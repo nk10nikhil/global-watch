@@ -35,7 +35,10 @@ async function getCounter(db: DatabaseReader, name: string): Promise<number> {
   return counter?.value ?? 0;
 }
 
-async function incrementCounter(db: DatabaseWriter, name: string): Promise<number> {
+async function incrementCounter(
+  db: DatabaseWriter,
+  name: string,
+): Promise<number> {
   const counter = await db
     .query("counters")
     .withIndex("by_name", (q) => q.eq("name", name))
@@ -61,7 +64,9 @@ export const register = mutation({
 
     const existing = await ctx.db
       .query("registrations")
-      .withIndex("by_normalized_email", (q) => q.eq("normalizedEmail", normalizedEmail))
+      .withIndex("by_normalized_email", (q) =>
+        q.eq("normalizedEmail", normalizedEmail),
+      )
       .first();
 
     if (existing) {
@@ -77,13 +82,18 @@ export const register = mutation({
       };
     }
 
-    const referralCode = await generateUniqueReferralCode(ctx.db, normalizedEmail);
+    const referralCode = await generateUniqueReferralCode(
+      ctx.db,
+      normalizedEmail,
+    );
 
     // Credit the referrer
     if (args.referredBy) {
       const referrer = await ctx.db
         .query("registrations")
-        .withIndex("by_referral_code", (q) => q.eq("referralCode", args.referredBy))
+        .withIndex("by_referral_code", (q) =>
+          q.eq("referralCode", args.referredBy),
+        )
         .first();
       if (referrer) {
         await ctx.db.patch(referrer._id, {
@@ -119,7 +129,9 @@ export const getPosition = query({
   handler: async (ctx, args) => {
     const reg = await ctx.db
       .query("registrations")
-      .withIndex("by_referral_code", (q) => q.eq("referralCode", args.referralCode))
+      .withIndex("by_referral_code", (q) =>
+        q.eq("referralCode", args.referralCode),
+      )
       .first();
     if (!reg) return null;
 

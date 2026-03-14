@@ -4,11 +4,11 @@
  * and geocodes curated RSS items via inferGeoHubsFromTitle.
  */
 
-import type { HappyContentCategory } from './positive-classifier';
-import { getRpcBaseUrl } from '@/services/rpc-client';
-import { PositiveEventsServiceClient } from '@/generated/client/worldmonitor/positive_events/v1/service_client';
-import { inferGeoHubsFromTitle } from './geo-hub-index';
-import { createCircuitBreaker } from '@/utils';
+import type { HappyContentCategory } from "./positive-classifier";
+import { getRpcBaseUrl } from "@/services/rpc-client";
+import { PositiveEventsServiceClient } from "@/generated/client/worldmonitor/positive_events/v1/service_client";
+import { inferGeoHubsFromTitle } from "./geo-hub-index";
+import { createCircuitBreaker } from "@/utils";
 
 export interface PositiveGeoEvent {
   lat: number;
@@ -24,7 +24,7 @@ const client = new PositiveEventsServiceClient(getRpcBaseUrl(), {
 });
 
 const breaker = createCircuitBreaker<PositiveGeoEvent[]>({
-  name: 'Positive Geo Events',
+  name: "Positive Geo Events",
   cacheTtlMs: 10 * 60 * 1000, // 10min — GDELT data refreshes frequently
   persistCache: true,
 });
@@ -36,11 +36,11 @@ const breaker = createCircuitBreaker<PositiveGeoEvent[]>({
 export async function fetchPositiveGeoEvents(): Promise<PositiveGeoEvent[]> {
   return breaker.execute(async () => {
     const response = await client.listPositiveGeoEvents({});
-    return response.events.map(event => ({
+    return response.events.map((event) => ({
       lat: event.latitude,
       lon: event.longitude,
       name: event.name,
-      category: (event.category || 'humanity-kindness') as HappyContentCategory,
+      category: (event.category || "humanity-kindness") as HappyContentCategory,
       count: event.count,
       timestamp: event.timestamp,
     }));
@@ -64,7 +64,7 @@ export function geocodePositiveNewsItems(
         lat: firstMatch.hub.lat,
         lon: firstMatch.hub.lon,
         name: item.title,
-        category: item.category || 'humanity-kindness',
+        category: item.category || "humanity-kindness",
         count: 1,
         timestamp: Date.now(),
       });

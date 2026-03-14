@@ -1,11 +1,11 @@
-import assert from 'node:assert/strict';
-import { afterEach, describe, it } from 'node:test';
+import assert from "node:assert/strict";
+import { afterEach, describe, it } from "node:test";
 
 import {
   buildStockNewsSearchQuery,
   resetStockNewsSearchStateForTests,
   searchRecentStockHeadlines,
-} from '../server/worldmonitor/market/v1/stock-news-search.ts';
+} from "../server/worldmonitor/market/v1/stock-news-search.ts";
 
 const originalFetch = globalThis.fetch;
 
@@ -17,87 +17,123 @@ afterEach(() => {
   resetStockNewsSearchStateForTests();
 });
 
-describe('stock news search query', () => {
-  it('builds the same stock-news style query used by the source project', () => {
-    assert.equal(buildStockNewsSearchQuery('aapl', 'Apple'), 'Apple AAPL stock latest news');
-    assert.equal(buildStockNewsSearchQuery(' msft ', ''), 'MSFT stock latest news');
+describe("stock news search query", () => {
+  it("builds the same stock-news style query used by the source project", () => {
+    assert.equal(
+      buildStockNewsSearchQuery("aapl", "Apple"),
+      "Apple AAPL stock latest news",
+    );
+    assert.equal(
+      buildStockNewsSearchQuery(" msft ", ""),
+      "MSFT stock latest news",
+    );
   });
 });
 
-describe('searchRecentStockHeadlines', () => {
-  it('uses Tavily first when configured', async () => {
-    process.env.TAVILY_API_KEYS = 'tavily-key-1';
+describe("searchRecentStockHeadlines", () => {
+  it("uses Tavily first when configured", async () => {
+    process.env.TAVILY_API_KEYS = "tavily-key-1";
     const requested: string[] = [];
 
     globalThis.fetch = (async (input: RequestInfo | URL) => {
-      const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+      const url =
+        typeof input === "string"
+          ? input
+          : input instanceof URL
+            ? input.toString()
+            : input.url;
       requested.push(url);
-      if (url === 'https://api.tavily.com/search') {
-        return new Response(JSON.stringify({
-          results: [
-            {
-              title: 'Apple expands buyback after strong quarter',
-              url: 'https://example.com/apple-buyback',
-              published_date: '2026-03-08T12:00:00Z',
-              source: 'Reuters',
-            },
-          ],
-        }), { status: 200 });
-      }
-      throw new Error(`Unexpected URL: ${url}`);
-    }) as typeof fetch;
-
-    const result = await searchRecentStockHeadlines('AAPL', 'Apple', 5);
-
-    assert.equal(result.provider, 'tavily');
-    assert.equal(result.headlines.length, 1);
-    assert.equal(result.headlines[0]?.source, 'Reuters');
-    assert.deepEqual(requested, ['https://api.tavily.com/search']);
-  });
-
-  it('falls back from Tavily to Brave before using RSS', async () => {
-    process.env.TAVILY_API_KEYS = 'tavily-key-1';
-    process.env.BRAVE_API_KEYS = 'brave-key-1';
-    const requested: string[] = [];
-
-    globalThis.fetch = (async (input: RequestInfo | URL) => {
-      const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
-      requested.push(url);
-      if (url === 'https://api.tavily.com/search') {
-        return new Response(JSON.stringify({ error: 'rate limit' }), { status: 429 });
-      }
-      if (url.startsWith('https://api.search.brave.com/res/v1/web/search?')) {
-        return new Response(JSON.stringify({
-          web: {
+      if (url === "https://api.tavily.com/search") {
+        return new Response(
+          JSON.stringify({
             results: [
               {
-                title: 'Apple supply chain normalizes',
-                url: 'https://example.com/apple-supply-chain',
-                description: 'Supply chain pressure eases for Apple.',
-                age: '2 hours ago',
+                title: "Apple expands buyback after strong quarter",
+                url: "https://example.com/apple-buyback",
+                published_date: "2026-03-08T12:00:00Z",
+                source: "Reuters",
               },
             ],
-          },
-        }), { status: 200 });
+          }),
+          { status: 200 },
+        );
       }
       throw new Error(`Unexpected URL: ${url}`);
     }) as typeof fetch;
 
-    const result = await searchRecentStockHeadlines('AAPL', 'Apple', 5);
+    const result = await searchRecentStockHeadlines("AAPL", "Apple", 5);
 
-    assert.equal(result.provider, 'brave');
+    assert.equal(result.provider, "tavily");
     assert.equal(result.headlines.length, 1);
-    assert.equal(result.headlines[0]?.link, 'https://example.com/apple-supply-chain');
-    assert.equal(requested.length, 2);
-    assert.equal(requested[0], 'https://api.tavily.com/search');
-    assert.match(requested[1] || '', /^https:\/\/api\.search\.brave\.com\/res\/v1\/web\/search\?/);
+    assert.equal(result.headlines[0]?.source, "Reuters");
+    assert.deepEqual(requested, ["https://api.tavily.com/search"]);
   });
 
-  it('falls back to Google News RSS when provider keys are unavailable', async () => {
+  it("falls back from Tavily to Brave before using RSS", async () => {
+    process.env.TAVILY_API_KEYS = "tavily-key-1";
+    process.env.BRAVE_API_KEYS = "brave-key-1";
+    const requested: string[] = [];
+
     globalThis.fetch = (async (input: RequestInfo | URL) => {
-      const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
-      if (url.startsWith('https://news.google.com/rss/search?')) {
-        return new Response(`<?xml version="1.0" encoding="UTF-8"?>
+      const url =
+        typeof input === "string"
+          ? input
+          : input instanceof URL
+            ? input.toString()
+            : input.url;
+      requested.push(url);
+      if (url === "https://api.tavily.com/search") {
+        return new Response(JSON.stringify({ error: "rate limit" }), {
+          status: 429,
+        });
+      }
+      if (url.startsWith("https://api.search.brave.com/res/v1/web/search?")) {
+        return new Response(
+          JSON.stringify({
+            web: {
+              results: [
+                {
+                  title: "Apple supply chain normalizes",
+                  url: "https://example.com/apple-supply-chain",
+                  description: "Supply chain pressure eases for Apple.",
+                  age: "2 hours ago",
+                },
+              ],
+            },
+          }),
+          { status: 200 },
+        );
+      }
+      throw new Error(`Unexpected URL: ${url}`);
+    }) as typeof fetch;
+
+    const result = await searchRecentStockHeadlines("AAPL", "Apple", 5);
+
+    assert.equal(result.provider, "brave");
+    assert.equal(result.headlines.length, 1);
+    assert.equal(
+      result.headlines[0]?.link,
+      "https://example.com/apple-supply-chain",
+    );
+    assert.equal(requested.length, 2);
+    assert.equal(requested[0], "https://api.tavily.com/search");
+    assert.match(
+      requested[1] || "",
+      /^https:\/\/api\.search\.brave\.com\/res\/v1\/web\/search\?/,
+    );
+  });
+
+  it("falls back to Google News RSS when provider keys are unavailable", async () => {
+    globalThis.fetch = (async (input: RequestInfo | URL) => {
+      const url =
+        typeof input === "string"
+          ? input
+          : input instanceof URL
+            ? input.toString()
+            : input.url;
+      if (url.startsWith("https://news.google.com/rss/search?")) {
+        return new Response(
+          `<?xml version="1.0" encoding="UTF-8"?>
 <rss>
   <channel>
     <item>
@@ -107,42 +143,52 @@ describe('searchRecentStockHeadlines', () => {
       <source>Bloomberg</source>
     </item>
   </channel>
-</rss>`, { status: 200 });
+</rss>`,
+          { status: 200 },
+        );
       }
       throw new Error(`Unexpected URL: ${url}`);
     }) as typeof fetch;
 
-    const result = await searchRecentStockHeadlines('AAPL', 'Apple', 5);
+    const result = await searchRecentStockHeadlines("AAPL", "Apple", 5);
 
-    assert.equal(result.provider, 'google-news-rss');
+    assert.equal(result.provider, "google-news-rss");
     assert.equal(result.headlines.length, 1);
-    assert.equal(result.headlines[0]?.source, 'Bloomberg');
+    assert.equal(result.headlines[0]?.source, "Bloomberg");
   });
 
-  it('parses SerpAPI news results when it is the first available provider', async () => {
-    process.env.SERPAPI_API_KEYS = 'serp-key-1';
+  it("parses SerpAPI news results when it is the first available provider", async () => {
+    process.env.SERPAPI_API_KEYS = "serp-key-1";
 
     globalThis.fetch = (async (input: RequestInfo | URL) => {
-      const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
-      if (url.startsWith('https://serpapi.com/search.json?')) {
-        return new Response(JSON.stringify({
-          news_results: [
-            {
-              title: 'Apple opens new AI engineering hub',
-              link: 'https://example.com/apple-ai-hub',
-              source: 'CNBC',
-              date: '3 hours ago',
-            },
-          ],
-        }), { status: 200 });
+      const url =
+        typeof input === "string"
+          ? input
+          : input instanceof URL
+            ? input.toString()
+            : input.url;
+      if (url.startsWith("https://serpapi.com/search.json?")) {
+        return new Response(
+          JSON.stringify({
+            news_results: [
+              {
+                title: "Apple opens new AI engineering hub",
+                link: "https://example.com/apple-ai-hub",
+                source: "CNBC",
+                date: "3 hours ago",
+              },
+            ],
+          }),
+          { status: 200 },
+        );
       }
       throw new Error(`Unexpected URL: ${url}`);
     }) as typeof fetch;
 
-    const result = await searchRecentStockHeadlines('AAPL', 'Apple', 5);
+    const result = await searchRecentStockHeadlines("AAPL", "Apple", 5);
 
-    assert.equal(result.provider, 'serpapi');
+    assert.equal(result.provider, "serpapi");
     assert.equal(result.headlines.length, 1);
-    assert.equal(result.headlines[0]?.source, 'CNBC');
+    assert.equal(result.headlines[0]?.source, "CNBC");
   });
 });

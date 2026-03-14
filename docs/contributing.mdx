@@ -2,6 +2,7 @@
 title: "Contributing"
 description: "Code style guidelines, pull request process, contribution types, and security practices for the WorldMonitor project."
 ---
+
 Contributions are welcome! Whether you are fixing bugs, adding features, improving documentation, or suggesting ideas, your help makes this project better. This guide covers the contribution workflow, code conventions, and security requirements.
 
 ## Getting Started
@@ -63,8 +64,8 @@ The dashboard handles untrusted data from dozens of external sources. Defense-in
 All user-visible content is sanitized before DOM insertion:
 
 ```typescript
-escapeHtml(str)  // Encodes & < > " ' as HTML entities
-sanitizeUrl(url) // Allows only http/https protocols
+escapeHtml(str); // Encodes & < > " ' as HTML entities
+sanitizeUrl(url); // Allows only http/https protocols
 ```
 
 This applies to:
@@ -75,17 +76,17 @@ This applies to:
 - Map popup content
 - Tension pair labels
 
-The `mark` element highlighting in search escapes text *before* wrapping matches, preventing injection via crafted search queries.
+The `mark` element highlighting in search escapes text _before_ wrapping matches, preventing injection via crafted search queries.
 
 ### Proxy Endpoint Validation
 
 Serverless proxy functions validate and clamp all parameters:
 
-| Endpoint | Validation |
-|----------|------------|
+| Endpoint             | Validation                                    |
+| -------------------- | --------------------------------------------- |
 | `/api/yahoo-finance` | Symbol format `[A-Za-z0-9.^=-]`, max 20 chars |
-| `/api/coingecko` | Coin IDs alphanumeric+hyphen, max 20 IDs |
-| `/api/polymarket` | Order field allowlist, limit clamped 1-100 |
+| `/api/coingecko`     | Coin IDs alphanumeric+hyphen, max 20 IDs      |
+| `/api/polymarket`    | Order field allowlist, limit clamped 1-100    |
 
 This prevents upstream API abuse and rate limit exhaustion from malformed requests.
 
@@ -104,6 +105,7 @@ This prevents upstream API abuse and rate limit exhaustion from malformed reques
 ## Submitting a Pull Request
 
 1. **Ensure your code builds**:
+
    ```bash
    npm run build
    ```
@@ -111,6 +113,7 @@ This prevents upstream API abuse and rate limit exhaustion from malformed reques
 2. **Test your changes** manually in the browser
 
 3. **Write a clear commit message**:
+
    ```
    Add earthquake magnitude filtering to map layer
 
@@ -120,6 +123,7 @@ This prevents upstream API abuse and rate limit exhaustion from malformed reques
    ```
 
 4. **Push to your fork**:
+
    ```bash
    git push origin feature/your-feature-name
    ```
@@ -132,13 +136,13 @@ This prevents upstream API abuse and rate limit exhaustion from malformed reques
 
 ## What Makes a Good PR
 
-| Do | Don't |
-|----|-------|
-| Focus on one feature or fix | Bundle unrelated changes |
-| Follow existing code patterns | Introduce new frameworks without discussion |
-| Keep changes minimal and targeted | Refactor surrounding code unnecessarily |
-| Update README if adding features | Add features without documentation |
-| Test edge cases | Assume happy path only |
+| Do                                | Don't                                       |
+| --------------------------------- | ------------------------------------------- |
+| Focus on one feature or fix       | Bundle unrelated changes                    |
+| Follow existing code patterns     | Introduce new frameworks without discussion |
+| Keep changes minimal and targeted | Refactor surrounding code unnecessarily     |
+| Update README if adding features  | Add features without documentation          |
+| Test edge cases                   | Assume happy path only                      |
 
 ## Types of Contributions
 

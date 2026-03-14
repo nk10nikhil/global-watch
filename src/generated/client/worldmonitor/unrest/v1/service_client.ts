@@ -62,13 +62,31 @@ export interface PaginationResponse {
   totalCount: number;
 }
 
-export type SeverityLevel = "SEVERITY_LEVEL_UNSPECIFIED" | "SEVERITY_LEVEL_LOW" | "SEVERITY_LEVEL_MEDIUM" | "SEVERITY_LEVEL_HIGH";
+export type SeverityLevel =
+  | "SEVERITY_LEVEL_UNSPECIFIED"
+  | "SEVERITY_LEVEL_LOW"
+  | "SEVERITY_LEVEL_MEDIUM"
+  | "SEVERITY_LEVEL_HIGH";
 
-export type ConfidenceLevel = "CONFIDENCE_LEVEL_UNSPECIFIED" | "CONFIDENCE_LEVEL_LOW" | "CONFIDENCE_LEVEL_MEDIUM" | "CONFIDENCE_LEVEL_HIGH";
+export type ConfidenceLevel =
+  | "CONFIDENCE_LEVEL_UNSPECIFIED"
+  | "CONFIDENCE_LEVEL_LOW"
+  | "CONFIDENCE_LEVEL_MEDIUM"
+  | "CONFIDENCE_LEVEL_HIGH";
 
-export type UnrestEventType = "UNREST_EVENT_TYPE_UNSPECIFIED" | "UNREST_EVENT_TYPE_PROTEST" | "UNREST_EVENT_TYPE_RIOT" | "UNREST_EVENT_TYPE_STRIKE" | "UNREST_EVENT_TYPE_DEMONSTRATION" | "UNREST_EVENT_TYPE_CIVIL_UNREST";
+export type UnrestEventType =
+  | "UNREST_EVENT_TYPE_UNSPECIFIED"
+  | "UNREST_EVENT_TYPE_PROTEST"
+  | "UNREST_EVENT_TYPE_RIOT"
+  | "UNREST_EVENT_TYPE_STRIKE"
+  | "UNREST_EVENT_TYPE_DEMONSTRATION"
+  | "UNREST_EVENT_TYPE_CIVIL_UNREST";
 
-export type UnrestSourceType = "UNREST_SOURCE_TYPE_UNSPECIFIED" | "UNREST_SOURCE_TYPE_ACLED" | "UNREST_SOURCE_TYPE_GDELT" | "UNREST_SOURCE_TYPE_RSS";
+export type UnrestSourceType =
+  | "UNREST_SOURCE_TYPE_UNSPECIFIED"
+  | "UNREST_SOURCE_TYPE_ACLED"
+  | "UNREST_SOURCE_TYPE_GDELT"
+  | "UNREST_SOURCE_TYPE_RSS";
 
 export interface FieldViolation {
   field: string;
@@ -118,20 +136,33 @@ export class UnrestServiceClient {
     this.defaultHeaders = { ...options?.defaultHeaders };
   }
 
-  async listUnrestEvents(req: ListUnrestEventsRequest, options?: UnrestServiceCallOptions): Promise<ListUnrestEventsResponse> {
+  async listUnrestEvents(
+    req: ListUnrestEventsRequest,
+    options?: UnrestServiceCallOptions,
+  ): Promise<ListUnrestEventsResponse> {
     let path = "/api/unrest/v1/list-unrest-events";
     const params = new URLSearchParams();
-    if (req.start != null && req.start !== 0) params.set("start", String(req.start));
+    if (req.start != null && req.start !== 0)
+      params.set("start", String(req.start));
     if (req.end != null && req.end !== 0) params.set("end", String(req.end));
-    if (req.pageSize != null && req.pageSize !== 0) params.set("page_size", String(req.pageSize));
-    if (req.cursor != null && req.cursor !== "") params.set("cursor", String(req.cursor));
-    if (req.country != null && req.country !== "") params.set("country", String(req.country));
-    if (req.minSeverity != null && req.minSeverity !== "") params.set("min_severity", String(req.minSeverity));
-    if (req.neLat != null && req.neLat !== 0) params.set("ne_lat", String(req.neLat));
-    if (req.neLon != null && req.neLon !== 0) params.set("ne_lon", String(req.neLon));
-    if (req.swLat != null && req.swLat !== 0) params.set("sw_lat", String(req.swLat));
-    if (req.swLon != null && req.swLon !== 0) params.set("sw_lon", String(req.swLon));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.pageSize != null && req.pageSize !== 0)
+      params.set("page_size", String(req.pageSize));
+    if (req.cursor != null && req.cursor !== "")
+      params.set("cursor", String(req.cursor));
+    if (req.country != null && req.country !== "")
+      params.set("country", String(req.country));
+    if (req.minSeverity != null && req.minSeverity !== "")
+      params.set("min_severity", String(req.minSeverity));
+    if (req.neLat != null && req.neLat !== 0)
+      params.set("ne_lat", String(req.neLat));
+    if (req.neLon != null && req.neLon !== 0)
+      params.set("ne_lon", String(req.neLon));
+    if (req.swLat != null && req.swLat !== 0)
+      params.set("sw_lat", String(req.swLat));
+    if (req.swLon != null && req.swLon !== 0)
+      params.set("sw_lon", String(req.swLon));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -149,7 +180,7 @@ export class UnrestServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as ListUnrestEventsResponse;
+    return (await resp.json()) as ListUnrestEventsResponse;
   }
 
   private async handleError(resp: Response): Promise<never> {
@@ -164,7 +195,10 @@ export class UnrestServiceClient {
         if (e instanceof ValidationError) throw e;
       }
     }
-    throw new ApiError(resp.status, `Request failed with status ${resp.status}`, body);
+    throw new ApiError(
+      resp.status,
+      `Request failed with status ${resp.status}`,
+      body,
+    );
   }
 }
-

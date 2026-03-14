@@ -9,7 +9,7 @@ interface CacheEntry<T> {
   timestamp: number;
 }
 
-export type BreakerDataMode = 'live' | 'cached' | 'unavailable';
+export type BreakerDataMode = "live" | "cached" | "unavailable";
 
 export interface BreakerDataState {
   mode: BreakerDataMode;
@@ -34,13 +34,17 @@ const DEFAULT_MAX_FAILURES = 2;
 const DEFAULT_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
 const DEFAULT_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 const PERSISTENT_STALE_CEILING_MS = 24 * 60 * 60 * 1000; // 24h — discard persistent entries older than this
-const DEFAULT_CACHE_KEY = '__default__';
+const DEFAULT_CACHE_KEY = "__default__";
 const DEFAULT_MAX_CACHE_ENTRIES = 256;
 
 function isDesktopOfflineMode(): boolean {
-  if (typeof window === 'undefined') return false;
-  const hasTauri = Boolean((window as unknown as { __TAURI__?: unknown }).__TAURI__);
-  return hasTauri && typeof navigator !== 'undefined' && navigator.onLine === false;
+  if (typeof window === "undefined") return false;
+  const hasTauri = Boolean(
+    (window as unknown as { __TAURI__?: unknown }).__TAURI__,
+  );
+  return (
+    hasTauri && typeof navigator !== "undefined" && navigator.onLine === false
+  );
 }
 
 export class CircuitBreaker<T> {
@@ -53,7 +57,11 @@ export class CircuitBreaker<T> {
   private persistEnabled: boolean;
   private persistentLoadedKeys = new Set<string>();
   private persistentLoadPromises = new Map<string, Promise<void>>();
-  private lastDataState: BreakerDataState = { mode: 'unavailable', timestamp: null, offline: false };
+  private lastDataState: BreakerDataState = {
+    mode: "unavailable",
+    timestamp: null,
+    offline: false,
+  };
   private backgroundRefreshPromises = new Map<string, Promise<void>>();
   private maxCacheEntries: number;
 
@@ -62,9 +70,8 @@ export class CircuitBreaker<T> {
     this.maxFailures = options.maxFailures ?? DEFAULT_MAX_FAILURES;
     this.cooldownMs = options.cooldownMs ?? DEFAULT_COOLDOWN_MS;
     this.cacheTtlMs = options.cacheTtlMs ?? DEFAULT_CACHE_TTL_MS;
-    this.persistEnabled = this.cacheTtlMs === 0
-      ? false
-      : (options.persistCache ?? false);
+    this.persistEnabled =
+      this.cacheTtlMs === 0 ? false : (options.persistCache ?? false);
     this.maxCacheEntries = options.maxCacheEntries ?? DEFAULT_MAX_CACHE_ENTRIES;
   }
 
@@ -138,20 +145,25 @@ export class CircuitBreaker<T> {
 
     const loadPromise = (async () => {
       try {
-        const { getPersistentCache } = await import('../services/persistent-cache');
+        const { getPersistentCache } =
+          await import("../services/persistent-cache");
         const entry = await getPersistentCache<T>(this.getPersistKey(cacheKey));
-        if (entry == null || entry.data === undefined || entry.data === null) return;
+        if (entry == null || entry.data === undefined || entry.data === null)
+          return;
 
         const age = Date.now() - entry.updatedAt;
         if (age > PERSISTENT_STALE_CEILING_MS) return;
 
         // Only hydrate if in-memory cache is empty (don't overwrite live data)
         if (this.getCacheEntry(cacheKey) === null) {
-          this.cache.set(cacheKey, { data: entry.data, timestamp: entry.updatedAt });
+          this.cache.set(cacheKey, {
+            data: entry.data,
+            timestamp: entry.updatedAt,
+          });
           this.evictIfNeeded();
-          const withinTtl = (Date.now() - entry.updatedAt) < this.cacheTtlMs;
+          const withinTtl = Date.now() - entry.updatedAt < this.cacheTtlMs;
           this.lastDataState = {
-            mode: withinTtl ? 'cached' : 'unavailable',
+            mode: withinTtl ? "cached" : "unavailable",
             timestamp: entry.updatedAt,
             offline: false,
           };
@@ -170,25 +182,31 @@ export class CircuitBreaker<T> {
 
   /** Fire-and-forget write to persistent storage. */
   private writePersistentCache(data: T, cacheKey: string): void {
-    import('../services/persistent-cache').then(({ setPersistentCache }) => {
-      setPersistentCache(this.getPersistKey(cacheKey), data).catch(() => {});
-    }).catch(() => {});
+    import("../services/persistent-cache")
+      .then(({ setPersistentCache }) => {
+        setPersistentCache(this.getPersistKey(cacheKey), data).catch(() => {});
+      })
+      .catch(() => {});
   }
 
   /** Fire-and-forget delete from persistent storage. */
   private deletePersistentCache(cacheKey: string): void {
-    import('../services/persistent-cache').then(({ deletePersistentCache }) => {
-      deletePersistentCache(this.getPersistKey(cacheKey)).catch(() => {});
-    }).catch(() => {});
+    import("../services/persistent-cache")
+      .then(({ deletePersistentCache }) => {
+        deletePersistentCache(this.getPersistKey(cacheKey)).catch(() => {});
+      })
+      .catch(() => {});
   }
 
   /** Fire-and-forget delete for all persistent entries owned by this breaker. */
   private deleteAllPersistentCache(): void {
-    import('../services/persistent-cache').then(({ deletePersistentCache, deletePersistentCacheByPrefix }) => {
-      const baseKey = this.getPersistKey(DEFAULT_CACHE_KEY);
-      deletePersistentCache(baseKey).catch(() => {});
-      deletePersistentCacheByPrefix(`${baseKey}:`).catch(() => {});
-    }).catch(() => {});
+    import("../services/persistent-cache")
+      .then(({ deletePersistentCache, deletePersistentCacheByPrefix }) => {
+        const baseKey = this.getPersistKey(DEFAULT_CACHE_KEY);
+        deletePersistentCache(baseKey).catch(() => {});
+        deletePersistentCacheByPrefix(`${baseKey}:`).catch(() => {});
+      })
+      .catch(() => {});
   }
 
   isOnCooldown(): boolean {
@@ -197,19 +215,22 @@ export class CircuitBreaker<T> {
 
   getCooldownRemaining(): number {
     if (!this.isStateOnCooldown()) return 0;
-    return Math.max(0, Math.ceil((this.state.cooldownUntil - Date.now()) / 1000));
+    return Math.max(
+      0,
+      Math.ceil((this.state.cooldownUntil - Date.now()) / 1000),
+    );
   }
 
   getStatus(): string {
     if (this.lastDataState.offline) {
-      return this.lastDataState.mode === 'cached'
-        ? 'offline mode (serving cached data)'
-        : 'offline mode (live API unavailable)';
+      return this.lastDataState.mode === "cached"
+        ? "offline mode (serving cached data)"
+        : "offline mode (live API unavailable)";
     }
     if (this.isOnCooldown()) {
       return `temporarily unavailable (retry in ${this.getCooldownRemaining()}s)`;
     }
-    return 'ok';
+    return "ok";
   }
 
   getDataState(): BreakerDataState {
@@ -239,7 +260,7 @@ export class CircuitBreaker<T> {
     this.state.failures = 0;
     this.state.cooldownUntil = 0;
     this.state.lastError = undefined;
-    this.lastDataState = { mode: 'live', timestamp, offline: false };
+    this.lastDataState = { mode: "live", timestamp, offline: false };
   }
 
   private writeCacheEntry(data: T, cacheKey: string, timestamp: number): void {
@@ -284,7 +305,9 @@ export class CircuitBreaker<T> {
     this.state.lastError = error;
     if (this.state.failures >= this.maxFailures) {
       this.state.cooldownUntil = Date.now() + this.cooldownMs;
-      console.warn(`[${this.name}] On cooldown for ${this.cooldownMs / 1000}s after ${this.state.failures} failures`);
+      console.warn(
+        `[${this.name}] On cooldown for ${this.cooldownMs / 1000}s after ${this.state.failures} failures`,
+      );
     }
   }
 
@@ -305,18 +328,28 @@ export class CircuitBreaker<T> {
     const cachedEntry = this.getCacheEntry(cacheKey);
 
     if (this.isStateOnCooldown()) {
-      console.log(`[${this.name}] Currently unavailable, ${this.getCooldownRemaining()}s remaining`);
+      console.log(
+        `[${this.name}] Currently unavailable, ${this.getCooldownRemaining()}s remaining`,
+      );
       if (cachedEntry !== null && this.isCacheEntryFresh(cachedEntry)) {
-        this.lastDataState = { mode: 'cached', timestamp: cachedEntry.timestamp, offline };
+        this.lastDataState = {
+          mode: "cached",
+          timestamp: cachedEntry.timestamp,
+          offline,
+        };
         this.touchCacheKey(cacheKey);
         return cachedEntry.data as R;
       }
-      this.lastDataState = { mode: 'unavailable', timestamp: null, offline };
+      this.lastDataState = { mode: "unavailable", timestamp: null, offline };
       return (cachedEntry?.data ?? defaultValue) as R;
     }
 
     if (cachedEntry !== null && this.isCacheEntryFresh(cachedEntry)) {
-      this.lastDataState = { mode: 'cached', timestamp: cachedEntry.timestamp, offline };
+      this.lastDataState = {
+        mode: "cached",
+        timestamp: cachedEntry.timestamp,
+        offline,
+      };
       this.touchCacheKey(cacheKey);
       return cachedEntry.data as R;
     }
@@ -326,24 +359,31 @@ export class CircuitBreaker<T> {
     // the background. This prevents "Loading..." on every page reload when
     // the persistent cache is older than the TTL. Skip SWR when cacheTtlMs === 0.
     if (cachedEntry !== null && this.cacheTtlMs > 0) {
-      this.lastDataState = { mode: 'cached', timestamp: cachedEntry.timestamp, offline };
+      this.lastDataState = {
+        mode: "cached",
+        timestamp: cachedEntry.timestamp,
+        offline,
+      };
       this.touchCacheKey(cacheKey);
       // Fire-and-forget background refresh — guard against concurrent SWR fetches
       // so that multiple callers with the same stale cache key don't each
       // spawn a parallel request.
       if (!this.backgroundRefreshPromises.has(cacheKey)) {
-        const refreshPromise = fn().then(result => {
-          const now = Date.now();
-          this.markSuccess(now);
-          if (shouldCache(result)) {
-            this.writeCacheEntry(result, cacheKey, now);
-          }
-        }).catch(e => {
-          console.warn(`[${this.name}] Background refresh failed:`, e);
-          this.recordFailure(String(e));
-        }).finally(() => {
-          this.backgroundRefreshPromises.delete(cacheKey);
-        });
+        const refreshPromise = fn()
+          .then((result) => {
+            const now = Date.now();
+            this.markSuccess(now);
+            if (shouldCache(result)) {
+              this.writeCacheEntry(result, cacheKey, now);
+            }
+          })
+          .catch((e) => {
+            console.warn(`[${this.name}] Background refresh failed:`, e);
+            this.recordFailure(String(e));
+          })
+          .finally(() => {
+            this.backgroundRefreshPromises.delete(cacheKey);
+          });
         this.backgroundRefreshPromises.set(cacheKey, refreshPromise);
       }
       return cachedEntry.data as R;
@@ -361,7 +401,7 @@ export class CircuitBreaker<T> {
       const msg = String(e);
       console.error(`[${this.name}] Failed:`, msg);
       this.recordFailure(msg);
-      this.lastDataState = { mode: 'unavailable', timestamp: null, offline };
+      this.lastDataState = { mode: "unavailable", timestamp: null, offline };
       return defaultValue;
     }
   }
@@ -370,7 +410,9 @@ export class CircuitBreaker<T> {
 // Registry of circuit breakers for global status
 const breakers = new Map<string, CircuitBreaker<unknown>>();
 
-export function createCircuitBreaker<T>(options: CircuitBreakerOptions): CircuitBreaker<T> {
+export function createCircuitBreaker<T>(
+  options: CircuitBreakerOptions,
+): CircuitBreaker<T> {
   const breaker = new CircuitBreaker<T>(options);
   breakers.set(options.name, breaker as CircuitBreaker<unknown>);
   return breaker;
@@ -389,12 +431,15 @@ export function isCircuitBreakerOnCooldown(name: string): boolean {
   return breaker ? breaker.isOnCooldown() : false;
 }
 
-export function getCircuitBreakerCooldownInfo(name: string): { onCooldown: boolean; remainingSeconds: number } {
+export function getCircuitBreakerCooldownInfo(name: string): {
+  onCooldown: boolean;
+  remainingSeconds: number;
+} {
   const breaker = breakers.get(name);
   if (!breaker) return { onCooldown: false, remainingSeconds: 0 };
   return {
     onCooldown: breaker.isOnCooldown(),
-    remainingSeconds: breaker.getCooldownRemaining()
+    remainingSeconds: breaker.getCooldownRemaining(),
   };
 }
 

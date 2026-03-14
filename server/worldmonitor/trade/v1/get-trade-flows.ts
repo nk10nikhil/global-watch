@@ -10,10 +10,10 @@ import type {
   GetTradeFlowsRequest,
   GetTradeFlowsResponse,
   TradeFlowRecord,
-} from '../../../../src/generated/server/worldmonitor/trade/v1/service_server';
+} from "../../../../src/generated/server/worldmonitor/trade/v1/service_server";
 
-import { cachedFetchJson } from '../../../_shared/redis';
-import { wtoFetch, WTO_MEMBER_CODES, ITS_MTV_AX, ITS_MTV_AM } from './_shared';
+import { cachedFetchJson } from "../../../_shared/redis";
+import { wtoFetch, WTO_MEMBER_CODES, ITS_MTV_AX, ITS_MTV_AM } from "./_shared";
 
 const REDIS_CACHE_TTL = 21600; // 6h — WTO data is annual, rarely changes
 
@@ -34,12 +34,14 @@ interface RawFlowRow {
  * Parse raw WTO rows into a flat list of { year, indicator, value }.
  */
 function parseRows(data: any, indicator: string): RawFlowRow[] {
-  const dataset: any[] = Array.isArray(data) ? data : data?.Dataset ?? data?.dataset ?? [];
+  const dataset: any[] = Array.isArray(data)
+    ? data
+    : (data?.Dataset ?? data?.dataset ?? []);
   const rows: RawFlowRow[] = [];
 
   for (const row of dataset) {
-    const year = parseInt(row.Year ?? row.year ?? row.Period ?? '', 10);
-    const value = parseFloat(row.Value ?? row.value ?? '');
+    const year = parseInt(row.Year ?? row.year ?? row.Period ?? "", 10);
+    const value = parseFloat(row.Value ?? row.value ?? "");
     if (!isNaN(year) && !isNaN(value)) {
       rows.push({ year, indicator, value });
     }
@@ -84,10 +86,14 @@ function buildFlowRecords(
     let yoyImportChange = 0;
 
     if (prev && prev.exports > 0) {
-      yoyExportChange = Math.round(((current.exports - prev.exports) / prev.exports) * 10000) / 100;
+      yoyExportChange =
+        Math.round(((current.exports - prev.exports) / prev.exports) * 10000) /
+        100;
     }
     if (prev && prev.imports > 0) {
-      yoyImportChange = Math.round(((current.imports - prev.imports) / prev.imports) * 10000) / 100;
+      yoyImportChange =
+        Math.round(((current.imports - prev.imports) / prev.imports) * 10000) /
+        100;
     }
 
     records.push({
@@ -98,7 +104,7 @@ function buildFlowRecords(
       importValueUsd: current.imports,
       yoyExportChange,
       yoyImportChange,
-      productSector: 'Total merchandise',
+      productSector: "Total merchandise",
     });
   }
 
@@ -115,23 +121,33 @@ async function fetchTradeFlows(
 
   const baseParams: Record<string, string> = {
     r: reporter,
-    p: partner || '000',
+    p: partner || "000",
     ps: `${startYear}-${currentYear}`,
-    pc: 'TO',
-    fmt: 'json',
-    mode: 'full',
-    max: '500',
+    pc: "TO",
+    fmt: "json",
+    mode: "full",
+    max: "500",
   };
 
   // Fetch exports and imports in parallel (separate requests — WTO API doesn't support comma-separated indicators)
   const [exportsResult, importsResult] = await Promise.allSettled([
-    wtoFetch('/data', { ...baseParams, i: ITS_MTV_AX }),
-    wtoFetch('/data', { ...baseParams, i: ITS_MTV_AM }),
+    wtoFetch("/data", { ...baseParams, i: ITS_MTV_AX }),
+    wtoFetch("/data", { ...baseParams, i: ITS_MTV_AM }),
   ]);
-  const exportsData = exportsResult.status === 'fulfilled' ? exportsResult.value : null;
-  const importsData = importsResult.status === 'fulfilled' ? importsResult.value : null;
-  if (exportsResult.status === 'rejected') console.warn('[trade] exports fetch failed, using partial results:', exportsResult.reason);
-  if (importsResult.status === 'rejected') console.warn('[trade] imports fetch failed, using partial results:', importsResult.reason);
+  const exportsData =
+    exportsResult.status === "fulfilled" ? exportsResult.value : null;
+  const importsData =
+    importsResult.status === "fulfilled" ? importsResult.value : null;
+  if (exportsResult.status === "rejected")
+    console.warn(
+      "[trade] exports fetch failed, using partial results:",
+      exportsResult.reason,
+    );
+  if (importsResult.status === "rejected")
+    console.warn(
+      "[trade] imports fetch failed, using partial results:",
+      importsResult.reason,
+    );
 
   if (!exportsData && !importsData) return { flows: [], ok: false };
 
@@ -140,7 +156,7 @@ async function fetchTradeFlows(
     ...(importsData ? parseRows(importsData, ITS_MTV_AM) : []),
   ];
 
-  const flows = buildFlowRecords(rows, reporter, partner || '000');
+  const flows = buildFlowRecords(rows, reporter, partner || "000");
 
   return { flows, ok: true };
 }
@@ -151,8 +167,12 @@ export async function getTradeFlows(
 ): Promise<GetTradeFlowsResponse> {
   try {
     // Input validation
-    const reporter = isValidCode(req.reportingCountry) ? req.reportingCountry : '840';
-    const partner = isValidCode(req.partnerCountry) ? req.partnerCountry : '000';
+    const reporter = isValidCode(req.reportingCountry)
+      ? req.reportingCountry
+      : "840";
+    const partner = isValidCode(req.partnerCountry)
+      ? req.partnerCountry
+      : "000";
     const years = Math.max(1, Math.min(req.years > 0 ? req.years : 10, 30));
 
     const cacheKey = `trade:flows:v1:${reporter}:${partner}:${years}`;
@@ -162,11 +182,21 @@ export async function getTradeFlows(
       async () => {
         const { flows, ok } = await fetchTradeFlows(reporter, partner, years);
         if (!ok || flows.length === 0) return null;
-        return { flows, fetchedAt: new Date().toISOString(), upstreamUnavailable: false };
+        return {
+          flows,
+          fetchedAt: new Date().toISOString(),
+          upstreamUnavailable: false,
+        };
       },
     );
 
-    return result ?? { flows: [], fetchedAt: new Date().toISOString(), upstreamUnavailable: true };
+    return (
+      result ?? {
+        flows: [],
+        fetchedAt: new Date().toISOString(),
+        upstreamUnavailable: true,
+      }
+    );
   } catch {
     return {
       flows: [],

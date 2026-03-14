@@ -203,7 +203,7 @@ Panels use `localStorage` for persistence. Defined in `src/components/Panel.ts`:
 ### Panel Spans
 
 ```typescript
-const PANEL_SPANS_KEY = 'worldmonitor-panel-spans';
+const PANEL_SPANS_KEY = "worldmonitor-panel-spans";
 
 // Stored as Record<string, number> — panel ID → grid span (1–4)
 function loadPanelSpans(): Record<string, number> {
@@ -245,19 +245,19 @@ Defined in `src/config/variants/base.ts` (and mirrored in `src/config/panels.ts`
 
 ```typescript
 export const STORAGE_KEYS = {
-  panels:        'worldmonitor-panels',
-  monitors:      'worldmonitor-monitors',
-  mapLayers:     'worldmonitor-layers',
-  disabledFeeds: 'worldmonitor-disabled-feeds',
+  panels: "worldmonitor-panels",
+  monitors: "worldmonitor-monitors",
+  mapLayers: "worldmonitor-layers",
+  disabledFeeds: "worldmonitor-disabled-feeds",
 } as const;
 ```
 
-| Key | Type | Purpose |
-|-----|------|---------|
-| `worldmonitor-panels` | `Record<string, PanelConfig>` | Per-panel enabled/name/priority |
-| `worldmonitor-monitors` | `Monitor[]` | Color/label configs for monitors |
-| `worldmonitor-layers` | `MapLayers` | Enabled/disabled map layer toggles |
-| `worldmonitor-disabled-feeds` | `string[]` | User-disabled news feed sources |
+| Key                           | Type                          | Purpose                            |
+| ----------------------------- | ----------------------------- | ---------------------------------- |
+| `worldmonitor-panels`         | `Record<string, PanelConfig>` | Per-panel enabled/name/priority    |
+| `worldmonitor-monitors`       | `Monitor[]`                   | Color/label configs for monitors   |
+| `worldmonitor-layers`         | `MapLayers`                   | Enabled/disabled map layer toggles |
+| `worldmonitor-disabled-feeds` | `string[]`                    | User-disabled news feed sources    |
 
 ---
 
@@ -311,10 +311,10 @@ sequenceDiagram
 
 ```typescript
 const colorCache = new Map<string, string>();
-let cacheTheme = '';
+let cacheTheme = "";
 
 export function getCSSColor(varName: string): string {
-  const currentTheme = document.documentElement.dataset.theme || 'dark';
+  const currentTheme = document.documentElement.dataset.theme || "dark";
   if (currentTheme !== cacheTheme) {
     colorCache.clear();
     cacheTheme = currentTheme;
@@ -324,7 +324,7 @@ export function getCSSColor(varName: string): string {
 
 export function invalidateColorCache(): void {
   colorCache.clear();
-  cacheTheme = '';
+  cacheTheme = "";
 }
 ```
 
@@ -332,10 +332,10 @@ export function invalidateColorCache(): void {
 
 All colors are driven by CSS custom properties under `[data-theme]` selectors. Components never hardcode colors — they read from the CSS variable system. Meta `theme-color` values:
 
-| Theme | `#meta[theme-color]` |
-|-------|---------------------|
-| `dark` | `#0a0f0a` |
-| `light` | `#f8f9fa` |
+| Theme   | `#meta[theme-color]` |
+| ------- | -------------------- |
+| `dark`  | `#0a0f0a`            |
+| `light` | `#f8f9fa`            |
 
 ---
 
@@ -351,14 +351,14 @@ Defined in `src/services/storage.ts`.
 
 Tracks statistical baselines for anomaly detection.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `key` | `string` (keyPath) | Metric identifier |
-| `counts` | `number[]` | Rolling 30-day count observations |
-| `timestamps` | `number[]` | Corresponding observation timestamps |
-| `avg7d` | `number` | Rolling 7-day average |
-| `avg30d` | `number` | Rolling 30-day average |
-| `lastUpdated` | `number` | Last update timestamp |
+| Field         | Type               | Description                          |
+| ------------- | ------------------ | ------------------------------------ |
+| `key`         | `string` (keyPath) | Metric identifier                    |
+| `counts`      | `number[]`         | Rolling 30-day count observations    |
+| `timestamps`  | `number[]`         | Corresponding observation timestamps |
+| `avg7d`       | `number`           | Rolling 7-day average                |
+| `avg30d`      | `number`           | Rolling 30-day average               |
+| `lastUpdated` | `number`           | Last update timestamp                |
 
 **Key operations:**
 
@@ -385,13 +385,13 @@ Deviation thresholds:
 
 Periodic dashboard state captures for historical playback.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `timestamp` | `number` (keyPath) | Snapshot creation time |
-| `events` | `unknown[]` | Event state at time of capture |
-| `marketPrices` | `Record<string, number>` | Market prices at capture |
-| `predictions` | `Array<{title, yesPrice}>` | Prediction market state |
-| `hotspotLevels` | `Record<string, string>` | Hotspot intensity levels |
+| Field           | Type                       | Description                    |
+| --------------- | -------------------------- | ------------------------------ |
+| `timestamp`     | `number` (keyPath)         | Snapshot creation time         |
+| `events`        | `unknown[]`                | Event state at time of capture |
+| `marketPrices`  | `Record<string, number>`   | Market prices at capture       |
+| `predictions`   | `Array<{title, yesPrice}>` | Prediction market state        |
+| `hotspotLevels` | `Record<string, string>`   | Hotspot intensity levels       |
 
 **Index:** `by_time` on `timestamp`.
 
@@ -464,26 +464,50 @@ export interface ParsedMapUrlState {
 
 ### Supported Query Parameters
 
-| Param | Type | Range/Values | Example |
-|-------|------|-------------|---------|
-| `view` | `MapView` | `global`, `america`, `mena`, `eu`, `asia`, `latam`, `africa`, `oceania` | `?view=mena` |
-| `zoom` | `number` | `1–10` (clamped) | `?zoom=5` |
-| `lat` | `number` | `-90–90` (clamped) | `?lat=33.2` |
-| `lon` | `number` | `-180–180` (clamped) | `?lon=44.1` |
-| `timeRange` | `TimeRange` | `1h`, `6h`, `24h`, `48h`, `7d`, `all` | `?t=24h` |
-| `layers` | `string` | Comma-separated layer keys or `none` | `?layers=earthquakes,flights` |
-| `country` | `string` | ISO 3166-1 alpha-2 code | `?country=UA` |
+| Param       | Type        | Range/Values                                                            | Example                       |
+| ----------- | ----------- | ----------------------------------------------------------------------- | ----------------------------- |
+| `view`      | `MapView`   | `global`, `america`, `mena`, `eu`, `asia`, `latam`, `africa`, `oceania` | `?view=mena`                  |
+| `zoom`      | `number`    | `1–10` (clamped)                                                        | `?zoom=5`                     |
+| `lat`       | `number`    | `-90–90` (clamped)                                                      | `?lat=33.2`                   |
+| `lon`       | `number`    | `-180–180` (clamped)                                                    | `?lon=44.1`                   |
+| `timeRange` | `TimeRange` | `1h`, `6h`, `24h`, `48h`, `7d`, `all`                                   | `?t=24h`                      |
+| `layers`    | `string`    | Comma-separated layer keys or `none`                                    | `?layers=earthquakes,flights` |
+| `country`   | `string`    | ISO 3166-1 alpha-2 code                                                 | `?country=UA`                 |
 
 ### Layer Keys (29 supported)
 
 ```typescript
 const LAYER_KEYS: (keyof MapLayers)[] = [
-  'conflicts', 'bases', 'cables', 'pipelines', 'hotspots', 'ais',
-  'nuclear', 'irradiators', 'sanctions', 'weather', 'economic',
-  'waterways', 'outages', 'cyberThreats', 'datacenters', 'protests',
-  'flights', 'military', 'natural', 'spaceports', 'minerals', 'fires',
-  'ucdpEvents', 'displacement', 'climate', 'startupHubs', 'cloudRegions',
-  'accelerators', 'techHQs', 'techEvents',
+  "conflicts",
+  "bases",
+  "cables",
+  "pipelines",
+  "hotspots",
+  "ais",
+  "nuclear",
+  "irradiators",
+  "sanctions",
+  "weather",
+  "economic",
+  "waterways",
+  "outages",
+  "cyberThreats",
+  "datacenters",
+  "protests",
+  "flights",
+  "military",
+  "natural",
+  "spaceports",
+  "minerals",
+  "fires",
+  "ucdpEvents",
+  "displacement",
+  "climate",
+  "startupHubs",
+  "cloudRegions",
+  "accelerators",
+  "techHQs",
+  "techEvents",
 ];
 ```
 
@@ -532,37 +556,44 @@ Defined in `src/services/runtime-config.ts`. Manages API keys and feature toggle
 
 ```typescript
 export type RuntimeSecretKey =
-  | 'GROQ_API_KEY'
-  | 'OPENROUTER_API_KEY'
-  | 'FRED_API_KEY'
-  | 'EIA_API_KEY'
-  | 'CLOUDFLARE_API_TOKEN'
-  | 'ACLED_ACCESS_TOKEN'
-  | 'URLHAUS_AUTH_KEY'
-  | 'OTX_API_KEY'
-  | 'ABUSEIPDB_API_KEY'
-  | 'WINGBITS_API_KEY'
-  | 'WS_RELAY_URL'
-  | 'VITE_OPENSKY_RELAY_URL'
-  | 'OPENSKY_CLIENT_ID'
-  | 'OPENSKY_CLIENT_SECRET'
-  | 'AISSTREAM_API_KEY'
-  | 'FINNHUB_API_KEY'
-  | 'NASA_FIRMS_API_KEY'
-  | 'UC_DP_KEY';
+  | "GROQ_API_KEY"
+  | "OPENROUTER_API_KEY"
+  | "FRED_API_KEY"
+  | "EIA_API_KEY"
+  | "CLOUDFLARE_API_TOKEN"
+  | "ACLED_ACCESS_TOKEN"
+  | "URLHAUS_AUTH_KEY"
+  | "OTX_API_KEY"
+  | "ABUSEIPDB_API_KEY"
+  | "WINGBITS_API_KEY"
+  | "WS_RELAY_URL"
+  | "VITE_OPENSKY_RELAY_URL"
+  | "OPENSKY_CLIENT_ID"
+  | "OPENSKY_CLIENT_SECRET"
+  | "AISSTREAM_API_KEY"
+  | "FINNHUB_API_KEY"
+  | "NASA_FIRMS_API_KEY"
+  | "UC_DP_KEY";
 ```
 
 ### Feature Toggles
 
 ```typescript
 export type RuntimeFeatureId =
-  | 'aiGroq'          | 'aiOpenRouter'
-  | 'economicFred'    | 'energyEia'
-  | 'internetOutages' | 'acledConflicts'
-  | 'abuseChThreatIntel' | 'alienvaultOtxThreatIntel'
-  | 'abuseIpdbThreatIntel' | 'wingbitsEnrichment'
-  | 'aisRelay'        | 'openskyRelay'
-  | 'finnhubMarkets'  | 'nasaFirms';
+  | "aiGroq"
+  | "aiOpenRouter"
+  | "economicFred"
+  | "energyEia"
+  | "internetOutages"
+  | "acledConflicts"
+  | "abuseChThreatIntel"
+  | "alienvaultOtxThreatIntel"
+  | "abuseIpdbThreatIntel"
+  | "wingbitsEnrichment"
+  | "aisRelay"
+  | "openskyRelay"
+  | "finnhubMarkets"
+  | "nasaFirms";
 ```
 
 All toggles default to `true`.
@@ -612,19 +643,19 @@ Defined in `src/services/activity-tracker.ts`. Tracks item freshness across pane
 
 ```typescript
 export interface ActivityState {
-  seenIds: Set<string>;                    // Items user has "seen"
-  firstSeenTime: Map<string, number>;      // When items first appeared
-  newCount: number;                        // Unseen items count
-  lastInteraction: number;                 // Last user interaction timestamp
+  seenIds: Set<string>; // Items user has "seen"
+  firstSeenTime: Map<string, number>; // When items first appeared
+  newCount: number; // Unseen items count
+  lastInteraction: number; // Last user interaction timestamp
 }
 ```
 
 **Timing constants:**
 
-| Constant | Value | Purpose |
-|----------|-------|---------|
-| `NEW_TAG_DURATION_MS` | `2 * 60 * 1000` (2 min) | Duration to show "NEW" badge |
-| `HIGHLIGHT_DURATION_MS` | `30 * 1000` (30 sec) | Duration for highlight glow effect |
+| Constant                | Value                   | Purpose                            |
+| ----------------------- | ----------------------- | ---------------------------------- |
+| `NEW_TAG_DURATION_MS`   | `2 * 60 * 1000` (2 min) | Duration to show "NEW" badge       |
+| `HIGHLIGHT_DURATION_MS` | `30 * 1000` (30 sec)    | Duration for highlight glow effect |
 
 **Key operations:**
 
@@ -690,21 +721,21 @@ stateDiagram-v2
 
 Complete reference of every `localStorage` key used by World Monitor:
 
-| Key | Purpose | Format | Source |
-|-----|---------|--------|--------|
-| `worldmonitor-variant` | Active variant override | `'full' \| 'tech' \| 'finance'` | `src/config/variant.ts`, `App.ts` |
-| `worldmonitor-theme` | Theme preference | `'dark' \| 'light'` | `src/utils/theme-manager.ts` |
-| `panel-order` | Panel arrangement order | `string[]` (JSON) | `App.ts` |
-| `worldmonitor-panel-spans` | Panel grid sizes | `Record<string, number>` (JSON) | `src/components/Panel.ts` |
-| `worldmonitor-panels` | Panel enabled/config state | `Record<string, PanelConfig>` (JSON) | `STORAGE_KEYS.panels` |
-| `worldmonitor-monitors` | Monitor color/label configs | `Monitor[]` (JSON) | `STORAGE_KEYS.monitors` |
-| `worldmonitor-layers` | Map layer toggles | `MapLayers` (JSON) | `STORAGE_KEYS.mapLayers` |
-| `worldmonitor-disabled-feeds` | User-disabled news sources | `string[]` (JSON) | `STORAGE_KEYS.disabledFeeds` |
-| `worldmonitor-runtime-feature-toggles` | Desktop feature toggles | `Record<RuntimeFeatureId, boolean>` (JSON) | `src/services/runtime-config.ts` |
-| `worldmonitor-persistent-cache:{key}` | Persistent data cache entries | `CacheEnvelope<T>` (JSON) | `src/services/persistent-cache.ts` |
-| `wm-update-dismissed-{version}` | Dismissed update notifications | `'1'` | `App.ts` |
-| `worldmonitor-panel-order-v1.9` | Panel order migration flag | `'done'` | `App.ts` (one-time migration) |
-| `worldmonitor-tech-insights-top-v1` | Tech variant migration flag | `'done'` | `App.ts` (one-time migration) |
+| Key                                    | Purpose                        | Format                                     | Source                             |
+| -------------------------------------- | ------------------------------ | ------------------------------------------ | ---------------------------------- |
+| `worldmonitor-variant`                 | Active variant override        | `'full' \| 'tech' \| 'finance'`            | `src/config/variant.ts`, `App.ts`  |
+| `worldmonitor-theme`                   | Theme preference               | `'dark' \| 'light'`                        | `src/utils/theme-manager.ts`       |
+| `panel-order`                          | Panel arrangement order        | `string[]` (JSON)                          | `App.ts`                           |
+| `worldmonitor-panel-spans`             | Panel grid sizes               | `Record<string, number>` (JSON)            | `src/components/Panel.ts`          |
+| `worldmonitor-panels`                  | Panel enabled/config state     | `Record<string, PanelConfig>` (JSON)       | `STORAGE_KEYS.panels`              |
+| `worldmonitor-monitors`                | Monitor color/label configs    | `Monitor[]` (JSON)                         | `STORAGE_KEYS.monitors`            |
+| `worldmonitor-layers`                  | Map layer toggles              | `MapLayers` (JSON)                         | `STORAGE_KEYS.mapLayers`           |
+| `worldmonitor-disabled-feeds`          | User-disabled news sources     | `string[]` (JSON)                          | `STORAGE_KEYS.disabledFeeds`       |
+| `worldmonitor-runtime-feature-toggles` | Desktop feature toggles        | `Record<RuntimeFeatureId, boolean>` (JSON) | `src/services/runtime-config.ts`   |
+| `worldmonitor-persistent-cache:{key}`  | Persistent data cache entries  | `CacheEnvelope<T>` (JSON)                  | `src/services/persistent-cache.ts` |
+| `wm-update-dismissed-{version}`        | Dismissed update notifications | `'1'`                                      | `App.ts`                           |
+| `worldmonitor-panel-order-v1.9`        | Panel order migration flag     | `'done'`                                   | `App.ts` (one-time migration)      |
+| `worldmonitor-tech-insights-top-v1`    | Tech variant migration flag    | `'done'`                                   | `App.ts` (one-time migration)      |
 
 ### CacheEnvelope Format
 

@@ -92,7 +92,10 @@ export interface ServerContext {
 
 export interface ServerOptions {
   onError?: (error: unknown, req: Request) => Response | Promise<Response>;
-  validateRequest?: (methodName: string, body: unknown) => FieldViolation[] | undefined;
+  validateRequest?: (
+    methodName: string,
+    body: unknown,
+  ) => FieldViolation[] | undefined;
 }
 
 export interface RouteDescriptor {
@@ -102,7 +105,10 @@ export interface RouteDescriptor {
 }
 
 export interface GivingServiceHandler {
-  getGivingSummary(ctx: ServerContext, req: GetGivingSummaryRequest): Promise<GetGivingSummaryResponse>;
+  getGivingSummary(
+    ctx: ServerContext,
+    req: GetGivingSummaryRequest,
+  ): Promise<GetGivingSummaryResponse>;
 }
 
 export function createGivingServiceRoutes(
@@ -123,7 +129,10 @@ export function createGivingServiceRoutes(
             categoryLimit: Number(params.get("category_limit") ?? "0"),
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getGivingSummary", body);
+            const bodyViolations = options.validateRequest(
+              "getGivingSummary",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -136,16 +145,22 @@ export function createGivingServiceRoutes(
           };
 
           const result = await handler.getGivingSummary(ctx, body);
-          return new Response(JSON.stringify(result as GetGivingSummaryResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetGivingSummaryResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -160,4 +175,3 @@ export function createGivingServiceRoutes(
     },
   ];
 }
-

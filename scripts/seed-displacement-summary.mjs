@@ -1,23 +1,53 @@
 #!/usr/bin/env node
 
-import { loadEnvFile, CHROME_UA, runSeed } from './_seed-utils.mjs';
+import { loadEnvFile, CHROME_UA, runSeed } from "./_seed-utils.mjs";
 
 loadEnvFile(import.meta.url);
 
-const CANONICAL_KEY_PREFIX = 'displacement:summary:v1';
+const CANONICAL_KEY_PREFIX = "displacement:summary:v1";
 const CACHE_TTL = 86400; // 24 hours — UNHCR data is annual
 
 const COUNTRY_CENTROIDS = {
-  AFG: [33.9, 67.7], SYR: [35.0, 38.0], UKR: [48.4, 31.2], SDN: [15.5, 32.5],
-  SSD: [6.9, 31.3], SOM: [5.2, 46.2], COD: [-4.0, 21.8], MMR: [19.8, 96.7],
-  YEM: [15.6, 48.5], ETH: [9.1, 40.5], VEN: [6.4, -66.6], IRQ: [33.2, 43.7],
-  COL: [4.6, -74.1], NGA: [9.1, 7.5], PSE: [31.9, 35.2], TUR: [39.9, 32.9],
-  DEU: [51.2, 10.4], PAK: [30.4, 69.3], UGA: [1.4, 32.3], BGD: [23.7, 90.4],
-  KEN: [0.0, 38.0], TCD: [15.5, 19.0], JOR: [31.0, 36.0], LBN: [33.9, 35.5],
-  EGY: [26.8, 30.8], IRN: [32.4, 53.7], TZA: [-6.4, 34.9], RWA: [-1.9, 29.9],
-  CMR: [7.4, 12.4], MLI: [17.6, -4.0], BFA: [12.3, -1.6], NER: [17.6, 8.1],
-  CAF: [6.6, 20.9], MOZ: [-18.7, 35.5], USA: [37.1, -95.7], FRA: [46.2, 2.2],
-  GBR: [55.4, -3.4], IND: [20.6, 79.0], CHN: [35.9, 104.2], RUS: [61.5, 105.3],
+  AFG: [33.9, 67.7],
+  SYR: [35.0, 38.0],
+  UKR: [48.4, 31.2],
+  SDN: [15.5, 32.5],
+  SSD: [6.9, 31.3],
+  SOM: [5.2, 46.2],
+  COD: [-4.0, 21.8],
+  MMR: [19.8, 96.7],
+  YEM: [15.6, 48.5],
+  ETH: [9.1, 40.5],
+  VEN: [6.4, -66.6],
+  IRQ: [33.2, 43.7],
+  COL: [4.6, -74.1],
+  NGA: [9.1, 7.5],
+  PSE: [31.9, 35.2],
+  TUR: [39.9, 32.9],
+  DEU: [51.2, 10.4],
+  PAK: [30.4, 69.3],
+  UGA: [1.4, 32.3],
+  BGD: [23.7, 90.4],
+  KEN: [0.0, 38.0],
+  TCD: [15.5, 19.0],
+  JOR: [31.0, 36.0],
+  LBN: [33.9, 35.5],
+  EGY: [26.8, 30.8],
+  IRN: [32.4, 53.7],
+  TZA: [-6.4, 34.9],
+  RWA: [-1.9, 29.9],
+  CMR: [7.4, 12.4],
+  MLI: [17.6, -4.0],
+  BFA: [12.3, -1.6],
+  NER: [17.6, 8.1],
+  CAF: [6.6, 20.9],
+  MOZ: [-18.7, 35.5],
+  USA: [37.1, -95.7],
+  FRA: [46.2, 2.2],
+  GBR: [55.4, -3.4],
+  IND: [20.6, 79.0],
+  CHN: [35.9, 104.2],
+  RUS: [61.5, 105.3],
 };
 
 function getCoordinates(code) {
@@ -36,8 +66,8 @@ async function fetchUnhcrYearItems(year) {
       `https://api.unhcr.org/population/v1/population/?year=${year}&limit=${limit}&page=${page}&coo_all=true&coa_all=true`,
       {
         headers: {
-          Accept: 'application/json',
-          'User-Agent': CHROME_UA,
+          Accept: "application/json",
+          "User-Agent": CHROME_UA,
         },
         signal: AbortSignal.timeout(15_000),
       },
@@ -77,7 +107,8 @@ async function fetchDisplacementSummary() {
     }
   }
 
-  if (rawItems.length === 0) throw new Error('No UNHCR data available for current or past 2 years');
+  if (rawItems.length === 0)
+    throw new Error("No UNHCR data available for current or past 2 years");
 
   const byOrigin = {};
   const byAsylum = {};
@@ -88,8 +119,8 @@ async function fetchDisplacementSummary() {
   let totalStateless = 0;
 
   for (const item of rawItems) {
-    const originCode = item.coo_iso || '';
-    const asylumCode = item.coa_iso || '';
+    const originCode = item.coo_iso || "";
+    const asylumCode = item.coa_iso || "";
     const refugees = Number(item.refugees) || 0;
     const asylumSeekers = Number(item.asylum_seekers) || 0;
     const idps = Number(item.idps) || 0;
@@ -102,7 +133,13 @@ async function fetchDisplacementSummary() {
 
     if (originCode) {
       if (!byOrigin[originCode]) {
-        byOrigin[originCode] = { name: item.coo_name || originCode, refugees: 0, asylumSeekers: 0, idps: 0, stateless: 0 };
+        byOrigin[originCode] = {
+          name: item.coo_name || originCode,
+          refugees: 0,
+          asylumSeekers: 0,
+          idps: 0,
+          stateless: 0,
+        };
       }
       byOrigin[originCode].refugees += refugees;
       byOrigin[originCode].asylumSeekers += asylumSeekers;
@@ -112,7 +149,11 @@ async function fetchDisplacementSummary() {
 
     if (asylumCode) {
       if (!byAsylum[asylumCode]) {
-        byAsylum[asylumCode] = { name: item.coa_name || asylumCode, refugees: 0, asylumSeekers: 0 };
+        byAsylum[asylumCode] = {
+          name: item.coa_name || asylumCode,
+          refugees: 0,
+          asylumSeekers: 0,
+        };
       }
       byAsylum[asylumCode].refugees += refugees;
       byAsylum[asylumCode].asylumSeekers += asylumSeekers;
@@ -121,7 +162,13 @@ async function fetchDisplacementSummary() {
     if (originCode && asylumCode && refugees > 0) {
       const flowKey = `${originCode}->${asylumCode}`;
       if (!flowMap[flowKey]) {
-        flowMap[flowKey] = { originCode, originName: item.coo_name || originCode, asylumCode, asylumName: item.coa_name || asylumCode, refugees: 0 };
+        flowMap[flowKey] = {
+          originCode,
+          originName: item.coo_name || originCode,
+          asylumCode,
+          asylumName: item.coa_name || asylumCode,
+          refugees: 0,
+        };
       }
       flowMap[flowKey].refugees += refugees;
     }
@@ -137,7 +184,8 @@ async function fetchDisplacementSummary() {
       asylumSeekers: data.asylumSeekers,
       idps: data.idps,
       stateless: data.stateless,
-      totalDisplaced: data.refugees + data.asylumSeekers + data.idps + data.stateless,
+      totalDisplaced:
+        data.refugees + data.asylumSeekers + data.idps + data.stateless,
       hostRefugees: 0,
       hostAsylumSeekers: 0,
       hostTotal: 0,
@@ -170,7 +218,11 @@ async function fetchDisplacementSummary() {
   }
 
   const sortedCountries = Object.values(countries)
-    .sort((a, b) => Math.max(b.totalDisplaced, b.hostTotal) - Math.max(a.totalDisplaced, a.hostTotal))
+    .sort(
+      (a, b) =>
+        Math.max(b.totalDisplaced, b.hostTotal) -
+        Math.max(a.totalDisplaced, a.hostTotal),
+    )
     .map((d) => ({
       code: d.code,
       name: d.name,
@@ -216,7 +268,7 @@ async function fetchDisplacementSummary() {
 function validate(data) {
   return (
     data?.summary &&
-    typeof data.summary.year === 'number' &&
+    typeof data.summary.year === "number" &&
     Array.isArray(data.summary.countries) &&
     data.summary.countries.length >= 1
   );
@@ -225,11 +277,11 @@ function validate(data) {
 const currentYear = new Date().getFullYear();
 const canonicalKey = `${CANONICAL_KEY_PREFIX}:${currentYear}`;
 
-runSeed('displacement', 'summary', canonicalKey, fetchDisplacementSummary, {
+runSeed("displacement", "summary", canonicalKey, fetchDisplacementSummary, {
   validateFn: validate,
   ttlSeconds: CACHE_TTL,
   sourceVersion: `unhcr-${currentYear}`,
 }).catch((err) => {
-  console.error('FATAL:', err.message || err);
+  console.error("FATAL:", err.message || err);
   process.exit(1);
 });

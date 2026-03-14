@@ -31,7 +31,7 @@ The Market Radar panel computes a composite BUY/CASH verdict from 7 independent 
 | Signal              | Computation                           | Bullish When                |
 | ------------------- | ------------------------------------- | --------------------------- |
 | **Liquidity**       | JPY/USD 30-day rate of change         | ROC > -2% (no yen squeeze)  |
-| **Flow Structure**  | BTC 5-day return vs QQQ 5-day return  | Gap &lt; 5% (aligned)          |
+| **Flow Structure**  | BTC 5-day return vs QQQ 5-day return  | Gap &lt; 5% (aligned)       |
 | **Macro Regime**    | QQQ 20-day ROC vs XLP 20-day ROC      | QQQ outperforming (risk-on) |
 | **Technical Trend** | BTC vs SMA50 + 30-day VWAP            | Above both (bullish)        |
 | **Hash Rate**       | Bitcoin mining hashrate 30-day change | Growing > 3%                |
@@ -120,11 +120,11 @@ Trend detection flags week-over-week changes exceeding ±0.5% as rising or falli
 
 The Economic panel integrates data from the Bank for International Settlements (BIS), the central bank of central banks, providing three complementary datasets:
 
-| Dataset | Description | Use Case |
-| --- | --- | --- |
-| **Policy Rates** | Current central bank policy rates across major economies | Monetary policy stance comparison — tight vs. accommodative |
+| Dataset                           | Description                                                   | Use Case                                                                    |
+| --------------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| **Policy Rates**                  | Current central bank policy rates across major economies      | Monetary policy stance comparison — tight vs. accommodative                 |
 | **Real Effective Exchange Rates** | Trade-weighted currency indices adjusted for inflation (REER) | Currency competitiveness — rising REER = strengthening, falling = weakening |
-| **Credit-to-GDP** | Total credit to the non-financial sector as percentage of GDP | Credit bubble detection — high ratios signal overleveraged economies |
+| **Credit-to-GDP**                 | Total credit to the non-financial sector as percentage of GDP | Credit bubble detection — high ratios signal overleveraged economies        |
 
 Data is fetched through three dedicated BIS RPCs (`GetBisPolicyRates`, `GetBisExchangeRates`, `GetBisCredit`) in the `economic/v1` proto service. Each dataset uses independent circuit breakers with 30-minute cache TTLs. The panel renders policy rates as a sorted table with spark bars, exchange rates with directional trend indicators, and credit-to-GDP as a ranked list. BIS data freshness is tracked in the intelligence gap system — staleness or failures surface as explicit warnings rather than silent gaps.
 
@@ -132,12 +132,12 @@ Data is fetched through three dedicated BIS RPCs (`GetBisPolicyRates`, `GetBisEx
 
 The Trade Policy panel provides real-time visibility into global trade restrictions, tariffs, and barriers — critical for tracking economic warfare, sanctions impact, and supply chain disruption risk. Four data views are available:
 
-| Tab | Data Source | Content |
-| --- | --- | --- |
-| **Restrictions** | WTO trade monitoring | Active trade restrictions with imposing/affected countries, product categories, and enforcement dates |
-| **Tariffs** | WTO tariff database | Tariff rate trends between country pairs (e.g., US↔China) with historical datapoints |
-| **Flows** | WTO trade statistics | Bilateral trade flow volumes with year-over-year change indicators |
-| **Barriers** | WTO SPS/TBT notifications | Sanitary, phytosanitary, and technical barriers to trade with status tracking |
+| Tab              | Data Source               | Content                                                                                               |
+| ---------------- | ------------------------- | ----------------------------------------------------------------------------------------------------- |
+| **Restrictions** | WTO trade monitoring      | Active trade restrictions with imposing/affected countries, product categories, and enforcement dates |
+| **Tariffs**      | WTO tariff database       | Tariff rate trends between country pairs (e.g., US↔China) with historical datapoints                  |
+| **Flows**        | WTO trade statistics      | Bilateral trade flow volumes with year-over-year change indicators                                    |
+| **Barriers**     | WTO SPS/TBT notifications | Sanitary, phytosanitary, and technical barriers to trade with status tracking                         |
 
 The `trade/v1` proto service defines four RPCs, each with its own circuit breaker (30-minute cache TTL) and `upstreamUnavailable` signaling for graceful degradation when WTO endpoints are temporarily unreachable. The panel is available on FULL and FINANCE variants. Trade policy data feeds into the data freshness tracker as `wto_trade`, with intelligence gap warnings when the WTO feed goes stale.
 

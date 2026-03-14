@@ -149,13 +149,13 @@ This hybrid approach means the UI is never blocked waiting for AI — users see 
 
 The dashboard monitors five independent alert origins and fuses them into a unified breaking news stream with layered deduplication, cooldowns, and source quality gating:
 
-| Origin               | Trigger                                                        | Example                                      |
-| -------------------- | -------------------------------------------------------------- | -------------------------------------------- |
-| **RSS alert**        | News item with `isAlert: true` and threat level critical/high  | Reuters flash: missile strike confirmed       |
-| **Keyword spike**    | Trending keyword exceeds spike threshold                       | "nuclear" surges across 8+ feeds in 2 hours  |
-| **Hotspot escalation** | Hotspot escalation score exceeds critical threshold          | Taiwan Strait tension crosses 80/100         |
-| **Military surge**   | Theater posture assessment detects strike packaging            | Tanker + AWACS + fighters co-present in MENA |
-| **OREF siren**       | Israel Home Front Command issues incoming rocket/missile alert | Rocket barrage detected in northern Israel   |
+| Origin                 | Trigger                                                        | Example                                      |
+| ---------------------- | -------------------------------------------------------------- | -------------------------------------------- |
+| **RSS alert**          | News item with `isAlert: true` and threat level critical/high  | Reuters flash: missile strike confirmed      |
+| **Keyword spike**      | Trending keyword exceeds spike threshold                       | "nuclear" surges across 8+ feeds in 2 hours  |
+| **Hotspot escalation** | Hotspot escalation score exceeds critical threshold            | Taiwan Strait tension crosses 80/100         |
+| **Military surge**     | Theater posture assessment detects strike packaging            | Tanker + AWACS + fighters co-present in MENA |
+| **OREF siren**         | Israel Home Front Command issues incoming rocket/missile alert | Rocket barrage detected in northern Israel   |
 
 **Anti-noise safeguards**:
 
@@ -173,12 +173,12 @@ When an alert passes all gates, the system dispatches a `wm:breaking-news` Custo
 
 The dashboard runs a full ML pipeline in the browser via Transformers.js, with no server dependency for core intelligence. This is automatically disabled on mobile devices to conserve memory.
 
-| Capability                   | Model               | Use                                               |
-| ---------------------------- | ------------------- | ------------------------------------------------- |
-| **Text embeddings**          | sentence-similarity | Semantic clustering of news headlines             |
-| **Sequence classification**  | threat-classifier   | Threat severity and category detection            |
+| Capability                   | Model               | Use                                                                        |
+| ---------------------------- | ------------------- | -------------------------------------------------------------------------- |
+| **Text embeddings**          | sentence-similarity | Semantic clustering of news headlines                                      |
+| **Sequence classification**  | threat-classifier   | Threat severity and category detection                                     |
 | **Summarization**            | T5-small            | Last-resort fallback when Ollama, Groq, and OpenRouter are all unavailable |
-| **Named Entity Recognition** | NER pipeline        | Country, organization, and leader extraction      |
+| **Named Entity Recognition** | NER pipeline        | Country, organization, and leader extraction                               |
 
 **Hybrid clustering** combines fast Jaccard similarity (n-gram overlap, threshold 0.4) with ML-refined semantic similarity (cosine similarity, threshold 0.78). Jaccard runs instantly on every refresh; semantic refinement runs when the ML worker is loaded and merges clusters that are textually different but semantically identical (e.g., "NATO expands missile shield" and "Alliance deploys new air defense systems").
 
@@ -192,10 +192,10 @@ For offline resilience and reduced API costs, the system includes browser-based 
 
 ### Available Models
 
-| Model | Task | Size | Use Case |
-|-------|------|------|----------|
-| **T5-small** | Text summarization | ~60MB | Offline briefing generation |
-| **DistilBERT** | Sentiment analysis | ~67MB | News tone classification |
+| Model          | Task               | Size  | Use Case                    |
+| -------------- | ------------------ | ----- | --------------------------- |
+| **T5-small**   | Text summarization | ~60MB | Offline briefing generation |
+| **DistilBERT** | Sentiment analysis | ~67MB | News tone classification    |
 
 ### Fallback Strategy
 
@@ -231,12 +231,12 @@ All ML inference runs in a dedicated Web Worker:
 
 Browser ML has constraints compared to cloud models:
 
-| Aspect | Cloud (Llama 3.3) | Browser (T5) |
-|--------|-------------------|--------------|
-| Context window | 128K tokens | 512 tokens |
-| Output quality | High | Moderate |
-| Inference speed | 2-3 seconds | 5-10 seconds |
-| Offline support | No | Yes |
+| Aspect          | Cloud (Llama 3.3) | Browser (T5) |
+| --------------- | ----------------- | ------------ |
+| Context window  | 128K tokens       | 512 tokens   |
+| Output quality  | High              | Moderate     |
+| Inference speed | 2-3 seconds       | 5-10 seconds |
+| Offline support | No                | Yes          |
 
 Browser summarization is intentionally limited to 6 headlines × 80 characters to stay within model constraints.
 
@@ -250,11 +250,11 @@ The Insights Panel provides AI-powered analysis of the current news landscape, t
 
 Every 2 minutes (with rate limiting), the system generates a concise situation brief using a multi-provider fallback chain:
 
-| Priority | Provider | Model | Latency | Use Case |
-|----------|----------|-------|---------|----------|
-| 1 | Groq | Llama 3.3 70B | ~2s | Primary provider (fast inference) |
-| 2 | OpenRouter | Llama 3.3 70B | ~3s | Fallback when Groq rate-limited |
-| 3 | Browser | T5 (ONNX) | ~5s | Offline fallback (local ML) |
+| Priority | Provider   | Model         | Latency | Use Case                          |
+| -------- | ---------- | ------------- | ------- | --------------------------------- |
+| 1        | Groq       | Llama 3.3 70B | ~2s     | Primary provider (fast inference) |
+| 2        | OpenRouter | Llama 3.3 70B | ~3s     | Fallback when Groq rate-limited   |
+| 3        | Browser    | T5 (ONNX)     | ~5s     | Offline fallback (local ML)       |
 
 **Caching Strategy**: Redis server-side caching prevents redundant API calls. When the same headline set has been summarized recently, the cached result is returned immediately.
 
@@ -297,11 +297,11 @@ This ensures military conflicts and humanitarian crises surface above routine bu
 
 Headlines are analyzed for overall sentiment distribution:
 
-| Sentiment | Detection Method | Display |
-|-----------|------------------|---------|
-| **Negative** | Crisis, conflict, death keywords | Red percentage |
+| Sentiment    | Detection Method                  | Display          |
+| ------------ | --------------------------------- | ---------------- |
+| **Negative** | Crisis, conflict, death keywords  | Red percentage   |
 | **Positive** | Agreement, growth, peace keywords | Green percentage |
-| **Neutral** | Neither detected | Gray percentage |
+| **Neutral**  | Neither detected                  | Gray percentage  |
 
 The overall sentiment balance provides a quick read on whether the news cycle is trending toward escalation or de-escalation.
 
@@ -360,23 +360,23 @@ CorrelationBonus (0-20):
 
 ### Urgency Classification
 
-| Urgency | Criteria | Visual |
-|---------|----------|--------|
-| **Critical** | Score > 70 OR 3+ signal types | Red badge |
+| Urgency      | Criteria                      | Visual       |
+| ------------ | ----------------------------- | ------------ |
+| **Critical** | Score > 70 OR 3+ signal types | Red badge    |
 | **Elevated** | Score > 50 OR 2+ signal types | Orange badge |
-| **Watch** | Default | Yellow badge |
+| **Watch**    | Default                       | Yellow badge |
 
 ### Signal Type Icons
 
 Focal points display icons indicating which signal types are active:
 
-| Icon | Signal Type | Meaning |
-|------|-------------|---------|
-| ✈️ | military_flight | Military aircraft detected nearby |
-| ⚓ | military_vessel | Naval vessels in waters |
-| 📢 | protest | Civil unrest events |
-| 🌐 | internet_outage | Network disruption |
-| 🚢 | ais_disruption | Shipping anomaly |
+| Icon | Signal Type     | Meaning                           |
+| ---- | --------------- | --------------------------------- |
+| ✈️   | military_flight | Military aircraft detected nearby |
+| ⚓   | military_vessel | Naval vessels in waters           |
+| 📢   | protest         | Civil unrest events               |
+| 🌐   | internet_outage | Network disruption                |
+| 🚢   | ais_disruption  | Shipping anomaly                  |
 
 ### Example Output
 

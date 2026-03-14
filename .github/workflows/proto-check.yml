@@ -3,11 +3,11 @@ name: Proto Generation Check
 on:
   pull_request:
     paths:
-      - 'proto/**'
-      - 'src/generated/**'
-      - 'docs/api/**'
-      - 'Makefile'
-      - '.github/workflows/proto-check.yml'
+      - "proto/**"
+      - "src/generated/**"
+      - "docs/api/**"
+      - "Makefile"
+      - ".github/workflows/proto-check.yml"
 
 jobs:
   proto-freshness:
@@ -18,7 +18,7 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.23'
+          go-version: "1.23"
           cache: false
 
       - name: Cache Go binaries (buf, protoc plugins)

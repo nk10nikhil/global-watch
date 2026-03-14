@@ -1,8 +1,9 @@
-import { SITE_VARIANT } from '@/config/variant';
+import { SITE_VARIANT } from "@/config/variant";
 
-const WS_API_URL = import.meta.env.VITE_WS_API_URL || '';
-const DEFAULT_WEB_API_URL = 'https://api.worldmonitor.app';
-const KEYED_CLOUD_API_PATTERN = /^\/api\/(?:[^/]+\/v1\/|bootstrap(?:\?|$)|polymarket(?:\?|$)|ais-snapshot(?:\?|$))/;
+const WS_API_URL = import.meta.env.VITE_WS_API_URL || "";
+const DEFAULT_WEB_API_URL = "https://api.worldmonitor.app";
+const KEYED_CLOUD_API_PATTERN =
+  /^\/api\/(?:[^/]+\/v1\/|bootstrap(?:\?|$)|polymarket(?:\?|$)|ais-snapshot(?:\?|$))/;
 
 const DEFAULT_REMOTE_HOSTS: Record<string, string> = {
   tech: WS_API_URL,
@@ -13,7 +14,7 @@ const DEFAULT_REMOTE_HOSTS: Record<string, string> = {
 };
 
 const DEFAULT_LOCAL_API_PORT = 46123;
-const FORCE_DESKTOP_RUNTIME = import.meta.env.VITE_DESKTOP_RUNTIME === '1';
+const FORCE_DESKTOP_RUNTIME = import.meta.env.VITE_DESKTOP_RUNTIME === "1";
 
 let _resolvedPort: number | null = null;
 let _portPromise: Promise<number> | null = null;
@@ -23,8 +24,8 @@ export async function resolveLocalApiPort(): Promise<number> {
   if (_portPromise) return _portPromise;
   _portPromise = (async () => {
     try {
-      const { tryInvokeTauri } = await import('@/services/tauri-bridge');
-      const port = await tryInvokeTauri<number>('get_local_api_port');
+      const { tryInvokeTauri } = await import("@/services/tauri-bridge");
+      const port = await tryInvokeTauri<number>("get_local_api_port");
       if (port && port > 0) {
         _resolvedPort = port;
         return port;
@@ -44,7 +45,7 @@ export function getLocalApiPort(): number {
 }
 
 function normalizeBaseUrl(baseUrl: string): string {
-  return baseUrl.replace(/\/$/, '');
+  return baseUrl.replace(/\/$/, "");
 }
 
 type RuntimeProbe = {
@@ -56,26 +57,23 @@ type RuntimeProbe = {
 };
 
 export function detectDesktopRuntime(probe: RuntimeProbe): boolean {
-  const tauriInUserAgent = probe.userAgent.includes('Tauri');
-  const secureLocalhostOrigin = (
-    probe.locationProtocol === 'https:' && (
-      probe.locationHost === 'localhost' ||
-      probe.locationHost.startsWith('localhost:') ||
-      probe.locationHost === '127.0.0.1' ||
-      probe.locationHost.startsWith('127.0.0.1:')
-    )
-  );
+  const tauriInUserAgent = probe.userAgent.includes("Tauri");
+  const secureLocalhostOrigin =
+    probe.locationProtocol === "https:" &&
+    (probe.locationHost === "localhost" ||
+      probe.locationHost.startsWith("localhost:") ||
+      probe.locationHost === "127.0.0.1" ||
+      probe.locationHost.startsWith("127.0.0.1:"));
 
   // Tauri production windows can expose tauri-like hosts/schemes without
   // always exposing bridge globals at first paint.
-  const tauriLikeLocation = (
-    probe.locationProtocol === 'tauri:' ||
-    probe.locationProtocol === 'asset:' ||
-    probe.locationHost === 'tauri.localhost' ||
-    probe.locationHost.endsWith('.tauri.localhost') ||
-    probe.locationOrigin.startsWith('tauri://') ||
-    secureLocalhostOrigin
-  );
+  const tauriLikeLocation =
+    probe.locationProtocol === "tauri:" ||
+    probe.locationProtocol === "asset:" ||
+    probe.locationHost === "tauri.localhost" ||
+    probe.locationHost.endsWith(".tauri.localhost") ||
+    probe.locationOrigin.startsWith("tauri://") ||
+    secureLocalhostOrigin;
 
   return probe.hasTauriGlobals || tauriInUserAgent || tauriLikeLocation;
 }
@@ -85,22 +83,22 @@ export function isDesktopRuntime(): boolean {
     return true;
   }
 
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return false;
   }
 
   return detectDesktopRuntime({
-    hasTauriGlobals: '__TAURI_INTERNALS__' in window || '__TAURI__' in window,
-    userAgent: window.navigator?.userAgent ?? '',
-    locationProtocol: window.location?.protocol ?? '',
-    locationHost: window.location?.host ?? '',
-    locationOrigin: window.location?.origin ?? '',
+    hasTauriGlobals: "__TAURI_INTERNALS__" in window || "__TAURI__" in window,
+    userAgent: window.navigator?.userAgent ?? "",
+    locationProtocol: window.location?.protocol ?? "",
+    locationHost: window.location?.host ?? "",
+    locationOrigin: window.location?.origin ?? "",
   });
 }
 
 export function getApiBaseUrl(): string {
   if (!isDesktopRuntime()) {
-    return '';
+    return "";
   }
 
   const configuredBaseUrl = import.meta.env.VITE_TAURI_API_BASE_URL;
@@ -112,9 +110,11 @@ export function getApiBaseUrl(): string {
 }
 
 function isWorldMonitorWebHost(hostname: string): boolean {
-  return hostname === 'worldmonitor.app'
-    || hostname === 'www.worldmonitor.app'
-    || hostname.endsWith('.worldmonitor.app');
+  return (
+    hostname === "worldmonitor.app" ||
+    hostname === "www.worldmonitor.app" ||
+    hostname.endsWith(".worldmonitor.app")
+  );
 }
 
 export function getConfiguredWebApiBaseUrl(): string {
@@ -122,17 +122,17 @@ export function getConfiguredWebApiBaseUrl(): string {
     return normalizeBaseUrl(WS_API_URL);
   }
 
-  if (typeof window === 'undefined') {
-    return '';
+  if (typeof window === "undefined") {
+    return "";
   }
 
   if (isDesktopRuntime()) {
-    return '';
+    return "";
   }
 
-  const hostname = window.location?.hostname ?? '';
+  const hostname = window.location?.hostname ?? "";
   if (!isWorldMonitorWebHost(hostname)) {
-    return '';
+    return "";
   }
 
   return DEFAULT_WEB_API_URL;
@@ -153,16 +153,17 @@ export function getRemoteApiBaseUrl(): string {
     return webApiBase;
   }
 
-  const fromHosts = DEFAULT_REMOTE_HOSTS[SITE_VARIANT] ?? DEFAULT_REMOTE_HOSTS.full ?? '';
+  const fromHosts =
+    DEFAULT_REMOTE_HOSTS[SITE_VARIANT] ?? DEFAULT_REMOTE_HOSTS.full ?? "";
   if (fromHosts) return fromHosts;
 
   // Desktop builds may not set VITE_WS_API_URL; default to production.
-  if (isDesktopRuntime()) return 'https://worldmonitor.app';
-  return '';
+  if (isDesktopRuntime()) return "https://worldmonitor.app";
+  return "";
 }
 
 export function toRuntimeUrl(path: string): string {
-  if (!path.startsWith('/')) {
+  if (!path.startsWith("/")) {
     return path;
   }
 
@@ -175,7 +176,7 @@ export function toRuntimeUrl(path: string): string {
 }
 
 export function toApiUrl(path: string): string {
-  if (!path.startsWith('/')) {
+  if (!path.startsWith("/")) {
     return path;
   }
 
@@ -195,18 +196,20 @@ function extractHostnames(...urls: (string | undefined)[]): string[] {
   const hosts: string[] = [];
   for (const u of urls) {
     if (!u) continue;
-    try { hosts.push(new URL(u).hostname); } catch {}
+    try {
+      hosts.push(new URL(u).hostname);
+    } catch {}
   }
   return hosts;
 }
 
 const APP_HOSTS = new Set([
-  'worldmonitor.app',
-  'www.worldmonitor.app',
-  'tech.worldmonitor.app',
-  'api.worldmonitor.app',
-  'localhost',
-  '127.0.0.1',
+  "worldmonitor.app",
+  "www.worldmonitor.app",
+  "tech.worldmonitor.app",
+  "api.worldmonitor.app",
+  "localhost",
+  "127.0.0.1",
   ...extractHostnames(WS_API_URL, import.meta.env.VITE_WS_RELAY_URL),
 ]);
 
@@ -214,20 +217,20 @@ function isAppOriginUrl(urlStr: string): boolean {
   try {
     const u = new URL(urlStr);
     const host = u.hostname;
-    return APP_HOSTS.has(host) || host.endsWith('.worldmonitor.app');
+    return APP_HOSTS.has(host) || host.endsWith(".worldmonitor.app");
   } catch {
     return false;
   }
 }
 
 function toPathAndSearch(url: string | URL): string {
-  const u = typeof url === 'string' ? new URL(url) : url;
+  const u = typeof url === "string" ? new URL(url) : url;
   return `${u.pathname}${u.search}`;
 }
 
 function getApiTargetFromRequestInput(input: RequestInfo | URL): string | null {
-  if (typeof input === 'string') {
-    if (input.startsWith('/')) return input;
+  if (typeof input === "string") {
+    if (input.startsWith("/")) return input;
     if (isAppOriginUrl(input)) {
       return toPathAndSearch(input);
     }
@@ -251,7 +254,7 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export type SmartPollReason = 'interval' | 'resume' | 'manual' | 'startup';
+export type SmartPollReason = "interval" | "resume" | "manual" | "startup";
 
 export interface SmartPollContext {
   signal?: AbortSignal;
@@ -281,19 +284,21 @@ export interface SmartPollLoopHandle {
 }
 
 function isAbortError(error: unknown): boolean {
-  if (!error || typeof error !== 'object') return false;
+  if (!error || typeof error !== "object") return false;
   const name = (error as { name?: string }).name;
-  return name === 'AbortError';
+  return name === "AbortError";
 }
 
 function hasVisibilityApi(): boolean {
-  return typeof document !== 'undefined'
-    && typeof document.addEventListener === 'function'
-    && typeof document.removeEventListener === 'function';
+  return (
+    typeof document !== "undefined" &&
+    typeof document.addEventListener === "function" &&
+    typeof document.removeEventListener === "function"
+  );
 }
 
 function isDocumentHidden(): boolean {
-  return hasVisibilityApi() && document.visibilityState === 'hidden';
+  return hasVisibilityApi() && document.visibilityState === "hidden";
 }
 
 export function startSmartPollLoop(
@@ -310,9 +315,10 @@ export function startSmartPollLoop(
   const maxBackoffMultiplier = Math.max(1, opts.maxBackoffMultiplier ?? 4);
   const jitterFraction = Math.max(0, opts.jitterFraction ?? 0.1);
   const minIntervalMs = Math.max(250, opts.minIntervalMs ?? 1_000);
-  const hiddenIntervalMs = opts.hiddenIntervalMs !== undefined
-    ? Math.max(minIntervalMs, Math.round(opts.hiddenIntervalMs))
-    : undefined;
+  const hiddenIntervalMs =
+    opts.hiddenIntervalMs !== undefined
+      ? Math.max(minIntervalMs, Math.round(opts.hiddenIntervalMs))
+      : undefined;
 
   const visibilityDebounceMs = Math.max(0, opts.visibilityDebounceMs ?? 300);
 
@@ -332,14 +338,14 @@ export function startSmartPollLoop(
   const baseDelayMs = (hidden: boolean): number | null => {
     if (hidden) {
       if (pauseWhenHidden) return null;
-      return hiddenIntervalMs ?? (intervalMs * hiddenMultiplier);
+      return hiddenIntervalMs ?? intervalMs * hiddenMultiplier;
     }
     return intervalMs * backoffMultiplier;
   };
 
   const computeDelay = (baseMs: number): number => {
     const jitterRange = baseMs * jitterFraction;
-    const jittered = baseMs + ((Math.random() * 2 - 1) * jitterRange);
+    const jittered = baseMs + (Math.random() * 2 - 1) * jitterRange;
     return Math.max(minIntervalMs, Math.round(jittered));
   };
 
@@ -350,7 +356,7 @@ export function startSmartPollLoop(
     if (base === null) return;
     timerId = setTimeout(() => {
       timerId = null;
-      void runOnce('interval');
+      void runOnce("interval");
     }, computeDelay(base));
   };
 
@@ -372,7 +378,8 @@ export function startSmartPollLoop(
     }
 
     inFlight = true;
-    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const controller =
+      typeof AbortController !== "undefined" ? new AbortController() : null;
     activeController = controller;
 
     try {
@@ -383,13 +390,19 @@ export function startSmartPollLoop(
       });
 
       if (result === false) {
-        backoffMultiplier = Math.min(backoffMultiplier * 2, maxBackoffMultiplier);
+        backoffMultiplier = Math.min(
+          backoffMultiplier * 2,
+          maxBackoffMultiplier,
+        );
       } else {
         backoffMultiplier = 1;
       }
     } catch (error) {
       if (!controller?.signal.aborted && !isAbortError(error)) {
-        backoffMultiplier = Math.min(backoffMultiplier * 2, maxBackoffMultiplier);
+        backoffMultiplier = Math.min(
+          backoffMultiplier * 2,
+          maxBackoffMultiplier,
+        );
         if (onError) onError(error);
       }
     } finally {
@@ -422,7 +435,7 @@ export function startSmartPollLoop(
 
     if (refreshOnVisible) {
       clearTimer();
-      void runOnce('resume');
+      void runOnce("resume");
       return;
     }
 
@@ -436,18 +449,21 @@ export function startSmartPollLoop(
     // keep polling after the tab disappears.
     if (visibilityDebounceMs > 0 && !isDocumentHidden()) {
       clearVisibilityDebounce();
-      visibilityDebounceTimer = setTimeout(handleVisibilityChange, visibilityDebounceMs);
+      visibilityDebounceTimer = setTimeout(
+        handleVisibilityChange,
+        visibilityDebounceMs,
+      );
       return;
     }
     handleVisibilityChange();
   };
 
   if (hasVisibilityApi()) {
-    document.addEventListener('visibilitychange', onVisibilityChange);
+    document.addEventListener("visibilitychange", onVisibilityChange);
   }
 
   if (runImmediately) {
-    void runOnce('startup');
+    void runOnce("startup");
   } else {
     scheduleNext();
   }
@@ -461,13 +477,13 @@ export function startSmartPollLoop(
       activeController?.abort();
       activeController = null;
       if (hasVisibilityApi()) {
-        document.removeEventListener('visibilitychange', onVisibilityChange);
+        document.removeEventListener("visibilitychange", onVisibilityChange);
       }
     },
     trigger: () => {
       if (!active) return;
       clearTimer();
-      void runOnce('manual');
+      void runOnce("manual");
     },
     isActive: () => active,
   };
@@ -480,7 +496,9 @@ export async function waitForSidecarReady(timeoutMs = 3000): Promise<boolean> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     try {
-      const res = await fetch(`${baseUrl}/api/service-status`, { method: 'GET' });
+      const res = await fetch(`${baseUrl}/api/service-status`, {
+        method: "GET",
+      });
       if (res.ok) return true;
     } catch {
       // sidecar not ready yet
@@ -493,11 +511,14 @@ export async function waitForSidecarReady(timeoutMs = 3000): Promise<boolean> {
 function isLocalOnlyApiTarget(target: string): boolean {
   // Security boundary: endpoints that can carry local secrets must use the
   // `/api/local-*` prefix so cloud fallback is automatically blocked.
-  return target.startsWith('/api/local-');
+  return target.startsWith("/api/local-");
 }
 
 function isKeyFreeApiTarget(target: string): boolean {
-  return target.startsWith('/api/register-interest') || target.startsWith('/api/version');
+  return (
+    target.startsWith("/api/register-interest") ||
+    target.startsWith("/api/version")
+  );
 }
 
 async function fetchLocalWithStartupRetry(
@@ -529,7 +550,7 @@ async function fetchLocalWithStartupRetry(
 
   throw lastError instanceof Error
     ? lastError
-    : new Error('Local API unavailable');
+    : new Error("Local API unavailable");
 }
 
 // ── Security threat model for the fetch patch ──────────────────────────
@@ -554,7 +575,11 @@ async function fetchLocalWithStartupRetry(
 const TOKEN_TTL_MS = 5 * 60 * 1000;
 
 export function installRuntimeFetchPatch(): void {
-  if (!isDesktopRuntime() || typeof window === 'undefined' || (window as unknown as Record<string, unknown>).__wmFetchPatched) {
+  if (
+    !isDesktopRuntime() ||
+    typeof window === "undefined" ||
+    (window as unknown as Record<string, unknown>).__wmFetchPatched
+  ) {
     return;
   }
 
@@ -563,13 +588,21 @@ export function installRuntimeFetchPatch(): void {
   let tokenFetchedAt = 0;
   let authRetryCooldownUntil = 0; // suppress 401 retries after consecutive failures
 
-  window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+  window.fetch = async (
+    input: RequestInfo | URL,
+    init?: RequestInit,
+  ): Promise<Response> => {
     const target = getApiTargetFromRequestInput(input);
-    const debug = localStorage.getItem('wm-debug-log') === '1';
+    const debug = localStorage.getItem("wm-debug-log") === "1";
 
-    if (!target?.startsWith('/api/')) {
+    if (!target?.startsWith("/api/")) {
       if (debug) {
-        const raw = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+        const raw =
+          typeof input === "string"
+            ? input
+            : input instanceof URL
+              ? input.href
+              : input.url;
         console.log(`[fetch] passthrough → ${raw.slice(0, 120)}`);
       }
       return nativeFetch(input, init);
@@ -577,14 +610,19 @@ export function installRuntimeFetchPatch(): void {
 
     // Resolve dynamic sidecar port on first API call
     if (_resolvedPort === null) {
-      try { await resolveLocalApiPort(); } catch { /* use default */ }
+      try {
+        await resolveLocalApiPort();
+      } catch {
+        /* use default */
+      }
     }
 
-    const tokenExpired = localApiToken && (Date.now() - tokenFetchedAt > TOKEN_TTL_MS);
+    const tokenExpired =
+      localApiToken && Date.now() - tokenFetchedAt > TOKEN_TTL_MS;
     if (!localApiToken || tokenExpired) {
       try {
-        const { tryInvokeTauri } = await import('@/services/tauri-bridge');
-        localApiToken = await tryInvokeTauri<string>('get_local_api_token');
+        const { tryInvokeTauri } = await import("@/services/tauri-bridge");
+        localApiToken = await tryInvokeTauri<string>("get_local_api_token");
         tokenFetchedAt = Date.now();
       } catch {
         localApiToken = null;
@@ -594,7 +632,7 @@ export function installRuntimeFetchPatch(): void {
 
     const headers = new Headers(init?.headers);
     if (localApiToken) {
-      headers.set('Authorization', `Bearer ${localApiToken}`);
+      headers.set("Authorization", `Bearer ${localApiToken}`);
     }
     const localInit = { ...init, headers };
 
@@ -604,9 +642,13 @@ export function installRuntimeFetchPatch(): void {
 
     if (allowCloudFallback && !isKeyFreeApiTarget(target)) {
       try {
-        const { getSecretState, secretsReady } = await import('@/services/runtime-config');
-        await Promise.race([secretsReady, new Promise<void>(r => setTimeout(r, 2000))]);
-        const wmKeyState = getSecretState('WORLDMONITOR_API_KEY');
+        const { getSecretState, secretsReady } =
+          await import("@/services/runtime-config");
+        await Promise.race([
+          secretsReady,
+          new Promise<void>((r) => setTimeout(r, 2000)),
+        ]);
+        const wmKeyState = getSecretState("WORLDMONITOR_API_KEY");
         if (!wmKeyState.present || !wmKeyState.valid) {
           allowCloudFallback = false;
         }
@@ -623,10 +665,12 @@ export function installRuntimeFetchPatch(): void {
       if (debug) console.log(`[fetch] cloud fallback → ${cloudUrl}`);
       const cloudHeaders = new Headers(init?.headers);
       if (KEYED_CLOUD_API_PATTERN.test(target)) {
-        const { getRuntimeConfigSnapshot } = await import('@/services/runtime-config');
-        const wmKeyValue = getRuntimeConfigSnapshot().secrets['WORLDMONITOR_API_KEY']?.value;
+        const { getRuntimeConfigSnapshot } =
+          await import("@/services/runtime-config");
+        const wmKeyValue =
+          getRuntimeConfigSnapshot().secrets["WORLDMONITOR_API_KEY"]?.value;
         if (wmKeyValue) {
-          cloudHeaders.set('X-WorldMonitor-Key', wmKeyValue);
+          cloudHeaders.set("X-WorldMonitor-Key", wmKeyValue);
         }
       }
       return nativeFetch(cloudUrl, { ...init, headers: cloudHeaders });
@@ -634,16 +678,30 @@ export function installRuntimeFetchPatch(): void {
 
     try {
       const t0 = performance.now();
-      let response = await fetchLocalWithStartupRetry(nativeFetch, localUrl, localInit);
-      if (debug) console.log(`[fetch] ${target} → ${response.status} (${Math.round(performance.now() - t0)}ms)`);
+      let response = await fetchLocalWithStartupRetry(
+        nativeFetch,
+        localUrl,
+        localInit,
+      );
+      if (debug)
+        console.log(
+          `[fetch] ${target} → ${response.status} (${Math.round(performance.now() - t0)}ms)`,
+        );
 
       // Token may be stale after a sidecar restart — refresh and retry once.
       // Skip retry if we recently failed (avoid doubling every request during auth outages).
-      if (response.status === 401 && localApiToken && Date.now() > authRetryCooldownUntil) {
-        if (debug) console.log(`[fetch] 401 from sidecar, refreshing token and retrying`);
+      if (
+        response.status === 401 &&
+        localApiToken &&
+        Date.now() > authRetryCooldownUntil
+      ) {
+        if (debug)
+          console.log(
+            `[fetch] 401 from sidecar, refreshing token and retrying`,
+          );
         try {
-          const { tryInvokeTauri } = await import('@/services/tauri-bridge');
-          localApiToken = await tryInvokeTauri<string>('get_local_api_token');
+          const { tryInvokeTauri } = await import("@/services/tauri-bridge");
+          localApiToken = await tryInvokeTauri<string>("get_local_api_token");
           tokenFetchedAt = Date.now();
         } catch {
           localApiToken = null;
@@ -651,12 +709,19 @@ export function installRuntimeFetchPatch(): void {
         }
         if (localApiToken) {
           const retryHeaders = new Headers(init?.headers);
-          retryHeaders.set('Authorization', `Bearer ${localApiToken}`);
-          response = await fetchLocalWithStartupRetry(nativeFetch, localUrl, { ...init, headers: retryHeaders });
-          if (debug) console.log(`[fetch] retry ${target} → ${response.status}`);
+          retryHeaders.set("Authorization", `Bearer ${localApiToken}`);
+          response = await fetchLocalWithStartupRetry(nativeFetch, localUrl, {
+            ...init,
+            headers: retryHeaders,
+          });
+          if (debug)
+            console.log(`[fetch] retry ${target} → ${response.status}`);
           if (response.status === 401) {
             authRetryCooldownUntil = Date.now() + 60_000;
-            if (debug) console.log(`[fetch] auth retry failed, suppressing retries for 60s`);
+            if (debug)
+              console.log(
+                `[fetch] auth retry failed, suppressing retries for 60s`,
+              );
           } else {
             authRetryCooldownUntil = 0;
           }
@@ -665,15 +730,22 @@ export function installRuntimeFetchPatch(): void {
 
       if (!response.ok) {
         if (!allowCloudFallback) {
-          if (debug) console.log(`[fetch] local-only endpoint ${target} returned ${response.status}; skipping cloud fallback`);
+          if (debug)
+            console.log(
+              `[fetch] local-only endpoint ${target} returned ${response.status}; skipping cloud fallback`,
+            );
           return response;
         }
-        if (debug) console.log(`[fetch] local ${response.status}, falling back to cloud`);
+        if (debug)
+          console.log(
+            `[fetch] local ${response.status}, falling back to cloud`,
+          );
         return cloudFallback();
       }
       return response;
     } catch (error) {
-      if (debug) console.warn(`[runtime] Local API unavailable for ${target}`, error);
+      if (debug)
+        console.warn(`[runtime] Local API unavailable for ${target}`, error);
       if (!allowCloudFallback) {
         throw error;
       }
@@ -684,41 +756,57 @@ export function installRuntimeFetchPatch(): void {
   (window as unknown as Record<string, unknown>).__wmFetchPatched = true;
 }
 
-const ALLOWED_REDIRECT_HOSTS = /^https:\/\/([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)*worldmonitor\.app(:\d+)?$/;
+const ALLOWED_REDIRECT_HOSTS =
+  /^https:\/\/([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)*worldmonitor\.app(:\d+)?$/;
 
 function isAllowedRedirectTarget(url: string): boolean {
   try {
     const parsed = new URL(url);
-    return ALLOWED_REDIRECT_HOSTS.test(parsed.origin) || parsed.hostname === 'localhost';
+    return (
+      ALLOWED_REDIRECT_HOSTS.test(parsed.origin) ||
+      parsed.hostname === "localhost"
+    );
   } catch {
     return false;
   }
 }
 
 export function installWebApiRedirect(): void {
-  if (isDesktopRuntime() || typeof window === 'undefined') return;
+  if (isDesktopRuntime() || typeof window === "undefined") return;
   const apiBase = getConfiguredWebApiBaseUrl();
   if (!apiBase) return;
   if (!isAllowedRedirectTarget(apiBase)) {
-    console.warn('[runtime] web API base blocked — not in hostname allowlist:', apiBase);
+    console.warn(
+      "[runtime] web API base blocked — not in hostname allowlist:",
+      apiBase,
+    );
     return;
   }
-  if ((window as unknown as Record<string, unknown>).__wmWebRedirectPatched) return;
+  if ((window as unknown as Record<string, unknown>).__wmWebRedirectPatched)
+    return;
 
   const nativeFetch = window.fetch.bind(window);
   const API_BASE = apiBase;
-  const shouldRedirectPath = (pathWithQuery: string): boolean => pathWithQuery.startsWith('/api/');
-  const shouldFallbackToOrigin = (status: number): boolean => (
-    status === 404 || status === 405 || status === 501 || status === 502 || status === 503
-  );
+  const shouldRedirectPath = (pathWithQuery: string): boolean =>
+    pathWithQuery.startsWith("/api/");
+  const shouldFallbackToOrigin = (status: number): boolean =>
+    status === 404 ||
+    status === 405 ||
+    status === 501 ||
+    status === 502 ||
+    status === 503;
   const fetchWithRedirectFallback = async (
     redirectedInput: RequestInfo | URL,
     originalInput: RequestInfo | URL,
     originalInit?: RequestInit,
   ): Promise<Response> => {
     try {
-      const redirectedResponse = await nativeFetch(redirectedInput, originalInit);
-      if (!shouldFallbackToOrigin(redirectedResponse.status)) return redirectedResponse;
+      const redirectedResponse = await nativeFetch(
+        redirectedInput,
+        originalInit,
+      );
+      if (!shouldFallbackToOrigin(redirectedResponse.status))
+        return redirectedResponse;
       return nativeFetch(originalInput, originalInit);
     } catch (error) {
       try {
@@ -729,16 +817,30 @@ export function installWebApiRedirect(): void {
     }
   };
 
-  window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-    if (typeof input === 'string' && shouldRedirectPath(input)) {
+  window.fetch = async (
+    input: RequestInfo | URL,
+    init?: RequestInit,
+  ): Promise<Response> => {
+    if (typeof input === "string" && shouldRedirectPath(input)) {
       return fetchWithRedirectFallback(`${API_BASE}${input}`, input, init);
     }
-    if (input instanceof URL && input.origin === window.location.origin && shouldRedirectPath(`${input.pathname}${input.search}`)) {
-      return fetchWithRedirectFallback(new URL(`${API_BASE}${input.pathname}${input.search}`), input, init);
+    if (
+      input instanceof URL &&
+      input.origin === window.location.origin &&
+      shouldRedirectPath(`${input.pathname}${input.search}`)
+    ) {
+      return fetchWithRedirectFallback(
+        new URL(`${API_BASE}${input.pathname}${input.search}`),
+        input,
+        init,
+      );
     }
     if (input instanceof Request) {
       const u = new URL(input.url);
-      if (u.origin === window.location.origin && shouldRedirectPath(`${u.pathname}${u.search}`)) {
+      if (
+        u.origin === window.location.origin &&
+        shouldRedirectPath(`${u.pathname}${u.search}`)
+      ) {
         return fetchWithRedirectFallback(
           new Request(`${API_BASE}${u.pathname}${u.search}`, input),
           input.clone(),

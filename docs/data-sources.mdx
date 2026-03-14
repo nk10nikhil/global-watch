@@ -103,10 +103,10 @@ description: "Comprehensive documentation of all data sources, feed tiers, and c
 
 26 curated Telegram channels provide a raw, low-latency intelligence feed covering conflict zones, OSINT analysis, and breaking news — sources that are often minutes ahead of traditional wire services during fast-moving events.
 
-| Tier       | Channels                                                                                                              |
-| ---------- | --------------------------------------------------------------------------------------------------------------------- |
-| **Tier 1** | VahidOnline (Iran politics)                                                                                           |
-| **Tier 2** | Abu Ali Express, Aurora Intel, BNO News, Clash Report, DeepState, Defender Dome, Iran International, LiveUAMap, OSINTdefender, OSINT Updates, Ukraine Air Force (kpszsu), Povitryani Tryvoha |
+| Tier       | Channels                                                                                                                                                                                                  |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Tier 1** | VahidOnline (Iran politics)                                                                                                                                                                               |
+| **Tier 2** | Abu Ali Express, Aurora Intel, BNO News, Clash Report, DeepState, Defender Dome, Iran International, LiveUAMap, OSINTdefender, OSINT Updates, Ukraine Air Force (kpszsu), Povitryani Tryvoha              |
 | **Tier 3** | Bellingcat, CyberDetective, GeopoliticalCenter, Middle East Spectator, Middle East Now Breaking, NEXTA, OSINT Industries, OsintOps News, OSINT Live, OsintTV, The Spectator Index, War Monitor, WFWitness |
 
 **Architecture**: A GramJS MTProto client running on the Railway relay polls all channels sequentially on a 60-second cycle. Each channel has a 15-second timeout (GramJS `getEntity`/`getMessages` can hang indefinitely on FLOOD_WAIT or MTProto stalls), and the entire cycle has a 3-minute hard timeout. A stuck-poll guard force-clears the mutex after 3.5 minutes, and FLOOD_WAIT errors from Telegram's API stop the cycle early rather than propagating to every remaining channel.
@@ -156,11 +156,11 @@ The Security Advisories panel displays advisories with colored level badges and 
 
 111 airports across 5 regions (Americas, Europe, Asia-Pacific, MENA, Africa) are continuously monitored for delays, ground stops, and closures through three independent data sources:
 
-| Source             | Coverage                  | Method                                                                                                  |
-| ------------------ | ------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Source             | Coverage                  | Method                                                                                                        |
+| ------------------ | ------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | **FAA ASWS**       | 14 US hub airports        | Real-time XML feed from `nasstatus.faa.gov` — ground delays, ground stops, arrival/departure delays, closures |
-| **AviationStack**  | 40 international airports  | Last 100 flights per airport — cancellation rate and average delay duration computed from flight records  |
-| **ICAO NOTAM API** | 46 MENA airports           | Real-time NOTAM (Notice to Air Missions) query for active airport/airspace closures                      |
+| **AviationStack**  | 40 international airports | Last 100 flights per airport — cancellation rate and average delay duration computed from flight records      |
+| **ICAO NOTAM API** | 46 MENA airports          | Real-time NOTAM (Notice to Air Missions) query for active airport/airspace closures                           |
 
 **NOTAM closure detection** targets MENA airports where airspace closures due to military activity or security events carry strategic significance. Detection uses two methods: ICAO Q-code matching (aerodrome/airspace closure codes `FA`, `AH`, `AL`, `AW`, `AC`, `AM` combined with closure qualifiers `LC`, `AS`, `AU`, `XX`, `AW`) and free-text regex scanning for closure keywords (`AD CLSD`, `AIRPORT CLOSED`, `AIRSPACE CLOSED`). When a NOTAM closure is detected, it overrides any existing delay alert for that airport with a `severe/closure` classification.
 
@@ -170,14 +170,14 @@ The Security Advisories panel displays advisories with colored level badges and 
 
 The Airline Intel panel provides a comprehensive 6-tab aviation monitoring interface covering operations, flights, carriers, tracking, news, and pricing:
 
-| Tab | Data | Source |
-| --- | --- | --- |
-| **Ops** | Delay percentages, cancellation rates, NOTAM closures, ground stops | FAA ASWS, AviationStack, ICAO |
-| **Flights** | Specific flight status with scheduled vs estimated times, divert/cancel flags | AviationStack flight lookup |
-| **Airlines** | Per-carrier statistics at monitored airports (delay %, cancellation rate, flight count) | AviationStack carrier ops |
-| **Tracking** | Live ADS-B aircraft positions with altitude, ground speed, heading, on-ground status | OpenSky / Wingbits |
-| **News** | 20+ recent aviation news items with entity matching (airlines, airports, aircraft types) | RSS feeds tagged `aviation` |
-| **Prices** | Multi-carrier price quotes with cabin selection (Economy/Business), currency conversion, non-stop filters | Travelpayouts cached data |
+| Tab          | Data                                                                                                      | Source                        |
+| ------------ | --------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| **Ops**      | Delay percentages, cancellation rates, NOTAM closures, ground stops                                       | FAA ASWS, AviationStack, ICAO |
+| **Flights**  | Specific flight status with scheduled vs estimated times, divert/cancel flags                             | AviationStack flight lookup   |
+| **Airlines** | Per-carrier statistics at monitored airports (delay %, cancellation rate, flight count)                   | AviationStack carrier ops     |
+| **Tracking** | Live ADS-B aircraft positions with altitude, ground speed, heading, on-ground status                      | OpenSky / Wingbits            |
+| **News**     | 20+ recent aviation news items with entity matching (airlines, airports, aircraft types)                  | RSS feeds tagged `aviation`   |
+| **Prices**   | Multi-carrier price quotes with cabin selection (Economy/Business), currency conversion, non-stop filters | Travelpayouts cached data     |
 
 **Aviation watchlist** — users customize a personal list of airports (IATA codes), airlines, and routes persisted to `localStorage` as `aviation:watchlist:v1`. The default watchlist includes IST, ESB, SAW, LHR, FRA, CDG airports and TK airline, reflecting common monitoring needs. The watchlist drives which airports appear in the Ops tab and which carriers are tracked in the Airlines tab.
 
@@ -266,14 +266,14 @@ Population exposure estimation calculates affected populations within event-spec
 
 62 strategic ports are cataloged across six types, reflecting their role in global trade and military posture:
 
-| Type           | Count | Examples                                             |
-| -------------- | ----- | ---------------------------------------------------- |
-| **Container**  | 21    | Shanghai (#1, 47M+ TEU), Singapore, Ningbo, Shenzhen |
-| **Oil/LNG**    | 8     | Ras Tanura (Saudi), Sabine Pass (US), Fujairah (UAE) |
+| Type           | Count | Examples                                                                       |
+| -------------- | ----- | ------------------------------------------------------------------------------ |
+| **Container**  | 21    | Shanghai (#1, 47M+ TEU), Singapore, Ningbo, Shenzhen                           |
+| **Oil/LNG**    | 8     | Ras Tanura (Saudi), Sabine Pass (US), Fujairah (UAE)                           |
 | **Chokepoint** | 9     | Suez Canal, Panama Canal, Strait of Malacca, Gibraltar, Bosphorus, Dardanelles |
-| **Naval**      | 6     | Zhanjiang, Yulin (China), Vladivostok (Russia)       |
-| **Mixed**      | 15+   | Ports serving multiple roles (trade + military)      |
-| **Bulk**       | 20+   | Regional commodity ports                             |
+| **Naval**      | 6     | Zhanjiang, Yulin (China), Vladivostok (Russia)                                 |
+| **Mixed**      | 15+   | Ports serving multiple roles (trade + military)                                |
+| **Bulk**       | 20+   | Regional commodity ports                                                       |
 
 Ports are ranked by throughput and weighted by strategic importance in the infrastructure cascade model: oil/LNG terminals carry 0.9 criticality, container ports 0.7, and naval bases 0.4. Port proximity appears in the Country Brief infrastructure exposure section.
 

@@ -79,8 +79,7 @@ export interface EnergyPrice {
   priceAt: number;
 }
 
-export interface GetMacroSignalsRequest {
-}
+export interface GetMacroSignalsRequest {}
 
 export interface GetMacroSignalsResponse {
   timestamp: string;
@@ -174,8 +173,7 @@ export interface EnergyCapacityYear {
   capacityMw: number;
 }
 
-export interface GetBisPolicyRatesRequest {
-}
+export interface GetBisPolicyRatesRequest {}
 
 export interface GetBisPolicyRatesResponse {
   rates: BisPolicyRate[];
@@ -190,8 +188,7 @@ export interface BisPolicyRate {
   centralBank: string;
 }
 
-export interface GetBisExchangeRatesRequest {
-}
+export interface GetBisExchangeRatesRequest {}
 
 export interface GetBisExchangeRatesResponse {
   rates: BisExchangeRate[];
@@ -206,8 +203,7 @@ export interface BisExchangeRate {
   date: string;
 }
 
-export interface GetBisCreditRequest {
-}
+export interface GetBisCreditRequest {}
 
 export interface GetBisCreditResponse {
   entries: BisCreditToGdp[];
@@ -269,12 +265,18 @@ export class EconomicServiceClient {
     this.defaultHeaders = { ...options?.defaultHeaders };
   }
 
-  async getFredSeries(req: GetFredSeriesRequest, options?: EconomicServiceCallOptions): Promise<GetFredSeriesResponse> {
+  async getFredSeries(
+    req: GetFredSeriesRequest,
+    options?: EconomicServiceCallOptions,
+  ): Promise<GetFredSeriesResponse> {
     let path = "/api/economic/v1/get-fred-series";
     const params = new URLSearchParams();
-    if (req.seriesId != null && req.seriesId !== "") params.set("series_id", String(req.seriesId));
-    if (req.limit != null && req.limit !== 0) params.set("limit", String(req.limit));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.seriesId != null && req.seriesId !== "")
+      params.set("series_id", String(req.seriesId));
+    if (req.limit != null && req.limit !== 0)
+      params.set("limit", String(req.limit));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -292,10 +294,13 @@ export class EconomicServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as GetFredSeriesResponse;
+    return (await resp.json()) as GetFredSeriesResponse;
   }
 
-  async getFredSeriesBatch(req: GetFredSeriesBatchRequest, options?: EconomicServiceCallOptions): Promise<GetFredSeriesBatchResponse> {
+  async getFredSeriesBatch(
+    req: GetFredSeriesBatchRequest,
+    options?: EconomicServiceCallOptions,
+  ): Promise<GetFredSeriesBatchResponse> {
     let path = "/api/economic/v1/get-fred-series-batch";
     const url = this.baseURL + path;
 
@@ -316,18 +321,27 @@ export class EconomicServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as GetFredSeriesBatchResponse;
+    return (await resp.json()) as GetFredSeriesBatchResponse;
   }
 
-  async listWorldBankIndicators(req: ListWorldBankIndicatorsRequest, options?: EconomicServiceCallOptions): Promise<ListWorldBankIndicatorsResponse> {
+  async listWorldBankIndicators(
+    req: ListWorldBankIndicatorsRequest,
+    options?: EconomicServiceCallOptions,
+  ): Promise<ListWorldBankIndicatorsResponse> {
     let path = "/api/economic/v1/list-world-bank-indicators";
     const params = new URLSearchParams();
-    if (req.indicatorCode != null && req.indicatorCode !== "") params.set("indicator_code", String(req.indicatorCode));
-    if (req.countryCode != null && req.countryCode !== "") params.set("country_code", String(req.countryCode));
-    if (req.year != null && req.year !== 0) params.set("year", String(req.year));
-    if (req.pageSize != null && req.pageSize !== 0) params.set("page_size", String(req.pageSize));
-    if (req.cursor != null && req.cursor !== "") params.set("cursor", String(req.cursor));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.indicatorCode != null && req.indicatorCode !== "")
+      params.set("indicator_code", String(req.indicatorCode));
+    if (req.countryCode != null && req.countryCode !== "")
+      params.set("country_code", String(req.countryCode));
+    if (req.year != null && req.year !== 0)
+      params.set("year", String(req.year));
+    if (req.pageSize != null && req.pageSize !== 0)
+      params.set("page_size", String(req.pageSize));
+    if (req.cursor != null && req.cursor !== "")
+      params.set("cursor", String(req.cursor));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -345,14 +359,19 @@ export class EconomicServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as ListWorldBankIndicatorsResponse;
+    return (await resp.json()) as ListWorldBankIndicatorsResponse;
   }
 
-  async getEnergyPrices(req: GetEnergyPricesRequest, options?: EconomicServiceCallOptions): Promise<GetEnergyPricesResponse> {
+  async getEnergyPrices(
+    req: GetEnergyPricesRequest,
+    options?: EconomicServiceCallOptions,
+  ): Promise<GetEnergyPricesResponse> {
     let path = "/api/economic/v1/get-energy-prices";
     const params = new URLSearchParams();
-    if (req.commodities != null && req.commodities !== "") params.set("commodities", String(req.commodities));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.commodities != null && req.commodities !== "")
+      params.set("commodities", String(req.commodities));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -370,10 +389,13 @@ export class EconomicServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as GetEnergyPricesResponse;
+    return (await resp.json()) as GetEnergyPricesResponse;
   }
 
-  async getMacroSignals(req: GetMacroSignalsRequest, options?: EconomicServiceCallOptions): Promise<GetMacroSignalsResponse> {
+  async getMacroSignals(
+    req: GetMacroSignalsRequest,
+    options?: EconomicServiceCallOptions,
+  ): Promise<GetMacroSignalsResponse> {
     let path = "/api/economic/v1/get-macro-signals";
     const url = this.baseURL + path;
 
@@ -393,15 +415,21 @@ export class EconomicServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as GetMacroSignalsResponse;
+    return (await resp.json()) as GetMacroSignalsResponse;
   }
 
-  async getEnergyCapacity(req: GetEnergyCapacityRequest, options?: EconomicServiceCallOptions): Promise<GetEnergyCapacityResponse> {
+  async getEnergyCapacity(
+    req: GetEnergyCapacityRequest,
+    options?: EconomicServiceCallOptions,
+  ): Promise<GetEnergyCapacityResponse> {
     let path = "/api/economic/v1/get-energy-capacity";
     const params = new URLSearchParams();
-    if (req.energySources != null && req.energySources !== "") params.set("energy_sources", String(req.energySources));
-    if (req.years != null && req.years !== 0) params.set("years", String(req.years));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.energySources != null && req.energySources !== "")
+      params.set("energy_sources", String(req.energySources));
+    if (req.years != null && req.years !== 0)
+      params.set("years", String(req.years));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -419,10 +447,13 @@ export class EconomicServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as GetEnergyCapacityResponse;
+    return (await resp.json()) as GetEnergyCapacityResponse;
   }
 
-  async getBisPolicyRates(req: GetBisPolicyRatesRequest, options?: EconomicServiceCallOptions): Promise<GetBisPolicyRatesResponse> {
+  async getBisPolicyRates(
+    req: GetBisPolicyRatesRequest,
+    options?: EconomicServiceCallOptions,
+  ): Promise<GetBisPolicyRatesResponse> {
     let path = "/api/economic/v1/get-bis-policy-rates";
     const url = this.baseURL + path;
 
@@ -442,10 +473,13 @@ export class EconomicServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as GetBisPolicyRatesResponse;
+    return (await resp.json()) as GetBisPolicyRatesResponse;
   }
 
-  async getBisExchangeRates(req: GetBisExchangeRatesRequest, options?: EconomicServiceCallOptions): Promise<GetBisExchangeRatesResponse> {
+  async getBisExchangeRates(
+    req: GetBisExchangeRatesRequest,
+    options?: EconomicServiceCallOptions,
+  ): Promise<GetBisExchangeRatesResponse> {
     let path = "/api/economic/v1/get-bis-exchange-rates";
     const url = this.baseURL + path;
 
@@ -465,10 +499,13 @@ export class EconomicServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as GetBisExchangeRatesResponse;
+    return (await resp.json()) as GetBisExchangeRatesResponse;
   }
 
-  async getBisCredit(req: GetBisCreditRequest, options?: EconomicServiceCallOptions): Promise<GetBisCreditResponse> {
+  async getBisCredit(
+    req: GetBisCreditRequest,
+    options?: EconomicServiceCallOptions,
+  ): Promise<GetBisCreditResponse> {
     let path = "/api/economic/v1/get-bis-credit";
     const url = this.baseURL + path;
 
@@ -488,7 +525,7 @@ export class EconomicServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as GetBisCreditResponse;
+    return (await resp.json()) as GetBisCreditResponse;
   }
 
   private async handleError(resp: Response): Promise<never> {
@@ -503,7 +540,10 @@ export class EconomicServiceClient {
         if (e instanceof ValidationError) throw e;
       }
     }
-    throw new ApiError(resp.status, `Request failed with status ${resp.status}`, body);
+    throw new ApiError(
+      resp.status,
+      `Request failed with status ${resp.status}`,
+      body,
+    );
   }
 }
-

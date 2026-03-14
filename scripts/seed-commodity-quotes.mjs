@@ -1,24 +1,34 @@
 #!/usr/bin/env node
 
-import { loadEnvFile, loadSharedConfig, CHROME_UA, sleep, runSeed, parseYahooChart, writeExtraKey } from './_seed-utils.mjs';
+import {
+  loadEnvFile,
+  loadSharedConfig,
+  CHROME_UA,
+  sleep,
+  runSeed,
+  parseYahooChart,
+  writeExtraKey,
+} from "./_seed-utils.mjs";
 
-const commodityConfig = loadSharedConfig('commodities.json');
+const commodityConfig = loadSharedConfig("commodities.json");
 
 loadEnvFile(import.meta.url);
 
-const CANONICAL_KEY = 'market:commodities-bootstrap:v1';
+const CANONICAL_KEY = "market:commodities-bootstrap:v1";
 const CACHE_TTL = 1800;
 const YAHOO_DELAY_MS = 200;
 
 async function fetchYahooWithRetry(url, label, maxAttempts = 4) {
   for (let i = 0; i < maxAttempts; i++) {
     const resp = await fetch(url, {
-      headers: { 'User-Agent': CHROME_UA },
+      headers: { "User-Agent": CHROME_UA },
       signal: AbortSignal.timeout(10_000),
     });
     if (resp.status === 429) {
       const wait = 5000 * (i + 1);
-      console.warn(`  [Yahoo] ${label} 429 — waiting ${wait / 1000}s (attempt ${i + 1}/${maxAttempts})`);
+      console.warn(
+        `  [Yahoo] ${label} 429 — waiting ${wait / 1000}s (attempt ${i + 1}/${maxAttempts})`,
+      );
       await sleep(wait);
       continue;
     }
@@ -32,7 +42,7 @@ async function fetchYahooWithRetry(url, label, maxAttempts = 4) {
   return null;
 }
 
-const COMMODITY_SYMBOLS = commodityConfig.commodities.map(c => c.symbol);
+const COMMODITY_SYMBOLS = commodityConfig.commodities.map((c) => c.symbol);
 
 async function fetchCommodityQuotes() {
   const quotes = [];
@@ -52,7 +62,9 @@ async function fetchCommodityQuotes() {
       const parsed = parseYahooChart(await resp.json(), symbol);
       if (parsed) {
         quotes.push(parsed);
-        console.log(`  ${symbol}: $${parsed.price} (${parsed.change > 0 ? '+' : ''}${parsed.change}%)`);
+        console.log(
+          `  ${symbol}: $${parsed.price} (${parsed.change > 0 ? "+" : ""}${parsed.change}%)`,
+        );
       } else {
         misses++;
       }
@@ -80,18 +92,25 @@ async function fetchAndStash() {
   return seedData;
 }
 
-runSeed('market', 'commodities', CANONICAL_KEY, fetchAndStash, {
+runSeed("market", "commodities", CANONICAL_KEY, fetchAndStash, {
   validateFn: validate,
   ttlSeconds: CACHE_TTL,
-  sourceVersion: 'yahoo-chart',
-}).then(async (result) => {
-  if (result?.skipped || !seedData) return;
-  const commodityKey = `market:commodities:v1:${[...COMMODITY_SYMBOLS].sort().join(',')}`;
-  const quotesKey = `market:quotes:v1:${[...COMMODITY_SYMBOLS].sort().join(',')}`;
-  const quotesPayload = { ...seedData, finnhubSkipped: false, skipReason: '', rateLimited: false };
-  await writeExtraKey(commodityKey, seedData, CACHE_TTL);
-  await writeExtraKey(quotesKey, quotesPayload, CACHE_TTL);
-}).catch((err) => {
-  console.error('FATAL:', err.message || err);
-  process.exit(1);
-});
+  sourceVersion: "yahoo-chart",
+})
+  .then(async (result) => {
+    if (result?.skipped || !seedData) return;
+    const commodityKey = `market:commodities:v1:${[...COMMODITY_SYMBOLS].sort().join(",")}`;
+    const quotesKey = `market:quotes:v1:${[...COMMODITY_SYMBOLS].sort().join(",")}`;
+    const quotesPayload = {
+      ...seedData,
+      finnhubSkipped: false,
+      skipReason: "",
+      rateLimited: false,
+    };
+    await writeExtraKey(commodityKey, seedData, CACHE_TTL);
+    await writeExtraKey(quotesKey, quotesPayload, CACHE_TTL);
+  })
+  .catch((err) => {
+    console.error("FATAL:", err.message || err);
+    process.exit(1);
+  });

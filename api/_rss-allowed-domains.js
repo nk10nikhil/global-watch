@@ -290,5 +290,5 @@ export default [
   "www.mining-technology.com",
   "www.australianmining.com.au",
   "news.goldseek.com",
-  "news.silverseek.com"
+  "news.silverseek.com",
 ];

@@ -1,18 +1,25 @@
-import { getRpcBaseUrl } from '@/services/rpc-client';
+import { getRpcBaseUrl } from "@/services/rpc-client";
 import {
   UnrestServiceClient,
   type UnrestEvent,
   type ListUnrestEventsResponse,
-} from '@/generated/client/worldmonitor/unrest/v1/service_client';
-import type { SocialUnrestEvent, ProtestSeverity, ProtestEventType, ProtestSource } from '@/types';
-import { createCircuitBreaker } from '@/utils';
-import { getHydratedData } from '@/services/bootstrap';
+} from "@/generated/client/worldmonitor/unrest/v1/service_client";
+import type {
+  SocialUnrestEvent,
+  ProtestSeverity,
+  ProtestEventType,
+  ProtestSource,
+} from "@/types";
+import { createCircuitBreaker } from "@/utils";
+import { getHydratedData } from "@/services/bootstrap";
 
 // ---- Client + Circuit Breaker ----
 
-const client = new UnrestServiceClient(getRpcBaseUrl(), { fetch: (...args) => globalThis.fetch(...args) });
+const client = new UnrestServiceClient(getRpcBaseUrl(), {
+  fetch: (...args) => globalThis.fetch(...args),
+});
 const unrestBreaker = createCircuitBreaker<ListUnrestEventsResponse>({
-  name: 'Unrest Events',
+  name: "Unrest Events",
   cacheTtlMs: 10 * 60 * 1000,
   persistCache: true,
 });
@@ -21,35 +28,49 @@ const unrestBreaker = createCircuitBreaker<ListUnrestEventsResponse>({
 
 function mapSeverity(s: string): ProtestSeverity {
   switch (s) {
-    case 'SEVERITY_LEVEL_HIGH': return 'high';
-    case 'SEVERITY_LEVEL_MEDIUM': return 'medium';
-    default: return 'low';
+    case "SEVERITY_LEVEL_HIGH":
+      return "high";
+    case "SEVERITY_LEVEL_MEDIUM":
+      return "medium";
+    default:
+      return "low";
   }
 }
 
 function mapEventType(t: string): ProtestEventType {
   switch (t) {
-    case 'UNREST_EVENT_TYPE_PROTEST': return 'protest';
-    case 'UNREST_EVENT_TYPE_RIOT': return 'riot';
-    case 'UNREST_EVENT_TYPE_STRIKE': return 'strike';
-    case 'UNREST_EVENT_TYPE_DEMONSTRATION': return 'demonstration';
-    default: return 'civil_unrest';
+    case "UNREST_EVENT_TYPE_PROTEST":
+      return "protest";
+    case "UNREST_EVENT_TYPE_RIOT":
+      return "riot";
+    case "UNREST_EVENT_TYPE_STRIKE":
+      return "strike";
+    case "UNREST_EVENT_TYPE_DEMONSTRATION":
+      return "demonstration";
+    default:
+      return "civil_unrest";
   }
 }
 
 function mapSourceType(s: string): ProtestSource {
   switch (s) {
-    case 'UNREST_SOURCE_TYPE_ACLED': return 'acled';
-    case 'UNREST_SOURCE_TYPE_GDELT': return 'gdelt';
-    default: return 'rss';
+    case "UNREST_SOURCE_TYPE_ACLED":
+      return "acled";
+    case "UNREST_SOURCE_TYPE_GDELT":
+      return "gdelt";
+    default:
+      return "rss";
   }
 }
 
-function mapConfidence(c: string): 'high' | 'medium' | 'low' {
+function mapConfidence(c: string): "high" | "medium" | "low" {
   switch (c) {
-    case 'CONFIDENCE_LEVEL_HIGH': return 'high';
-    case 'CONFIDENCE_LEVEL_MEDIUM': return 'medium';
-    default: return 'low';
+    case "CONFIDENCE_LEVEL_HIGH":
+      return "high";
+    case "CONFIDENCE_LEVEL_MEDIUM":
+      return "medium";
+    default:
+      return "low";
   }
 }
 
@@ -74,7 +95,7 @@ function toSocialUnrestEvent(e: UnrestEvent): SocialUnrestEvent {
     tags: e.tags.length > 0 ? e.tags : undefined,
     actors: e.actors.length > 0 ? e.actors : undefined,
     confidence: mapConfidence(e.confidence),
-    validated: mapConfidence(e.confidence) === 'high',
+    validated: mapConfidence(e.confidence) === "high",
   };
 }
 
@@ -100,7 +121,9 @@ const emptyFallback: ListUnrestEventsResponse = {
 };
 
 export async function fetchProtestEvents(): Promise<ProtestData> {
-  const hydrated = getHydratedData('unrestEvents') as ListUnrestEventsResponse | undefined;
+  const hydrated = getHydratedData("unrestEvents") as
+    | ListUnrestEventsResponse
+    | undefined;
   if (hydrated?.events?.length) {
     const events = hydrated.events.map(toSocialUnrestEvent);
     const byCountry = new Map<string, SocialUnrestEvent[]>();
@@ -109,21 +132,26 @@ export async function fetchProtestEvents(): Promise<ProtestData> {
       existing.push(event);
       byCountry.set(event.country, existing);
     }
-    const acledCount = events.filter(e => e.sourceType === 'acled').length;
-    const gdeltCount = events.filter(e => e.sourceType === 'gdelt').length;
+    const acledCount = events.filter((e) => e.sourceType === "acled").length;
+    const gdeltCount = events.filter((e) => e.sourceType === "gdelt").length;
     if (acledCount > 0) acledConfigured = true;
     else if (gdeltCount > 0) acledConfigured = false;
-    return { events, byCountry, highSeverityCount: events.filter(e => e.severity === 'high').length, sources: { acled: acledCount, gdelt: gdeltCount } };
+    return {
+      events,
+      byCountry,
+      highSeverityCount: events.filter((e) => e.severity === "high").length,
+      sources: { acled: acledCount, gdelt: gdeltCount },
+    };
   }
 
   const resp = await unrestBreaker.execute(async () => {
     return client.listUnrestEvents({
-      country: '',
-      minSeverity: 'SEVERITY_LEVEL_UNSPECIFIED',
+      country: "",
+      minSeverity: "SEVERITY_LEVEL_UNSPECIFIED",
       start: 0,
       end: 0,
       pageSize: 0,
-      cursor: '',
+      cursor: "",
       neLat: 0,
       neLon: 0,
       swLat: 0,
@@ -142,8 +170,8 @@ export async function fetchProtestEvents(): Promise<ProtestData> {
   }
 
   // Count by source
-  const acledCount = events.filter(e => e.sourceType === 'acled').length;
-  const gdeltCount = events.filter(e => e.sourceType === 'gdelt').length;
+  const acledCount = events.filter((e) => e.sourceType === "acled").length;
+  const gdeltCount = events.filter((e) => e.sourceType === "gdelt").length;
 
   // Update acledConfigured heuristic based on response
   if (events.length > 0) {
@@ -158,7 +186,7 @@ export async function fetchProtestEvents(): Promise<ProtestData> {
   return {
     events,
     byCountry,
-    highSeverityCount: events.filter(e => e.severity === 'high').length,
+    highSeverityCount: events.filter((e) => e.severity === "high").length,
     sources: {
       acled: acledCount,
       gdelt: gdeltCount,
@@ -168,6 +196,9 @@ export async function fetchProtestEvents(): Promise<ProtestData> {
 
 // ---- Status Function ----
 
-export function getProtestStatus(): { acledConfigured: boolean | null; gdeltAvailable: boolean } {
+export function getProtestStatus(): {
+  acledConfigured: boolean | null;
+  gdeltAvailable: boolean;
+} {
   return { acledConfigured, gdeltAvailable: true };
 }

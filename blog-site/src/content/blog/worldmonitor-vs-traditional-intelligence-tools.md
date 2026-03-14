@@ -105,18 +105,18 @@ Let's be direct about what World Monitor is and isn't relative to established pl
 
 The fundamental difference isn't any single feature. It's that World Monitor fuses domains that traditional tools keep separate:
 
-| Domain | Bloomberg | Palantir | Dataminr | Recorded Future | World Monitor |
-|--------|-----------|----------|----------|-----------------|--------------|
-| Financial markets | Deep | Limited | No | No | Moderate |
-| Geopolitical events | Limited | Custom | Social only | Cyber focus | Deep |
-| Military tracking | No | Custom | No | No | ADS-B + AIS + USNI |
-| Conflict data | No | Custom | Social | Cyber | ACLED + UCDP + Telegram |
-| Infrastructure mapping | No | Custom | No | Partial | Cables, pipelines, ports, datacenters |
-| Natural disasters | No | Custom | Limited | No | USGS + NASA FIRMS + EONET |
-| AI analysis (local) | No | No | No | No | Ollama + LM Studio + browser ML |
-| Prediction markets | No | No | No | No | Polymarket integration |
-| Price | $24K/yr | $1M+ | $100K+ | Enterprise | Free |
-| Open source | No | No | No | No | AGPL-3.0 |
+| Domain                 | Bloomberg | Palantir | Dataminr    | Recorded Future | World Monitor                         |
+| ---------------------- | --------- | -------- | ----------- | --------------- | ------------------------------------- |
+| Financial markets      | Deep      | Limited  | No          | No              | Moderate                              |
+| Geopolitical events    | Limited   | Custom   | Social only | Cyber focus     | Deep                                  |
+| Military tracking      | No        | Custom   | No          | No              | ADS-B + AIS + USNI                    |
+| Conflict data          | No        | Custom   | Social      | Cyber           | ACLED + UCDP + Telegram               |
+| Infrastructure mapping | No        | Custom   | No          | Partial         | Cables, pipelines, ports, datacenters |
+| Natural disasters      | No        | Custom   | Limited     | No              | USGS + NASA FIRMS + EONET             |
+| AI analysis (local)    | No        | No       | No          | No              | Ollama + LM Studio + browser ML       |
+| Prediction markets     | No        | No       | No          | No              | Polymarket integration                |
+| Price                  | $24K/yr   | $1M+     | $100K+      | Enterprise      | Free                                  |
+| Open source            | No        | No       | No          | No              | AGPL-3.0                              |
 
 No single traditional tool covers all these domains. Analysts typically cobble together 5-6 subscriptions. World Monitor provides integrated coverage across all of them.
 

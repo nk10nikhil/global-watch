@@ -33,9 +33,19 @@ export interface PaginationResponse {
   totalCount: number;
 }
 
-export type AnomalySeverity = "ANOMALY_SEVERITY_UNSPECIFIED" | "ANOMALY_SEVERITY_NORMAL" | "ANOMALY_SEVERITY_MODERATE" | "ANOMALY_SEVERITY_EXTREME";
+export type AnomalySeverity =
+  | "ANOMALY_SEVERITY_UNSPECIFIED"
+  | "ANOMALY_SEVERITY_NORMAL"
+  | "ANOMALY_SEVERITY_MODERATE"
+  | "ANOMALY_SEVERITY_EXTREME";
 
-export type AnomalyType = "ANOMALY_TYPE_UNSPECIFIED" | "ANOMALY_TYPE_WARM" | "ANOMALY_TYPE_COLD" | "ANOMALY_TYPE_WET" | "ANOMALY_TYPE_DRY" | "ANOMALY_TYPE_MIXED";
+export type AnomalyType =
+  | "ANOMALY_TYPE_UNSPECIFIED"
+  | "ANOMALY_TYPE_WARM"
+  | "ANOMALY_TYPE_COLD"
+  | "ANOMALY_TYPE_WET"
+  | "ANOMALY_TYPE_DRY"
+  | "ANOMALY_TYPE_MIXED";
 
 export interface FieldViolation {
   field: string;
@@ -72,7 +82,10 @@ export interface ServerContext {
 
 export interface ServerOptions {
   onError?: (error: unknown, req: Request) => Response | Promise<Response>;
-  validateRequest?: (methodName: string, body: unknown) => FieldViolation[] | undefined;
+  validateRequest?: (
+    methodName: string,
+    body: unknown,
+  ) => FieldViolation[] | undefined;
 }
 
 export interface RouteDescriptor {
@@ -82,7 +95,10 @@ export interface RouteDescriptor {
 }
 
 export interface ClimateServiceHandler {
-  listClimateAnomalies(ctx: ServerContext, req: ListClimateAnomaliesRequest): Promise<ListClimateAnomaliesResponse>;
+  listClimateAnomalies(
+    ctx: ServerContext,
+    req: ListClimateAnomaliesRequest,
+  ): Promise<ListClimateAnomaliesResponse>;
 }
 
 export function createClimateServiceRoutes(
@@ -104,7 +120,10 @@ export function createClimateServiceRoutes(
             minSeverity: params.get("min_severity") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("listClimateAnomalies", body);
+            const bodyViolations = options.validateRequest(
+              "listClimateAnomalies",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -117,16 +136,22 @@ export function createClimateServiceRoutes(
           };
 
           const result = await handler.listClimateAnomalies(ctx, body);
-          return new Response(JSON.stringify(result as ListClimateAnomaliesResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as ListClimateAnomaliesResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -141,4 +166,3 @@ export function createClimateServiceRoutes(
     },
   ];
 }
-

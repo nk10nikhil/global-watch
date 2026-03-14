@@ -3,9 +3,16 @@
  * Handles embeddings, sentiment analysis, summarization, and NER
  */
 
-import { pipeline, env } from '@xenova/transformers';
-import { MODEL_CONFIGS, type ModelConfig } from '@/config/ml-config';
-import { storeVectors, searchVectors, getCount, resetStore, sanitizeTitle, type VectorSearchResult } from './vector-db';
+import { pipeline, env } from "@xenova/transformers";
+import { MODEL_CONFIGS, type ModelConfig } from "@/config/ml-config";
+import {
+  storeVectors,
+  searchVectors,
+  getCount,
+  resetStore,
+  sanitizeTitle,
+  type VectorSearchResult,
+} from "./vector-db";
 
 // Configure transformers.js
 env.allowLocalModels = false;
@@ -13,65 +20,65 @@ env.useBrowserCache = true;
 
 // Message types
 interface InitMessage {
-  type: 'init';
+  type: "init";
   id: string;
 }
 
 interface LoadModelMessage {
-  type: 'load-model';
+  type: "load-model";
   id: string;
   modelId: string;
 }
 
 interface UnloadModelMessage {
-  type: 'unload-model';
+  type: "unload-model";
   id: string;
   modelId: string;
 }
 
 interface EmbedMessage {
-  type: 'embed';
+  type: "embed";
   id: string;
   texts: string[];
 }
 
 interface SummarizeMessage {
-  type: 'summarize';
+  type: "summarize";
   id: string;
   texts: string[];
   modelId?: string;
 }
 
 interface SentimentMessage {
-  type: 'classify-sentiment';
+  type: "classify-sentiment";
   id: string;
   texts: string[];
 }
 
 interface NERMessage {
-  type: 'extract-entities';
+  type: "extract-entities";
   id: string;
   texts: string[];
 }
 
 interface SemanticClusterMessage {
-  type: 'cluster-semantic';
+  type: "cluster-semantic";
   id: string;
   embeddings: number[][];
   threshold: number;
 }
 
 interface StatusMessage {
-  type: 'status';
+  type: "status";
   id: string;
 }
 
 interface ResetMessage {
-  type: 'reset';
+  type: "reset";
 }
 
 interface VectorStoreIngestMessage {
-  type: 'vector-store-ingest';
+  type: "vector-store-ingest";
   id: string;
   items: Array<{
     text: string;
@@ -83,7 +90,7 @@ interface VectorStoreIngestMessage {
 }
 
 interface VectorStoreSearchMessage {
-  type: 'vector-store-search';
+  type: "vector-store-search";
   id: string;
   queries: string[];
   topK: number;
@@ -91,12 +98,12 @@ interface VectorStoreSearchMessage {
 }
 
 interface VectorStoreCountMessage {
-  type: 'vector-store-count';
+  type: "vector-store-count";
   id: string;
 }
 
 interface VectorStoreResetMessage {
-  type: 'vector-store-reset';
+  type: "vector-store-reset";
   id: string;
 }
 
@@ -122,7 +129,7 @@ const loadedPipelines = new Map<string, any>();
 const loadingPromises = new Map<string, Promise<void>>();
 
 function getModelConfig(modelId: string): ModelConfig | undefined {
-  return MODEL_CONFIGS.find(m => m.id === modelId);
+  return MODEL_CONFIGS.find((m) => m.id === modelId);
 }
 
 async function loadModel(modelId: string): Promise<void> {
@@ -142,13 +149,19 @@ async function loadModel(modelId: string): Promise<void> {
     // Suppress verbose ONNX Runtime warnings (CleanUnusedInitializersAndNodeArgs)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const ort = (globalThis as any).ort;
-    if (ort?.env) { try { ort.env.logLevel = 'error'; } catch { /* ignore */ } }
+    if (ort?.env) {
+      try {
+        ort.env.logLevel = "error";
+      } catch {
+        /* ignore */
+      }
+    }
 
     const pipe = await pipeline(config.task, config.hfModel, {
       progress_callback: (progress: { status: string; progress?: number }) => {
-        if (progress.status === 'progress' && progress.progress !== undefined) {
+        if (progress.status === "progress" && progress.progress !== undefined) {
           self.postMessage({
-            type: 'model-progress',
+            type: "model-progress",
             modelId,
             progress: progress.progress,
           });
@@ -158,10 +171,12 @@ async function loadModel(modelId: string): Promise<void> {
 
     loadedPipelines.set(modelId, pipe);
     loadingPromises.delete(modelId);
-    console.log(`[MLWorker] Model loaded in ${Date.now() - startTime}ms: ${modelId}`);
+    console.log(
+      `[MLWorker] Model loaded in ${Date.now() - startTime}ms: ${modelId}`,
+    );
 
     // Notify manager that model is now available (no id = unsolicited notification)
-    self.postMessage({ type: 'model-loaded', modelId });
+    self.postMessage({ type: "model-loaded", modelId });
   })();
 
   loadingPromises.set(modelId, loadPromise);
@@ -177,19 +192,22 @@ function unloadModel(modelId: string): void {
 }
 
 async function embedTexts(texts: string[]): Promise<number[][]> {
-  await loadModel('embeddings');
-  const pipe = loadedPipelines.get('embeddings')!;
+  await loadModel("embeddings");
+  const pipe = loadedPipelines.get("embeddings")!;
 
   const results: number[][] = [];
   for (const text of texts) {
-    const output = await pipe(text, { pooling: 'mean', normalize: true });
+    const output = await pipe(text, { pooling: "mean", normalize: true });
     results.push(Array.from(output.data as Float32Array));
   }
 
   return results;
 }
 
-async function summarizeTexts(texts: string[], modelId = 'summarization'): Promise<string[]> {
+async function summarizeTexts(
+  texts: string[],
+  modelId = "summarization",
+): Promise<string[]> {
   await loadModel(modelId);
   const pipe = loadedPipelines.get(modelId)!;
 
@@ -200,15 +218,17 @@ async function summarizeTexts(texts: string[], modelId = 'summarization'): Promi
       min_length: 10,
     });
     const result = (output as Array<{ generated_text: string }>)[0];
-    results.push(result?.generated_text ?? '');
+    results.push(result?.generated_text ?? "");
   }
 
   return results;
 }
 
-async function classifySentiment(texts: string[]): Promise<Array<{ label: string; score: number }>> {
-  await loadModel('sentiment');
-  const pipe = loadedPipelines.get('sentiment')!;
+async function classifySentiment(
+  texts: string[],
+): Promise<Array<{ label: string; score: number }>> {
+  await loadModel("sentiment");
+  const pipe = loadedPipelines.get("sentiment")!;
 
   const results: Array<{ label: string; score: number }> = [];
   for (const text of texts) {
@@ -216,7 +236,8 @@ async function classifySentiment(texts: string[]): Promise<Array<{ label: string
     const result = (output as Array<{ label: string; score: number }>)[0];
     if (result) {
       results.push({
-        label: result.label.toLowerCase() === 'positive' ? 'positive' : 'negative',
+        label:
+          result.label.toLowerCase() === "positive" ? "positive" : "negative",
         score: result.score,
       });
     }
@@ -234,19 +255,21 @@ interface NEREntity {
 }
 
 async function extractEntities(texts: string[]): Promise<NEREntity[][]> {
-  await loadModel('ner');
-  const pipe = loadedPipelines.get('ner')!;
+  await loadModel("ner");
+  const pipe = loadedPipelines.get("ner")!;
 
   const results: NEREntity[][] = [];
   for (const text of texts) {
     const output = await pipe(text);
-    const entities = (output as Array<{
-      entity_group: string;
-      score: number;
-      word: string;
-      start: number;
-      end: number;
-    }>).map(e => ({
+    const entities = (
+      output as Array<{
+        entity_group: string;
+        score: number;
+        word: string;
+        start: number;
+        end: number;
+      }>
+    ).map((e) => ({
       text: e.word,
       type: e.entity_group,
       confidence: e.score,
@@ -291,7 +314,7 @@ function cosineSimilarityF32(a: Float32Array, b: Float32Array): number {
 
 function semanticCluster(
   embeddings: number[][],
-  threshold: number
+  threshold: number,
 ): number[][] {
   const n = embeddings.length;
   const clusters: number[][] = [];
@@ -331,84 +354,86 @@ self.onmessage = async (event: MessageEvent<MLWorkerMessage>) => {
 
   try {
     switch (message.type) {
-      case 'init': {
-        self.postMessage({ type: 'ready', id: message.id });
+      case "init": {
+        self.postMessage({ type: "ready", id: message.id });
         break;
       }
 
-      case 'load-model': {
+      case "load-model": {
         await loadModel(message.modelId);
         self.postMessage({
-          type: 'model-loaded',
+          type: "model-loaded",
           id: message.id,
           modelId: message.modelId,
         });
         break;
       }
 
-      case 'unload-model': {
+      case "unload-model": {
         unloadModel(message.modelId);
         self.postMessage({
-          type: 'model-unloaded',
+          type: "model-unloaded",
           id: message.id,
           modelId: message.modelId,
         });
         break;
       }
 
-      case 'embed': {
+      case "embed": {
         const embeddings = await embedTexts(message.texts);
         self.postMessage({
-          type: 'embed-result',
+          type: "embed-result",
           id: message.id,
           embeddings,
         });
         break;
       }
 
-      case 'summarize': {
+      case "summarize": {
         const summaries = await summarizeTexts(message.texts, message.modelId);
         self.postMessage({
-          type: 'summarize-result',
+          type: "summarize-result",
           id: message.id,
           summaries,
         });
         break;
       }
 
-      case 'classify-sentiment': {
+      case "classify-sentiment": {
         const results = await classifySentiment(message.texts);
         self.postMessage({
-          type: 'sentiment-result',
+          type: "sentiment-result",
           id: message.id,
           results,
         });
         break;
       }
 
-      case 'extract-entities': {
+      case "extract-entities": {
         const entities = await extractEntities(message.texts);
         self.postMessage({
-          type: 'entities-result',
+          type: "entities-result",
           id: message.id,
           entities,
         });
         break;
       }
 
-      case 'cluster-semantic': {
+      case "cluster-semantic": {
         const clusters = semanticCluster(message.embeddings, message.threshold);
         self.postMessage({
-          type: 'cluster-semantic-result',
+          type: "cluster-semantic-result",
           id: message.id,
           clusters,
         });
         break;
       }
 
-      case 'vector-store-ingest': {
+      case "vector-store-ingest": {
         const EMBED_DIM = 384;
-        const embeddings = await embedTexts(message.items.map(i => sanitizeTitle(i.text)));
+        const embeddings = await embedTexts(
+          message.items.map((i) => sanitizeTitle(i.text)),
+        );
         const valid: Array<{
           text: string;
           embedding: Float32Array;
@@ -432,17 +457,19 @@ self.onmessage = async (event: MessageEvent<MLWorkerMessage>) => {
         }
         const stored = valid.length > 0 ? await storeVectors(valid) : 0;
         self.postMessage({
-          type: 'vector-store-ingest-result',
+          type: "vector-store-ingest-result",
           id: message.id,
           stored,
         });
         break;
       }
 
-      case 'vector-store-search': {
+      case "vector-store-search": {
         const clampedTopK = Math.max(1, Math.min(20, message.topK));
         const clampedMinScore = Math.max(0, Math.min(1, message.minScore));
-        const queries = message.queries.slice(0, 5).map(q => sanitizeTitle(q));
+        const queries = message.queries
+          .slice(0, 5)
+          .map((q) => sanitizeTitle(q));
         const queryEmbeddings = await embedTexts(queries);
         const queryF32: Float32Array[] = [];
         for (const emb of queryEmbeddings) {
@@ -450,53 +477,58 @@ self.onmessage = async (event: MessageEvent<MLWorkerMessage>) => {
         }
         let results: VectorSearchResult[] = [];
         if (queryF32.length > 0) {
-          results = await searchVectors(queryF32, clampedTopK, clampedMinScore, cosineSimilarityF32);
+          results = await searchVectors(
+            queryF32,
+            clampedTopK,
+            clampedMinScore,
+            cosineSimilarityF32,
+          );
         }
         self.postMessage({
-          type: 'vector-store-search-result',
+          type: "vector-store-search-result",
           id: message.id,
           results,
         });
         break;
       }
 
-      case 'vector-store-count': {
+      case "vector-store-count": {
         const count = await getCount();
         self.postMessage({
-          type: 'vector-store-count-result',
+          type: "vector-store-count-result",
           id: message.id,
           count,
         });
         break;
       }
 
-      case 'vector-store-reset': {
+      case "vector-store-reset": {
         await resetStore();
         self.postMessage({
-          type: 'vector-store-reset-result',
+          type: "vector-store-reset-result",
           id: message.id,
         });
         break;
       }
 
-      case 'status': {
+      case "status": {
         self.postMessage({
-          type: 'status-result',
+          type: "status-result",
           id: message.id,
           loadedModels: Array.from(loadedPipelines.keys()),
         });
         break;
       }
 
-      case 'reset': {
+      case "reset": {
         loadedPipelines.clear();
-        self.postMessage({ type: 'reset-complete' });
+        self.postMessage({ type: "reset-complete" });
         break;
       }
     }
   } catch (error) {
     self.postMessage({
-      type: 'error',
+      type: "error",
       id: (message as { id?: string }).id,
       error: error instanceof Error ? error.message : String(error),
     });
@@ -504,4 +536,4 @@ self.onmessage = async (event: MessageEvent<MLWorkerMessage>) => {
 };
 
 // Signal ready
-self.postMessage({ type: 'worker-ready' });
+self.postMessage({ type: "worker-ready" });

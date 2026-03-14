@@ -1,4 +1,4 @@
-import type { MapLayers } from '@/types';
+import type { MapLayers } from "@/types";
 
 interface InvestmentsMapLike {
   enableLayer: (layer: keyof MapLayers) => void;
@@ -9,9 +9,9 @@ export function focusInvestmentOnMap(
   map: InvestmentsMapLike | null,
   mapLayers: MapLayers,
   lat: number,
-  lon: number
+  lon: number,
 ): void {
-  map?.enableLayer('gulfInvestments');
+  map?.enableLayer("gulfInvestments");
   mapLayers.gulfInvestments = true;
   map?.setCenter(lat, lon, 6);
 }

@@ -10,11 +10,17 @@ export async function initAnalytics(): Promise<void> {
   // Intentionally no-op.
 }
 
-export function trackEvent(_name: string, _props?: Record<string, unknown>): void {
+export function trackEvent(
+  _name: string,
+  _props?: Record<string, unknown>,
+): void {
   // Intentionally no-op.
 }
 
-export function trackEventBeforeUnload(_name: string, _props?: Record<string, unknown>): void {
+export function trackEventBeforeUnload(
+  _name: string,
+  _props?: Record<string, unknown>,
+): void {
   // Intentionally no-op.
 }
 
@@ -26,7 +32,11 @@ export function trackApiKeysSnapshot(): void {
   // Intentionally no-op.
 }
 
-export function trackLLMUsage(_provider: string, _model: string, _cached: boolean): void {
+export function trackLLMUsage(
+  _provider: string,
+  _model: string,
+  _cached: boolean,
+): void {
   // Intentionally no-op.
 }
 
@@ -42,7 +52,11 @@ export function trackVariantSwitch(_from: string, _to: string): void {
   // Intentionally no-op.
 }
 
-export function trackMapLayerToggle(_layerId: string, _enabled: boolean, _source: 'user' | 'programmatic'): void {
+export function trackMapLayerToggle(
+  _layerId: string,
+  _enabled: boolean,
+  _source: "user" | "programmatic",
+): void {
   // Intentionally no-op.
 }
 
@@ -58,11 +72,17 @@ export function trackLanguageChange(_language: string): void {
   // Intentionally no-op.
 }
 
-export function trackFeatureToggle(_featureId: string, _enabled: boolean): void {
+export function trackFeatureToggle(
+  _featureId: string,
+  _enabled: boolean,
+): void {
   // Intentionally no-op.
 }
 
-export function trackSearchUsed(_queryLength: number, _resultCount: number): void {
+export function trackSearchUsed(
+  _queryLength: number,
+  _resultCount: number,
+): void {
   // Intentionally no-op.
 }
 
@@ -70,7 +90,11 @@ export function trackMapViewChange(_view: string): void {
   // Intentionally no-op.
 }
 
-export function trackCountrySelected(_code: string, _name: string, _source: string): void {
+export function trackCountrySelected(
+  _code: string,
+  _name: string,
+  _source: string,
+): void {
   // Intentionally no-op.
 }
 
@@ -82,7 +106,12 @@ export function trackPanelToggled(_panelId: string, _enabled: boolean): void {
   // Intentionally no-op.
 }
 
-export function trackFindingClicked(_id: string, _source: string, _type: string, _priority: string): void {
+export function trackFindingClicked(
+  _id: string,
+  _source: string,
+  _type: string,
+  _priority: string,
+): void {
   // Intentionally no-op.
 }
 
@@ -98,7 +127,10 @@ export function trackUpdateDismissed(_version: string): void {
   // Intentionally no-op.
 }
 
-export function trackCriticalBannerAction(_action: string, _theaterId: string): void {
+export function trackCriticalBannerAction(
+  _action: string,
+  _theaterId: string,
+): void {
   // Intentionally no-op.
 }
 
@@ -110,7 +142,11 @@ export function trackDownloadBannerDismissed(): void {
   // Intentionally no-op.
 }
 
-export function trackWebcamSelected(_webcamId: string, _city: string, _viewMode: string): void {
+export function trackWebcamSelected(
+  _webcamId: string,
+  _city: string,
+  _viewMode: string,
+): void {
   // Intentionally no-op.
 }
 

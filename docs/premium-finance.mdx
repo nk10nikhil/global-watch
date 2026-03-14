@@ -2,6 +2,7 @@
 title: "Premium Finance"
 description: "Premium finance is the finance-variant layer providing stock-analysis capabilities within World Monitor, originally inspired by a standalone daily_stock_analysis project but now fully integrated."
 ---
+
 Premium finance is the finance-variant layer providing stock-analysis capabilities within World Monitor. These features were originally inspired by a standalone `daily_stock_analysis` project but are now fully integrated into the World Monitor codebase.
 
 This layer is intentionally split into:
@@ -179,7 +180,7 @@ Premium finance endpoints are enforced server-side.
 Premium RPC paths are gated in:
 
 - [gateway.ts](https://github.com/koala73/worldmonitor/blob/main/server/gateway.ts)
-- [api/_api-key.js](https://github.com/koala73/worldmonitor/blob/main/api/_api-key.js)
+- [api/\_api-key.js](https://github.com/koala73/worldmonitor/blob/main/api/_api-key.js)
 
 This matters because a UI-only lock would still allow direct API usage from trusted browser origins.
 

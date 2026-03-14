@@ -14,12 +14,12 @@ Thank you for helping spread the word about World Monitor! This guide provides t
 
 ## Key URLs
 
-| Link | Description |
-|------|-------------|
-| [worldmonitor.app](https://worldmonitor.app) | Main dashboard — geopolitics, military, conflicts |
-| [tech.worldmonitor.app](https://tech.worldmonitor.app) | Tech variant — startups, AI/ML, cybersecurity |
+| Link                                                         | Description                                         |
+| ------------------------------------------------------------ | --------------------------------------------------- |
+| [worldmonitor.app](https://worldmonitor.app)                 | Main dashboard — geopolitics, military, conflicts   |
+| [tech.worldmonitor.app](https://tech.worldmonitor.app)       | Tech variant — startups, AI/ML, cybersecurity       |
 | [finance.worldmonitor.app](https://finance.worldmonitor.app) | Finance variant — markets, exchanges, central banks |
-| [GitHub](https://github.com/koala73/worldmonitor) | Source code (AGPL-3.0) |
+| [GitHub](https://github.com/koala73/worldmonitor)            | Source code (AGPL-3.0)                              |
 
 ---
 
@@ -152,17 +152,17 @@ Run AI summarization entirely on your own hardware — no API keys, no cloud, no
 
 ## Recent Major Features (Changelog Highlights)
 
-| Version | Feature |
-|---------|---------|
-| v2.5.1 | Batch FRED fetching, parallel UCDP, partial cache TTL, bot middleware |
-| v2.5.0 | Ollama/LM Studio local LLM support, settings split into LLMs + API Keys tabs, keychain vault consolidation |
-| v2.4.1 | Ultra-wide layout (panels wrap around map on 2000px+ screens) |
-| v2.4.0 | Live webcams from 19 geopolitical hotspots, 4 regions |
-| v2.3.9 | Full i18n: 19 languages including Japanese, Arabic (RTL), Chinese |
-| v2.3.8 | Finance variant with 92 exchanges, Gulf FDI investments |
-| v2.3.7 | Light/dark theme system, UCDP/UNHCR/Climate panels |
-| v2.3.6 | Desktop app with Tauri, OS keychain, auto-updates |
-| v2.3.0 | Country Intelligence dossiers, story sharing |
+| Version | Feature                                                                                                    |
+| ------- | ---------------------------------------------------------------------------------------------------------- |
+| v2.5.1  | Batch FRED fetching, parallel UCDP, partial cache TTL, bot middleware                                      |
+| v2.5.0  | Ollama/LM Studio local LLM support, settings split into LLMs + API Keys tabs, keychain vault consolidation |
+| v2.4.1  | Ultra-wide layout (panels wrap around map on 2000px+ screens)                                              |
+| v2.4.0  | Live webcams from 19 geopolitical hotspots, 4 regions                                                      |
+| v2.3.9  | Full i18n: 19 languages including Japanese, Arabic (RTL), Chinese                                          |
+| v2.3.8  | Finance variant with 92 exchanges, Gulf FDI investments                                                    |
+| v2.3.7  | Light/dark theme system, UCDP/UNHCR/Climate panels                                                         |
+| v2.3.6  | Desktop app with Tauri, OS keychain, auto-updates                                                          |
+| v2.3.0  | Country Intelligence dossiers, story sharing                                                               |
 
 ---
 

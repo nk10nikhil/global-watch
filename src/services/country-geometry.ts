@@ -1,4 +1,9 @@
-import type { FeatureCollection, Geometry, GeoJsonProperties, Position } from 'geojson';
+import type {
+  FeatureCollection,
+  Geometry,
+  GeoJsonProperties,
+  Position,
+} from "geojson";
 
 interface IndexedCountryGeometry {
   code: string;
@@ -12,21 +17,31 @@ interface CountryHit {
   name: string;
 }
 
-const COUNTRY_GEOJSON_URL = 'https://maps.worldmonitor.app/countries.geojson';
+const COUNTRY_GEOJSON_URL = "https://maps.worldmonitor.app/countries.geojson";
 
 /** Optional higher-resolution boundary overrides sourced from Natural Earth (served from R2 CDN). */
-const COUNTRY_OVERRIDES_URL = 'https://maps.worldmonitor.app/country-boundary-overrides.geojson';
+const COUNTRY_OVERRIDES_URL =
+  "https://maps.worldmonitor.app/country-boundary-overrides.geojson";
 const COUNTRY_OVERRIDE_TIMEOUT_MS = 3_000;
 
-const POLITICAL_OVERRIDES: Record<string, string> = { 'CN-TW': 'TW' };
+const POLITICAL_OVERRIDES: Record<string, string> = { "CN-TW": "TW" };
 
 const NAME_ALIASES: Record<string, string> = {
-  'dr congo': 'CD', 'democratic republic of the congo': 'CD',
-  'czech republic': 'CZ', 'ivory coast': 'CI', "cote d'ivoire": 'CI',
-  'uae': 'AE', 'uk': 'GB', 'usa': 'US',
-  'south korea': 'KR', 'north korea': 'KP',
-  'republic of the congo': 'CG', 'east timor': 'TL',
-  'cape verde': 'CV', 'swaziland': 'SZ', 'burma': 'MM',
+  "dr congo": "CD",
+  "democratic republic of the congo": "CD",
+  "czech republic": "CZ",
+  "ivory coast": "CI",
+  "cote d'ivoire": "CI",
+  uae: "AE",
+  uk: "GB",
+  usa: "US",
+  "south korea": "KR",
+  "north korea": "KP",
+  "republic of the congo": "CG",
+  "east timor": "TL",
+  "cape verde": "CV",
+  swaziland: "SZ",
+  burma: "MM",
 };
 
 let loadPromise: Promise<void> | null = null;
@@ -36,21 +51,27 @@ let countryList: IndexedCountryGeometry[] = [];
 const iso3ToIso2 = new Map<string, string>();
 const nameToIso2 = new Map<string, string>();
 const codeToName = new Map<string, string>();
-let sortedCountryNames: Array<{ name: string; code: string; regex: RegExp }> = [];
+let sortedCountryNames: Array<{ name: string; code: string; regex: RegExp }> =
+  [];
 
-function normalizeCode(properties: GeoJsonProperties | null | undefined): string | null {
+function normalizeCode(
+  properties: GeoJsonProperties | null | undefined,
+): string | null {
   if (!properties) return null;
-  const rawCode = properties['ISO3166-1-Alpha-2'] ?? properties.ISO_A2 ?? properties.iso_a2;
-  if (typeof rawCode !== 'string') return null;
+  const rawCode =
+    properties["ISO3166-1-Alpha-2"] ?? properties.ISO_A2 ?? properties.iso_a2;
+  if (typeof rawCode !== "string") return null;
   const trimmed = rawCode.trim().toUpperCase();
   const overridden = POLITICAL_OVERRIDES[trimmed] ?? trimmed;
   return /^[A-Z]{2}$/.test(overridden) ? overridden : null;
 }
 
-function normalizeName(properties: GeoJsonProperties | null | undefined): string | null {
+function normalizeName(
+  properties: GeoJsonProperties | null | undefined,
+): string | null {
   if (!properties) return null;
   const rawName = properties.name ?? properties.NAME ?? properties.admin;
-  if (typeof rawName !== 'string') return null;
+  if (typeof rawName !== "string") return null;
   const name = rawName.trim();
   return name.length > 0 ? name : null;
 }
@@ -65,17 +86,21 @@ function toCoord(point: Position): [number, number] | null {
 
 function normalizePolygonRings(rings: Position[][]): [number, number][][] {
   return rings
-    .map((ring) => ring.map(toCoord).filter((p): p is [number, number] => p !== null))
+    .map((ring) =>
+      ring.map(toCoord).filter((p): p is [number, number] => p !== null),
+    )
     .filter((ring) => ring.length >= 3);
 }
 
-function normalizeGeometry(geometry: Geometry | null | undefined): [number, number][][][] {
+function normalizeGeometry(
+  geometry: Geometry | null | undefined,
+): [number, number][][][] {
   if (!geometry) return [];
-  if (geometry.type === 'Polygon') {
+  if (geometry.type === "Polygon") {
     const polygon = normalizePolygonRings(geometry.coordinates);
     return polygon.length > 0 ? [polygon] : [];
   }
-  if (geometry.type === 'MultiPolygon') {
+  if (geometry.type === "MultiPolygon") {
     return geometry.coordinates
       .map((polygonCoords) => normalizePolygonRings(polygonCoords))
       .filter((polygon) => polygon.length > 0);
@@ -83,7 +108,9 @@ function normalizeGeometry(geometry: Geometry | null | undefined): [number, numb
   return [];
 }
 
-function computeBbox(polygons: [number, number][][][]): [number, number, number, number] | null {
+function computeBbox(
+  polygons: [number, number][][][],
+): [number, number, number, number] | null {
   let minLon = Infinity;
   let minLat = Infinity;
   let maxLon = -Infinity;
@@ -111,7 +138,7 @@ function pointOnSegment(
   x1: number,
   y1: number,
   x2: number,
-  y2: number
+  y2: number,
 ): boolean {
   const cross = (py - y1) * (x2 - x1) - (px - x1) * (y2 - y1);
   if (Math.abs(cross) > 1e-9) return false;
@@ -119,7 +146,11 @@ function pointOnSegment(
   return dot <= 0;
 }
 
-function pointInRing(lon: number, lat: number, ring: [number, number][]): boolean {
+function pointInRing(
+  lon: number,
+  lat: number,
+  ring: [number, number][],
+): boolean {
   let inside = false;
   for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
     const current = ring[i];
@@ -128,16 +159,22 @@ function pointInRing(lon: number, lat: number, ring: [number, number][]): boolea
     const [xi, yi] = current;
     const [xj, yj] = previous;
     if (pointOnSegment(lon, lat, xi, yi, xj, yj)) return true;
-    const intersects = ((yi > lat) !== (yj > lat))
-      && (lon < ((xj - xi) * (lat - yi)) / ((yj - yi) || Number.EPSILON) + xi);
+    const intersects =
+      yi > lat !== yj > lat &&
+      lon < ((xj - xi) * (lat - yi)) / (yj - yi || Number.EPSILON) + xi;
     if (intersects) inside = !inside;
   }
   return inside;
 }
 
-function pointInCountryGeometry(country: IndexedCountryGeometry, lon: number, lat: number): boolean {
+function pointInCountryGeometry(
+  country: IndexedCountryGeometry,
+  lon: number,
+  lat: number,
+): boolean {
   const [minLon, minLat, maxLon, maxLat] = country.bbox;
-  if (lon < minLon || lon > maxLon || lat < minLat || lat > maxLat) return false;
+  if (lon < minLon || lon > maxLon || lat < minLat || lat > maxLat)
+    return false;
 
   for (const polygon of country.polygons) {
     const outer = polygon[0];
@@ -156,7 +193,7 @@ function pointInCountryGeometry(country: IndexedCountryGeometry, lon: number, la
 }
 
 function escapeRegex(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function buildCountryNameMatchers(): void {
@@ -166,12 +203,12 @@ function buildCountryNameMatchers(): void {
     .map(([name, code]) => ({
       name,
       code,
-      regex: new RegExp(`\\b${escapeRegex(name)}\\b`, 'i'),
+      regex: new RegExp(`\\b${escapeRegex(name)}\\b`, "i"),
     }));
 }
 
 function makeTimeout(ms: number): AbortSignal {
-  if (typeof AbortSignal.timeout === 'function') return AbortSignal.timeout(ms);
+  if (typeof AbortSignal.timeout === "function") return AbortSignal.timeout(ms);
   const ctrl = new AbortController();
   setTimeout(() => ctrl.abort(), ms);
   return ctrl.signal;
@@ -189,8 +226,8 @@ function rebuildCountryIndex(data: FeatureCollection<Geometry>): void {
     const name = normalizeName(feature.properties);
     if (!code || !name) continue;
 
-    const iso3 = feature.properties?.['ISO3166-1-Alpha-3'];
-    if (typeof iso3 === 'string' && /^[A-Z]{3}$/i.test(iso3.trim())) {
+    const iso3 = feature.properties?.["ISO3166-1-Alpha-3"];
+    if (typeof iso3 === "string" && /^[A-Z]{3}$/i.test(iso3.trim())) {
       iso3ToIso2.set(iso3.trim().toUpperCase(), code);
     }
     nameToIso2.set(name.toLowerCase(), code);
@@ -249,7 +286,7 @@ async function ensureLoaded(): Promise<void> {
   }
 
   loadPromise = (async () => {
-    if (typeof fetch !== 'function') return;
+    if (typeof fetch !== "function") return;
 
     try {
       const response = await fetch(COUNTRY_GEOJSON_URL);
@@ -257,8 +294,12 @@ async function ensureLoaded(): Promise<void> {
         throw new Error(`HTTP ${response.status}`);
       }
 
-      const data = await response.json() as FeatureCollection<Geometry>;
-      if (!data || data.type !== 'FeatureCollection' || !Array.isArray(data.features)) {
+      const data = (await response.json()) as FeatureCollection<Geometry>;
+      if (
+        !data ||
+        data.type !== "FeatureCollection" ||
+        !Array.isArray(data.features)
+      ) {
         return;
       }
 
@@ -271,8 +312,12 @@ async function ensureLoaded(): Promise<void> {
           signal: makeTimeout(COUNTRY_OVERRIDE_TIMEOUT_MS),
         });
         if (overrideResp.ok) {
-          const overrideData = (await overrideResp.json()) as FeatureCollection<Geometry>;
-          if (overrideData?.type === 'FeatureCollection' && Array.isArray(overrideData.features)) {
+          const overrideData =
+            (await overrideResp.json()) as FeatureCollection<Geometry>;
+          if (
+            overrideData?.type === "FeatureCollection" &&
+            Array.isArray(overrideData.features)
+          ) {
             applyCountryGeometryOverrides(data, overrideData);
           }
         }
@@ -280,7 +325,7 @@ async function ensureLoaded(): Promise<void> {
         // Overrides optional; ignore fetch/parse errors
       }
     } catch (err) {
-      console.warn('[country-geometry] Failed to load countries.geojson:', err);
+      console.warn("[country-geometry] Failed to load countries.geojson:", err);
     }
   })();
 
@@ -300,13 +345,20 @@ export function hasCountryGeometry(code: string): boolean {
   return countryIndex.has(code.toUpperCase());
 }
 
-export function getCountryAtCoordinates(lat: number, lon: number, candidateCodes?: string[]): CountryHit | null {
+export function getCountryAtCoordinates(
+  lat: number,
+  lon: number,
+  candidateCodes?: string[],
+): CountryHit | null {
   if (!loadedGeoJson) return null;
-  const candidates = Array.isArray(candidateCodes) && candidateCodes.length > 0
-    ? candidateCodes
-      .map((code) => countryIndex.get(code.toUpperCase()))
-      .filter((country): country is IndexedCountryGeometry => Boolean(country))
-    : countryList;
+  const candidates =
+    Array.isArray(candidateCodes) && candidateCodes.length > 0
+      ? candidateCodes
+          .map((code) => countryIndex.get(code.toUpperCase()))
+          .filter((country): country is IndexedCountryGeometry =>
+            Boolean(country),
+          )
+      : countryList;
 
   for (const country of candidates) {
     if (pointInCountryGeometry(country, lon, lat)) {
@@ -316,7 +368,11 @@ export function getCountryAtCoordinates(lat: number, lon: number, candidateCodes
   return null;
 }
 
-export function isCoordinateInCountry(lat: number, lon: number, code: string): boolean | null {
+export function isCoordinateInCountry(
+  lat: number,
+  lon: number,
+  code: string,
+): boolean | null {
   if (!loadedGeoJson) return null;
   const country = countryIndex.get(code.toUpperCase());
   if (!country) return null;
@@ -345,7 +401,7 @@ export function matchCountryNamesInText(text: string): string[] {
   for (const { code, regex } of sortedCountryNames) {
     if (regex.test(remaining)) {
       matched.push(code);
-      remaining = remaining.replace(regex, '');
+      remaining = remaining.replace(regex, "");
     }
   }
   return matched;
@@ -355,14 +411,19 @@ export function getAllCountryCodes(): string[] {
   return [...countryIndex.keys()];
 }
 
-export function getCountryBbox(code: string): [number, number, number, number] | null {
+export function getCountryBbox(
+  code: string,
+): [number, number, number, number] | null {
   const entry = countryIndex.get(code.toUpperCase());
   return entry?.bbox ?? null;
 }
 
 export function getCountryCentroid(
   code: string,
-  fallbackBounds?: Record<string, { n: number; s: number; e: number; w: number }>,
+  fallbackBounds?: Record<
+    string,
+    { n: number; s: number; e: number; w: number }
+  >,
 ): { lat: number; lon: number } | null {
   const bbox = getCountryBbox(code);
   if (bbox) {
@@ -376,18 +437,28 @@ export function getCountryCentroid(
   return null;
 }
 
-export const ME_STRIKE_BOUNDS: Record<string, { n: number; s: number; e: number; w: number }> = {
-  BH: { n: 26.3, s: 25.8, e: 50.8, w: 50.3 }, QA: { n: 26.2, s: 24.5, e: 51.7, w: 50.7 },
-  LB: { n: 34.7, s: 33.1, e: 36.6, w: 35.1 }, KW: { n: 30.1, s: 28.5, e: 48.5, w: 46.5 },
-  IL: { n: 33.3, s: 29.5, e: 35.9, w: 34.3 }, AE: { n: 26.1, s: 22.6, e: 56.4, w: 51.6 },
-  JO: { n: 33.4, s: 29.2, e: 39.3, w: 34.9 }, SY: { n: 37.3, s: 32.3, e: 42.4, w: 35.7 },
-  OM: { n: 26.4, s: 16.6, e: 59.8, w: 52.0 }, IQ: { n: 37.4, s: 29.1, e: 48.6, w: 38.8 },
-  YE: { n: 19, s: 12, e: 54.5, w: 42 }, IR: { n: 40, s: 25, e: 63, w: 44 },
+export const ME_STRIKE_BOUNDS: Record<
+  string,
+  { n: number; s: number; e: number; w: number }
+> = {
+  BH: { n: 26.3, s: 25.8, e: 50.8, w: 50.3 },
+  QA: { n: 26.2, s: 24.5, e: 51.7, w: 50.7 },
+  LB: { n: 34.7, s: 33.1, e: 36.6, w: 35.1 },
+  KW: { n: 30.1, s: 28.5, e: 48.5, w: 46.5 },
+  IL: { n: 33.3, s: 29.5, e: 35.9, w: 34.3 },
+  AE: { n: 26.1, s: 22.6, e: 56.4, w: 51.6 },
+  JO: { n: 33.4, s: 29.2, e: 39.3, w: 34.9 },
+  SY: { n: 37.3, s: 32.3, e: 42.4, w: 35.7 },
+  OM: { n: 26.4, s: 16.6, e: 59.8, w: 52.0 },
+  IQ: { n: 37.4, s: 29.1, e: 48.6, w: 38.8 },
+  YE: { n: 19, s: 12, e: 54.5, w: 42 },
+  IR: { n: 40, s: 25, e: 63, w: 44 },
   SA: { n: 32, s: 16, e: 55, w: 35 },
 };
 
 export function resolveCountryFromBounds(
-  lat: number, lon: number,
+  lat: number,
+  lon: number,
   bounds: Record<string, { n: number; s: number; e: number; w: number }>,
 ): string | null {
   const matches: Array<{ code: string; area: number }> = [];

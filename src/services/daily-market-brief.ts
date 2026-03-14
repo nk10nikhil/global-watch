@@ -1,7 +1,7 @@
-import type { MarketData, NewsItem } from '@/types';
-import type { MarketWatchlistEntry } from './market-watchlist';
-import { getMarketWatchlistEntries } from './market-watchlist';
-import type { SummarizationResult } from './summarization';
+import type { MarketData, NewsItem } from "@/types";
+import type { MarketWatchlistEntry } from "./market-watchlist";
+import { getMarketWatchlistEntries } from "./market-watchlist";
+import type { SummarizationResult } from "./summarization";
 
 export interface DailyMarketBriefItem {
   symbol: string;
@@ -9,7 +9,7 @@ export interface DailyMarketBriefItem {
   display: string;
   price: number | null;
   change: number | null;
-  stance: 'bullish' | 'neutral' | 'defensive';
+  stance: "bullish" | "neutral" | "defensive";
   note: string;
   relatedHeadline?: string;
 }
@@ -44,8 +44,10 @@ export interface BuildDailyMarketBriefOptions {
   ) => Promise<SummarizationResult | null>;
 }
 
-async function getDefaultSummarizer(): Promise<NonNullable<BuildDailyMarketBriefOptions['summarize']>> {
-  const { generateSummary } = await import('./summarization');
+async function getDefaultSummarizer(): Promise<
+  NonNullable<BuildDailyMarketBriefOptions["summarize"]>
+> {
+  const { generateSummary } = await import("./summarization");
   return generateSummary;
 }
 
@@ -53,42 +55,61 @@ async function getPersistentCacheApi(): Promise<{
   getPersistentCache: <T>(key: string) => Promise<{ data: T } | null>;
   setPersistentCache: <T>(key: string, data: T) => Promise<void>;
 }> {
-  const { getPersistentCache, setPersistentCache } = await import('./persistent-cache');
+  const { getPersistentCache, setPersistentCache } =
+    await import("./persistent-cache");
   return { getPersistentCache, setPersistentCache };
 }
 
-const CACHE_PREFIX = 'premium:daily-market-brief:v1';
+const CACHE_PREFIX = "premium:daily-market-brief:v1";
 const DEFAULT_SCHEDULE_HOUR = 8;
 const DEFAULT_TARGET_COUNT = 4;
-const BRIEF_NEWS_CATEGORIES = ['markets', 'economic', 'crypto', 'finance'];
-const COMMON_NAME_TOKENS = new Set(['inc', 'corp', 'group', 'holdings', 'company', 'companies', 'class', 'common', 'plc', 'limited', 'ltd', 'adr']);
+const BRIEF_NEWS_CATEGORIES = ["markets", "economic", "crypto", "finance"];
+const COMMON_NAME_TOKENS = new Set([
+  "inc",
+  "corp",
+  "group",
+  "holdings",
+  "company",
+  "companies",
+  "class",
+  "common",
+  "plc",
+  "limited",
+  "ltd",
+  "adr",
+]);
 
 function resolveTimeZone(timezone?: string): string {
-  const candidate = timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  const candidate =
+    timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
   try {
-    Intl.DateTimeFormat('en-US', { timeZone: candidate }).format(new Date());
+    Intl.DateTimeFormat("en-US", { timeZone: candidate }).format(new Date());
     return candidate;
   } catch {
-    return 'UTC';
+    return "UTC";
   }
 }
 
-function getLocalDateParts(date: Date, timezone: string): { year: string; month: string; day: string; hour: string } {
-  const formatter = new Intl.DateTimeFormat('en-CA', {
+function getLocalDateParts(
+  date: Date,
+  timezone: string,
+): { year: string; month: string; day: string; hour: string } {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
     timeZone: resolveTimeZone(timezone),
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
     hour12: false,
   });
   const parts = formatter.formatToParts(date);
-  const read = (type: string): string => parts.find((part) => part.type === type)?.value || '';
+  const read = (type: string): string =>
+    parts.find((part) => part.type === type)?.value || "";
   return {
-    year: read('year'),
-    month: read('month'),
-    day: read('day'),
-    hour: read('hour'),
+    year: read("year"),
+    month: read("month"),
+    day: read("day"),
+    hour: read("hour"),
   };
 }
 
@@ -98,19 +119,21 @@ function getDateKey(date: Date, timezone: string): string {
 }
 
 function getLocalHour(date: Date, timezone: string): number {
-  return Number.parseInt(getLocalDateParts(date, timezone).hour || '0', 10) || 0;
+  return (
+    Number.parseInt(getLocalDateParts(date, timezone).hour || "0", 10) || 0
+  );
 }
 
 function formatTitleDate(date: Date, timezone: string): string {
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat("en-US", {
     timeZone: resolveTimeZone(timezone),
-    month: 'short',
-    day: 'numeric',
+    month: "short",
+    day: "numeric",
   }).format(date);
 }
 
 function sanitizeCacheKeyPart(value: string): string {
-  return value.replace(/[^a-z0-9/_-]+/gi, '-').toLowerCase();
+  return value.replace(/[^a-z0-9/_-]+/gi, "-").toLowerCase();
 }
 
 function getCacheKey(timezone: string): string {
@@ -121,7 +144,9 @@ function isMeaningfulToken(token: string): boolean {
   return token.length >= 3 && !COMMON_NAME_TOKENS.has(token);
 }
 
-function getSymbolTokens(item: Pick<MarketData, 'symbol' | 'display' | 'name'>): string[] {
+function getSymbolTokens(
+  item: Pick<MarketData, "symbol" | "display" | "name">,
+): string[] {
   const raw = [
     item.symbol,
     item.display,
@@ -138,27 +163,40 @@ function getSymbolTokens(item: Pick<MarketData, 'symbol' | 'display' | 'name'>):
   return out;
 }
 
-function matchesMarketHeadline(market: Pick<MarketData, 'symbol' | 'display' | 'name'>, title: string): boolean {
+function matchesMarketHeadline(
+  market: Pick<MarketData, "symbol" | "display" | "name">,
+  title: string,
+): boolean {
   const normalizedTitle = title.toLowerCase();
   return getSymbolTokens(market).some((token) => {
     if (token.length <= 4) {
-      return new RegExp(`\\b${token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`).test(normalizedTitle);
+      return new RegExp(
+        `\\b${token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`,
+      ).test(normalizedTitle);
     }
     return normalizedTitle.includes(token);
   });
 }
 
-function collectHeadlinePool(newsByCategory: Record<string, NewsItem[]>): NewsItem[] {
-  return BRIEF_NEWS_CATEGORIES
-    .flatMap((category) => newsByCategory[category] || [])
+function collectHeadlinePool(
+  newsByCategory: Record<string, NewsItem[]>,
+): NewsItem[] {
+  return BRIEF_NEWS_CATEGORIES.flatMap(
+    (category) => newsByCategory[category] || [],
+  )
     .filter((item) => !!item?.title)
     .sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime());
 }
 
-function resolveTargets(markets: MarketData[], explicitTargets?: MarketWatchlistEntry[]): MarketData[] {
+function resolveTargets(
+  markets: MarketData[],
+  explicitTargets?: MarketWatchlistEntry[],
+): MarketData[] {
   const explicitEntries = explicitTargets?.length ? explicitTargets : null;
   const watchlistEntries = explicitEntries ? null : getMarketWatchlistEntries();
-  const targetEntries = explicitEntries || (watchlistEntries && watchlistEntries.length > 0 ? watchlistEntries : []);
+  const targetEntries =
+    explicitEntries ||
+    (watchlistEntries && watchlistEntries.length > 0 ? watchlistEntries : []);
 
   const bySymbol = new Map(markets.map((market) => [market.symbol, market]));
   const resolved: MarketData[] = [];
@@ -184,99 +222,125 @@ function resolveTargets(markets: MarketData[], explicitTargets?: MarketWatchlist
   return resolved;
 }
 
-function getStance(change: number | null): DailyMarketBriefItem['stance'] {
-  if (typeof change !== 'number') return 'neutral';
-  if (change >= 1) return 'bullish';
-  if (change <= -1) return 'defensive';
-  return 'neutral';
+function getStance(change: number | null): DailyMarketBriefItem["stance"] {
+  if (typeof change !== "number") return "neutral";
+  if (change >= 1) return "bullish";
+  if (change <= -1) return "defensive";
+  return "neutral";
 }
 
 function formatSignedPercent(value: number | null): string {
-  if (typeof value !== 'number' || !Number.isFinite(value)) return 'flat';
-  const sign = value > 0 ? '+' : '';
+  if (typeof value !== "number" || !Number.isFinite(value)) return "flat";
+  const sign = value > 0 ? "+" : "";
   return `${sign}${value.toFixed(1)}%`;
 }
 
-function buildItemNote(change: number | null, relatedHeadline?: string): string {
+function buildItemNote(
+  change: number | null,
+  relatedHeadline?: string,
+): string {
   const stance = getStance(change);
-  const moveNote = stance === 'bullish'
-    ? 'Momentum is constructive; favor leaders over laggards.'
-    : stance === 'defensive'
-      ? 'Price action is under pressure; protect capital first.'
-      : 'Tape is balanced; wait for confirmation before pressing size.';
+  const moveNote =
+    stance === "bullish"
+      ? "Momentum is constructive; favor leaders over laggards."
+      : stance === "defensive"
+        ? "Price action is under pressure; protect capital first."
+        : "Tape is balanced; wait for confirmation before pressing size.";
   return relatedHeadline
     ? `${moveNote} Headline driver: ${relatedHeadline}`
     : moveNote;
 }
 
-function buildRuleSummary(items: DailyMarketBriefItem[], headlineCount: number): string {
-  const bullish = items.filter((item) => item.stance === 'bullish').length;
-  const defensive = items.filter((item) => item.stance === 'defensive').length;
+function buildRuleSummary(
+  items: DailyMarketBriefItem[],
+  headlineCount: number,
+): string {
+  const bullish = items.filter((item) => item.stance === "bullish").length;
+  const defensive = items.filter((item) => item.stance === "defensive").length;
   const neutral = items.length - bullish - defensive;
 
-  const bias = bullish > defensive
-    ? 'Risk appetite is leaning positive across the tracked watchlist.'
-    : defensive > bullish
-      ? 'The watchlist is trading defensively and breadth is soft.'
-      : 'The watchlist is mixed and conviction is limited.';
+  const bias =
+    bullish > defensive
+      ? "Risk appetite is leaning positive across the tracked watchlist."
+      : defensive > bullish
+        ? "The watchlist is trading defensively and breadth is soft."
+        : "The watchlist is mixed and conviction is limited.";
 
   const breadth = `Leaders: ${bullish}, neutral setups: ${neutral}, defensive names: ${defensive}.`;
-  const headlines = headlineCount > 0
-    ? `News flow remains active with ${headlineCount} relevant headline${headlineCount === 1 ? '' : 's'} in scope.`
-    : 'Headline flow is thin, so price action matters more than narrative today.';
+  const headlines =
+    headlineCount > 0
+      ? `News flow remains active with ${headlineCount} relevant headline${headlineCount === 1 ? "" : "s"} in scope.`
+      : "Headline flow is thin, so price action matters more than narrative today.";
 
   return `${bias} ${breadth} ${headlines}`;
 }
 
-function buildActionPlan(items: DailyMarketBriefItem[], headlineCount: number): string {
-  const bullish = items.filter((item) => item.stance === 'bullish').length;
-  const defensive = items.filter((item) => item.stance === 'defensive').length;
+function buildActionPlan(
+  items: DailyMarketBriefItem[],
+  headlineCount: number,
+): string {
+  const bullish = items.filter((item) => item.stance === "bullish").length;
+  const defensive = items.filter((item) => item.stance === "defensive").length;
 
   if (defensive > bullish) {
     return headlineCount > 0
-      ? 'Keep gross exposure light, wait for downside to stabilize, and let macro headlines clear before adding risk.'
-      : 'Keep exposure light and wait for price to reclaim short-term momentum before adding risk.';
+      ? "Keep gross exposure light, wait for downside to stabilize, and let macro headlines clear before adding risk."
+      : "Keep exposure light and wait for price to reclaim short-term momentum before adding risk.";
   }
 
   if (bullish >= 2) {
     return headlineCount > 0
-      ? 'Lean into relative strength, but size entries around macro releases and company-specific headlines.'
-      : 'Lean into the strongest names on pullbacks and avoid chasing extended opening moves.';
+      ? "Lean into relative strength, but size entries around macro releases and company-specific headlines."
+      : "Lean into the strongest names on pullbacks and avoid chasing extended opening moves.";
   }
 
-  return 'Stay selective, trade the cleanest relative-strength setups, and let index direction confirm before scaling.';
+  return "Stay selective, trade the cleanest relative-strength setups, and let index direction confirm before scaling.";
 }
 
-function buildRiskWatch(items: DailyMarketBriefItem[], headlines: NewsItem[]): string {
-  const defensive = items.filter((item) => item.stance === 'defensive').map((item) => item.display);
+function buildRiskWatch(
+  items: DailyMarketBriefItem[],
+  headlines: NewsItem[],
+): string {
+  const defensive = items
+    .filter((item) => item.stance === "defensive")
+    .map((item) => item.display);
   const headlineTitles = headlines.slice(0, 2).map((item) => item.title);
 
   if (defensive.length > 0 && headlineTitles.length > 0) {
-    return `Watch ${defensive.join(', ')} for further weakness while monitoring: ${headlineTitles.join(' | ')}`;
+    return `Watch ${defensive.join(", ")} for further weakness while monitoring: ${headlineTitles.join(" | ")}`;
   }
   if (defensive.length > 0) {
-    return `Watch ${defensive.join(', ')} for further weakness and avoid averaging into fading momentum.`;
+    return `Watch ${defensive.join(", ")} for further weakness and avoid averaging into fading momentum.`;
   }
   if (headlineTitles.length > 0) {
-    return `Headline watch: ${headlineTitles.join(' | ')}`;
+    return `Headline watch: ${headlineTitles.join(" | ")}`;
   }
-  return 'Risk watch is centered on macro follow-through, index breadth, and any abrupt reversal in the strongest names.';
+  return "Risk watch is centered on macro follow-through, index breadth, and any abrupt reversal in the strongest names.";
 }
 
-function buildSummaryInputs(items: DailyMarketBriefItem[], headlines: NewsItem[]): string[] {
+function buildSummaryInputs(
+  items: DailyMarketBriefItem[],
+  headlines: NewsItem[],
+): string[] {
   const marketLines = items.map((item) => {
     const change = formatSignedPercent(item.change);
-    const price = typeof item.price === 'number' ? ` at ${item.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}` : '';
+    const price =
+      typeof item.price === "number"
+        ? ` at ${item.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+        : "";
     return `${item.name} (${item.display}) is ${change}${price}; stance is ${item.stance}.`;
   });
 
-  const headlineLines = headlines.slice(0, 6).map((item) => item.title.trim()).filter(Boolean);
+  const headlineLines = headlines
+    .slice(0, 6)
+    .map((item) => item.title.trim())
+    .filter(Boolean);
   return [...marketLines, ...headlineLines];
 }
 
 export function shouldRefreshDailyBrief(
   brief: DailyMarketBrief | null | undefined,
-  timezone = 'UTC',
+  timezone = "UTC",
   now = new Date(),
   scheduleHour = DEFAULT_SCHEDULE_HOUR,
 ): boolean {
@@ -287,26 +351,39 @@ export function shouldRefreshDailyBrief(
   return getLocalHour(now, resolvedTimezone) >= scheduleHour;
 }
 
-export async function getCachedDailyMarketBrief(timezone?: string): Promise<DailyMarketBrief | null> {
+export async function getCachedDailyMarketBrief(
+  timezone?: string,
+): Promise<DailyMarketBrief | null> {
   const resolvedTimezone = resolveTimeZone(timezone);
   const { getPersistentCache } = await getPersistentCacheApi();
-  const envelope = await getPersistentCache<DailyMarketBrief>(getCacheKey(resolvedTimezone));
+  const envelope = await getPersistentCache<DailyMarketBrief>(
+    getCacheKey(resolvedTimezone),
+  );
   return envelope?.data ?? null;
 }
 
-export async function cacheDailyMarketBrief(brief: DailyMarketBrief): Promise<void> {
+export async function cacheDailyMarketBrief(
+  brief: DailyMarketBrief,
+): Promise<void> {
   const { setPersistentCache } = await getPersistentCacheApi();
   await setPersistentCache(getCacheKey(brief.timezone), brief);
 }
 
-export async function buildDailyMarketBrief(options: BuildDailyMarketBriefOptions): Promise<DailyMarketBrief> {
+export async function buildDailyMarketBrief(
+  options: BuildDailyMarketBriefOptions,
+): Promise<DailyMarketBrief> {
   const now = options.now || new Date();
   const timezone = resolveTimeZone(options.timezone);
-  const trackedMarkets = resolveTargets(options.markets, options.targets).slice(0, DEFAULT_TARGET_COUNT);
+  const trackedMarkets = resolveTargets(options.markets, options.targets).slice(
+    0,
+    DEFAULT_TARGET_COUNT,
+  );
   const relevantHeadlines = collectHeadlinePool(options.newsByCategory);
 
   const items: DailyMarketBriefItem[] = trackedMarkets.map((market) => {
-    const relatedHeadline = relevantHeadlines.find((headline) => matchesMarketHeadline(market, headline.title))?.title;
+    const relatedHeadline = relevantHeadlines.find((headline) =>
+      matchesMarketHeadline(market, headline.title),
+    )?.title;
     return {
       symbol: market.symbol,
       name: market.name,
@@ -325,12 +402,12 @@ export async function buildDailyMarketBrief(options: BuildDailyMarketBriefOption
       title: `Daily Market Brief • ${formatTitleDate(now, timezone)}`,
       dateKey: getDateKey(now, timezone),
       timezone,
-      summary: 'Market data is not available yet for the daily brief.',
-      actionPlan: '',
-      riskWatch: '',
+      summary: "Market data is not available yet for the daily brief.",
+      actionPlan: "",
+      riskWatch: "",
       items: [],
-      provider: 'rules',
-      model: '',
+      provider: "rules",
+      model: "",
       fallback: true,
       generatedAt: now.toISOString(),
       headlineCount: 0,
@@ -339,18 +416,19 @@ export async function buildDailyMarketBrief(options: BuildDailyMarketBriefOption
 
   const summaryInputs = buildSummaryInputs(items, relevantHeadlines);
   let summary = buildRuleSummary(items, relevantHeadlines.length);
-  let provider = 'rules';
-  let model = '';
+  let provider = "rules";
+  let model = "";
   let fallback = true;
 
   if (summaryInputs.length >= 2) {
     try {
-      const summaryProvider = options.summarize || await getDefaultSummarizer();
+      const summaryProvider =
+        options.summarize || (await getDefaultSummarizer());
       const generated = await summaryProvider(
         summaryInputs,
         undefined,
-        'Daily market briefing for a tracked watchlist',
-        'en',
+        "Daily market briefing for a tracked watchlist",
+        "en",
       );
       if (generated?.summary) {
         summary = generated.summary.trim();
@@ -359,7 +437,10 @@ export async function buildDailyMarketBrief(options: BuildDailyMarketBriefOption
         fallback = false;
       }
     } catch (err) {
-      console.warn('[DailyBrief] AI summarization failed, using rules-based fallback:', (err as Error).message);
+      console.warn(
+        "[DailyBrief] AI summarization failed, using rules-based fallback:",
+        (err as Error).message,
+      );
     }
   }
 

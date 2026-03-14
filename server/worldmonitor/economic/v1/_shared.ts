@@ -2,18 +2,21 @@
  * Shared helpers for the economic domain RPCs.
  */
 
-import { CHROME_UA, yahooGate } from '../../../_shared/constants';
+import { CHROME_UA, yahooGate } from "../../../_shared/constants";
 
 /**
  * Fetch JSON from a URL with a configurable timeout.
  * Rejects on non-2xx status.
  */
 export async function fetchJSON(url: string, timeout = 8000): Promise<any> {
-  if (url.includes('yahoo.com')) await yahooGate();
+  if (url.includes("yahoo.com")) await yahooGate();
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
   try {
-    const res = await fetch(url, { headers: { 'User-Agent': CHROME_UA }, signal: controller.signal });
+    const res = await fetch(url, {
+      headers: { "User-Agent": CHROME_UA },
+      signal: controller.signal,
+    });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
   } finally {
@@ -48,7 +51,9 @@ export function smaCalc(prices: number[], period: number): number | null {
 export function extractClosePrices(chart: any): number[] {
   try {
     const result = chart?.chart?.result?.[0];
-    return result?.indicators?.quote?.[0]?.close?.filter((p: any) => p != null) || [];
+    return (
+      result?.indicators?.quote?.[0]?.close?.filter((p: any) => p != null) || []
+    );
   } catch {
     return [];
   }
@@ -60,7 +65,10 @@ export function extractClosePrices(chart: any): number[] {
 export function extractVolumes(chart: any): number[] {
   try {
     const result = chart?.chart?.result?.[0];
-    return result?.indicators?.quote?.[0]?.volume?.filter((v: any) => v != null) || [];
+    return (
+      result?.indicators?.quote?.[0]?.volume?.filter((v: any) => v != null) ||
+      []
+    );
   } catch {
     return [];
   }
@@ -70,7 +78,9 @@ export function extractVolumes(chart: any): number[] {
  * Extract aligned price/volume pairs from a Yahoo Finance v8 chart response.
  * Only includes entries where both price and volume are non-null.
  */
-export function extractAlignedPriceVolume(chart: any): Array<{ price: number; volume: number }> {
+export function extractAlignedPriceVolume(
+  chart: any,
+): Array<{ price: number; volume: number }> {
   try {
     const result = chart?.chart?.result?.[0];
     const closes: any[] = result?.indicators?.quote?.[0]?.close || [];

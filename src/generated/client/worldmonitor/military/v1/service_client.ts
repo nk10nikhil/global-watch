@@ -130,8 +130,7 @@ export interface GetAircraftDetailsBatchResponse {
   configured: boolean;
 }
 
-export interface GetWingbitsStatusRequest {
-}
+export interface GetWingbitsStatusRequest {}
 
 export interface GetWingbitsStatusResponse {
   configured: boolean;
@@ -233,13 +232,52 @@ export interface MilitaryBaseCluster {
   expansionZoom: number;
 }
 
-export type MilitaryActivityType = "MILITARY_ACTIVITY_TYPE_UNSPECIFIED" | "MILITARY_ACTIVITY_TYPE_EXERCISE" | "MILITARY_ACTIVITY_TYPE_PATROL" | "MILITARY_ACTIVITY_TYPE_TRANSPORT" | "MILITARY_ACTIVITY_TYPE_DEPLOYMENT" | "MILITARY_ACTIVITY_TYPE_TRANSIT" | "MILITARY_ACTIVITY_TYPE_UNKNOWN";
+export type MilitaryActivityType =
+  | "MILITARY_ACTIVITY_TYPE_UNSPECIFIED"
+  | "MILITARY_ACTIVITY_TYPE_EXERCISE"
+  | "MILITARY_ACTIVITY_TYPE_PATROL"
+  | "MILITARY_ACTIVITY_TYPE_TRANSPORT"
+  | "MILITARY_ACTIVITY_TYPE_DEPLOYMENT"
+  | "MILITARY_ACTIVITY_TYPE_TRANSIT"
+  | "MILITARY_ACTIVITY_TYPE_UNKNOWN";
 
-export type MilitaryAircraftType = "MILITARY_AIRCRAFT_TYPE_UNSPECIFIED" | "MILITARY_AIRCRAFT_TYPE_FIGHTER" | "MILITARY_AIRCRAFT_TYPE_BOMBER" | "MILITARY_AIRCRAFT_TYPE_TRANSPORT" | "MILITARY_AIRCRAFT_TYPE_TANKER" | "MILITARY_AIRCRAFT_TYPE_AWACS" | "MILITARY_AIRCRAFT_TYPE_RECONNAISSANCE" | "MILITARY_AIRCRAFT_TYPE_HELICOPTER" | "MILITARY_AIRCRAFT_TYPE_DRONE" | "MILITARY_AIRCRAFT_TYPE_PATROL" | "MILITARY_AIRCRAFT_TYPE_SPECIAL_OPS" | "MILITARY_AIRCRAFT_TYPE_VIP" | "MILITARY_AIRCRAFT_TYPE_UNKNOWN";
+export type MilitaryAircraftType =
+  | "MILITARY_AIRCRAFT_TYPE_UNSPECIFIED"
+  | "MILITARY_AIRCRAFT_TYPE_FIGHTER"
+  | "MILITARY_AIRCRAFT_TYPE_BOMBER"
+  | "MILITARY_AIRCRAFT_TYPE_TRANSPORT"
+  | "MILITARY_AIRCRAFT_TYPE_TANKER"
+  | "MILITARY_AIRCRAFT_TYPE_AWACS"
+  | "MILITARY_AIRCRAFT_TYPE_RECONNAISSANCE"
+  | "MILITARY_AIRCRAFT_TYPE_HELICOPTER"
+  | "MILITARY_AIRCRAFT_TYPE_DRONE"
+  | "MILITARY_AIRCRAFT_TYPE_PATROL"
+  | "MILITARY_AIRCRAFT_TYPE_SPECIAL_OPS"
+  | "MILITARY_AIRCRAFT_TYPE_VIP"
+  | "MILITARY_AIRCRAFT_TYPE_UNKNOWN";
 
-export type MilitaryConfidence = "MILITARY_CONFIDENCE_UNSPECIFIED" | "MILITARY_CONFIDENCE_LOW" | "MILITARY_CONFIDENCE_MEDIUM" | "MILITARY_CONFIDENCE_HIGH";
+export type MilitaryConfidence =
+  | "MILITARY_CONFIDENCE_UNSPECIFIED"
+  | "MILITARY_CONFIDENCE_LOW"
+  | "MILITARY_CONFIDENCE_MEDIUM"
+  | "MILITARY_CONFIDENCE_HIGH";
 
-export type MilitaryOperator = "MILITARY_OPERATOR_UNSPECIFIED" | "MILITARY_OPERATOR_USAF" | "MILITARY_OPERATOR_USN" | "MILITARY_OPERATOR_USMC" | "MILITARY_OPERATOR_USA" | "MILITARY_OPERATOR_RAF" | "MILITARY_OPERATOR_RN" | "MILITARY_OPERATOR_FAF" | "MILITARY_OPERATOR_GAF" | "MILITARY_OPERATOR_PLAAF" | "MILITARY_OPERATOR_PLAN" | "MILITARY_OPERATOR_VKS" | "MILITARY_OPERATOR_IAF" | "MILITARY_OPERATOR_NATO" | "MILITARY_OPERATOR_OTHER";
+export type MilitaryOperator =
+  | "MILITARY_OPERATOR_UNSPECIFIED"
+  | "MILITARY_OPERATOR_USAF"
+  | "MILITARY_OPERATOR_USN"
+  | "MILITARY_OPERATOR_USMC"
+  | "MILITARY_OPERATOR_USA"
+  | "MILITARY_OPERATOR_RAF"
+  | "MILITARY_OPERATOR_RN"
+  | "MILITARY_OPERATOR_FAF"
+  | "MILITARY_OPERATOR_GAF"
+  | "MILITARY_OPERATOR_PLAAF"
+  | "MILITARY_OPERATOR_PLAN"
+  | "MILITARY_OPERATOR_VKS"
+  | "MILITARY_OPERATOR_IAF"
+  | "MILITARY_OPERATOR_NATO"
+  | "MILITARY_OPERATOR_OTHER";
 
 export interface FieldViolation {
   field: string;
@@ -289,18 +327,30 @@ export class MilitaryServiceClient {
     this.defaultHeaders = { ...options?.defaultHeaders };
   }
 
-  async listMilitaryFlights(req: ListMilitaryFlightsRequest, options?: MilitaryServiceCallOptions): Promise<ListMilitaryFlightsResponse> {
+  async listMilitaryFlights(
+    req: ListMilitaryFlightsRequest,
+    options?: MilitaryServiceCallOptions,
+  ): Promise<ListMilitaryFlightsResponse> {
     let path = "/api/military/v1/list-military-flights";
     const params = new URLSearchParams();
-    if (req.pageSize != null && req.pageSize !== 0) params.set("page_size", String(req.pageSize));
-    if (req.cursor != null && req.cursor !== "") params.set("cursor", String(req.cursor));
-    if (req.neLat != null && req.neLat !== 0) params.set("ne_lat", String(req.neLat));
-    if (req.neLon != null && req.neLon !== 0) params.set("ne_lon", String(req.neLon));
-    if (req.swLat != null && req.swLat !== 0) params.set("sw_lat", String(req.swLat));
-    if (req.swLon != null && req.swLon !== 0) params.set("sw_lon", String(req.swLon));
-    if (req.operator != null && req.operator !== "") params.set("operator", String(req.operator));
-    if (req.aircraftType != null && req.aircraftType !== "") params.set("aircraft_type", String(req.aircraftType));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.pageSize != null && req.pageSize !== 0)
+      params.set("page_size", String(req.pageSize));
+    if (req.cursor != null && req.cursor !== "")
+      params.set("cursor", String(req.cursor));
+    if (req.neLat != null && req.neLat !== 0)
+      params.set("ne_lat", String(req.neLat));
+    if (req.neLon != null && req.neLon !== 0)
+      params.set("ne_lon", String(req.neLon));
+    if (req.swLat != null && req.swLat !== 0)
+      params.set("sw_lat", String(req.swLat));
+    if (req.swLon != null && req.swLon !== 0)
+      params.set("sw_lon", String(req.swLon));
+    if (req.operator != null && req.operator !== "")
+      params.set("operator", String(req.operator));
+    if (req.aircraftType != null && req.aircraftType !== "")
+      params.set("aircraft_type", String(req.aircraftType));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -318,14 +368,19 @@ export class MilitaryServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as ListMilitaryFlightsResponse;
+    return (await resp.json()) as ListMilitaryFlightsResponse;
   }
 
-  async getTheaterPosture(req: GetTheaterPostureRequest, options?: MilitaryServiceCallOptions): Promise<GetTheaterPostureResponse> {
+  async getTheaterPosture(
+    req: GetTheaterPostureRequest,
+    options?: MilitaryServiceCallOptions,
+  ): Promise<GetTheaterPostureResponse> {
     let path = "/api/military/v1/get-theater-posture";
     const params = new URLSearchParams();
-    if (req.theater != null && req.theater !== "") params.set("theater", String(req.theater));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.theater != null && req.theater !== "")
+      params.set("theater", String(req.theater));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -343,14 +398,19 @@ export class MilitaryServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as GetTheaterPostureResponse;
+    return (await resp.json()) as GetTheaterPostureResponse;
   }
 
-  async getAircraftDetails(req: GetAircraftDetailsRequest, options?: MilitaryServiceCallOptions): Promise<GetAircraftDetailsResponse> {
+  async getAircraftDetails(
+    req: GetAircraftDetailsRequest,
+    options?: MilitaryServiceCallOptions,
+  ): Promise<GetAircraftDetailsResponse> {
     let path = "/api/military/v1/get-aircraft-details";
     const params = new URLSearchParams();
-    if (req.icao24 != null && req.icao24 !== "") params.set("icao24", String(req.icao24));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.icao24 != null && req.icao24 !== "")
+      params.set("icao24", String(req.icao24));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -368,10 +428,13 @@ export class MilitaryServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as GetAircraftDetailsResponse;
+    return (await resp.json()) as GetAircraftDetailsResponse;
   }
 
-  async getAircraftDetailsBatch(req: GetAircraftDetailsBatchRequest, options?: MilitaryServiceCallOptions): Promise<GetAircraftDetailsBatchResponse> {
+  async getAircraftDetailsBatch(
+    req: GetAircraftDetailsBatchRequest,
+    options?: MilitaryServiceCallOptions,
+  ): Promise<GetAircraftDetailsBatchResponse> {
     let path = "/api/military/v1/get-aircraft-details-batch";
     const url = this.baseURL + path;
 
@@ -392,10 +455,13 @@ export class MilitaryServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as GetAircraftDetailsBatchResponse;
+    return (await resp.json()) as GetAircraftDetailsBatchResponse;
   }
 
-  async getWingbitsStatus(req: GetWingbitsStatusRequest, options?: MilitaryServiceCallOptions): Promise<GetWingbitsStatusResponse> {
+  async getWingbitsStatus(
+    req: GetWingbitsStatusRequest,
+    options?: MilitaryServiceCallOptions,
+  ): Promise<GetWingbitsStatusResponse> {
     let path = "/api/military/v1/get-wingbits-status";
     const url = this.baseURL + path;
 
@@ -415,14 +481,18 @@ export class MilitaryServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as GetWingbitsStatusResponse;
+    return (await resp.json()) as GetWingbitsStatusResponse;
   }
 
-  async getUSNIFleetReport(req: GetUSNIFleetReportRequest, options?: MilitaryServiceCallOptions): Promise<GetUSNIFleetReportResponse> {
+  async getUSNIFleetReport(
+    req: GetUSNIFleetReportRequest,
+    options?: MilitaryServiceCallOptions,
+  ): Promise<GetUSNIFleetReportResponse> {
     let path = "/api/military/v1/get-usni-fleet-report";
     const params = new URLSearchParams();
     if (req.forceRefresh) params.set("force_refresh", String(req.forceRefresh));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -440,21 +510,33 @@ export class MilitaryServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as GetUSNIFleetReportResponse;
+    return (await resp.json()) as GetUSNIFleetReportResponse;
   }
 
-  async listMilitaryBases(req: ListMilitaryBasesRequest, options?: MilitaryServiceCallOptions): Promise<ListMilitaryBasesResponse> {
+  async listMilitaryBases(
+    req: ListMilitaryBasesRequest,
+    options?: MilitaryServiceCallOptions,
+  ): Promise<ListMilitaryBasesResponse> {
     let path = "/api/military/v1/list-military-bases";
     const params = new URLSearchParams();
-    if (req.neLat != null && req.neLat !== 0) params.set("ne_lat", String(req.neLat));
-    if (req.neLon != null && req.neLon !== 0) params.set("ne_lon", String(req.neLon));
-    if (req.swLat != null && req.swLat !== 0) params.set("sw_lat", String(req.swLat));
-    if (req.swLon != null && req.swLon !== 0) params.set("sw_lon", String(req.swLon));
-    if (req.zoom != null && req.zoom !== 0) params.set("zoom", String(req.zoom));
-    if (req.type != null && req.type !== "") params.set("type", String(req.type));
-    if (req.kind != null && req.kind !== "") params.set("kind", String(req.kind));
-    if (req.country != null && req.country !== "") params.set("country", String(req.country));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.neLat != null && req.neLat !== 0)
+      params.set("ne_lat", String(req.neLat));
+    if (req.neLon != null && req.neLon !== 0)
+      params.set("ne_lon", String(req.neLon));
+    if (req.swLat != null && req.swLat !== 0)
+      params.set("sw_lat", String(req.swLat));
+    if (req.swLon != null && req.swLon !== 0)
+      params.set("sw_lon", String(req.swLon));
+    if (req.zoom != null && req.zoom !== 0)
+      params.set("zoom", String(req.zoom));
+    if (req.type != null && req.type !== "")
+      params.set("type", String(req.type));
+    if (req.kind != null && req.kind !== "")
+      params.set("kind", String(req.kind));
+    if (req.country != null && req.country !== "")
+      params.set("country", String(req.country));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -472,7 +554,7 @@ export class MilitaryServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as ListMilitaryBasesResponse;
+    return (await resp.json()) as ListMilitaryBasesResponse;
   }
 
   private async handleError(resp: Response): Promise<never> {
@@ -487,7 +569,10 @@ export class MilitaryServiceClient {
         if (e instanceof ValidationError) throw e;
       }
     }
-    throw new ApiError(resp.status, `Request failed with status ${resp.status}`, body);
+    throw new ApiError(
+      resp.status,
+      `Request failed with status ${resp.status}`,
+      body,
+    );
   }
 }
-

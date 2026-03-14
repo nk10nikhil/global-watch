@@ -3,12 +3,12 @@ import type {
   GetAircraftDetailsBatchRequest,
   GetAircraftDetailsBatchResponse,
   AircraftDetails,
-} from '../../../../src/generated/server/worldmonitor/military/v1/service_server';
+} from "../../../../src/generated/server/worldmonitor/military/v1/service_server";
 
-import { mapWingbitsDetails } from './_shared';
-import { CHROME_UA } from '../../../_shared/constants';
-import { getCachedJsonBatch, cachedFetchJson } from '../../../_shared/redis';
-import { toUniqueSortedLimited } from '../../../_shared/normalize-list';
+import { mapWingbitsDetails } from "./_shared";
+import { CHROME_UA } from "../../../_shared/constants";
+import { getCachedJsonBatch, cachedFetchJson } from "../../../_shared/redis";
+import { toUniqueSortedLimited } from "../../../_shared/normalize-list";
 
 interface CachedAircraftDetails {
   details: AircraftDetails | null;
@@ -21,7 +21,8 @@ export async function getAircraftDetailsBatch(
 ): Promise<GetAircraftDetailsBatchResponse> {
   try {
     const apiKey = process.env.WINGBITS_API_KEY;
-    if (!apiKey) return { results: {}, fetched: 0, requested: 0, configured: false };
+    if (!apiKey)
+      return { results: {}, fetched: 0, requested: 0, configured: false };
 
     const normalized = req.icao24s
       .map((id) => id.trim().toLowerCase())
@@ -29,7 +30,7 @@ export async function getAircraftDetailsBatch(
     const limitedList = toUniqueSortedLimited(normalized, 10);
 
     // Redis shared cache — batch GET all keys in a single pipeline round-trip
-    const SINGLE_KEY = 'military:aircraft:v1';
+    const SINGLE_KEY = "military:aircraft:v1";
     const SINGLE_TTL = 24 * 60 * 60;
     const results: Record<string, AircraftDetails> = {};
     const toFetch: string[] = [];
@@ -40,8 +41,9 @@ export async function getAircraftDetailsBatch(
     for (let i = 0; i < limitedList.length; i++) {
       const icao24 = limitedList[i]!;
       const cached = cachedMap.get(cacheKeys[i]!);
-      if (cached && typeof cached === 'object' && 'details' in cached) {
-        const details = (cached as { details?: AircraftDetails | null }).details;
+      if (cached && typeof cached === "object" && "details" in cached) {
+        const details = (cached as { details?: AircraftDetails | null })
+          .details;
         if (details) {
           results[icao24] = details;
         }
@@ -60,10 +62,17 @@ export async function getAircraftDetailsBatch(
         SINGLE_TTL,
         async () => {
           try {
-            const resp = await fetch(`https://customer-api.wingbits.com/v1/flights/details/${icao24}`, {
-              headers: { 'x-api-key': apiKey, Accept: 'application/json', 'User-Agent': CHROME_UA },
-              signal: AbortSignal.timeout(10_000),
-            });
+            const resp = await fetch(
+              `https://customer-api.wingbits.com/v1/flights/details/${icao24}`,
+              {
+                headers: {
+                  "x-api-key": apiKey,
+                  Accept: "application/json",
+                  "User-Agent": CHROME_UA,
+                },
+                signal: AbortSignal.timeout(10_000),
+              },
+            );
             if (resp.status === 404) {
               return { details: null, configured: true };
             }
@@ -72,7 +81,9 @@ export async function getAircraftDetailsBatch(
               const details = mapWingbitsDetails(icao24, data);
               return { details, configured: true };
             }
-          } catch { /* skip failed lookups */ }
+          } catch {
+            /* skip failed lookups */
+          }
           return null;
         },
       );

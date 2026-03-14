@@ -4,7 +4,12 @@
     "default": false,
     "MD012": true,
     "MD022": true,
-    "MD032": true
+    "MD032": true,
   },
-  "ignores": ["node_modules/**", "dist/**", "src-tauri/target/**", ".planning/**"]
+  "ignores": [
+    "node_modules/**",
+    "dist/**",
+    "src-tauri/target/**",
+    ".planning/**",
+  ],
 }

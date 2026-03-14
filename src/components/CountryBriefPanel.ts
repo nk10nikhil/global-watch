@@ -1,7 +1,7 @@
-import type { CountryBriefSignals } from '@/app/app-context';
-import type { CountryScore } from '@/services/country-instability';
-import type { PredictionMarket } from '@/services/prediction';
-import type { NewsItem } from '@/types';
+import type { CountryBriefSignals } from "@/app/app-context";
+import type { CountryScore } from "@/services/country-instability";
+import type { PredictionMarket } from "@/services/prediction";
+import type { NewsItem } from "@/types";
 
 export interface CountryIntelData {
   brief: string;
@@ -26,11 +26,11 @@ export interface StockIndexData {
   cached?: boolean;
 }
 
-type ThreatLevel = 'critical' | 'high' | 'medium' | 'low' | 'info';
-type TrendDirection = 'up' | 'down' | 'flat';
+type ThreatLevel = "critical" | "high" | "medium" | "low" | "info";
+type TrendDirection = "up" | "down" | "flat";
 
 export interface CountryDeepDiveSignalItem {
-  type: 'MILITARY' | 'PROTEST' | 'CYBER' | 'DISASTER' | 'OUTAGE' | 'OTHER';
+  type: "MILITARY" | "PROTEST" | "CYBER" | "DISASTER" | "OUTAGE" | "OTHER";
   severity: ThreatLevel;
   description: string;
   timestamp: Date;
@@ -80,7 +80,12 @@ export interface CountryFactsData {
 }
 
 export interface CountryBriefPanel {
-  show(country: string, code: string, score: CountryScore | null, signals: CountryBriefSignals): void;
+  show(
+    country: string,
+    code: string,
+    score: CountryScore | null,
+    signals: CountryBriefSignals,
+  ): void;
   hide(): void;
   showLoading(): void;
   getCode(): string | null;
@@ -100,10 +105,14 @@ export interface CountryBriefPanel {
   updateScore?(score: CountryScore | null, signals: CountryBriefSignals): void;
   updateSignalDetails?(details: CountryDeepDiveSignalDetails): void;
   updateMilitaryActivity?(summary: CountryDeepDiveMilitarySummary): void;
-  updateEconomicIndicators?(indicators: CountryDeepDiveEconomicIndicator[]): void;
+  updateEconomicIndicators?(
+    indicators: CountryDeepDiveEconomicIndicator[],
+  ): void;
   updateCountryFacts?(data: CountryFactsData): void;
   maximize?(): void;
   minimize?(): void;
   getIsMaximized?(): boolean;
-  onStateChange?(cb: (state: { visible: boolean; maximized: boolean }) => void): void;
+  onStateChange?(
+    cb: (state: { visible: boolean; maximized: boolean }) => void,
+  ): void;
 }

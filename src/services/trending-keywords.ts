@@ -1,8 +1,13 @@
-import type { CorrelationSignal } from './correlation';
-import { mlWorker } from './ml-worker';
-import { generateSummary } from './summarization';
-import { SUPPRESSED_TRENDING_TERMS, escapeRegex, generateSignalId, tokenize } from '@/utils/analysis-constants';
-import { t } from '@/services/i18n';
+import type { CorrelationSignal } from "./correlation";
+import { mlWorker } from "./ml-worker";
+import { generateSummary } from "./summarization";
+import {
+  SUPPRESSED_TRENDING_TERMS,
+  escapeRegex,
+  generateSignalId,
+  tokenize,
+} from "@/utils/analysis-constants";
+import { t } from "@/services/i18n";
 
 export interface TrendingHeadlineInput {
   title: string;
@@ -71,10 +76,10 @@ const MAX_TRACKED_TERMS = 10000;
 const MAX_AUTO_SUMMARIES_PER_HOUR = 5;
 const MIN_TOKEN_LENGTH = 3;
 const MIN_SPIKE_SOURCE_COUNT = 2;
-const CONFIG_KEY = 'worldmonitor-trending-config-v1';
+const CONFIG_KEY = "worldmonitor-trending-config-v1";
 const ML_ENTITY_MIN_CONFIDENCE = 0.75;
 const ML_ENTITY_BATCH_SIZE = 20;
-const ML_ENTITY_TYPES = new Set(['PER', 'ORG', 'LOC', 'MISC']);
+const ML_ENTITY_TYPES = new Set(["PER", "ORG", "LOC", "MISC"]);
 
 const DEFAULT_CONFIG: TrendingConfig = {
   blockedTerms: [],
@@ -88,13 +93,26 @@ const APT_PATTERN = /APT\d+/gi;
 const FIN_PATTERN = /FIN\d+/gi;
 
 const LEADER_NAMES = [
-  'putin', 'zelensky', 'xi jinping', 'biden', 'trump', 'netanyahu',
-  'khamenei', 'erdogan', 'modi', 'macron', 'scholz', 'starmer',
-  'orban', 'milei', 'kim jong un', 'al-sisi',
+  "putin",
+  "zelensky",
+  "xi jinping",
+  "biden",
+  "trump",
+  "netanyahu",
+  "khamenei",
+  "erdogan",
+  "modi",
+  "macron",
+  "scholz",
+  "starmer",
+  "orban",
+  "milei",
+  "kim jong un",
+  "al-sisi",
 ];
-const LEADER_PATTERNS = LEADER_NAMES.map(name => ({
+const LEADER_PATTERNS = LEADER_NAMES.map((name) => ({
   name,
-  pattern: new RegExp(`\\b${escapeRegex(name)}\\b`, 'i'),
+  pattern: new RegExp(`\\b${escapeRegex(name)}\\b`, "i"),
 }));
 
 const termFrequency = new Map<string, TermRecord>();
@@ -118,24 +136,34 @@ function asDisplayTerm(term: string): string {
 }
 
 function isStorageAvailable(): boolean {
-  return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
+  return (
+    typeof window !== "undefined" && typeof window.localStorage !== "undefined"
+  );
 }
 
 function uniqueBlockedTerms(terms: string[]): string[] {
   return Array.from(
     new Set(
-      terms
-        .map(term => toTermKey(term))
-        .filter(term => term.length > 0)
-    )
+      terms.map((term) => toTermKey(term)).filter((term) => term.length > 0),
+    ),
   );
 }
 
-function sanitizeConfig(config: Partial<TrendingConfig> | null | undefined): TrendingConfig {
+function sanitizeConfig(
+  config: Partial<TrendingConfig> | null | undefined,
+): TrendingConfig {
   return {
-    blockedTerms: uniqueBlockedTerms(config?.blockedTerms ?? DEFAULT_CONFIG.blockedTerms),
-    minSpikeCount: Math.max(1, Math.round(config?.minSpikeCount ?? DEFAULT_CONFIG.minSpikeCount)),
-    spikeMultiplier: Math.max(1, Number(config?.spikeMultiplier ?? DEFAULT_CONFIG.spikeMultiplier)),
+    blockedTerms: uniqueBlockedTerms(
+      config?.blockedTerms ?? DEFAULT_CONFIG.blockedTerms,
+    ),
+    minSpikeCount: Math.max(
+      1,
+      Math.round(config?.minSpikeCount ?? DEFAULT_CONFIG.minSpikeCount),
+    ),
+    spikeMultiplier: Math.max(
+      1,
+      Number(config?.spikeMultiplier ?? DEFAULT_CONFIG.spikeMultiplier),
+    ),
     autoSummarize: config?.autoSummarize ?? DEFAULT_CONFIG.autoSummarize,
   };
 }
@@ -170,8 +198,8 @@ function persistConfig(config: TrendingConfig): void {
 
 function getBlockedTermSet(config: TrendingConfig): Set<string> {
   return new Set([
-    ...Array.from(SUPPRESSED_TRENDING_TERMS).map(term => toTermKey(term)),
-    ...config.blockedTerms.map(term => toTermKey(term)),
+    ...Array.from(SUPPRESSED_TRENDING_TERMS).map((term) => toTermKey(term)),
+    ...config.blockedTerms.map((term) => toTermKey(term)),
   ]);
 }
 
@@ -198,14 +226,17 @@ export function extractEntities(text: string): string[] {
 }
 
 function normalizeEntityType(type: string): string {
-  return type.replace(/^[BI]-/, '').trim().toUpperCase();
+  return type
+    .replace(/^[BI]-/, "")
+    .trim()
+    .toUpperCase();
 }
 
 function normalizeMLEntityText(text: string): string {
   return text
-    .replace(/^##/, '')
-    .replace(/\s+/g, ' ')
-    .replace(/^[^A-Za-z0-9]+|[^A-Za-z0-9]+$/g, '')
+    .replace(/^##/, "")
+    .replace(/\s+/g, " ")
+    .replace(/^[^A-Za-z0-9]+|[^A-Za-z0-9]+$/g, "")
     .trim();
 }
 
@@ -216,7 +247,11 @@ function collectMLEntities(rawEntities: MLEntity[] | undefined): string[] {
   for (const entity of rawEntities) {
     const type = normalizeEntityType(entity.type);
     if (!ML_ENTITY_TYPES.has(type)) continue;
-    if (!Number.isFinite(entity.confidence) || entity.confidence < ML_ENTITY_MIN_CONFIDENCE) continue;
+    if (
+      !Number.isFinite(entity.confidence) ||
+      entity.confidence < ML_ENTITY_MIN_CONFIDENCE
+    )
+      continue;
 
     const normalized = normalizeMLEntityText(entity.text);
     if (normalized.length < 2 || /^\d+$/.test(normalized)) continue;
@@ -262,19 +297,24 @@ export async function extractEntitiesWithML(text: string): Promise<string[]> {
       ...(mlEntitiesByText[0] ?? []),
     ]);
   } catch (error) {
-    console.debug('[TrendingKeywords] ML entity extraction failed, using regex entities only:', error);
+    console.debug(
+      "[TrendingKeywords] ML entity extraction failed, using regex entities only:",
+      error,
+    );
     return dedupeEntityTerms(regexEntities);
   }
 }
 
 function headlineKey(headline: TrendingHeadlineInput): string {
-  const publishedAt = Number.isFinite(headline.pubDate.getTime()) ? headline.pubDate.getTime() : 0;
+  const publishedAt = Number.isFinite(headline.pubDate.getTime())
+    ? headline.pubDate.getTime()
+    : 0;
   return [
     headline.source.trim().toLowerCase(),
-    (headline.link ?? '').trim().toLowerCase(),
+    (headline.link ?? "").trim().toLowerCase(),
     headline.title.trim().toLowerCase(),
     publishedAt,
-  ].join('|');
+  ].join("|");
 }
 
 function pruneOldState(now: number): void {
@@ -285,8 +325,12 @@ function pruneOldState(now: number): void {
   }
 
   for (const [term, record] of termFrequency) {
-    record.timestamps = record.timestamps.filter(ts => now - ts <= BASELINE_WINDOW_MS);
-    record.headlines = record.headlines.filter(h => now - h.ingestedAt <= ROLLING_WINDOW_MS);
+    record.timestamps = record.timestamps.filter(
+      (ts) => now - ts <= BASELINE_WINDOW_MS,
+    );
+    record.headlines = record.headlines.filter(
+      (h) => now - h.ingestedAt <= ROLLING_WINDOW_MS,
+    );
     if (record.timestamps.length === 0) {
       termFrequency.delete(term);
     }
@@ -299,7 +343,10 @@ function pruneOldState(now: number): void {
   if (termFrequency.size <= MAX_TRACKED_TERMS) return;
 
   const ordered = Array.from(termFrequency.entries())
-    .map(([term, record]) => ({ term, latest: record.timestamps[record.timestamps.length - 1] ?? 0 }))
+    .map(([term, record]) => ({
+      term,
+      latest: record.timestamps[record.timestamps.length - 1] ?? 0,
+    }))
     .sort((a, b) => a.latest - b.latest);
 
   for (const { term } of ordered) {
@@ -311,7 +358,9 @@ function pruneOldState(now: number): void {
 function maybeRefreshBaselines(now: number): void {
   if (now - lastBaselineRefreshMs < BASELINE_REFRESH_MS) return;
   for (const record of termFrequency.values()) {
-    const weekCount = record.timestamps.filter(ts => now - ts <= BASELINE_WINDOW_MS).length;
+    const weekCount = record.timestamps.filter(
+      (ts) => now - ts <= BASELINE_WINDOW_MS,
+    ).length;
     record.baseline7d = weekCount / 7;
   }
   lastBaselineRefreshMs = now;
@@ -330,7 +379,7 @@ function dedupeHeadlines(headlines: StoredHeadline[]): StoredHeadline[] {
 }
 
 function stripSourceAttribution(title: string): string {
-  const idx = title.lastIndexOf(' - ');
+  const idx = title.lastIndexOf(" - ");
   if (idx === -1) return title;
   const after = title.slice(idx + 3).trim();
   if (after.length > 0 && after.length <= 60 && !/[.!?]/.test(after)) {
@@ -360,7 +409,7 @@ function recordTermCandidates(
   termCandidates: Map<string, TermCandidate>,
   headline: TrendingHeadlineInput,
   now: number,
-  blockedTerms: Set<string>
+  blockedTerms: Set<string>,
 ): boolean {
   let addedAny = false;
 
@@ -386,8 +435,10 @@ function recordTermCandidates(
     record.headlines.push({
       title: headline.title,
       source: headline.source,
-      link: headline.link ?? '',
-      publishedAt: Number.isFinite(headline.pubDate.getTime()) ? headline.pubDate.getTime() : now,
+      link: headline.link ?? "",
+      publishedAt: Number.isFinite(headline.pubDate.getTime())
+        ? headline.pubDate.getTime()
+        : now,
       ingestedAt: now,
     });
     addedAny = true;
@@ -396,28 +447,39 @@ function recordTermCandidates(
   return addedAny;
 }
 
-function checkForSpikes(now: number, config: TrendingConfig, blockedTerms: Set<string>): TrendingSpike[] {
+function checkForSpikes(
+  now: number,
+  config: TrendingConfig,
+  blockedTerms: Set<string>,
+): TrendingSpike[] {
   const spikes: TrendingSpike[] = [];
 
   for (const [term, record] of termFrequency) {
     if (blockedTerms.has(term)) continue;
 
-    const recentCount = record.timestamps.filter(ts => now - ts < ROLLING_WINDOW_MS).length;
+    const recentCount = record.timestamps.filter(
+      (ts) => now - ts < ROLLING_WINDOW_MS,
+    ).length;
     if (recentCount < config.minSpikeCount) continue;
 
     const baseline = record.baseline7d;
     const multiplier = baseline > 0 ? recentCount / baseline : 0;
-    const isSpike = baseline > 0
-      ? recentCount > baseline * config.spikeMultiplier
-      : recentCount >= config.minSpikeCount;
+    const isSpike =
+      baseline > 0
+        ? recentCount > baseline * config.spikeMultiplier
+        : recentCount >= config.minSpikeCount;
 
     if (!isSpike) continue;
     if (now - record.lastSpikeAlertMs < SPIKE_COOLDOWN_MS) continue;
 
     const recentHeadlines = dedupeHeadlines(
-      record.headlines.filter(headline => now - headline.ingestedAt <= ROLLING_WINDOW_MS)
+      record.headlines.filter(
+        (headline) => now - headline.ingestedAt <= ROLLING_WINDOW_MS,
+      ),
     );
-    const uniqueSources = new Set(recentHeadlines.map(headline => headline.source)).size;
+    const uniqueSources = new Set(
+      recentHeadlines.map((headline) => headline.source),
+    ).size;
     if (uniqueSources < MIN_SPIKE_SOURCE_COUNT) continue;
 
     record.lastSpikeAlertMs = now;
@@ -449,12 +511,15 @@ function pushSignal(signal: CorrelationSignal): void {
   }
 }
 
-function isLikelyProperNoun(term: string, headlines: StoredHeadline[]): boolean {
-  if (term.includes(' ') && term.length > 5) return true;
+function isLikelyProperNoun(
+  term: string,
+  headlines: StoredHeadline[],
+): boolean {
+  if (term.includes(" ") && term.length > 5) return true;
   if (/^\d/.test(term)) return true;
 
-  const titles = headlines.slice(0, 8).map(h => h.title);
-  const termRe = new RegExp(`\\b${escapeRegex(term)}\\b`, 'gi');
+  const titles = headlines.slice(0, 8).map((h) => h.title);
+  const termRe = new RegExp(`\\b${escapeRegex(term)}\\b`, "gi");
   let capitalizedCount = 0;
   let midSentenceCount = 0;
   for (const title of titles) {
@@ -466,15 +531,20 @@ function isLikelyProperNoun(term: string, headlines: StoredHeadline[]): boolean 
     }
   }
   if (midSentenceCount === 0) {
-    return titles.some(t => {
-      const allCaps = t.match(new RegExp(`\\b${escapeRegex(term)}\\b`, 'gi'));
-      return allCaps?.some(match => match === match.toUpperCase() && match.length >= 2);
+    return titles.some((t) => {
+      const allCaps = t.match(new RegExp(`\\b${escapeRegex(term)}\\b`, "gi"));
+      return allCaps?.some(
+        (match) => match === match.toUpperCase() && match.length >= 2,
+      );
     });
   }
   return capitalizedCount / midSentenceCount >= 0.5;
 }
 
-async function isSignificantTerm(term: string, headlines: StoredHeadline[]): Promise<boolean> {
+async function isSignificantTerm(
+  term: string,
+  headlines: StoredHeadline[],
+): Promise<boolean> {
   const lower = term.toLowerCase();
 
   if (/^(cve-\d{4}-\d{4,}|apt\d+|fin\d+)$/i.test(term)) return true;
@@ -487,12 +557,15 @@ async function isSignificantTerm(term: string, headlines: StoredHeadline[]): Pro
   }
 
   try {
-    const titles = headlines.slice(0, 6).map(h => h.title);
+    const titles = headlines.slice(0, 6).map((h) => h.title);
     const entitiesPerTitle = await mlWorker.extractEntities(titles);
 
     for (const entities of entitiesPerTitle) {
       for (const entity of entities) {
-        if (entity.text.toLowerCase().includes(lower) || lower.includes(entity.text.toLowerCase())) {
+        if (
+          entity.text.toLowerCase().includes(lower) ||
+          lower.includes(entity.text.toLowerCase())
+        ) {
           return true;
         }
       }
@@ -504,7 +577,10 @@ async function isSignificantTerm(term: string, headlines: StoredHeadline[]): Pro
   }
 }
 
-async function handleSpike(spike: TrendingSpike, config: TrendingConfig): Promise<void> {
+async function handleSpike(
+  spike: TrendingSpike,
+  config: TrendingConfig,
+): Promise<void> {
   const termKey = toTermKey(spike.term);
   if (activeSpikeTerms.has(termKey)) return;
   activeSpikeTerms.add(termKey);
@@ -512,38 +588,53 @@ async function handleSpike(spike: TrendingSpike, config: TrendingConfig): Promis
   try {
     const significant = await isSignificantTerm(spike.term, spike.headlines);
     if (!significant) {
-      console.debug(`[TrendingKeywords] Suppressed non-entity term: "${spike.term}"`);
+      console.debug(
+        `[TrendingKeywords] Suppressed non-entity term: "${spike.term}"`,
+      );
       return;
     }
 
     const windowHours = Math.round((spike.windowMs / HOUR_MS) * 10) / 10;
-    const headlines = spike.headlines.slice(0, 6).map(h => h.title);
-    const multiplierText = spike.baseline > 0 ? `${spike.multiplier.toFixed(1)}x baseline` : 'cold-start threshold';
+    const headlines = spike.headlines.slice(0, 6).map((h) => h.title);
+    const multiplierText =
+      spike.baseline > 0
+        ? `${spike.multiplier.toFixed(1)}x baseline`
+        : "cold-start threshold";
 
     let description = `${spike.term} is appearing across ${spike.uniqueSources} sources (${spike.count} mentions in ${windowHours}h).`;
 
     const now = Date.now();
-    if (config.autoSummarize && headlines.length >= 2 && canRunAutoSummary(now)) {
+    if (
+      config.autoSummarize &&
+      headlines.length >= 2 &&
+      canRunAutoSummary(now)
+    ) {
       autoSummaryRuns.push(now);
       const summary = await generateSummary(
         headlines,
         undefined,
-        `Breaking: "${spike.term}" mentioned ${spike.count}x in ${windowHours}h (${multiplierText})`
+        `Breaking: "${spike.term}" mentioned ${spike.count}x in ${windowHours}h (${multiplierText})`,
       );
       if (summary?.summary) {
         description = summary.summary;
       }
     }
 
-    const priorityBoost = spike.multiplier >= 5 ? 0.9 : spike.multiplier >= 3 ? 0.75 : 0.6;
-    const confidence = spike.baseline > 0
-      ? Math.min(0.95, priorityBoost)
-      : Math.min(0.8, 0.45 + spike.count / 20);
+    const priorityBoost =
+      spike.multiplier >= 5 ? 0.9 : spike.multiplier >= 3 ? 0.75 : 0.6;
+    const confidence =
+      spike.baseline > 0
+        ? Math.min(0.95, priorityBoost)
+        : Math.min(0.8, 0.45 + spike.count / 20);
 
     pushSignal({
       id: generateSignalId(),
-      type: 'keyword_spike',
-      title: t('alerts.trending', { term: spike.term, count: spike.count, hours: windowHours }),
+      type: "keyword_spike",
+      title: t("alerts.trending", {
+        term: spike.term,
+        count: spike.count,
+        hours: windowHours,
+      }),
       description,
       confidence,
       timestamp: new Date(),
@@ -558,17 +649,20 @@ async function handleSpike(spike: TrendingSpike, config: TrendingConfig): Promis
       },
     });
   } catch (error) {
-    console.warn('[TrendingKeywords] Failed to handle spike:', error);
+    console.warn("[TrendingKeywords] Failed to handle spike:", error);
   } finally {
     activeSpikeTerms.delete(termKey);
   }
 }
 
-async function enrichWithMLEntities(headlines: PendingMLEnrichmentHeadline[], ingestedAt: number): Promise<void> {
+async function enrichWithMLEntities(
+  headlines: PendingMLEnrichmentHeadline[],
+  ingestedAt: number,
+): Promise<void> {
   if (headlines.length === 0 || !mlWorker.isAvailable) return;
 
   try {
-    const texts = headlines.map(entry => entry.headline.title);
+    const texts = headlines.map((entry) => entry.headline.title);
     const mlEntitiesByText = await extractMLEntitiesForTexts(texts);
     const config = readConfig();
     const blockedTerms = getBlockedTermSet(config);
@@ -587,7 +681,13 @@ async function enrichWithMLEntities(headlines: PendingMLEnrichmentHeadline[], in
       }
 
       if (termCandidates.size === 0) continue;
-      addedAny = recordTermCandidates(termCandidates, pending.headline, ingestedAt, blockedTerms) || addedAny;
+      addedAny =
+        recordTermCandidates(
+          termCandidates,
+          pending.headline,
+          ingestedAt,
+          blockedTerms,
+        ) || addedAny;
     }
 
     if (!addedAny) return;
@@ -601,7 +701,7 @@ async function enrichWithMLEntities(headlines: PendingMLEnrichmentHeadline[], in
       void handleSpike(spike, config).catch(() => {});
     }
   } catch (error) {
-    console.debug('[TrendingKeywords] ML entity enrichment skipped:', error);
+    console.debug("[TrendingKeywords] ML entity enrichment skipped:", error);
   }
 }
 
@@ -651,7 +751,9 @@ export function getTrendingConfig(): TrendingConfig {
   return { ...readConfig() };
 }
 
-export function updateTrendingConfig(update: Partial<TrendingConfig>): TrendingConfig {
+export function updateTrendingConfig(
+  update: Partial<TrendingConfig>,
+): TrendingConfig {
   const next = sanitizeConfig({
     ...readConfig(),
     ...update,
@@ -672,7 +774,9 @@ export function unsuppressTrendingTerm(term: string): TrendingConfig {
   const config = readConfig();
   const normalized = toTermKey(term);
   return updateTrendingConfig({
-    blockedTerms: config.blockedTerms.filter(entry => toTermKey(entry) !== normalized),
+    blockedTerms: config.blockedTerms.filter(
+      (entry) => toTermKey(entry) !== normalized,
+    ),
   });
 }
 

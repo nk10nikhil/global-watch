@@ -1,18 +1,28 @@
 #!/usr/bin/env node
 
-import { loadEnvFile, loadSharedConfig, CHROME_UA, runSeed, sleep } from './_seed-utils.mjs';
+import {
+  loadEnvFile,
+  loadSharedConfig,
+  CHROME_UA,
+  runSeed,
+  sleep,
+} from "./_seed-utils.mjs";
 
-const cryptoConfig = loadSharedConfig('crypto.json');
+const cryptoConfig = loadSharedConfig("crypto.json");
 
 loadEnvFile(import.meta.url);
 
-const CANONICAL_KEY = 'market:crypto:v1';
+const CANONICAL_KEY = "market:crypto:v1";
 const CACHE_TTL = 3600; // 1 hour
 
 const CRYPTO_IDS = cryptoConfig.ids;
 const CRYPTO_META = cryptoConfig.meta;
 
-async function fetchWithRateLimitRetry(url, maxAttempts = 5, headers = { Accept: 'application/json', 'User-Agent': CHROME_UA }) {
+async function fetchWithRateLimitRetry(
+  url,
+  maxAttempts = 5,
+  headers = { Accept: "application/json", "User-Agent": CHROME_UA },
+) {
   for (let i = 0; i < maxAttempts; i++) {
     const resp = await fetch(url, {
       headers,
@@ -20,46 +30,55 @@ async function fetchWithRateLimitRetry(url, maxAttempts = 5, headers = { Accept:
     });
     if (resp.status === 429) {
       const wait = Math.min(10_000 * (i + 1), 60_000);
-      console.warn(`  CoinGecko 429 — waiting ${wait / 1000}s (attempt ${i + 1}/${maxAttempts})`);
+      console.warn(
+        `  CoinGecko 429 — waiting ${wait / 1000}s (attempt ${i + 1}/${maxAttempts})`,
+      );
       await sleep(wait);
       continue;
     }
     if (!resp.ok) throw new Error(`CoinGecko HTTP ${resp.status}`);
     return resp;
   }
-  throw new Error('CoinGecko rate limit exceeded after retries');
+  throw new Error("CoinGecko rate limit exceeded after retries");
 }
 
 const COINPAPRIKA_ID_MAP = cryptoConfig.coinpaprika;
 
 async function fetchFromCoinGecko() {
-  const ids = CRYPTO_IDS.join(',');
+  const ids = CRYPTO_IDS.join(",");
   const apiKey = process.env.COINGECKO_API_KEY;
   const baseUrl = apiKey
-    ? 'https://pro-api.coingecko.com/api/v3'
-    : 'https://api.coingecko.com/api/v3';
+    ? "https://pro-api.coingecko.com/api/v3"
+    : "https://api.coingecko.com/api/v3";
   const url = `${baseUrl}/coins/markets?vs_currency=usd&ids=${ids}&order=market_cap_desc&sparkline=true&price_change_percentage=24h`;
-  const headers = { Accept: 'application/json', 'User-Agent': CHROME_UA };
-  if (apiKey) headers['x-cg-pro-api-key'] = apiKey;
+  const headers = { Accept: "application/json", "User-Agent": CHROME_UA };
+  if (apiKey) headers["x-cg-pro-api-key"] = apiKey;
 
   const resp = await fetchWithRateLimitRetry(url, 5, headers);
   const data = await resp.json();
   if (!Array.isArray(data) || data.length === 0) {
-    throw new Error('CoinGecko returned no data');
+    throw new Error("CoinGecko returned no data");
   }
   return data;
 }
 
 async function fetchFromCoinPaprika() {
-  console.log('  [CoinPaprika] Falling back to CoinPaprika...');
-  const resp = await fetch('https://api.coinpaprika.com/v1/tickers?quotes=USD', {
-    headers: { Accept: 'application/json', 'User-Agent': CHROME_UA },
-    signal: AbortSignal.timeout(15_000),
-  });
+  console.log("  [CoinPaprika] Falling back to CoinPaprika...");
+  const resp = await fetch(
+    "https://api.coinpaprika.com/v1/tickers?quotes=USD",
+    {
+      headers: { Accept: "application/json", "User-Agent": CHROME_UA },
+      signal: AbortSignal.timeout(15_000),
+    },
+  );
   if (!resp.ok) throw new Error(`CoinPaprika HTTP ${resp.status}`);
   const allTickers = await resp.json();
-  const paprikaIds = new Set(CRYPTO_IDS.map((id) => COINPAPRIKA_ID_MAP[id]).filter(Boolean));
-  const reverseMap = new Map(Object.entries(COINPAPRIKA_ID_MAP).map(([g, p]) => [p, g]));
+  const paprikaIds = new Set(
+    CRYPTO_IDS.map((id) => COINPAPRIKA_ID_MAP[id]).filter(Boolean),
+  );
+  const reverseMap = new Map(
+    Object.entries(COINPAPRIKA_ID_MAP).map(([g, p]) => [p, g]),
+  );
   return allTickers
     .filter((t) => paprikaIds.has(t.id))
     .map((t) => ({
@@ -89,7 +108,8 @@ async function fetchCryptoQuotes() {
     if (!coin) continue;
     const meta = CRYPTO_META[id];
     const prices = coin.sparkline_in_7d?.price;
-    const sparkline = prices && prices.length > 24 ? prices.slice(-48) : (prices || []);
+    const sparkline =
+      prices && prices.length > 24 ? prices.slice(-48) : prices || [];
 
     quotes.push({
       name: meta?.name || id,
@@ -101,7 +121,7 @@ async function fetchCryptoQuotes() {
   }
 
   if (quotes.every((q) => q.price === 0)) {
-    throw new Error('All sources returned all-zero prices');
+    throw new Error("All sources returned all-zero prices");
   }
 
   return { quotes };
@@ -115,11 +135,11 @@ function validate(data) {
   );
 }
 
-runSeed('market', 'crypto', CANONICAL_KEY, fetchCryptoQuotes, {
+runSeed("market", "crypto", CANONICAL_KEY, fetchCryptoQuotes, {
   validateFn: validate,
   ttlSeconds: CACHE_TTL,
-  sourceVersion: 'coingecko-markets',
+  sourceVersion: "coingecko-markets",
 }).catch((err) => {
-  console.error('FATAL:', err.message || err);
+  console.error("FATAL:", err.message || err);
   process.exit(1);
 });

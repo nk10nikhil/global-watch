@@ -2,6 +2,7 @@
 title: "Adding API Endpoints"
 description: "All JSON API endpoints in World Monitor must use sebuf. This guide walks through adding a new RPC to an existing service and adding an entirely new service."
 ---
+
 All JSON API endpoints in World Monitor **must** use sebuf. Do not create standalone `api/*.js` files — the legacy pattern is deprecated and being removed.
 
 This guide walks through adding a new RPC to an existing service and adding an entirely new service.
@@ -103,34 +104,35 @@ import type {
   ServerContext,
   GetEarthquakeDetailsRequest,
   GetEarthquakeDetailsResponse,
-} from '../../../../src/generated/server/worldmonitor/seismology/v1/service_server';
+} from "../../../../src/generated/server/worldmonitor/seismology/v1/service_server";
 
-export const getEarthquakeDetails: SeismologyServiceHandler['getEarthquakeDetails'] = async (
-  _ctx: ServerContext,
-  req: GetEarthquakeDetailsRequest,
-): Promise<GetEarthquakeDetailsResponse> => {
-  const response = await fetch(
-    `https://earthquake.usgs.gov/earthquakes/feed/v1.0/detail/${req.earthquakeId}.geojson`,
-  );
-  if (!response.ok) {
-    throw new Error(`USGS API error: ${response.status}`);
-  }
-  const f: any = await response.json();
-  return {
-    earthquake: {
-      id: f.id,
-      place: f.properties.place || '',
-      magnitude: f.properties.mag ?? 0,
-      depthKm: f.geometry.coordinates[2] ?? 0,
-      location: {
-        latitude: f.geometry.coordinates[1],
-        longitude: f.geometry.coordinates[0],
+export const getEarthquakeDetails: SeismologyServiceHandler["getEarthquakeDetails"] =
+  async (
+    _ctx: ServerContext,
+    req: GetEarthquakeDetailsRequest,
+  ): Promise<GetEarthquakeDetailsResponse> => {
+    const response = await fetch(
+      `https://earthquake.usgs.gov/earthquakes/feed/v1.0/detail/${req.earthquakeId}.geojson`,
+    );
+    if (!response.ok) {
+      throw new Error(`USGS API error: ${response.status}`);
+    }
+    const f: any = await response.json();
+    return {
+      earthquake: {
+        id: f.id,
+        place: f.properties.place || "",
+        magnitude: f.properties.mag ?? 0,
+        depthKm: f.geometry.coordinates[2] ?? 0,
+        location: {
+          latitude: f.geometry.coordinates[1],
+          longitude: f.geometry.coordinates[0],
+        },
+        occurredAt: f.properties.time,
+        sourceUrl: f.properties.url || "",
       },
-      occurredAt: f.properties.time,
-      sourceUrl: f.properties.url || '',
-    },
+    };
   };
-};
 ```
 
 ### 5. Wire it into the handler re-export
@@ -138,10 +140,10 @@ export const getEarthquakeDetails: SeismologyServiceHandler['getEarthquakeDetail
 Edit `server/worldmonitor/seismology/v1/handler.ts`:
 
 ```typescript
-import type { SeismologyServiceHandler } from '../../../../src/generated/server/worldmonitor/seismology/v1/service_server';
+import type { SeismologyServiceHandler } from "../../../../src/generated/server/worldmonitor/seismology/v1/service_server";
 
-import { listEarthquakes } from './list-earthquakes';
-import { getEarthquakeDetails } from './get-earthquake-details';
+import { listEarthquakes } from "./list-earthquakes";
+import { getEarthquakeDetails } from "./get-earthquake-details";
 
 export const seismologyHandler: SeismologyServiceHandler = {
   listEarthquakes,
@@ -270,15 +272,16 @@ server/worldmonitor/sanctions/v1/
 ```
 
 `server/worldmonitor/sanctions/v1/list-sanctions.ts`:
+
 ```typescript
 import type {
   SanctionsServiceHandler,
   ServerContext,
   ListSanctionsRequest,
   ListSanctionsResponse,
-} from '../../../../src/generated/server/worldmonitor/sanctions/v1/service_server';
+} from "../../../../src/generated/server/worldmonitor/sanctions/v1/service_server";
 
-export const listSanctions: SanctionsServiceHandler['listSanctions'] = async (
+export const listSanctions: SanctionsServiceHandler["listSanctions"] = async (
   _ctx: ServerContext,
   req: ListSanctionsRequest,
 ): Promise<ListSanctionsResponse> => {
@@ -288,10 +291,11 @@ export const listSanctions: SanctionsServiceHandler['listSanctions'] = async (
 ```
 
 `server/worldmonitor/sanctions/v1/handler.ts`:
-```typescript
-import type { SanctionsServiceHandler } from '../../../../src/generated/server/worldmonitor/sanctions/v1/service_server';
 
-import { listSanctions } from './list-sanctions';
+```typescript
+import type { SanctionsServiceHandler } from "../../../../src/generated/server/worldmonitor/sanctions/v1/service_server";
+
+import { listSanctions } from "./list-sanctions";
 
 export const sanctionsHandler: SanctionsServiceHandler = {
   listSanctions,
@@ -303,8 +307,8 @@ export const sanctionsHandler: SanctionsServiceHandler = {
 Edit `api/[[...path]].js` — add the import and mount the routes:
 
 ```typescript
-import { createSanctionsServiceRoutes } from '../src/generated/server/worldmonitor/sanctions/v1/service_server';
-import { sanctionsHandler } from './server/worldmonitor/sanctions/v1/handler';
+import { createSanctionsServiceRoutes } from "../src/generated/server/worldmonitor/sanctions/v1/service_server";
+import { sanctionsHandler } from "./server/worldmonitor/sanctions/v1/handler";
 
 const allRoutes = [
   // ... existing routes ...
@@ -325,19 +329,29 @@ import {
   SanctionsServiceClient,
   type SanctionsEntry,
   type ListSanctionsResponse,
-} from '@/generated/client/worldmonitor/sanctions/v1/service_client';
-import { createCircuitBreaker } from '@/utils';
+} from "@/generated/client/worldmonitor/sanctions/v1/service_client";
+import { createCircuitBreaker } from "@/utils";
 
 export type { SanctionsEntry };
 
-const client = new SanctionsServiceClient('', { fetch: fetch.bind(globalThis) });
-const breaker = createCircuitBreaker<ListSanctionsResponse>({ name: 'Sanctions' });
+const client = new SanctionsServiceClient("", {
+  fetch: fetch.bind(globalThis),
+});
+const breaker = createCircuitBreaker<ListSanctionsResponse>({
+  name: "Sanctions",
+});
 
 const emptyFallback: ListSanctionsResponse = { entries: [] };
 
-export async function fetchSanctions(authority?: string): Promise<SanctionsEntry[]> {
+export async function fetchSanctions(
+  authority?: string,
+): Promise<SanctionsEntry[]> {
   const response = await breaker.execute(async () => {
-    return client.listSanctions({ authority: authority ?? '', countryCode: '', pagination: undefined });
+    return client.listSanctions({
+      authority: authority ?? "",
+      countryCode: "",
+      pagination: undefined,
+    });
   }, emptyFallback);
   return response.entries;
 }
@@ -404,13 +418,13 @@ double latitude = 1 [
 
 Reuse these instead of redefining:
 
-| Type | Import | Use for |
-|------|--------|---------|
-| `GeoCoordinates` | `worldmonitor/core/v1/geo.proto` | Any lat/lon location (has built-in -90/90 and -180/180 bounds) |
-| `BoundingBox` | `worldmonitor/core/v1/geo.proto` | Spatial filtering |
-| `TimeRange` | `worldmonitor/core/v1/time.proto` | Time-based filtering (has `INT64_ENCODING_NUMBER`) |
-| `PaginationRequest` | `worldmonitor/core/v1/pagination.proto` | Request pagination (has page_size 1-100 constraint) |
-| `PaginationResponse` | `worldmonitor/core/v1/pagination.proto` | Response pagination metadata |
+| Type                 | Import                                  | Use for                                                        |
+| -------------------- | --------------------------------------- | -------------------------------------------------------------- |
+| `GeoCoordinates`     | `worldmonitor/core/v1/geo.proto`        | Any lat/lon location (has built-in -90/90 and -180/180 bounds) |
+| `BoundingBox`        | `worldmonitor/core/v1/geo.proto`        | Spatial filtering                                              |
+| `TimeRange`          | `worldmonitor/core/v1/time.proto`       | Time-based filtering (has `INT64_ENCODING_NUMBER`)             |
+| `PaginationRequest`  | `worldmonitor/core/v1/pagination.proto` | Request pagination (has page_size 1-100 constraint)            |
+| `PaginationResponse` | `worldmonitor/core/v1/pagination.proto` | Response pagination metadata                                   |
 
 ### Comments
 
@@ -426,7 +440,7 @@ buf lint enforces comments on all messages, fields, services, RPCs, and enum val
 Always type the handler function against the generated interface using indexed access:
 
 ```typescript
-export const listSanctions: SanctionsServiceHandler['listSanctions'] = async (
+export const listSanctions: SanctionsServiceHandler["listSanctions"] = async (
   _ctx: ServerContext,
   req: ListSanctionsRequest,
 ): Promise<ListSanctionsResponse> => {
@@ -441,7 +455,9 @@ This ensures the compiler catches any mismatch between your implementation and t
 Always pass `{ fetch: fetch.bind(globalThis) }` when creating clients:
 
 ```typescript
-const client = new SanctionsServiceClient('', { fetch: fetch.bind(globalThis) });
+const client = new SanctionsServiceClient("", {
+  fetch: fetch.bind(globalThis),
+});
 ```
 
 The empty string base URL works because both Vite dev server and Vercel serve the API on the same origin. The `fetch.bind(globalThis)` is required for Tauri compatibility.

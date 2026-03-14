@@ -33,9 +33,19 @@ export interface PaginationResponse {
   totalCount: number;
 }
 
-export type AnomalySeverity = "ANOMALY_SEVERITY_UNSPECIFIED" | "ANOMALY_SEVERITY_NORMAL" | "ANOMALY_SEVERITY_MODERATE" | "ANOMALY_SEVERITY_EXTREME";
+export type AnomalySeverity =
+  | "ANOMALY_SEVERITY_UNSPECIFIED"
+  | "ANOMALY_SEVERITY_NORMAL"
+  | "ANOMALY_SEVERITY_MODERATE"
+  | "ANOMALY_SEVERITY_EXTREME";
 
-export type AnomalyType = "ANOMALY_TYPE_UNSPECIFIED" | "ANOMALY_TYPE_WARM" | "ANOMALY_TYPE_COLD" | "ANOMALY_TYPE_WET" | "ANOMALY_TYPE_DRY" | "ANOMALY_TYPE_MIXED";
+export type AnomalyType =
+  | "ANOMALY_TYPE_UNSPECIFIED"
+  | "ANOMALY_TYPE_WARM"
+  | "ANOMALY_TYPE_COLD"
+  | "ANOMALY_TYPE_WET"
+  | "ANOMALY_TYPE_DRY"
+  | "ANOMALY_TYPE_MIXED";
 
 export interface FieldViolation {
   field: string;
@@ -85,13 +95,20 @@ export class ClimateServiceClient {
     this.defaultHeaders = { ...options?.defaultHeaders };
   }
 
-  async listClimateAnomalies(req: ListClimateAnomaliesRequest, options?: ClimateServiceCallOptions): Promise<ListClimateAnomaliesResponse> {
+  async listClimateAnomalies(
+    req: ListClimateAnomaliesRequest,
+    options?: ClimateServiceCallOptions,
+  ): Promise<ListClimateAnomaliesResponse> {
     let path = "/api/climate/v1/list-climate-anomalies";
     const params = new URLSearchParams();
-    if (req.pageSize != null && req.pageSize !== 0) params.set("page_size", String(req.pageSize));
-    if (req.cursor != null && req.cursor !== "") params.set("cursor", String(req.cursor));
-    if (req.minSeverity != null && req.minSeverity !== "") params.set("min_severity", String(req.minSeverity));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.pageSize != null && req.pageSize !== 0)
+      params.set("page_size", String(req.pageSize));
+    if (req.cursor != null && req.cursor !== "")
+      params.set("cursor", String(req.cursor));
+    if (req.minSeverity != null && req.minSeverity !== "")
+      params.set("min_severity", String(req.minSeverity));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -109,7 +126,7 @@ export class ClimateServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as ListClimateAnomaliesResponse;
+    return (await resp.json()) as ListClimateAnomaliesResponse;
   }
 
   private async handleError(resp: Response): Promise<never> {
@@ -124,7 +141,10 @@ export class ClimateServiceClient {
         if (e instanceof ValidationError) throw e;
       }
     }
-    throw new ApiError(resp.status, `Request failed with status ${resp.status}`, body);
+    throw new ApiError(
+      resp.status,
+      `Request failed with status ${resp.status}`,
+      body,
+    );
   }
 }
-

@@ -3,13 +3,13 @@ import type {
   AnalyzeStockResponse,
   ServerContext,
   StockAnalysisHeadline,
-} from '../../../../src/generated/server/worldmonitor/market/v1/service_server';
-import { callLlm } from '../../../_shared/llm';
-import { cachedFetchJson } from '../../../_shared/redis';
-import { CHROME_UA, yahooGate } from '../../../_shared/constants';
-import { UPSTREAM_TIMEOUT_MS, sanitizeSymbol } from './_shared';
-import { storeStockAnalysisSnapshot } from './premium-stock-store';
-import { searchRecentStockHeadlines } from './stock-news-search';
+} from "../../../../src/generated/server/worldmonitor/market/v1/service_server";
+import { callLlm } from "../../../_shared/llm";
+import { cachedFetchJson } from "../../../_shared/redis";
+import { CHROME_UA, yahooGate } from "../../../_shared/constants";
+import { UPSTREAM_TIMEOUT_MS, sanitizeSymbol } from "./_shared";
+import { storeStockAnalysisSnapshot } from "./premium-stock-store";
+import { searchRecentStockHeadlines } from "./stock-news-search";
 
 export type Candle = {
   timestamp: number;
@@ -20,11 +20,30 @@ export type Candle = {
   volume: number;
 };
 
-type TrendStatus = 'Strong bull' | 'Bull' | 'Weak bull' | 'Consolidation' | 'Weak bear' | 'Bear' | 'Strong bear';
-type VolumeStatus = 'Heavy volume up' | 'Heavy volume down' | 'Shrink volume up' | 'Shrink volume down' | 'Normal';
-type Signal = 'Strong buy' | 'Buy' | 'Hold' | 'Watch' | 'Sell' | 'Strong sell';
-type MacdStatus = 'Golden cross above zero' | 'Golden cross' | 'Bullish' | 'Crossing up' | 'Crossing down' | 'Bearish' | 'Death cross';
-type RsiStatus = 'Overbought' | 'Strong buy' | 'Neutral' | 'Weak' | 'Oversold';
+type TrendStatus =
+  | "Strong bull"
+  | "Bull"
+  | "Weak bull"
+  | "Consolidation"
+  | "Weak bear"
+  | "Bear"
+  | "Strong bear";
+type VolumeStatus =
+  | "Heavy volume up"
+  | "Heavy volume down"
+  | "Shrink volume up"
+  | "Shrink volume down"
+  | "Normal";
+type Signal = "Strong buy" | "Buy" | "Hold" | "Watch" | "Sell" | "Strong sell";
+type MacdStatus =
+  | "Golden cross above zero"
+  | "Golden cross"
+  | "Bullish"
+  | "Crossing up"
+  | "Crossing down"
+  | "Bearish"
+  | "Death cross";
+type RsiStatus = "Overbought" | "Strong buy" | "Neutral" | "Weak" | "Oversold";
 
 export type TechnicalSnapshot = {
   currentPrice: number;
@@ -106,7 +125,7 @@ const BIAS_THRESHOLD = 5;
 const VOLUME_SHRINK_RATIO = 0.7;
 const VOLUME_HEAVY_RATIO = 1.5;
 const MA_SUPPORT_TOLERANCE = 0.02;
-export const STOCK_ANALYSIS_ENGINE_VERSION = 'v2';
+export const STOCK_ANALYSIS_ENGINE_VERSION = "v2";
 
 function round(value: number, digits = 2): number {
   return Number.isFinite(value) ? Number(value.toFixed(digits)) : 0;
@@ -116,10 +135,10 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
-export function signalDirection(signal: string): 'long' | 'short' | null {
+export function signalDirection(signal: string): "long" | "short" | null {
   const normalized = signal.toLowerCase();
-  if (normalized.includes('buy')) return 'long';
-  if (normalized.includes('sell')) return 'short';
+  if (normalized.includes("buy")) return "long";
+  if (normalized.includes("sell")) return "short";
   return null;
 }
 
@@ -130,14 +149,20 @@ export function deriveTradeLevels(
   resistances: number[],
 ): { stopLoss: number; takeProfit: number } {
   const direction = signalDirection(signal);
-  if (direction === 'short') {
-    const stopLoss = resistances.find((level) => level > entryPrice) || entryPrice * 1.05;
-    const takeProfit = supports.find((level) => level > 0 && level < entryPrice) || entryPrice * 0.92;
+  if (direction === "short") {
+    const stopLoss =
+      resistances.find((level) => level > entryPrice) || entryPrice * 1.05;
+    const takeProfit =
+      supports.find((level) => level > 0 && level < entryPrice) ||
+      entryPrice * 0.92;
     return { stopLoss: round(stopLoss), takeProfit: round(takeProfit) };
   }
 
-  const stopLoss = supports.find((level) => level > 0 && level < entryPrice) || entryPrice * 0.95;
-  const takeProfit = resistances.find((level) => level > entryPrice) || entryPrice * 1.08;
+  const stopLoss =
+    supports.find((level) => level > 0 && level < entryPrice) ||
+    entryPrice * 0.95;
+  const takeProfit =
+    resistances.find((level) => level > entryPrice) || entryPrice * 1.08;
   return { stopLoss: round(stopLoss), takeProfit: round(takeProfit) };
 }
 
@@ -163,7 +188,7 @@ function emaSeries(values: number[], period: number): number[] {
   let prev = values[0] ?? 0;
   for (let i = 0; i < values.length; i++) {
     const value = values[i] ?? prev;
-    prev = i === 0 ? value : ((value - prev) * multiplier) + prev;
+    prev = i === 0 ? value : (value - prev) * multiplier + prev;
     out.push(prev);
   }
   return out;
@@ -182,9 +207,11 @@ function wilderSmoothing(values: number[], period: number): number[] {
 }
 
 function rsiSeries(values: number[], period: number): number[] {
-  const deltas = values.map((value, index) => index === 0 ? 0 : value - (values[index - 1] ?? value));
-  const gains = deltas.map((delta) => delta > 0 ? delta : 0);
-  const losses = deltas.map((delta) => delta < 0 ? -delta : 0);
+  const deltas = values.map((value, index) =>
+    index === 0 ? 0 : value - (values[index - 1] ?? value),
+  );
+  const gains = deltas.map((delta) => (delta > 0 ? delta : 0));
+  const losses = deltas.map((delta) => (delta < 0 ? -delta : 0));
   const avgGains = wilderSmoothing(gains, period);
   const avgLosses = wilderSmoothing(losses, period);
   return values.map((_, index) => {
@@ -193,7 +220,7 @@ function rsiSeries(values: number[], period: number): number[] {
     if (!Number.isFinite(avgGain) || !Number.isFinite(avgLoss)) return 50;
     if (avgLoss === 0) return avgGain === 0 ? 50 : 100;
     const rs = avgGain / avgLoss;
-    return 100 - (100 / (1 + rs));
+    return 100 - 100 / (1 + rs);
   });
 }
 
@@ -216,16 +243,18 @@ function uniqueRounded(values: number[]): number[] {
   return out;
 }
 
-export async function fetchYahooHistory(symbol: string): Promise<{ candles: Candle[]; currency: string } | null> {
+export async function fetchYahooHistory(
+  symbol: string,
+): Promise<{ candles: Candle[]; currency: string } | null> {
   await yahooGate();
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=6mo&interval=1d&includePrePost=false&events=div,splits`;
   const response = await fetch(url, {
-    headers: { 'User-Agent': CHROME_UA },
+    headers: { "User-Agent": CHROME_UA },
     signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
   });
   if (!response.ok) return null;
 
-  const data = await response.json() as YahooChartResponse;
+  const data = (await response.json()) as YahooChartResponse;
   const result = data.chart?.result?.[0];
   const quote = result?.indicators?.quote?.[0];
   const timestamps = result?.timestamp ?? [];
@@ -241,19 +270,27 @@ export async function fetchYahooHistory(symbol: string): Promise<{ candles: Cand
     const open = opens[i];
     const high = highs[i];
     const low = lows[i];
-    if (![close, open, high, low].every((value) => typeof value === 'number' && Number.isFinite(value))) continue;
+    if (
+      ![close, open, high, low].every(
+        (value) => typeof value === "number" && Number.isFinite(value),
+      )
+    )
+      continue;
     candles.push({
       timestamp: (timestamps[i] ?? 0) * 1000,
       open: open as number,
       high: high as number,
       low: low as number,
       close: close as number,
-      volume: typeof volumes[i] === 'number' && Number.isFinite(volumes[i]) ? (volumes[i] as number) : 0,
+      volume:
+        typeof volumes[i] === "number" && Number.isFinite(volumes[i])
+          ? (volumes[i] as number)
+          : 0,
     });
   }
 
   if (candles.length < 30) return null;
-  return { candles, currency: result?.meta?.currency || 'USD' };
+  return { candles, currency: result?.meta?.currency || "USD" };
 }
 
 export function buildTechnicalSnapshot(candles: Candle[]): TechnicalSnapshot {
@@ -264,12 +301,17 @@ export function buildTechnicalSnapshot(candles: Candle[]): TechnicalSnapshot {
   const ma5Series = smaSeries(closes, 5);
   const ma10Series = smaSeries(closes, 10);
   const ma20Series = smaSeries(closes, 20);
-  const ma60Series = candles.length >= 60 ? smaSeries(closes, 60) : ma20Series.slice();
+  const ma60Series =
+    candles.length >= 60 ? smaSeries(closes, 60) : ma20Series.slice();
   const ema12 = emaSeries(closes, 12);
   const ema26 = emaSeries(closes, 26);
-  const macdDifSeries = closes.map((_, index) => (ema12[index] ?? 0) - (ema26[index] ?? 0));
+  const macdDifSeries = closes.map(
+    (_, index) => (ema12[index] ?? 0) - (ema26[index] ?? 0),
+  );
   const macdDeaSeries = emaSeries(macdDifSeries, 9);
-  const macdBarSeries = macdDifSeries.map((value, index) => (value - (macdDeaSeries[index] ?? 0)) * 2);
+  const macdBarSeries = macdDifSeries.map(
+    (value, index) => (value - (macdDeaSeries[index] ?? 0)) * 2,
+  );
   const rsi6Series = rsiSeries(closes, 6);
   const rsi12Series = rsiSeries(closes, 12);
   const rsi24Series = rsiSeries(closes, 24);
@@ -291,69 +333,83 @@ export function buildTechnicalSnapshot(candles: Candle[]): TechnicalSnapshot {
   const rsi12 = rsi12Series[latestIndex] ?? 50;
   const rsi24 = rsi24Series[latestIndex] ?? 50;
 
-  let trendStatus: TrendStatus = 'Consolidation';
+  let trendStatus: TrendStatus = "Consolidation";
   let trendStrength = 50;
-  let maAlignment = 'Moving averages are compressed and direction is unclear.';
+  let maAlignment = "Moving averages are compressed and direction is unclear.";
 
   if (ma5 > ma10 && ma10 > ma20) {
-    const prevSpread = ((ma5Series[spreadIndex] ?? ma5) - (ma20Series[spreadIndex] ?? ma20)) / Math.max(ma20Series[spreadIndex] ?? ma20, 0.0001) * 100;
-    const currSpread = (ma5 - ma20) / Math.max(ma20, 0.0001) * 100;
+    const prevSpread =
+      (((ma5Series[spreadIndex] ?? ma5) - (ma20Series[spreadIndex] ?? ma20)) /
+        Math.max(ma20Series[spreadIndex] ?? ma20, 0.0001)) *
+      100;
+    const currSpread = ((ma5 - ma20) / Math.max(ma20, 0.0001)) * 100;
     if (currSpread > prevSpread && currSpread > 5) {
-      trendStatus = 'Strong bull';
+      trendStatus = "Strong bull";
       trendStrength = 90;
-      maAlignment = 'MA5 > MA10 > MA20 with expanding separation.';
+      maAlignment = "MA5 > MA10 > MA20 with expanding separation.";
     } else {
-      trendStatus = 'Bull';
+      trendStatus = "Bull";
       trendStrength = 75;
-      maAlignment = 'MA5 > MA10 > MA20 confirms a bullish stack.';
+      maAlignment = "MA5 > MA10 > MA20 confirms a bullish stack.";
     }
   } else if (ma5 > ma10 && ma10 <= ma20) {
-    trendStatus = 'Weak bull';
+    trendStatus = "Weak bull";
     trendStrength = 55;
-    maAlignment = 'Short-term trend is positive but MA20 still lags.';
+    maAlignment = "Short-term trend is positive but MA20 still lags.";
   } else if (ma5 < ma10 && ma10 < ma20) {
-    const prevSpread = ((ma20Series[spreadIndex] ?? ma20) - (ma5Series[spreadIndex] ?? ma5)) / Math.max(ma5Series[spreadIndex] ?? ma5, 0.0001) * 100;
-    const currSpread = (ma20 - ma5) / Math.max(ma5, 0.0001) * 100;
+    const prevSpread =
+      (((ma20Series[spreadIndex] ?? ma20) - (ma5Series[spreadIndex] ?? ma5)) /
+        Math.max(ma5Series[spreadIndex] ?? ma5, 0.0001)) *
+      100;
+    const currSpread = ((ma20 - ma5) / Math.max(ma5, 0.0001)) * 100;
     if (currSpread > prevSpread && currSpread > 5) {
-      trendStatus = 'Strong bear';
+      trendStatus = "Strong bear";
       trendStrength = 10;
-      maAlignment = 'MA5 < MA10 < MA20 with widening downside separation.';
+      maAlignment = "MA5 < MA10 < MA20 with widening downside separation.";
     } else {
-      trendStatus = 'Bear';
+      trendStatus = "Bear";
       trendStrength = 25;
-      maAlignment = 'MA5 < MA10 < MA20 confirms a bearish stack.';
+      maAlignment = "MA5 < MA10 < MA20 confirms a bearish stack.";
     }
   } else if (ma5 < ma10 && ma10 >= ma20) {
-    trendStatus = 'Weak bear';
+    trendStatus = "Weak bear";
     trendStrength = 40;
-    maAlignment = 'Short-term momentum is weak while MA20 still props the trend.';
+    maAlignment =
+      "Short-term momentum is weak while MA20 still props the trend.";
   }
 
   const biasMa5 = ((currentPrice - ma5) / Math.max(ma5, 0.0001)) * 100;
   const biasMa10 = ((currentPrice - ma10) / Math.max(ma10, 0.0001)) * 100;
   const biasMa20 = ((currentPrice - ma20) / Math.max(ma20, 0.0001)) * 100;
 
-  const prevFiveVolume = volumes.slice(Math.max(0, volumes.length - 6), volumes.length - 1).filter((value) => value > 0);
-  const volumeRatio5d = prevFiveVolume.length > 0 ? (volumes[latestIndex] ?? 0) / mean(prevFiveVolume) : 0;
-  const dayChange = ((currentPrice - previousClose) / Math.max(previousClose, 0.0001)) * 100;
+  const prevFiveVolume = volumes
+    .slice(Math.max(0, volumes.length - 6), volumes.length - 1)
+    .filter((value) => value > 0);
+  const volumeRatio5d =
+    prevFiveVolume.length > 0
+      ? (volumes[latestIndex] ?? 0) / mean(prevFiveVolume)
+      : 0;
+  const dayChange =
+    ((currentPrice - previousClose) / Math.max(previousClose, 0.0001)) * 100;
 
-  let volumeStatus: VolumeStatus = 'Normal';
-  let volumeTrend = 'Volume is close to the recent baseline.';
+  let volumeStatus: VolumeStatus = "Normal";
+  let volumeTrend = "Volume is close to the recent baseline.";
   if (volumeRatio5d >= VOLUME_HEAVY_RATIO) {
     if (dayChange > 0) {
-      volumeStatus = 'Heavy volume up';
-      volumeTrend = 'Price rose on strong participation.';
+      volumeStatus = "Heavy volume up";
+      volumeTrend = "Price rose on strong participation.";
     } else {
-      volumeStatus = 'Heavy volume down';
-      volumeTrend = 'Selling pressure expanded sharply.';
+      volumeStatus = "Heavy volume down";
+      volumeTrend = "Selling pressure expanded sharply.";
     }
   } else if (volumeRatio5d <= VOLUME_SHRINK_RATIO) {
     if (dayChange > 0) {
-      volumeStatus = 'Shrink volume up';
-      volumeTrend = 'Price pushed higher but participation stayed light.';
+      volumeStatus = "Shrink volume up";
+      volumeTrend = "Price pushed higher but participation stayed light.";
     } else {
-      volumeStatus = 'Shrink volume down';
-      volumeTrend = 'Pullback happened on lighter volume, which often signals digestion instead of panic.';
+      volumeStatus = "Shrink volume down";
+      volumeTrend =
+        "Pullback happened on lighter volume, which often signals digestion instead of panic.";
     }
   }
 
@@ -374,7 +430,8 @@ export function buildTechnicalSnapshot(candles: Candle[]): TechnicalSnapshot {
   const recentHigh = Math.max(...highs.slice(-20));
   const resistanceLevels = recentHigh > currentPrice ? [recentHigh] : [];
 
-  const prevMacdGap = (macdDifSeries[prevIndex] ?? 0) - (macdDeaSeries[prevIndex] ?? 0);
+  const prevMacdGap =
+    (macdDifSeries[prevIndex] ?? 0) - (macdDeaSeries[prevIndex] ?? 0);
   const currMacdGap = macdDif - macdDea;
   const isGoldenCross = prevMacdGap <= 0 && currMacdGap > 0;
   const isDeathCross = prevMacdGap >= 0 && currMacdGap < 0;
@@ -382,47 +439,47 @@ export function buildTechnicalSnapshot(candles: Candle[]): TechnicalSnapshot {
   const isCrossingUp = prevZero <= 0 && macdDif > 0;
   const isCrossingDown = prevZero >= 0 && macdDif < 0;
 
-  let macdStatus: MacdStatus = 'Bullish';
-  let macdSignal = 'MACD is neutral.';
+  let macdStatus: MacdStatus = "Bullish";
+  let macdSignal = "MACD is neutral.";
   if (isGoldenCross && macdDif > 0) {
-    macdStatus = 'Golden cross above zero';
-    macdSignal = 'MACD flashed a golden cross above the zero line.';
+    macdStatus = "Golden cross above zero";
+    macdSignal = "MACD flashed a golden cross above the zero line.";
   } else if (isCrossingUp) {
-    macdStatus = 'Crossing up';
-    macdSignal = 'MACD moved back above the zero line.';
+    macdStatus = "Crossing up";
+    macdSignal = "MACD moved back above the zero line.";
   } else if (isGoldenCross) {
-    macdStatus = 'Golden cross';
-    macdSignal = 'MACD turned up with a fresh golden cross.';
+    macdStatus = "Golden cross";
+    macdSignal = "MACD turned up with a fresh golden cross.";
   } else if (isDeathCross) {
-    macdStatus = 'Death cross';
-    macdSignal = 'MACD rolled over into a death cross.';
+    macdStatus = "Death cross";
+    macdSignal = "MACD rolled over into a death cross.";
   } else if (isCrossingDown) {
-    macdStatus = 'Crossing down';
-    macdSignal = 'MACD slipped below the zero line.';
+    macdStatus = "Crossing down";
+    macdSignal = "MACD slipped below the zero line.";
   } else if (macdDif > 0 && macdDea > 0) {
-    macdStatus = 'Bullish';
-    macdSignal = 'MACD remains above zero and constructive.';
+    macdStatus = "Bullish";
+    macdSignal = "MACD remains above zero and constructive.";
   } else if (macdDif < 0 && macdDea < 0) {
-    macdStatus = 'Bearish';
-    macdSignal = 'MACD remains below zero and defensive.';
+    macdStatus = "Bearish";
+    macdSignal = "MACD remains below zero and defensive.";
   }
 
-  let rsiStatus: RsiStatus = 'Neutral';
+  let rsiStatus: RsiStatus = "Neutral";
   let rsiSignal = `RSI(12) is ${round(rsi12, 1)}.`;
   if (rsi12 > 70) {
-    rsiStatus = 'Overbought';
+    rsiStatus = "Overbought";
     rsiSignal = `RSI(12) at ${round(rsi12, 1)} suggests stretched momentum.`;
   } else if (rsi12 > 60) {
-    rsiStatus = 'Strong buy';
+    rsiStatus = "Strong buy";
     rsiSignal = `RSI(12) at ${round(rsi12, 1)} confirms strong upside momentum.`;
   } else if (rsi12 >= 40) {
-    rsiStatus = 'Neutral';
+    rsiStatus = "Neutral";
     rsiSignal = `RSI(12) at ${round(rsi12, 1)} sits in the neutral zone.`;
   } else if (rsi12 >= 30) {
-    rsiStatus = 'Weak';
+    rsiStatus = "Weak";
     rsiSignal = `RSI(12) at ${round(rsi12, 1)} shows weak momentum but not washout.`;
   } else {
-    rsiStatus = 'Oversold';
+    rsiStatus = "Oversold";
     rsiSignal = `RSI(12) at ${round(rsi12, 1)} is deeply oversold.`;
   }
 
@@ -431,103 +488,146 @@ export function buildTechnicalSnapshot(candles: Candle[]): TechnicalSnapshot {
   const riskFactors: string[] = [];
 
   const trendScores: Record<TrendStatus, number> = {
-    'Strong bull': 30,
-    'Bull': 26,
-    'Weak bull': 18,
-    'Consolidation': 12,
-    'Weak bear': 8,
-    'Bear': 4,
-    'Strong bear': 0,
+    "Strong bull": 30,
+    Bull: 26,
+    "Weak bull": 18,
+    Consolidation: 12,
+    "Weak bear": 8,
+    Bear: 4,
+    "Strong bear": 0,
   };
   signalScore += trendScores[trendStatus];
-  if (trendStatus === 'Strong bull' || trendStatus === 'Bull') bullishFactors.push(`${trendStatus}: trend structure stays in buyers' favor.`);
-  if (trendStatus === 'Bear' || trendStatus === 'Strong bear') riskFactors.push(`${trendStatus}: moving-average structure is still working against longs.`);
+  if (trendStatus === "Strong bull" || trendStatus === "Bull")
+    bullishFactors.push(
+      `${trendStatus}: trend structure stays in buyers' favor.`,
+    );
+  if (trendStatus === "Bear" || trendStatus === "Strong bear")
+    riskFactors.push(
+      `${trendStatus}: moving-average structure is still working against longs.`,
+    );
 
-  const effectiveThreshold = trendStatus === 'Strong bull' && trendStrength >= 70 ? BIAS_THRESHOLD * 1.5 : BIAS_THRESHOLD;
+  const effectiveThreshold =
+    trendStatus === "Strong bull" && trendStrength >= 70
+      ? BIAS_THRESHOLD * 1.5
+      : BIAS_THRESHOLD;
   if (biasMa5 < 0) {
     if (biasMa5 > -3) {
       signalScore += 20;
-      bullishFactors.push(`Price is only ${round(biasMa5, 1)}% below MA5, a controlled pullback.`);
+      bullishFactors.push(
+        `Price is only ${round(biasMa5, 1)}% below MA5, a controlled pullback.`,
+      );
     } else if (biasMa5 > -5) {
       signalScore += 16;
-      bullishFactors.push(`Price is testing MA5 support at ${round(biasMa5, 1)}% below the line.`);
+      bullishFactors.push(
+        `Price is testing MA5 support at ${round(biasMa5, 1)}% below the line.`,
+      );
     } else {
       signalScore += 8;
-      riskFactors.push(`Price is ${round(biasMa5, 1)}% below MA5, which raises breakdown risk.`);
+      riskFactors.push(
+        `Price is ${round(biasMa5, 1)}% below MA5, which raises breakdown risk.`,
+      );
     }
   } else if (biasMa5 < 2) {
     signalScore += 18;
-    bullishFactors.push(`Price is hugging MA5 with only ${round(biasMa5, 1)}% extension.`);
+    bullishFactors.push(
+      `Price is hugging MA5 with only ${round(biasMa5, 1)}% extension.`,
+    );
   } else if (biasMa5 < BIAS_THRESHOLD) {
     signalScore += 14;
-    bullishFactors.push(`Price is modestly extended at ${round(biasMa5, 1)}% above MA5.`);
+    bullishFactors.push(
+      `Price is modestly extended at ${round(biasMa5, 1)}% above MA5.`,
+    );
   } else if (biasMa5 > effectiveThreshold) {
     signalScore += 4;
-    riskFactors.push(`Price is ${round(biasMa5, 1)}% above MA5, which is a chasing setup.`);
+    riskFactors.push(
+      `Price is ${round(biasMa5, 1)}% above MA5, which is a chasing setup.`,
+    );
   } else {
     signalScore += 10;
-    bullishFactors.push(`Strong trend gives some room for the current ${round(biasMa5, 1)}% extension.`);
+    bullishFactors.push(
+      `Strong trend gives some room for the current ${round(biasMa5, 1)}% extension.`,
+    );
   }
 
   const volumeScores: Record<VolumeStatus, number> = {
-    'Shrink volume down': 15,
-    'Heavy volume up': 12,
-    'Normal': 10,
-    'Shrink volume up': 6,
-    'Heavy volume down': 0,
+    "Shrink volume down": 15,
+    "Heavy volume up": 12,
+    Normal: 10,
+    "Shrink volume up": 6,
+    "Heavy volume down": 0,
   };
   signalScore += volumeScores[volumeStatus];
-  if (volumeStatus === 'Shrink volume down') bullishFactors.push('Pullback volume is light, which supports the consolidation thesis.');
-  if (volumeStatus === 'Heavy volume down') riskFactors.push('Downside move arrived with heavy volume.');
+  if (volumeStatus === "Shrink volume down")
+    bullishFactors.push(
+      "Pullback volume is light, which supports the consolidation thesis.",
+    );
+  if (volumeStatus === "Heavy volume down")
+    riskFactors.push("Downside move arrived with heavy volume.");
 
   if (supportMa5) {
     signalScore += 5;
-    bullishFactors.push('Price is holding the MA5 support area.');
+    bullishFactors.push("Price is holding the MA5 support area.");
   }
   if (supportMa10) {
     signalScore += 5;
-    bullishFactors.push('Price is holding the MA10 support area.');
+    bullishFactors.push("Price is holding the MA10 support area.");
   }
 
   const macdScores: Record<MacdStatus, number> = {
-    'Golden cross above zero': 15,
-    'Golden cross': 12,
-    'Crossing up': 10,
-    'Bullish': 8,
-    'Bearish': 2,
-    'Crossing down': 0,
-    'Death cross': 0,
+    "Golden cross above zero": 15,
+    "Golden cross": 12,
+    "Crossing up": 10,
+    Bullish: 8,
+    Bearish: 2,
+    "Crossing down": 0,
+    "Death cross": 0,
   };
   signalScore += macdScores[macdStatus];
-  if (macdStatus === 'Golden cross above zero' || macdStatus === 'Golden cross') bullishFactors.push(macdSignal);
-  else if (macdStatus === 'Death cross' || macdStatus === 'Crossing down') riskFactors.push(macdSignal);
+  if (macdStatus === "Golden cross above zero" || macdStatus === "Golden cross")
+    bullishFactors.push(macdSignal);
+  else if (macdStatus === "Death cross" || macdStatus === "Crossing down")
+    riskFactors.push(macdSignal);
   else bullishFactors.push(macdSignal);
 
   const rsiScores: Record<RsiStatus, number> = {
-    'Oversold': 10,
-    'Strong buy': 8,
-    'Neutral': 5,
-    'Weak': 3,
-    'Overbought': 0,
+    Oversold: 10,
+    "Strong buy": 8,
+    Neutral: 5,
+    Weak: 3,
+    Overbought: 0,
   };
   signalScore += rsiScores[rsiStatus];
-  if (rsiStatus === 'Oversold' || rsiStatus === 'Strong buy') bullishFactors.push(rsiSignal);
-  else if (rsiStatus === 'Overbought') riskFactors.push(rsiSignal);
+  if (rsiStatus === "Oversold" || rsiStatus === "Strong buy")
+    bullishFactors.push(rsiSignal);
+  else if (rsiStatus === "Overbought") riskFactors.push(rsiSignal);
   else bullishFactors.push(rsiSignal);
 
   signalScore = clamp(Math.round(signalScore), 0, 100);
 
-  let signal: Signal = 'Sell';
-  if (signalScore >= 75 && (trendStatus === 'Strong bull' || trendStatus === 'Bull')) signal = 'Strong buy';
-  else if (signalScore >= 60 && (trendStatus === 'Strong bull' || trendStatus === 'Bull' || trendStatus === 'Weak bull')) signal = 'Buy';
-  else if (signalScore >= 45) signal = 'Hold';
-  else if (signalScore >= 30) signal = 'Watch';
-  else if (trendStatus === 'Bear' || trendStatus === 'Strong bear') signal = 'Strong sell';
+  let signal: Signal = "Sell";
+  if (
+    signalScore >= 75 &&
+    (trendStatus === "Strong bull" || trendStatus === "Bull")
+  )
+    signal = "Strong buy";
+  else if (
+    signalScore >= 60 &&
+    (trendStatus === "Strong bull" ||
+      trendStatus === "Bull" ||
+      trendStatus === "Weak bull")
+  )
+    signal = "Buy";
+  else if (signalScore >= 45) signal = "Hold";
+  else if (signalScore >= 30) signal = "Watch";
+  else if (trendStatus === "Bear" || trendStatus === "Strong bear")
+    signal = "Strong sell";
 
   return {
     currentPrice: round(currentPrice),
-    changePercent: round(((currentPrice - previousClose) / Math.max(previousClose, 0.0001)) * 100),
-    currency: 'USD',
+    changePercent: round(
+      ((currentPrice - previousClose) / Math.max(previousClose, 0.0001)) * 100,
+    ),
+    currency: "USD",
     ma5: round(ma5),
     ma10: round(ma10),
     ma20: round(ma20),
@@ -562,20 +662,30 @@ export function buildTechnicalSnapshot(candles: Candle[]): TechnicalSnapshot {
   };
 }
 
-export function getFallbackOverlay(name: string, technical: TechnicalSnapshot, headlines: StockAnalysisHeadline[]): AiOverlay {
+export function getFallbackOverlay(
+  name: string,
+  technical: TechnicalSnapshot,
+  headlines: StockAnalysisHeadline[],
+): AiOverlay {
   const technicalSummary = `${technical.maAlignment} ${technical.volumeTrend} ${technical.macdSignal} ${technical.rsiSignal}`;
-  const newsSummary = headlines.length > 0
-    ? `Recent coverage is led by ${headlines[0]?.source || 'market press'}: ${headlines[0]?.title || 'no headline available'}`
-    : 'No material recent headlines were pulled into the report.';
+  const newsSummary =
+    headlines.length > 0
+      ? `Recent coverage is led by ${headlines[0]?.source || "market press"}: ${headlines[0]?.title || "no headline available"}`
+      : "No material recent headlines were pulled into the report.";
   const actionMap: Record<Signal, string> = {
-    'Strong buy': 'Build or add on controlled pullbacks.',
-    'Buy': 'Accumulate selectively while the trend holds.',
-    'Hold': 'Keep exposure but wait for a cleaner entry or confirmation.',
-    'Watch': 'Stay patient until the setup improves.',
-    'Sell': 'Reduce exposure into strength.',
-    'Strong sell': 'Exit or avoid new long exposure.',
+    "Strong buy": "Build or add on controlled pullbacks.",
+    Buy: "Accumulate selectively while the trend holds.",
+    Hold: "Keep exposure but wait for a cleaner entry or confirmation.",
+    Watch: "Stay patient until the setup improves.",
+    Sell: "Reduce exposure into strength.",
+    "Strong sell": "Exit or avoid new long exposure.",
   };
-  const confidence = technical.signalScore >= 75 ? 'High' : technical.signalScore >= 55 ? 'Medium' : 'Low';
+  const confidence =
+    technical.signalScore >= 75
+      ? "High"
+      : technical.signalScore >= 55
+        ? "Medium"
+        : "Low";
   return {
     summary: `${name} screens as ${technical.signal.toLowerCase()} with a ${technical.trendStatus.toLowerCase()} setup and a ${technical.signalScore}/100 score.`,
     action: actionMap[technical.signal],
@@ -585,8 +695,8 @@ export function getFallbackOverlay(name: string, technical: TechnicalSnapshot, h
     newsSummary,
     bullishFactors: technical.bullishFactors.slice(0, 4),
     riskFactors: technical.riskFactors.slice(0, 4),
-    provider: 'rules',
-    model: '',
+    provider: "rules",
+    model: "",
     fallback: true,
   };
 }
@@ -601,11 +711,12 @@ async function buildAiOverlay(
   const llm = await callLlm({
     messages: [
       {
-        role: 'system',
-        content: 'You are a disciplined stock analyst. Return strict JSON only with keys: summary, action, confidence, whyNow, technicalSummary, newsSummary, bullishFactors, riskFactors. Keep it concise, factual, and free of disclaimers.',
+        role: "system",
+        content:
+          "You are a disciplined stock analyst. Return strict JSON only with keys: summary, action, confidence, whyNow, technicalSummary, newsSummary, bullishFactors, riskFactors. Keep it concise, factual, and free of disclaimers.",
       },
       {
-        role: 'user',
+        role: "user",
         content: JSON.stringify({
           symbol,
           name,
@@ -646,7 +757,10 @@ async function buildAiOverlay(
     validate: (content) => {
       try {
         const parsed = JSON.parse(content) as Record<string, unknown>;
-        return typeof parsed.summary === 'string' && typeof parsed.action === 'string';
+        return (
+          typeof parsed.summary === "string" &&
+          typeof parsed.action === "string"
+        );
       } catch {
         return false;
       }
@@ -672,10 +786,17 @@ async function buildAiOverlay(
       action: parsed.action?.trim() || fallback.action,
       confidence: parsed.confidence?.trim() || fallback.confidence,
       whyNow: parsed.whyNow?.trim() || fallback.whyNow,
-      technicalSummary: parsed.technicalSummary?.trim() || fallback.technicalSummary,
+      technicalSummary:
+        parsed.technicalSummary?.trim() || fallback.technicalSummary,
       newsSummary: parsed.newsSummary?.trim() || fallback.newsSummary,
-      bullishFactors: Array.isArray(parsed.bullishFactors) && parsed.bullishFactors.length > 0 ? parsed.bullishFactors.slice(0, 4) : fallback.bullishFactors,
-      riskFactors: Array.isArray(parsed.riskFactors) && parsed.riskFactors.length > 0 ? parsed.riskFactors.slice(0, 4) : fallback.riskFactors,
+      bullishFactors:
+        Array.isArray(parsed.bullishFactors) && parsed.bullishFactors.length > 0
+          ? parsed.bullishFactors.slice(0, 4)
+          : fallback.bullishFactors,
+      riskFactors:
+        Array.isArray(parsed.riskFactors) && parsed.riskFactors.length > 0
+          ? parsed.riskFactors.slice(0, 4)
+          : fallback.riskFactors,
       provider: llm.provider,
       model: llm.model,
       fallback: false,
@@ -708,7 +829,9 @@ export function buildAnalysisResponse(params: {
     analysisAt,
     generatedAt,
   } = params;
-  const analysisId = params.analysisId || `stock:${STOCK_ANALYSIS_ENGINE_VERSION}:${symbol}:${analysisAt}:${includeNews ? 'news' : 'core'}`;
+  const analysisId =
+    params.analysisId ||
+    `stock:${STOCK_ANALYSIS_ENGINE_VERSION}:${symbol}:${analysisAt}:${includeNews ? "news" : "core"}`;
   const { stopLoss, takeProfit } = deriveTradeLevels(
     technical.signal,
     technical.currentPrice,
@@ -766,27 +889,31 @@ export function buildAnalysisResponse(params: {
   };
 }
 
-function buildEmptyAnalysisResponse(symbol: string, name: string, includeNews: boolean): AnalyzeStockResponse {
+function buildEmptyAnalysisResponse(
+  symbol: string,
+  name: string,
+  includeNews: boolean,
+): AnalyzeStockResponse {
   return {
     available: false,
     symbol,
     name,
     display: symbol,
-    currency: '',
+    currency: "",
     currentPrice: 0,
     changePercent: 0,
     signalScore: 0,
-    signal: '',
-    trendStatus: '',
-    volumeStatus: '',
-    macdStatus: '',
-    rsiStatus: '',
-    summary: '',
-    action: '',
-    confidence: '',
-    technicalSummary: '',
-    newsSummary: '',
-    whyNow: '',
+    signal: "",
+    trendStatus: "",
+    volumeStatus: "",
+    macdStatus: "",
+    rsiStatus: "",
+    summary: "",
+    action: "",
+    confidence: "",
+    technicalSummary: "",
+    newsSummary: "",
+    whyNow: "",
     bullishFactors: [],
     riskFactors: [],
     supportLevels: [],
@@ -804,12 +931,12 @@ function buildEmptyAnalysisResponse(symbol: string, name: string, includeNews: b
     macdDif: 0,
     macdDea: 0,
     macdBar: 0,
-    provider: '',
-    model: '',
+    provider: "",
+    model: "",
     fallback: true,
     newsSearched: includeNews,
-    generatedAt: '',
-    analysisId: '',
+    generatedAt: "",
+    analysisId: "",
     analysisAt: 0,
     stopLoss: 0,
     takeProfit: 0,
@@ -821,39 +948,52 @@ export async function analyzeStock(
   _ctx: ServerContext,
   req: AnalyzeStockRequest,
 ): Promise<AnalyzeStockResponse> {
-  const symbol = sanitizeSymbol(req.symbol || '');
+  const symbol = sanitizeSymbol(req.symbol || "");
   if (!symbol) {
-    return buildEmptyAnalysisResponse('', '', false);
+    return buildEmptyAnalysisResponse("", "", false);
   }
 
   const name = (req.name || symbol).trim().slice(0, 120) || symbol;
   const includeNews = req.includeNews === true;
-  const nameSuffix = name !== symbol ? `:${name.replace(/[^a-zA-Z0-9]/g, '').slice(0, 30).toLowerCase()}` : '';
-  const cacheKey = `market:analyze-stock:v1:${symbol}:${includeNews ? 'news' : 'no-news'}${nameSuffix}`;
+  const nameSuffix =
+    name !== symbol
+      ? `:${name
+          .replace(/[^a-zA-Z0-9]/g, "")
+          .slice(0, 30)
+          .toLowerCase()}`
+      : "";
+  const cacheKey = `market:analyze-stock:v1:${symbol}:${includeNews ? "news" : "no-news"}${nameSuffix}`;
 
-  const cached = await cachedFetchJson<AnalyzeStockResponse>(cacheKey, CACHE_TTL_SECONDS, async () => {
-    const history = await fetchYahooHistory(symbol);
-    if (!history) return null;
+  const cached = await cachedFetchJson<AnalyzeStockResponse>(
+    cacheKey,
+    CACHE_TTL_SECONDS,
+    async () => {
+      const history = await fetchYahooHistory(symbol);
+      if (!history) return null;
 
-    const technical = buildTechnicalSnapshot(history.candles);
-    technical.currency = history.currency || 'USD';
-    const headlines = includeNews ? (await searchRecentStockHeadlines(symbol, name, NEWS_LIMIT)).headlines : [];
-    const overlay = await buildAiOverlay(symbol, name, technical, headlines);
-    const analysisAt = history.candles[history.candles.length - 1]?.timestamp || Date.now();
-    const response = buildAnalysisResponse({
-      symbol,
-      name,
-      currency: history.currency || 'USD',
-      technical,
-      headlines,
-      overlay,
-      includeNews,
-      analysisAt,
-      generatedAt: new Date().toISOString(),
-    });
-    await storeStockAnalysisSnapshot(response, includeNews);
-    return response;
-  });
+      const technical = buildTechnicalSnapshot(history.candles);
+      technical.currency = history.currency || "USD";
+      const headlines = includeNews
+        ? (await searchRecentStockHeadlines(symbol, name, NEWS_LIMIT)).headlines
+        : [];
+      const overlay = await buildAiOverlay(symbol, name, technical, headlines);
+      const analysisAt =
+        history.candles[history.candles.length - 1]?.timestamp || Date.now();
+      const response = buildAnalysisResponse({
+        symbol,
+        name,
+        currency: history.currency || "USD",
+        technical,
+        headlines,
+        overlay,
+        includeNews,
+        analysisAt,
+        generatedAt: new Date().toISOString(),
+      });
+      await storeStockAnalysisSnapshot(response, includeNews);
+      return response;
+    },
+  );
 
   if (cached) return cached;
 

@@ -1,6 +1,10 @@
-import type { ClusteredEvent } from '@/types';
-import { inferGeoHubsFromTitle, type GeoHubLocation } from './geo-hub-index';
-import { deriveHubActivityLevel, deriveHubTrend, normalizeHubScore } from './hub-activity-scoring';
+import type { ClusteredEvent } from "@/types";
+import { inferGeoHubsFromTitle, type GeoHubLocation } from "./geo-hub-index";
+import {
+  deriveHubActivityLevel,
+  deriveHubTrend,
+  normalizeHubScore,
+} from "./hub-activity-scoring";
 
 export interface GeoHubActivity {
   hubId: string;
@@ -9,14 +13,14 @@ export interface GeoHubActivity {
   country: string;
   lat: number;
   lon: number;
-  type: 'capital' | 'conflict' | 'strategic' | 'organization';
-  tier: 'critical' | 'major' | 'notable';
-  activityLevel: 'high' | 'elevated' | 'low';
+  type: "capital" | "conflict" | "strategic" | "organization";
+  tier: "critical" | "major" | "notable";
+  activityLevel: "high" | "elevated" | "low";
   score: number;
   newsCount: number;
   hasBreaking: boolean;
   topStories: Array<{ title: string; link: string }>;
-  trend: 'rising' | 'stable' | 'falling';
+  trend: "rising" | "stable" | "falling";
   matchedKeywords: string[];
 }
 
@@ -41,7 +45,9 @@ const TYPE_BONUS: Record<string, number> = {
   organization: 5,
 };
 
-export function aggregateGeoActivity(clusters: ClusteredEvent[]): GeoHubActivity[] {
+export function aggregateGeoActivity(
+  clusters: ClusteredEvent[],
+): GeoHubActivity[] {
   const hubAccumulators = new Map<string, HubAccumulator>();
 
   for (const cluster of clusters) {
@@ -75,7 +81,11 @@ export function aggregateGeoActivity(clusters: ClusteredEvent[]): GeoHubActivity
     }
   }
 
-  const rawScores: Array<{ hubId: string; acc: HubAccumulator; rawScore: number }> = [];
+  const rawScores: Array<{
+    hubId: string;
+    acc: HubAccumulator;
+    rawScore: number;
+  }> = [];
   let maxRawScore = 0;
 
   for (const [hubId, acc] of hubAccumulators) {
@@ -104,7 +114,7 @@ export function aggregateGeoActivity(clusters: ClusteredEvent[]): GeoHubActivity
 
     const topStories = acc.clusters
       .slice(0, 3)
-      .map(c => ({ title: c.primaryTitle, link: c.primaryLink }));
+      .map((c) => ({ title: c.primaryTitle, link: c.primaryLink }));
 
     const trend = deriveHubTrend(acc.totalVelocity, newsCount);
 
@@ -132,11 +142,17 @@ export function aggregateGeoActivity(clusters: ClusteredEvent[]): GeoHubActivity
   return activities;
 }
 
-export function getTopActiveGeoHubs(clusters: ClusteredEvent[], limit = 10): GeoHubActivity[] {
+export function getTopActiveGeoHubs(
+  clusters: ClusteredEvent[],
+  limit = 10,
+): GeoHubActivity[] {
   return aggregateGeoActivity(clusters).slice(0, limit);
 }
 
-export function getGeoHubActivity(hubId: string, clusters: ClusteredEvent[]): GeoHubActivity | undefined {
+export function getGeoHubActivity(
+  hubId: string,
+  clusters: ClusteredEvent[],
+): GeoHubActivity | undefined {
   const activities = aggregateGeoActivity(clusters);
-  return activities.find(a => a.hubId === hubId);
+  return activities.find((a) => a.hubId === hubId);
 }

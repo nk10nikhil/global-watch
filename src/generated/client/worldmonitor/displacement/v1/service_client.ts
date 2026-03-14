@@ -131,13 +131,20 @@ export class DisplacementServiceClient {
     this.defaultHeaders = { ...options?.defaultHeaders };
   }
 
-  async getDisplacementSummary(req: GetDisplacementSummaryRequest, options?: DisplacementServiceCallOptions): Promise<GetDisplacementSummaryResponse> {
+  async getDisplacementSummary(
+    req: GetDisplacementSummaryRequest,
+    options?: DisplacementServiceCallOptions,
+  ): Promise<GetDisplacementSummaryResponse> {
     let path = "/api/displacement/v1/get-displacement-summary";
     const params = new URLSearchParams();
-    if (req.year != null && req.year !== 0) params.set("year", String(req.year));
-    if (req.countryLimit != null && req.countryLimit !== 0) params.set("country_limit", String(req.countryLimit));
-    if (req.flowLimit != null && req.flowLimit !== 0) params.set("flow_limit", String(req.flowLimit));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.year != null && req.year !== 0)
+      params.set("year", String(req.year));
+    if (req.countryLimit != null && req.countryLimit !== 0)
+      params.set("country_limit", String(req.countryLimit));
+    if (req.flowLimit != null && req.flowLimit !== 0)
+      params.set("flow_limit", String(req.flowLimit));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -155,17 +162,23 @@ export class DisplacementServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as GetDisplacementSummaryResponse;
+    return (await resp.json()) as GetDisplacementSummaryResponse;
   }
 
-  async getPopulationExposure(req: GetPopulationExposureRequest, options?: DisplacementServiceCallOptions): Promise<GetPopulationExposureResponse> {
+  async getPopulationExposure(
+    req: GetPopulationExposureRequest,
+    options?: DisplacementServiceCallOptions,
+  ): Promise<GetPopulationExposureResponse> {
     let path = "/api/displacement/v1/get-population-exposure";
     const params = new URLSearchParams();
-    if (req.mode != null && req.mode !== "") params.set("mode", String(req.mode));
+    if (req.mode != null && req.mode !== "")
+      params.set("mode", String(req.mode));
     if (req.lat != null && req.lat !== 0) params.set("lat", String(req.lat));
     if (req.lon != null && req.lon !== 0) params.set("lon", String(req.lon));
-    if (req.radius != null && req.radius !== 0) params.set("radius", String(req.radius));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.radius != null && req.radius !== 0)
+      params.set("radius", String(req.radius));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -183,7 +196,7 @@ export class DisplacementServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as GetPopulationExposureResponse;
+    return (await resp.json()) as GetPopulationExposureResponse;
   }
 
   private async handleError(resp: Response): Promise<never> {
@@ -198,7 +211,10 @@ export class DisplacementServiceClient {
         if (e instanceof ValidationError) throw e;
       }
     }
-    throw new ApiError(resp.status, `Request failed with status ${resp.status}`, body);
+    throw new ApiError(
+      resp.status,
+      `Request failed with status ${resp.status}`,
+      body,
+    );
   }
 }
-

@@ -20,7 +20,7 @@ export interface HappinessData {
  * Uses dynamic import for code-splitting (JSON only loaded for happy variant).
  */
 export async function fetchHappinessScores(): Promise<HappinessData> {
-  const { default: raw } = await import('@/data/world-happiness.json');
+  const { default: raw } = await import("@/data/world-happiness.json");
   return {
     year: raw.year,
     source: raw.source,

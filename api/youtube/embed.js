@@ -1,12 +1,12 @@
-export const config = { runtime: 'edge' };
+export const config = { runtime: "edge" };
 
-function parseFlag(value, fallback = '1') {
-  if (value === '0' || value === '1') return value;
+function parseFlag(value, fallback = "1") {
+  if (value === "0" || value === "1") return value;
   return fallback;
 }
 
 function sanitizeVideoId(value) {
-  if (typeof value !== 'string') return null;
+  if (typeof value !== "string") return null;
   return /^[A-Za-z0-9_-]{11}$/.test(value) ? value : null;
 }
 
@@ -30,17 +30,23 @@ function sanitizeAllowedOrigin(raw, fallback, allowList = ALLOWED_ORIGINS) {
   if (!raw) return fallback;
   try {
     const parsed = new URL(raw);
-    if (!['https:', 'http:', 'tauri:'].includes(parsed.protocol)) {
+    if (!["https:", "http:", "tauri:"].includes(parsed.protocol)) {
       return fallback;
     }
-    const origin = parsed.origin !== 'null' ? parsed.origin : raw;
-    if (allowList.some(p => p.test(origin))) return origin;
-  } catch { /* invalid URL */ }
+    const origin = parsed.origin !== "null" ? parsed.origin : raw;
+    if (allowList.some((p) => p.test(origin))) return origin;
+  } catch {
+    /* invalid URL */
+  }
   return fallback;
 }
 
 function sanitizeOrigin(raw) {
-  return sanitizeAllowedOrigin(raw, 'https://worldmonitor.app', ALLOWED_ORIGINS);
+  return sanitizeAllowedOrigin(
+    raw,
+    "https://worldmonitor.app",
+    ALLOWED_ORIGINS,
+  );
 }
 
 function sanitizeParentOrigin(raw, fallback) {
@@ -49,31 +55,38 @@ function sanitizeParentOrigin(raw, fallback) {
 
 export default async function handler(request) {
   const url = new URL(request.url);
-  const videoId = sanitizeVideoId(url.searchParams.get('videoId'));
+  const videoId = sanitizeVideoId(url.searchParams.get("videoId"));
 
   if (!videoId) {
-    return new Response('Missing or invalid videoId', {
+    return new Response("Missing or invalid videoId", {
       status: 400,
-      headers: { 'content-type': 'text/plain; charset=utf-8' },
+      headers: { "content-type": "text/plain; charset=utf-8" },
     });
   }
 
-  const autoplay = parseFlag(url.searchParams.get('autoplay'), '1');
-  const mute = parseFlag(url.searchParams.get('mute'), '1');
-  const vq = ['small', 'medium', 'large', 'hd720', 'hd1080'].includes(url.searchParams.get('vq') || '') ? url.searchParams.get('vq') : '';
+  const autoplay = parseFlag(url.searchParams.get("autoplay"), "1");
+  const mute = parseFlag(url.searchParams.get("mute"), "1");
+  const vq = ["small", "medium", "large", "hd720", "hd1080"].includes(
+    url.searchParams.get("vq") || "",
+  )
+    ? url.searchParams.get("vq")
+    : "";
 
-  const origin = sanitizeOrigin(url.searchParams.get('origin'));
-  const parentOrigin = sanitizeParentOrigin(url.searchParams.get('parentOrigin'), origin);
+  const origin = sanitizeOrigin(url.searchParams.get("origin"));
+  const parentOrigin = sanitizeParentOrigin(
+    url.searchParams.get("parentOrigin"),
+    origin,
+  );
 
   const embedSrc = new URL(`https://www.youtube.com/embed/${videoId}`);
-  embedSrc.searchParams.set('autoplay', autoplay);
-  embedSrc.searchParams.set('mute', mute);
-  embedSrc.searchParams.set('playsinline', '1');
-  embedSrc.searchParams.set('rel', '0');
-  embedSrc.searchParams.set('controls', '1');
-  embedSrc.searchParams.set('enablejsapi', '1');
-  embedSrc.searchParams.set('origin', origin);
-  embedSrc.searchParams.set('widget_referrer', origin);
+  embedSrc.searchParams.set("autoplay", autoplay);
+  embedSrc.searchParams.set("mute", mute);
+  embedSrc.searchParams.set("playsinline", "1");
+  embedSrc.searchParams.set("rel", "0");
+  embedSrc.searchParams.set("controls", "1");
+  embedSrc.searchParams.set("enablejsapi", "1");
+  embedSrc.searchParams.set("origin", origin);
+  embedSrc.searchParams.set("widget_referrer", origin);
 
   const html = `<!doctype html>
 <html lang="en">
@@ -133,7 +146,7 @@ export default async function handler(request) {
         events:{
           onReady:function(){
             window.parent.postMessage({type:'yt-ready'},parentOrigin);
-            ${vq ? `if(player.setPlaybackQuality)player.setPlaybackQuality('${vq}');` : ''}
+            ${vq ? `if(player.setPlaybackQuality)player.setPlaybackQuality('${vq}');` : ""}
             if(${autoplay}===1){player.playVideo()}
             startMuteSync();
           },
@@ -172,12 +185,12 @@ export default async function handler(request) {
   return new Response(html, {
     status: 200,
     headers: {
-      'content-type': 'text/html; charset=utf-8',
-      'cache-control': 'public, s-maxage=900, stale-while-revalidate=300',
+      "content-type": "text/html; charset=utf-8",
+      "cache-control": "public, s-maxage=900, stale-while-revalidate=300",
       // Allow the nested YouTube iframe to call requestStorageAccess() for
       // unpartitioned cookie access (lets signed-in users skip bot-check).
       // Scope storage-access permission to self and YouTube only rather than *.
-      'permissions-policy': 'storage-access=(self "https://www.youtube.com")',
+      "permissions-policy": 'storage-access=(self "https://www.youtube.com")',
     },
   });
 }

@@ -1,12 +1,18 @@
-import { Panel } from './Panel';
-import { escapeHtml } from '@/utils/sanitize';
-import { fetchCachedTheaterPosture, type CachedTheaterPosture } from '@/services/cached-theater-posture';
-import { fetchMilitaryVessels } from '@/services/military-vessels';
-import { recalcPostureWithVessels, type TheaterPostureSummary } from '@/services/military-surge';
-import { isDesktopRuntime } from '@/services/runtime';
-import { t } from '../services/i18n';
-import type { NewsItem, DeductContextDetail } from '@/types';
-import { buildNewsContext } from '@/utils/news-context';
+import { Panel } from "./Panel";
+import { escapeHtml } from "@/utils/sanitize";
+import {
+  fetchCachedTheaterPosture,
+  type CachedTheaterPosture,
+} from "@/services/cached-theater-posture";
+import { fetchMilitaryVessels } from "@/services/military-vessels";
+import {
+  recalcPostureWithVessels,
+  type TheaterPostureSummary,
+} from "@/services/military-surge";
+import { isDesktopRuntime } from "@/services/runtime";
+import { t } from "../services/i18n";
+import type { NewsItem, DeductContextDetail } from "@/types";
+import { buildNewsContext } from "@/utils/news-context";
 
 export class StrategicPosturePanel extends Panel {
   private postures: TheaterPostureSummary[] = [];
@@ -14,16 +20,16 @@ export class StrategicPosturePanel extends Panel {
   private loadingElapsedInterval: ReturnType<typeof setInterval> | null = null;
   private loadingStartTime: number = 0;
   private onLocationClick?: (lat: number, lon: number) => void;
-  private lastTimestamp: string = '';
+  private lastTimestamp: string = "";
   private isStale: boolean = false;
 
   constructor(private getLatestNews?: () => NewsItem[]) {
     super({
-      id: 'strategic-posture',
-      title: t('panels.strategicPosture'),
+      id: "strategic-posture",
+      title: t("panels.strategicPosture"),
       showCount: false,
       trackActivity: true,
-      infoTooltip: t('components.strategicPosture.infoTooltip'),
+      infoTooltip: t("components.strategicPosture.infoTooltip"),
     });
     this.init();
   }
@@ -33,19 +39,27 @@ export class StrategicPosturePanel extends Panel {
     void this.fetchAndRender();
     // Re-augment with vessels after stream has had time to populate
     // AIS data accumulates gradually - check at 30s, 60s, 90s, 120s
-    this.vesselTimeouts.push(setTimeout(() => this.reaugmentVessels(), 30 * 1000));
-    this.vesselTimeouts.push(setTimeout(() => this.reaugmentVessels(), 60 * 1000));
-    this.vesselTimeouts.push(setTimeout(() => this.reaugmentVessels(), 90 * 1000));
-    this.vesselTimeouts.push(setTimeout(() => this.reaugmentVessels(), 120 * 1000));
+    this.vesselTimeouts.push(
+      setTimeout(() => this.reaugmentVessels(), 30 * 1000),
+    );
+    this.vesselTimeouts.push(
+      setTimeout(() => this.reaugmentVessels(), 60 * 1000),
+    );
+    this.vesselTimeouts.push(
+      setTimeout(() => this.reaugmentVessels(), 90 * 1000),
+    );
+    this.vesselTimeouts.push(
+      setTimeout(() => this.reaugmentVessels(), 120 * 1000),
+    );
   }
 
   private isPanelVisible(): boolean {
-    return !this.element.classList.contains('hidden');
+    return !this.element.classList.contains("hidden");
   }
 
   private async reaugmentVessels(): Promise<void> {
     if (!this.isPanelVisible() || this.postures.length === 0) return;
-    console.log('[StrategicPosturePanel] Re-augmenting with vessels...');
+    console.log("[StrategicPosturePanel] Re-augmenting with vessels...");
     await this.augmentWithVessels();
     if (!this.element?.isConnected) return;
     this.render();
@@ -60,24 +74,24 @@ export class StrategicPosturePanel extends Panel {
             <div class="posture-radar-sweep"></div>
             <div class="posture-radar-dot"></div>
           </div>
-          <div class="posture-loading-title">${t('components.strategicPosture.scanningTheaters')}</div>
+          <div class="posture-loading-title">${t("components.strategicPosture.scanningTheaters")}</div>
           <div class="posture-loading-stages">
             <div class="posture-stage active">
               <span class="posture-stage-dot"></span>
-              <span>${t('components.strategicPosture.positions')}</span>
+              <span>${t("components.strategicPosture.positions")}</span>
             </div>
             <div class="posture-stage pending">
               <span class="posture-stage-dot"></span>
-              <span>${t('components.strategicPosture.navalVesselsLoading')}</span>
+              <span>${t("components.strategicPosture.navalVesselsLoading")}</span>
             </div>
             <div class="posture-stage pending">
               <span class="posture-stage-dot"></span>
-              <span>${t('components.strategicPosture.theaterAnalysis')}</span>
+              <span>${t("components.strategicPosture.theaterAnalysis")}</span>
             </div>
           </div>
-          <div class="posture-loading-tip">${t('components.strategicPosture.connectingStreams')}</div>
-          <div class="posture-loading-elapsed">${t('components.strategicPosture.elapsed', { elapsed: '0' })}</div>
-          <div class="posture-loading-note">${t('components.strategicPosture.initialLoadNote')}</div>
+          <div class="posture-loading-tip">${t("components.strategicPosture.connectingStreams")}</div>
+          <div class="posture-loading-elapsed">${t("components.strategicPosture.elapsed", { elapsed: "0" })}</div>
+          <div class="posture-loading-note">${t("components.strategicPosture.initialLoadNote")}</div>
         </div>
       </div>
     `);
@@ -88,9 +102,11 @@ export class StrategicPosturePanel extends Panel {
     if (this.loadingElapsedInterval) clearInterval(this.loadingElapsedInterval);
     this.loadingElapsedInterval = setInterval(() => {
       const elapsed = Math.floor((Date.now() - this.loadingStartTime) / 1000);
-      const elapsedEl = this.content.querySelector('.posture-loading-elapsed');
+      const elapsedEl = this.content.querySelector(".posture-loading-elapsed");
       if (elapsedEl) {
-        elapsedEl.textContent = t('components.strategicPosture.elapsed', { elapsed: String(elapsed) });
+        elapsedEl.textContent = t("components.strategicPosture.elapsed", {
+          elapsed: String(elapsed),
+        });
       }
     }, 1000);
   }
@@ -102,19 +118,19 @@ export class StrategicPosturePanel extends Panel {
     }
   }
 
-  private showLoadingStage(stage: 'aircraft' | 'vessels' | 'analysis'): void {
-    const stages = this.content.querySelectorAll('.posture-stage');
+  private showLoadingStage(stage: "aircraft" | "vessels" | "analysis"): void {
+    const stages = this.content.querySelectorAll(".posture-stage");
     if (stages.length === 0) return;
 
     stages.forEach((el, i) => {
-      el.classList.remove('active', 'complete');
-      if (stage === 'aircraft' && i === 0) el.classList.add('active');
-      else if (stage === 'vessels') {
-        if (i === 0) el.classList.add('complete');
-        else if (i === 1) el.classList.add('active');
-      } else if (stage === 'analysis') {
-        if (i <= 1) el.classList.add('complete');
-        else if (i === 2) el.classList.add('active');
+      el.classList.remove("active", "complete");
+      if (stage === "aircraft" && i === 0) el.classList.add("active");
+      else if (stage === "vessels") {
+        if (i === 0) el.classList.add("complete");
+        else if (i === 1) el.classList.add("active");
+      } else if (stage === "analysis") {
+        if (i <= 1) el.classList.add("complete");
+        else if (i === 2) el.classList.add("active");
       }
     });
   }
@@ -124,7 +140,7 @@ export class StrategicPosturePanel extends Panel {
 
     try {
       // Fetch aircraft data from server
-      this.showLoadingStage('aircraft');
+      this.showLoadingStage("aircraft");
       const data = await fetchCachedTheaterPosture(this.signal);
       if (!this.element?.isConnected) return;
       if (!data || !data.postures?.length) {
@@ -141,11 +157,11 @@ export class StrategicPosturePanel extends Panel {
       this.isStale = data.stale || false;
 
       // Try to augment with vessel data (client-side)
-      this.showLoadingStage('vessels');
+      this.showLoadingStage("vessels");
       await this.augmentWithVessels();
       if (!this.element?.isConnected) return;
 
-      this.showLoadingStage('analysis');
+      this.showLoadingStage("analysis");
       this.updateBadges();
       this.render();
 
@@ -157,7 +173,7 @@ export class StrategicPosturePanel extends Panel {
       }
     } catch (error) {
       if (this.isAbortError(error)) return;
-      console.error('[StrategicPosturePanel] Fetch error:', error);
+      console.error("[StrategicPosturePanel] Fetch error:", error);
       this.showFetchError();
     }
   }
@@ -165,7 +181,9 @@ export class StrategicPosturePanel extends Panel {
   private async augmentWithVessels(): Promise<void> {
     try {
       const { vessels } = await fetchMilitaryVessels();
-      console.log(`[StrategicPosturePanel] Got ${vessels.length} total military vessels`);
+      console.log(
+        `[StrategicPosturePanel] Got ${vessels.length} total military vessels`,
+      );
       if (vessels.length === 0) {
         // AIS stream hasn't accumulated data yet — restore from cache
         this.restoreVesselCounts();
@@ -183,27 +201,46 @@ export class StrategicPosturePanel extends Panel {
             v.lat >= posture.bounds!.south &&
             v.lat <= posture.bounds!.north &&
             v.lon >= posture.bounds!.west &&
-            v.lon <= posture.bounds!.east
+            v.lon <= posture.bounds!.east,
         );
 
         // Count by type
-        posture.destroyers = theaterVessels.filter((v) => v.vesselType === 'destroyer').length;
-        posture.frigates = theaterVessels.filter((v) => v.vesselType === 'frigate').length;
-        posture.carriers = theaterVessels.filter((v) => v.vesselType === 'carrier').length;
-        posture.submarines = theaterVessels.filter((v) => v.vesselType === 'submarine').length;
-        posture.patrol = theaterVessels.filter((v) => v.vesselType === 'patrol').length;
+        posture.destroyers = theaterVessels.filter(
+          (v) => v.vesselType === "destroyer",
+        ).length;
+        posture.frigates = theaterVessels.filter(
+          (v) => v.vesselType === "frigate",
+        ).length;
+        posture.carriers = theaterVessels.filter(
+          (v) => v.vesselType === "carrier",
+        ).length;
+        posture.submarines = theaterVessels.filter(
+          (v) => v.vesselType === "submarine",
+        ).length;
+        posture.patrol = theaterVessels.filter(
+          (v) => v.vesselType === "patrol",
+        ).length;
         posture.auxiliaryVessels = theaterVessels.filter(
-          (v) => v.vesselType === 'auxiliary' || v.vesselType === 'special' || v.vesselType === 'amphibious' || v.vesselType === 'icebreaker' || v.vesselType === 'research' || v.vesselType === 'unknown'
+          (v) =>
+            v.vesselType === "auxiliary" ||
+            v.vesselType === "special" ||
+            v.vesselType === "amphibious" ||
+            v.vesselType === "icebreaker" ||
+            v.vesselType === "research" ||
+            v.vesselType === "unknown",
         ).length;
         posture.totalVessels = theaterVessels.length;
 
         if (theaterVessels.length > 0) {
-          console.log(`[StrategicPosturePanel] ${posture.shortName}: ${theaterVessels.length} vessels`, theaterVessels.map(v => v.vesselType));
+          console.log(
+            `[StrategicPosturePanel] ${posture.shortName}: ${theaterVessels.length} vessels`,
+            theaterVessels.map((v) => v.vesselType),
+          );
         }
 
         // Add vessel operators to byOperator
         for (const v of theaterVessels) {
-          const op = v.operator || 'unknown';
+          const op = v.operator || "unknown";
           posture.byOperator[op] = (posture.byOperator[op] || 0) + 1;
         }
       }
@@ -213,9 +250,13 @@ export class StrategicPosturePanel extends Panel {
 
       // Recalculate posture levels now that vessels are included
       recalcPostureWithVessels(this.postures);
-      console.log('[StrategicPosturePanel] Augmented with', vessels.length, 'vessels, posture levels recalculated');
+      console.log(
+        "[StrategicPosturePanel] Augmented with",
+        vessels.length,
+        "vessels, posture levels recalculated",
+      );
     } catch (error) {
-      console.warn('[StrategicPosturePanel] Failed to fetch vessels:', error);
+      console.warn("[StrategicPosturePanel] Failed to fetch vessels:", error);
       // Restore cached vessel counts if live fetch failed
       this.restoreVesselCounts();
       recalcPostureWithVessels(this.postures);
@@ -224,7 +265,18 @@ export class StrategicPosturePanel extends Panel {
 
   private cacheVesselCounts(): void {
     try {
-      const counts: Record<string, { destroyers: number; frigates: number; carriers: number; submarines: number; patrol: number; auxiliaryVessels: number; totalVessels: number }> = {};
+      const counts: Record<
+        string,
+        {
+          destroyers: number;
+          frigates: number;
+          carriers: number;
+          submarines: number;
+          patrol: number;
+          auxiliaryVessels: number;
+          totalVessels: number;
+        }
+      > = {};
       for (const p of this.postures) {
         if (p.totalVessels > 0) {
           counts[p.theaterId] = {
@@ -238,13 +290,18 @@ export class StrategicPosturePanel extends Panel {
           };
         }
       }
-      localStorage.setItem('wm:vesselPosture', JSON.stringify({ counts, ts: Date.now() }));
-    } catch { /* quota exceeded or private mode */ }
+      localStorage.setItem(
+        "wm:vesselPosture",
+        JSON.stringify({ counts, ts: Date.now() }),
+      );
+    } catch {
+      /* quota exceeded or private mode */
+    }
   }
 
   private restoreVesselCounts(): void {
     try {
-      const raw = localStorage.getItem('wm:vesselPosture');
+      const raw = localStorage.getItem("wm:vesselPosture");
       if (!raw) return;
       const { counts, ts } = JSON.parse(raw);
       // Only use cache if < 30 minutes old
@@ -261,8 +318,10 @@ export class StrategicPosturePanel extends Panel {
           p.totalVessels = cached.totalVessels;
         }
       }
-      console.log('[StrategicPosturePanel] Restored cached vessel counts');
-    } catch { /* parse error */ }
+      console.log("[StrategicPosturePanel] Restored cached vessel counts");
+    } catch {
+      /* parse error */
+    }
   }
 
   public updatePostures(data: CachedTheaterPosture): void {
@@ -285,8 +344,12 @@ export class StrategicPosturePanel extends Panel {
   }
 
   private updateBadges(): void {
-    const hasCritical = this.postures.some((p) => p.postureLevel === 'critical');
-    const hasElevated = this.postures.some((p) => p.postureLevel === 'elevated');
+    const hasCritical = this.postures.some(
+      (p) => p.postureLevel === "critical",
+    );
+    const hasElevated = this.postures.some(
+      (p) => p.postureLevel === "elevated",
+    );
     if (hasCritical) {
       this.setNewBadge(1, true);
     } else if (hasElevated) {
@@ -306,21 +369,21 @@ export class StrategicPosturePanel extends Panel {
       <div class="posture-panel">
         <div class="posture-no-data">
           <div class="posture-no-data-icon pulse">📡</div>
-          <div class="posture-no-data-title">${t('components.strategicPosture.acquiringData')}</div>
+          <div class="posture-no-data-title">${t("components.strategicPosture.acquiringData")}</div>
           <div class="posture-no-data-desc">
-            ${t('components.strategicPosture.acquiringDesc')}
+            ${t("components.strategicPosture.acquiringDesc")}
           </div>
           <div class="posture-data-sources">
             <div class="posture-source">
               <span class="posture-source-icon connecting">✈️</span>
-              <span>${t('components.strategicPosture.openSkyAdsb')}</span>
+              <span>${t("components.strategicPosture.openSkyAdsb")}</span>
             </div>
             <div class="posture-source">
               <span class="posture-source-icon waiting">🚢</span>
-              <span>${t('components.strategicPosture.aisVesselStream')}</span>
+              <span>${t("components.strategicPosture.aisVesselStream")}</span>
             </div>
           </div>
-          <button class="posture-retry-btn" data-panel-retry>↻ ${t('components.strategicPosture.retryNow')}</button>
+          <button class="posture-retry-btn" data-panel-retry>↻ ${t("components.strategicPosture.retryNow")}</button>
         </div>
       </div>
     `);
@@ -333,14 +396,14 @@ export class StrategicPosturePanel extends Panel {
       <div class="posture-panel">
         <div class="posture-no-data">
           <div class="posture-no-data-icon">⚠️</div>
-          <div class="posture-no-data-title">${t('components.strategicPosture.feedRateLimited')}</div>
+          <div class="posture-no-data-title">${t("components.strategicPosture.feedRateLimited")}</div>
           <div class="posture-no-data-desc">
-            ${t('components.strategicPosture.rateLimitedDesc')}
+            ${t("components.strategicPosture.rateLimitedDesc")}
           </div>
           <div class="posture-error-hint">
-            <strong>${t('components.strategicPosture.rateLimitedTip')}</strong>
+            <strong>${t("components.strategicPosture.rateLimitedTip")}</strong>
           </div>
-          <button class="posture-retry-btn" data-panel-retry>↻ ${t('components.strategicPosture.tryAgain')}</button>
+          <button class="posture-retry-btn" data-panel-retry>↻ ${t("components.strategicPosture.tryAgain")}</button>
         </div>
       </div>
     `);
@@ -349,23 +412,23 @@ export class StrategicPosturePanel extends Panel {
 
   private getPostureBadge(level: string): string {
     switch (level) {
-      case 'critical':
-        return `<span class="posture-badge posture-critical">${t('components.strategicPosture.badges.critical')}</span>`;
-      case 'elevated':
-        return `<span class="posture-badge posture-elevated">${t('components.strategicPosture.badges.elevated')}</span>`;
+      case "critical":
+        return `<span class="posture-badge posture-critical">${t("components.strategicPosture.badges.critical")}</span>`;
+      case "elevated":
+        return `<span class="posture-badge posture-elevated">${t("components.strategicPosture.badges.elevated")}</span>`;
       default:
-        return `<span class="posture-badge posture-normal">${t('components.strategicPosture.badges.normal')}</span>`;
+        return `<span class="posture-badge posture-normal">${t("components.strategicPosture.badges.normal")}</span>`;
     }
   }
 
   private getTrendIcon(trend: string, change: number): string {
     switch (trend) {
-      case 'increasing':
+      case "increasing":
         return `<span class="posture-trend trend-up">↗ +${change}%</span>`;
-      case 'decreasing':
+      case "decreasing":
         return `<span class="posture-trend trend-down">↘ ${change}%</span>`;
       default:
-        return `<span class="posture-trend trend-stable">→ ${t('components.strategicPosture.trendStable')}</span>`;
+        return `<span class="posture-trend trend-stable">→ ${t("components.strategicPosture.trendStable")}</span>`;
     }
   }
 
@@ -376,19 +439,25 @@ export class StrategicPosturePanel extends Panel {
   }
 
   private renderTheater(p: TheaterPostureSummary): string {
-    const isExpanded = p.postureLevel !== 'normal';
+    const isExpanded = p.postureLevel !== "normal";
     const displayName = this.theaterDisplayName(p);
 
     if (!isExpanded) {
       // Compact single-line view for normal theaters
       const chips: string[] = [];
-      if (p.totalAircraft > 0) chips.push(`<span class="posture-chip air">✈️ ${p.totalAircraft}</span>`);
-      if (p.totalVessels > 0) chips.push(`<span class="posture-chip naval">⚓ ${p.totalVessels}</span>`);
+      if (p.totalAircraft > 0)
+        chips.push(
+          `<span class="posture-chip air">✈️ ${p.totalAircraft}</span>`,
+        );
+      if (p.totalVessels > 0)
+        chips.push(
+          `<span class="posture-chip naval">⚓ ${p.totalVessels}</span>`,
+        );
 
       return `
-        <div class="posture-theater posture-compact" data-lat="${p.centerLat}" data-lon="${p.centerLon}" title="${t('components.strategicPosture.clickToView', { name: escapeHtml(displayName) })}">
+        <div class="posture-theater posture-compact" data-lat="${p.centerLat}" data-lon="${p.centerLon}" title="${t("components.strategicPosture.clickToView", { name: escapeHtml(displayName) })}">
           <span class="posture-name">${escapeHtml(p.shortName)}</span>
-          <div class="posture-chips">${chips.join('')}</div>
+          <div class="posture-chips">${chips.join("")}</div>
           ${this.getPostureBadge(p.postureLevel)}
         </div>
       `;
@@ -396,50 +465,93 @@ export class StrategicPosturePanel extends Panel {
 
     // Build compact stat chips for expanded view
     const airChips: string[] = [];
-    if (p.fighters > 0) airChips.push(`<span class="posture-stat" title="${t('components.strategicPosture.units.fighters')}">✈️ ${p.fighters}</span>`);
-    if (p.tankers > 0) airChips.push(`<span class="posture-stat" title="${t('components.strategicPosture.units.tankers')}">⛽ ${p.tankers}</span>`);
-    if (p.awacs > 0) airChips.push(`<span class="posture-stat" title="${t('components.strategicPosture.units.awacs')}">📡 ${p.awacs}</span>`);
-    if (p.reconnaissance > 0) airChips.push(`<span class="posture-stat" title="${t('components.strategicPosture.units.recon')}">🔍 ${p.reconnaissance}</span>`);
-    if (p.transport > 0) airChips.push(`<span class="posture-stat" title="${t('components.strategicPosture.units.transport')}">📦 ${p.transport}</span>`);
-    if (p.bombers > 0) airChips.push(`<span class="posture-stat" title="${t('components.strategicPosture.units.bombers')}">💣 ${p.bombers}</span>`);
-    if (p.drones > 0) airChips.push(`<span class="posture-stat" title="${t('components.strategicPosture.units.drones')}">🛸 ${p.drones}</span>`);
+    if (p.fighters > 0)
+      airChips.push(
+        `<span class="posture-stat" title="${t("components.strategicPosture.units.fighters")}">✈️ ${p.fighters}</span>`,
+      );
+    if (p.tankers > 0)
+      airChips.push(
+        `<span class="posture-stat" title="${t("components.strategicPosture.units.tankers")}">⛽ ${p.tankers}</span>`,
+      );
+    if (p.awacs > 0)
+      airChips.push(
+        `<span class="posture-stat" title="${t("components.strategicPosture.units.awacs")}">📡 ${p.awacs}</span>`,
+      );
+    if (p.reconnaissance > 0)
+      airChips.push(
+        `<span class="posture-stat" title="${t("components.strategicPosture.units.recon")}">🔍 ${p.reconnaissance}</span>`,
+      );
+    if (p.transport > 0)
+      airChips.push(
+        `<span class="posture-stat" title="${t("components.strategicPosture.units.transport")}">📦 ${p.transport}</span>`,
+      );
+    if (p.bombers > 0)
+      airChips.push(
+        `<span class="posture-stat" title="${t("components.strategicPosture.units.bombers")}">💣 ${p.bombers}</span>`,
+      );
+    if (p.drones > 0)
+      airChips.push(
+        `<span class="posture-stat" title="${t("components.strategicPosture.units.drones")}">🛸 ${p.drones}</span>`,
+      );
     // Fallback: show total aircraft if no typed breakdown available
     if (airChips.length === 0 && p.totalAircraft > 0) {
-      airChips.push(`<span class="posture-stat" title="${t('components.strategicPosture.units.aircraft')}">✈️ ${p.totalAircraft}</span>`);
+      airChips.push(
+        `<span class="posture-stat" title="${t("components.strategicPosture.units.aircraft")}">✈️ ${p.totalAircraft}</span>`,
+      );
     }
 
     const navalChips: string[] = [];
-    if (p.carriers > 0) navalChips.push(`<span class="posture-stat carrier" title="${t('components.strategicPosture.units.carriers')}">🚢 ${p.carriers}</span>`);
-    if (p.destroyers > 0) navalChips.push(`<span class="posture-stat" title="${t('components.strategicPosture.units.destroyers')}">⚓ ${p.destroyers}</span>`);
-    if (p.frigates > 0) navalChips.push(`<span class="posture-stat" title="${t('components.strategicPosture.units.frigates')}">🛥️ ${p.frigates}</span>`);
-    if (p.submarines > 0) navalChips.push(`<span class="posture-stat" title="${t('components.strategicPosture.units.submarines')}">🦈 ${p.submarines}</span>`);
-    if (p.patrol > 0) navalChips.push(`<span class="posture-stat" title="${t('components.strategicPosture.units.patrol')}">🚤 ${p.patrol}</span>`);
-    if (p.auxiliaryVessels > 0) navalChips.push(`<span class="posture-stat" title="${t('components.strategicPosture.units.auxiliary')}">⚓ ${p.auxiliaryVessels}</span>`);
+    if (p.carriers > 0)
+      navalChips.push(
+        `<span class="posture-stat carrier" title="${t("components.strategicPosture.units.carriers")}">🚢 ${p.carriers}</span>`,
+      );
+    if (p.destroyers > 0)
+      navalChips.push(
+        `<span class="posture-stat" title="${t("components.strategicPosture.units.destroyers")}">⚓ ${p.destroyers}</span>`,
+      );
+    if (p.frigates > 0)
+      navalChips.push(
+        `<span class="posture-stat" title="${t("components.strategicPosture.units.frigates")}">🛥️ ${p.frigates}</span>`,
+      );
+    if (p.submarines > 0)
+      navalChips.push(
+        `<span class="posture-stat" title="${t("components.strategicPosture.units.submarines")}">🦈 ${p.submarines}</span>`,
+      );
+    if (p.patrol > 0)
+      navalChips.push(
+        `<span class="posture-stat" title="${t("components.strategicPosture.units.patrol")}">🚤 ${p.patrol}</span>`,
+      );
+    if (p.auxiliaryVessels > 0)
+      navalChips.push(
+        `<span class="posture-stat" title="${t("components.strategicPosture.units.auxiliary")}">⚓ ${p.auxiliaryVessels}</span>`,
+      );
     // Fallback: show total vessels if no typed breakdown available
     if (navalChips.length === 0 && p.totalVessels > 0) {
-      navalChips.push(`<span class="posture-stat" title="${t('components.strategicPosture.units.navalVessels')}">⚓ ${p.totalVessels}</span>`);
+      navalChips.push(
+        `<span class="posture-stat" title="${t("components.strategicPosture.units.navalVessels")}">⚓ ${p.totalVessels}</span>`,
+      );
     }
 
     const hasAir = airChips.length > 0;
     const hasNaval = navalChips.length > 0;
 
     return `
-      <div class="posture-theater posture-expanded ${p.postureLevel}" data-lat="${p.centerLat}" data-lon="${p.centerLon}" title="${t('components.strategicPosture.clickToViewMap')}">
+      <div class="posture-theater posture-expanded ${p.postureLevel}" data-lat="${p.centerLat}" data-lon="${p.centerLon}" title="${t("components.strategicPosture.clickToViewMap")}">
         <div class="posture-theater-header">
           <span class="posture-name">${escapeHtml(displayName)}</span>
           ${this.getPostureBadge(p.postureLevel)}
         </div>
 
         <div class="posture-forces">
-          ${hasAir ? `<div class="posture-force-row"><span class="posture-domain">${t('components.strategicPosture.domains.air')}</span><div class="posture-stats">${airChips.join('')}</div></div>` : ''}
-          ${hasNaval ? `<div class="posture-force-row"><span class="posture-domain">${t('components.strategicPosture.domains.sea')}</span><div class="posture-stats">${navalChips.join('')}</div></div>` : ''}
+          ${hasAir ? `<div class="posture-force-row"><span class="posture-domain">${t("components.strategicPosture.domains.air")}</span><div class="posture-stats">${airChips.join("")}</div></div>` : ""}
+          ${hasNaval ? `<div class="posture-force-row"><span class="posture-domain">${t("components.strategicPosture.domains.sea")}</span><div class="posture-stats">${navalChips.join("")}</div></div>` : ""}
         </div>
 
         <div class="posture-footer">
-          ${p.strikeCapable ? `<span class="posture-strike">⚡ ${t('components.strategicPosture.strike')}</span>` : ''}
+          ${p.strikeCapable ? `<span class="posture-strike">⚡ ${t("components.strategicPosture.strike")}</span>` : ""}
           ${this.getTrendIcon(p.trend, p.changePercent)}
-          ${p.targetNation ? `<span class="posture-focus">→ ${escapeHtml(p.targetNation)}</span>` : ''}
-          ${isDesktopRuntime() ? `<button class="posture-deduce-btn" title="Deduce Situation with AI" style="background: none; border: none; cursor: pointer; opacity: 0.7; font-size: 1.1em; transition: opacity 0.2s; margin-left: auto;" data-theater='${escapeHtml(JSON.stringify(p))}'>\u{1F9E0}</button>` : ''}
+          ${p.targetNation ? `<span class="posture-focus">→ ${escapeHtml(p.targetNation)}</span>` : ""}
+          ${isDesktopRuntime() ? `<button class="posture-deduce-btn" title="Deduce Situation with AI" style="background: none; border: none; cursor: pointer; opacity: 0.7; font-size: 1.1em; transition: opacity 0.2s; margin-left: auto;" data-theater='${escapeHtml(JSON.stringify(p))}'>\u{1F9E0}</button>` : ""}
         </div>
       </div>
     `;
@@ -448,7 +560,11 @@ export class StrategicPosturePanel extends Panel {
   private render(): void {
     this.stopLoadingTimer();
     const sorted = [...this.postures].sort((a, b) => {
-      const order: Record<string, number> = { critical: 0, elevated: 1, normal: 2 };
+      const order: Record<string, number> = {
+        critical: 0,
+        elevated: 1,
+        normal: 2,
+      };
       return (order[a.postureLevel] ?? 2) - (order[b.postureLevel] ?? 2);
     });
 
@@ -457,17 +573,17 @@ export class StrategicPosturePanel extends Panel {
       : new Date().toLocaleTimeString();
 
     const staleWarning = this.isStale
-      ? `<div class="posture-stale-warning">⚠️ ${t('components.strategicPosture.staleWarning')}</div>`
-      : '';
+      ? `<div class="posture-stale-warning">⚠️ ${t("components.strategicPosture.staleWarning")}</div>`
+      : "";
 
     const html = `
       <div class="posture-panel">
         ${staleWarning}
-        ${sorted.map((p) => this.renderTheater(p)).join('')}
+        ${sorted.map((p) => this.renderTheater(p)).join("")}
 
         <div class="posture-footer">
-          <span class="posture-updated">${this.isStale ? '⚠️ ' : ''}${t('components.strategicPosture.updated')} ${updatedTime}</span>
-          <button class="posture-refresh-btn" title="${t('components.strategicPosture.refresh')}" aria-label="${t('components.strategicPosture.refresh')}">↻</button>
+          <span class="posture-updated">${this.isStale ? "⚠️ " : ""}${t("components.strategicPosture.updated")} ${updatedTime}</span>
+          <button class="posture-refresh-btn" title="${t("components.strategicPosture.refresh")}" aria-label="${t("components.strategicPosture.refresh")}">↻</button>
         </div>
       </div>
     `;
@@ -477,21 +593,23 @@ export class StrategicPosturePanel extends Panel {
   }
 
   private attachEventListeners(): void {
-    this.content.querySelector('.posture-refresh-btn')?.addEventListener('click', () => {
-      this.refresh();
-    });
+    this.content
+      .querySelector(".posture-refresh-btn")
+      ?.addEventListener("click", () => {
+        this.refresh();
+      });
 
-    const theaters = this.content.querySelectorAll('.posture-theater');
+    const theaters = this.content.querySelectorAll(".posture-theater");
     theaters.forEach((el) => {
-      el.addEventListener('click', (e) => {
+      el.addEventListener("click", (e) => {
         // Prevent click if we clicked the deduce button specifically
-        if ((e.target as HTMLElement).closest('.posture-deduce-btn')) {
+        if ((e.target as HTMLElement).closest(".posture-deduce-btn")) {
           return;
         }
 
-        const lat = parseFloat((el as HTMLElement).dataset.lat || '0');
-        const lon = parseFloat((el as HTMLElement).dataset.lon || '0');
-        console.log('[StrategicPosturePanel] Theater clicked:', {
+        const lat = parseFloat((el as HTMLElement).dataset.lat || "0");
+        const lon = parseFloat((el as HTMLElement).dataset.lon || "0");
+        console.log("[StrategicPosturePanel] Theater clicked:", {
           lat,
           lon,
           dataLat: (el as HTMLElement).dataset.lat,
@@ -500,21 +618,28 @@ export class StrategicPosturePanel extends Panel {
           hasHandler: !!this.onLocationClick,
         });
         if (this.onLocationClick && !isNaN(lat) && !isNaN(lon)) {
-          console.log('[StrategicPosturePanel] Calling onLocationClick with:', lat, lon);
-          this.onLocationClick(lat, lon);
-        } else {
-          console.warn('[StrategicPosturePanel] No handler or invalid coords!', {
-            hasHandler: !!this.onLocationClick,
+          console.log(
+            "[StrategicPosturePanel] Calling onLocationClick with:",
             lat,
             lon,
-          });
+          );
+          this.onLocationClick(lat, lon);
+        } else {
+          console.warn(
+            "[StrategicPosturePanel] No handler or invalid coords!",
+            {
+              hasHandler: !!this.onLocationClick,
+              lat,
+              lon,
+            },
+          );
         }
       });
     });
 
-    const deduceBtns = this.content.querySelectorAll('.posture-deduce-btn');
+    const deduceBtns = this.content.querySelectorAll(".posture-deduce-btn");
     deduceBtns.forEach((btn) => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener("click", (e) => {
         e.stopPropagation();
         try {
           const theaterDataStr = (btn as HTMLElement).dataset.theater;
@@ -522,27 +647,44 @@ export class StrategicPosturePanel extends Panel {
 
           const p = JSON.parse(theaterDataStr);
           const query = `What is the expected strategic impact of the current military posture in the ${p.shortName} theater?`;
-          let geoContext = `Theater: ${p.shortName} (${p.theaterName}). Military Assets: ${p.totalAircraft} aircraft, ${p.totalVessels} naval vessels. Readiness Level: ${p.postureLevel}. Assets breakdown: ${p.fighters} fighters, ${p.bombers} bombers, ${p.carriers} carriers, ${p.submarines} submarines. Focus/Target: ${p.targetNation || 'Unknown'}.`;
+          let geoContext = `Theater: ${p.shortName} (${p.theaterName}). Military Assets: ${p.totalAircraft} aircraft, ${p.totalVessels} naval vessels. Readiness Level: ${p.postureLevel}. Assets breakdown: ${p.fighters} fighters, ${p.bombers} bombers, ${p.carriers} carriers, ${p.submarines} submarines. Focus/Target: ${p.targetNation || "Unknown"}.`;
 
           if (this.getLatestNews) {
             const newsCtx = buildNewsContext(this.getLatestNews);
             if (newsCtx) geoContext += `\n\n${newsCtx}`;
           }
 
-          const detail: DeductContextDetail = { query, geoContext, autoSubmit: true };
-          document.dispatchEvent(new CustomEvent('wm:deduct-context', { detail }));
+          const detail: DeductContextDetail = {
+            query,
+            geoContext,
+            autoSubmit: true,
+          };
+          document.dispatchEvent(
+            new CustomEvent("wm:deduct-context", { detail }),
+          );
         } catch (err) {
-          console.error('[StrategicPosturePanel] Failed to dispatch deduction event', err);
+          console.error(
+            "[StrategicPosturePanel] Failed to dispatch deduction event",
+            err,
+          );
         }
       });
     });
   }
 
-  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
-    console.log('[StrategicPosturePanel] setLocationClickHandler called, handler:', typeof handler);
+  public setLocationClickHandler(
+    handler: (lat: number, lon: number) => void,
+  ): void {
+    console.log(
+      "[StrategicPosturePanel] setLocationClickHandler called, handler:",
+      typeof handler,
+    );
     this.onLocationClick = handler;
     // Verify it's stored
-    console.log('[StrategicPosturePanel] Handler stored, onLocationClick now:', typeof this.onLocationClick);
+    console.log(
+      "[StrategicPosturePanel] Handler stored, onLocationClick now:",
+      typeof this.onLocationClick,
+    );
   }
 
   public getPostures(): TheaterPostureSummary[] {
@@ -550,7 +692,7 @@ export class StrategicPosturePanel extends Panel {
   }
 
   public override show(): void {
-    const wasHidden = this.element.classList.contains('hidden');
+    const wasHidden = this.element.classList.contains("hidden");
     super.show();
     if (wasHidden) {
       void this.fetchAndRender();
@@ -559,7 +701,7 @@ export class StrategicPosturePanel extends Panel {
 
   public destroy(): void {
     this.stopLoadingTimer();
-    this.vesselTimeouts.forEach(t => clearTimeout(t));
+    this.vesselTimeouts.forEach((t) => clearTimeout(t));
     this.vesselTimeouts = [];
     super.destroy();
   }

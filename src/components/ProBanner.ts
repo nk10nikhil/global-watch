@@ -29,8 +29,8 @@ export function showProBanner(container: HTMLElement): void {
   if (bannerEl) return;
   if (window.self !== window.top) return;
 
-  const banner = document.createElement('div');
-  banner.className = 'pro-banner';
+  const banner = document.createElement("div");
+  banner.className = "pro-banner";
   banner.innerHTML = `
     <span class="pro-banner-badge">PRO</span>
     <span class="pro-banner-text">
@@ -47,7 +47,7 @@ export function showProBanner(container: HTMLElement): void {
   });
   */
 
-  const header = container.querySelector('.header');
+  const header = container.querySelector(".header");
   if (header) {
     header.before(banner);
   } else {
@@ -55,12 +55,12 @@ export function showProBanner(container: HTMLElement): void {
   }
 
   bannerEl = banner;
-  requestAnimationFrame(() => banner.classList.add('pro-banner-in'));
+  requestAnimationFrame(() => banner.classList.add("pro-banner-in"));
 }
 
 export function hideProBanner(): void {
   if (!bannerEl) return;
-  bannerEl.classList.add('pro-banner-out');
+  bannerEl.classList.add("pro-banner-out");
   setTimeout(() => {
     bannerEl?.remove();
     bannerEl = null;

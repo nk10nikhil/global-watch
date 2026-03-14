@@ -12,19 +12,19 @@
  *   - ListGulfQuotes        (Yahoo Finance GCC indices, currencies, oil)
  */
 
-import type { MarketServiceHandler } from '../../../../src/generated/server/worldmonitor/market/v1/service_server';
-import { listMarketQuotes } from './list-market-quotes';
-import { listCryptoQuotes } from './list-crypto-quotes';
-import { listCommodityQuotes } from './list-commodity-quotes';
-import { getSectorSummary } from './get-sector-summary';
-import { listStablecoinMarkets } from './list-stablecoin-markets';
-import { listEtfFlows } from './list-etf-flows';
-import { getCountryStockIndex } from './get-country-stock-index';
-import { listGulfQuotes } from './list-gulf-quotes';
-import { analyzeStock } from './analyze-stock';
-import { getStockAnalysisHistory } from './get-stock-analysis-history';
-import { backtestStock } from './backtest-stock';
-import { listStoredStockBacktests } from './list-stored-stock-backtests';
+import type { MarketServiceHandler } from "../../../../src/generated/server/worldmonitor/market/v1/service_server";
+import { listMarketQuotes } from "./list-market-quotes";
+import { listCryptoQuotes } from "./list-crypto-quotes";
+import { listCommodityQuotes } from "./list-commodity-quotes";
+import { getSectorSummary } from "./get-sector-summary";
+import { listStablecoinMarkets } from "./list-stablecoin-markets";
+import { listEtfFlows } from "./list-etf-flows";
+import { getCountryStockIndex } from "./get-country-stock-index";
+import { listGulfQuotes } from "./list-gulf-quotes";
+import { analyzeStock } from "./analyze-stock";
+import { getStockAnalysisHistory } from "./get-stock-analysis-history";
+import { backtestStock } from "./backtest-stock";
+import { listStoredStockBacktests } from "./list-stored-stock-backtests";
 
 export const marketHandler: MarketServiceHandler = {
   listMarketQuotes,

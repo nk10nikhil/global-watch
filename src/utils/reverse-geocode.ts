@@ -1,4 +1,4 @@
-import { toApiUrl } from '@/services/runtime';
+import { toApiUrl } from "@/services/runtime";
 
 export interface GeoResult {
   country: string;
@@ -14,19 +14,26 @@ function cacheKey(lat: number, lon: number): string {
 
 const TIMEOUT_MS = 8000;
 
-export async function reverseGeocode(lat: number, lon: number, signal?: AbortSignal): Promise<GeoResult | null> {
+export async function reverseGeocode(
+  lat: number,
+  lon: number,
+  signal?: AbortSignal,
+): Promise<GeoResult | null> {
   const key = cacheKey(lat, lon);
   if (cache.has(key)) return cache.get(key) ?? null;
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
   const onExternalAbort = () => controller.abort();
-  signal?.addEventListener('abort', onExternalAbort, { once: true });
+  signal?.addEventListener("abort", onExternalAbort, { once: true });
 
   try {
-    const res = await fetch(toApiUrl(`/api/reverse-geocode?lat=${lat}&lon=${lon}`), {
-      signal: controller.signal,
-    });
+    const res = await fetch(
+      toApiUrl(`/api/reverse-geocode?lat=${lat}&lon=${lon}`),
+      {
+        signal: controller.signal,
+      },
+    );
     if (!res.ok) {
       cache.set(key, null);
       return null;
@@ -38,7 +45,11 @@ export async function reverseGeocode(lat: number, lon: number, signal?: AbortSig
       return null;
     }
 
-    const result: GeoResult = { country: data.country, code: data.code, displayName: data.displayName || data.country };
+    const result: GeoResult = {
+      country: data.country,
+      code: data.code,
+      displayName: data.displayName || data.country,
+    };
     cache.set(key, result);
     return result;
   } catch {
@@ -48,6 +59,6 @@ export async function reverseGeocode(lat: number, lon: number, signal?: AbortSig
     return null;
   } finally {
     clearTimeout(timeout);
-    signal?.removeEventListener('abort', onExternalAbort);
+    signal?.removeEventListener("abort", onExternalAbort);
   }
 }

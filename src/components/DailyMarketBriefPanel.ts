@@ -1,47 +1,52 @@
-import { Panel } from './Panel';
-import type { DailyMarketBrief } from '@/services/daily-market-brief';
-import { describeFreshness } from '@/services/persistent-cache';
-import { escapeHtml } from '@/utils/sanitize';
+import { Panel } from "./Panel";
+import type { DailyMarketBrief } from "@/services/daily-market-brief";
+import { describeFreshness } from "@/services/persistent-cache";
+import { escapeHtml } from "@/utils/sanitize";
 
-type BriefSource = 'live' | 'cached';
+type BriefSource = "live" | "cached";
 
 function formatGeneratedTime(isoTimestamp: string, timezone: string): string {
   try {
-    return new Intl.DateTimeFormat('en-US', {
+    return new Intl.DateTimeFormat("en-US", {
       timeZone: timezone,
-      hour: 'numeric',
-      minute: '2-digit',
-      month: 'short',
-      day: 'numeric',
+      hour: "numeric",
+      minute: "2-digit",
+      month: "short",
+      day: "numeric",
     }).format(new Date(isoTimestamp));
   } catch {
     return isoTimestamp;
   }
 }
 
-function stanceLabel(stance: DailyMarketBrief['items'][number]['stance']): string {
-  if (stance === 'bullish') return 'Bullish';
-  if (stance === 'defensive') return 'Defensive';
-  return 'Neutral';
+function stanceLabel(
+  stance: DailyMarketBrief["items"][number]["stance"],
+): string {
+  if (stance === "bullish") return "Bullish";
+  if (stance === "defensive") return "Defensive";
+  return "Neutral";
 }
 
 function formatPrice(price: number | null): string {
-  if (typeof price !== 'number' || !Number.isFinite(price)) return 'N/A';
+  if (typeof price !== "number" || !Number.isFinite(price)) return "N/A";
   return price.toLocaleString(undefined, { maximumFractionDigits: 2 });
 }
 
 function formatChange(change: number | null): string {
-  if (typeof change !== 'number' || !Number.isFinite(change)) return 'Flat';
-  const sign = change > 0 ? '+' : '';
+  if (typeof change !== "number" || !Number.isFinite(change)) return "Flat";
+  const sign = change > 0 ? "+" : "";
   return `${sign}${change.toFixed(2)}%`;
 }
 
 export class DailyMarketBriefPanel extends Panel {
   constructor() {
-    super({ id: 'daily-market-brief', title: 'Daily Market Brief' });
+    super({ id: "daily-market-brief", title: "Daily Market Brief" });
   }
 
-  public renderBrief(brief: DailyMarketBrief, source: BriefSource = 'live'): void {
+  public renderBrief(
+    brief: DailyMarketBrief,
+    source: BriefSource = "live",
+  ): void {
     const freshness = describeFreshness(new Date(brief.generatedAt).getTime());
     this.setDataBadge(source, freshness);
     this.resetRetryBackoff();
@@ -68,7 +73,9 @@ export class DailyMarketBriefPanel extends Panel {
         </div>
 
         <div style="display:grid;gap:8px">
-          ${brief.items.map((item) => `
+          ${brief.items
+            .map(
+              (item) => `
             <div style="display:grid;gap:6px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,0.02)">
               <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
                 <div>
@@ -82,15 +89,17 @@ export class DailyMarketBriefPanel extends Panel {
               </div>
               <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
                 <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim)">${escapeHtml(stanceLabel(item.stance))}</div>
-                ${item.relatedHeadline ? `<div style="font-size:11px;color:var(--text-dim);text-align:right;max-width:55%">Linked headline</div>` : ''}
+                ${item.relatedHeadline ? `<div style="font-size:11px;color:var(--text-dim);text-align:right;max-width:55%">Linked headline</div>` : ""}
               </div>
               <div style="font-size:12px;line-height:1.45">${escapeHtml(item.note)}</div>
             </div>
-          `).join('')}
+          `,
+            )
+            .join("")}
         </div>
 
         <div style="font-size:11px;color:var(--text-dim)">
-          ${escapeHtml(brief.fallback ? 'Rules-based brief' : `AI-assisted brief via ${brief.provider}${brief.model ? ` (${brief.model})` : ''}`)}
+          ${escapeHtml(brief.fallback ? "Rules-based brief" : `AI-assisted brief via ${brief.provider}${brief.model ? ` (${brief.model})` : ""}`)}
         </div>
       </div>
     `;
@@ -98,7 +107,9 @@ export class DailyMarketBriefPanel extends Panel {
     this.setContent(html);
   }
 
-  public showUnavailable(message = 'The daily brief needs live market data before it can be generated.'): void {
+  public showUnavailable(
+    message = "The daily brief needs live market data before it can be generated.",
+  ): void {
     this.showError(message);
   }
 }

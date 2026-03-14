@@ -12,15 +12,31 @@ import type {
   GetTradeBarriersRequest,
   GetTradeBarriersResponse,
   TradeBarrier,
-} from '../../../../src/generated/server/worldmonitor/trade/v1/service_server';
+} from "../../../../src/generated/server/worldmonitor/trade/v1/service_server";
 
-import { cachedFetchJson } from '../../../_shared/redis';
-import { wtoFetch, WTO_MEMBER_CODES } from './_shared';
+import { cachedFetchJson } from "../../../_shared/redis";
+import { wtoFetch, WTO_MEMBER_CODES } from "./_shared";
 
 const REDIS_CACHE_TTL = 21600; // 6h — WTO data is annual, rarely changes
 
 /** Major economies to query. */
-const MAJOR_REPORTERS = ['840', '156', '276', '392', '826', '356', '076', '643', '410', '036', '124', '484', '250', '380', '528'];
+const MAJOR_REPORTERS = [
+  "840",
+  "156",
+  "276",
+  "392",
+  "826",
+  "356",
+  "076",
+  "643",
+  "410",
+  "036",
+  "124",
+  "484",
+  "250",
+  "380",
+  "528",
+];
 
 /**
  * Validate a country code string — alphanumeric, max 10 chars.
@@ -38,19 +54,22 @@ interface TariffRow {
 }
 
 function parseRows(data: any): TariffRow[] {
-  const dataset: any[] = Array.isArray(data) ? data : data?.Dataset ?? data?.dataset ?? [];
+  const dataset: any[] = Array.isArray(data)
+    ? data
+    : (data?.Dataset ?? data?.dataset ?? []);
   const rows: TariffRow[] = [];
 
   for (const row of dataset) {
-    const year = parseInt(row.Year ?? row.year ?? '0', 10);
-    const value = parseFloat(row.Value ?? row.value ?? '');
+    const year = parseInt(row.Year ?? row.year ?? "0", 10);
+    const value = parseFloat(row.Value ?? row.value ?? "");
     if (isNaN(year) || isNaN(value)) continue;
 
-    const countryCode = String(row.ReportingEconomyCode ?? '');
+    const countryCode = String(row.ReportingEconomyCode ?? "");
     rows.push({
-      country: WTO_MEMBER_CODES[countryCode] ?? String(row.ReportingEconomy ?? ''),
+      country:
+        WTO_MEMBER_CODES[countryCode] ?? String(row.ReportingEconomy ?? ""),
       countryCode,
-      indicator: String(row.IndicatorCode ?? ''),
+      indicator: String(row.IndicatorCode ?? ""),
       year,
       value,
     });
@@ -64,31 +83,40 @@ async function fetchBarriers(
   limit: number,
 ): Promise<{ barriers: TradeBarrier[]; ok: boolean }> {
   const currentYear = new Date().getFullYear();
-  const reporters = MAJOR_REPORTERS.join(',');
+  const reporters = MAJOR_REPORTERS.join(",");
 
   // Fetch agricultural and non-agricultural tariffs in parallel
   const [agriResult, nonAgriResult] = await Promise.allSettled([
-    wtoFetch('/data', {
-      i: 'TP_A_0160',
+    wtoFetch("/data", {
+      i: "TP_A_0160",
       r: reporters,
       ps: `${currentYear - 3}-${currentYear}`,
-      fmt: 'json',
-      mode: 'full',
-      max: '500',
+      fmt: "json",
+      mode: "full",
+      max: "500",
     }),
-    wtoFetch('/data', {
-      i: 'TP_A_0430',
+    wtoFetch("/data", {
+      i: "TP_A_0430",
       r: reporters,
       ps: `${currentYear - 3}-${currentYear}`,
-      fmt: 'json',
-      mode: 'full',
-      max: '500',
+      fmt: "json",
+      mode: "full",
+      max: "500",
     }),
   ]);
-  const agriData = agriResult.status === 'fulfilled' ? agriResult.value : null;
-  const nonAgriData = nonAgriResult.status === 'fulfilled' ? nonAgriResult.value : null;
-  if (agriResult.status === 'rejected') console.warn('[trade] agricultural tariff fetch failed, using partial results:', agriResult.reason);
-  if (nonAgriResult.status === 'rejected') console.warn('[trade] non-agricultural tariff fetch failed, using partial results:', nonAgriResult.reason);
+  const agriData = agriResult.status === "fulfilled" ? agriResult.value : null;
+  const nonAgriData =
+    nonAgriResult.status === "fulfilled" ? nonAgriResult.value : null;
+  if (agriResult.status === "rejected")
+    console.warn(
+      "[trade] agricultural tariff fetch failed, using partial results:",
+      agriResult.reason,
+    );
+  if (nonAgriResult.status === "rejected")
+    console.warn(
+      "[trade] non-agricultural tariff fetch failed, using partial results:",
+      nonAgriResult.reason,
+    );
 
   if (!agriData && !nonAgriData) return { barriers: [], ok: false };
 
@@ -125,25 +153,31 @@ async function fetchBarriers(
     const nonAgriRate = nonAgri?.value ?? 0;
     const gap = agriRate - nonAgriRate;
     const country = agri?.country ?? nonAgri?.country ?? code;
-    const year = String(agri?.year ?? nonAgri?.year ?? '');
+    const year = String(agri?.year ?? nonAgri?.year ?? "");
 
     barriers.push({
       id: `${code}-tariff-gap-${year}`,
       notifyingCountry: country,
-      title: `Agricultural tariff: ${agriRate.toFixed(1)}% vs Non-agricultural: ${nonAgriRate.toFixed(1)}% (gap: ${gap > 0 ? '+' : ''}${gap.toFixed(1)}pp)`,
-      measureType: gap > 10 ? 'High agricultural protection' : gap > 5 ? 'Moderate agricultural protection' : 'Low tariff gap',
-      productDescription: 'Agricultural vs Non-agricultural products',
-      objective: gap > 0 ? 'Agricultural sector protection' : 'Uniform tariff structure',
-      status: gap > 10 ? 'high' : gap > 5 ? 'moderate' : 'low',
+      title: `Agricultural tariff: ${agriRate.toFixed(1)}% vs Non-agricultural: ${nonAgriRate.toFixed(1)}% (gap: ${gap > 0 ? "+" : ""}${gap.toFixed(1)}pp)`,
+      measureType:
+        gap > 10
+          ? "High agricultural protection"
+          : gap > 5
+            ? "Moderate agricultural protection"
+            : "Low tariff gap",
+      productDescription: "Agricultural vs Non-agricultural products",
+      objective:
+        gap > 0 ? "Agricultural sector protection" : "Uniform tariff structure",
+      status: gap > 10 ? "high" : gap > 5 ? "moderate" : "low",
       dateDistributed: year,
-      sourceUrl: 'https://stats.wto.org',
+      sourceUrl: "https://stats.wto.org",
     });
   }
 
   // Sort by gap (highest agricultural protection first)
   barriers.sort((a, b) => {
-    const gapA = parseFloat(a.title.match(/gap: ([+-]?\d+\.?\d*)/)?.[1] ?? '0');
-    const gapB = parseFloat(b.title.match(/gap: ([+-]?\d+\.?\d*)/)?.[1] ?? '0');
+    const gapA = parseFloat(a.title.match(/gap: ([+-]?\d+\.?\d*)/)?.[1] ?? "0");
+    const gapB = parseFloat(b.title.match(/gap: ([+-]?\d+\.?\d*)/)?.[1] ?? "0");
     return gapB - gapA;
   });
 
@@ -165,11 +199,21 @@ export async function getTradeBarriers(
       async () => {
         const { barriers, ok } = await fetchBarriers(countries, limit);
         if (!ok || barriers.length === 0) return null;
-        return { barriers, fetchedAt: new Date().toISOString(), upstreamUnavailable: false };
+        return {
+          barriers,
+          fetchedAt: new Date().toISOString(),
+          upstreamUnavailable: false,
+        };
       },
     );
 
-    return result ?? { barriers: [], fetchedAt: new Date().toISOString(), upstreamUnavailable: true };
+    return (
+      result ?? {
+        barriers: [],
+        fetchedAt: new Date().toISOString(),
+        upstreamUnavailable: true,
+      }
+    );
   } catch {
     return {
       barriers: [],

@@ -9,11 +9,11 @@ Each entry includes severity, description, affected files, and dependencies on o
 
 ### BUG-001 — Monolithic `App.ts` God-Class (4 357 lines)
 
-| Field | Value |
-|---|---|
-| **Severity** | Critical (architectural) |
-| **Affected** | `src/App.ts` |
-| **Depends on** | — |
+| Field          | Value                    |
+| -------------- | ------------------------ |
+| **Severity**   | Critical (architectural) |
+| **Affected**   | `src/App.ts`             |
+| **Depends on** | —                        |
 
 **Description**
 `App.ts` holds the entire application orchestration in a single 4 357-line class with 136 methods.
@@ -42,11 +42,11 @@ Keep the `App` class as a thin composition root that wires controllers together.
 
 ### BUG-002 — Unsafe `innerHTML` Assignments with External Data
 
-| Field | Value |
-|---|---|
-| **Severity** | Critical (security) |
-| **Affected** | `src/components/MapPopup.ts`, `src/components/DeckGLMap.ts`, `src/components/CascadePanel.ts`, `src/components/CountryBriefPage.ts`, `src/components/CountryIntelModal.ts`, `src/components/InsightsPanel.ts`, `src/App.ts` (lines ~2763, ~2817) |
-| **Depends on** | — |
+| Field          | Value                                                                                                                                                                                                                                            |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Severity**   | Critical (security)                                                                                                                                                                                                                              |
+| **Affected**   | `src/components/MapPopup.ts`, `src/components/DeckGLMap.ts`, `src/components/CascadePanel.ts`, `src/components/CountryBriefPage.ts`, `src/components/CountryIntelModal.ts`, `src/components/InsightsPanel.ts`, `src/App.ts` (lines ~2763, ~2817) |
+| **Depends on** | —                                                                                                                                                                                                                                                |
 
 **Description**
 Despite documentation claiming all external data passes through `escapeHtml()`, many `innerHTML` assignments interpolate feed-sourced strings (headlines, source names, tension labels) without escaping.
@@ -61,14 +61,14 @@ Add an ESLint rule or grep pre-commit hook to flag new `innerHTML` usage.
 
 ### BUG-003 — `youtube/live` Dev Endpoint Always Returns `null` Video
 
-| Field | Value |
-|---|---|
-| **Severity** | Critical (feature broken in dev) |
-| **Affected** | `vite.config.ts` (line ~148-151) |
-| **Depends on** | — |
+| Field          | Value                            |
+| -------------- | -------------------------------- |
+| **Severity**   | Critical (feature broken in dev) |
+| **Affected**   | `vite.config.ts` (line ~148-151) |
+| **Depends on** | —                                |
 
 **Description**
-The `youtubeLivePlugin()` Vite middleware hardcodes `{ videoId: null, channel }` with a TODO comment: *"will implement proper detection later"*.
+The `youtubeLivePlugin()` Vite middleware hardcodes `{ videoId: null, channel }` with a TODO comment: _"will implement proper detection later"_.
 This means the LiveNewsPanel falls back to static channel-level video IDs during local development, never resolving the actual live stream.
 
 **AI instructions**
@@ -80,11 +80,11 @@ Implement the pending live-stream detection using the `youtubei.js` library alre
 
 ### BUG-004 — Panel-Order Migration Log Says "v1.8" but Key Says "v1.9"
 
-| Field | Value |
-|---|---|
-| **Severity** | High (data inconsistency) |
-| **Affected** | `src/App.ts` (line ~237) |
-| **Depends on** | — |
+| Field          | Value                     |
+| -------------- | ------------------------- |
+| **Severity**   | High (data inconsistency) |
+| **Affected**   | `src/App.ts` (line ~237)  |
+| **Depends on** | —                         |
 
 **Description**
 `PANEL_ORDER_MIGRATION_KEY` is `worldmonitor-panel-order-v1.9` but the `console.log` says `"Migrated panel order to v1.8 layout"`.
@@ -97,11 +97,11 @@ Change the log message to `v1.9`.
 
 ### BUG-005 — Duplicate `layerToSource` Mapping
 
-| Field | Value |
-|---|---|
-| **Severity** | High (maintenance risk) |
-| **Affected** | `src/App.ts` — `syncDataFreshnessWithLayers()` (line ~606) and `setupMapLayerHandlers()` (line ~643) |
-| **Depends on** | BUG-001 (Phase 2) |
+| Field          | Value                                                                                                |
+| -------------- | ---------------------------------------------------------------------------------------------------- |
+| **Severity**   | High (maintenance risk)                                                                              |
+| **Affected**   | `src/App.ts` — `syncDataFreshnessWithLayers()` (line ~606) and `setupMapLayerHandlers()` (line ~643) |
+| **Depends on** | BUG-001 (Phase 2)                                                                                    |
 
 **Description**
 The `layerToSource` map is copy-pasted in two places. If a new layer is added to one and not the other, freshness tracking silently breaks for that layer.
@@ -114,11 +114,11 @@ Extract `layerToSource` to a shared constant (e.g., in `src/config/panels.ts`), 
 
 ### BUG-006 — RSS Proxy Mirrors Polymarket Through Production URL
 
-| Field | Value |
-|---|---|
-| **Severity** | High (reliability / circular dependency) |
-| **Affected** | `vite.config.ts` (line ~348) |
-| **Depends on** | — |
+| Field          | Value                                    |
+| -------------- | ---------------------------------------- |
+| **Severity**   | High (reliability / circular dependency) |
+| **Affected**   | `vite.config.ts` (line ~348)             |
+| **Depends on** | —                                        |
 
 **Description**
 The Polymarket dev proxy targets `https://worldmonitor.app` (the live production site).
@@ -131,11 +131,11 @@ Proxy directly to `gamma-api.polymarket.com` or implement the same edge-function
 
 ### BUG-007 — No Error Boundary on News Cluster Rendering
 
-| Field | Value |
-|---|---|
-| **Severity** | High |
-| **Affected** | `src/components/NewsPanel.ts`, `src/services/clustering.ts` |
-| **Depends on** | — |
+| Field          | Value                                                       |
+| -------------- | ----------------------------------------------------------- |
+| **Severity**   | High                                                        |
+| **Affected**   | `src/components/NewsPanel.ts`, `src/services/clustering.ts` |
+| **Depends on** | —                                                           |
 
 **Description**
 If the clustering worker returns malformed data (e.g., a cluster with `undefined` headline), the `NewsPanel` render loop throws, leaving the panel blank.
@@ -148,12 +148,12 @@ Wrap each cluster card render in a try/catch. Log the bad cluster and render a "
 
 ### BUG-008 — `setInterval` Clock Leak in `startHeaderClock()`
 
-| Field | Value |
-|---|---|
-| **Severity** | High (memory leak on HMR) |
-| **Affected** | `src/App.ts` (line ~523), `src/controllers/ui-setup.ts` |
-| **Status** | 🟡 Fixed in extracted controller; original `App.ts` still has the bug until Phase 2 wiring |
-| **Depends on** | — |
+| Field          | Value                                                                                      |
+| -------------- | ------------------------------------------------------------------------------------------ |
+| **Severity**   | High (memory leak on HMR)                                                                  |
+| **Affected**   | `src/App.ts` (line ~523), `src/controllers/ui-setup.ts`                                    |
+| **Status**     | 🟡 Fixed in extracted controller; original `App.ts` still has the bug until Phase 2 wiring |
+| **Depends on** | —                                                                                          |
 
 **Description**
 `setInterval(tick, 1000)` in `startHeaderClock()` is never stored or cleared.
@@ -167,11 +167,11 @@ Note: The extracted `UISetupController` already stores the interval in `clockInt
 
 ### BUG-009 — `deepLinkCountry` Polling Has No Maximum Retry
 
-| Field | Value |
-|---|---|
-| **Severity** | High |
-| **Affected** | `src/App.ts` — `handleDeepLinks()` (lines ~392-400, ~413-419) |
-| **Depends on** | — |
+| Field          | Value                                                         |
+| -------------- | ------------------------------------------------------------- |
+| **Severity**   | High                                                          |
+| **Affected**   | `src/App.ts` — `handleDeepLinks()` (lines ~392-400, ~413-419) |
+| **Depends on** | —                                                             |
 
 **Description**
 `checkAndOpen()` and `checkAndOpenBrief()` use `setTimeout(…, 500)` recursively with no cap. If the data source is permanently down, the browser spins polling forever.
@@ -183,11 +183,11 @@ Add a max retry counter (e.g., 60 attempts = 30 seconds) and show a user-facing 
 
 ### BUG-010 — Finance Variant Missing Desktop Packaging Scripts
 
-| Field | Value |
-|---|---|
-| **Severity** | High |
-| **Affected** | `package.json` |
-| **Depends on** | — |
+| Field          | Value          |
+| -------------- | -------------- |
+| **Severity**   | High           |
+| **Affected**   | `package.json` |
+| **Depends on** | —              |
 
 **Description**
 The `finance` variant has `dev:finance`, `build:finance`, and `desktop:build:finance` scripts, but there are no `desktop:package:*:finance` scripts.
@@ -202,11 +202,11 @@ Add `desktop:package:macos:finance`, `desktop:package:windows:finance`, and thei
 
 ### BUG-011 — Inconsistent Idle Timeout Values
 
-| Field | Value |
-|---|---|
-| **Severity** | Medium |
-| **Affected** | `src/App.ts` (2 min), `src/components/LiveNewsPanel.ts` (5 min), `src/components/LiveWebcamsPanel.ts` (5 min) |
-| **Depends on** | — |
+| Field          | Value                                                                                                         |
+| -------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Severity**   | Medium                                                                                                        |
+| **Affected**   | `src/App.ts` (2 min), `src/components/LiveNewsPanel.ts` (5 min), `src/components/LiveWebcamsPanel.ts` (5 min) |
+| **Depends on** | —                                                                                                             |
 
 **Description**
 Documentation says "5 min idle" pauses the stream, but `App.ts` uses a 2-minute `IDLE_PAUSE_MS`.
@@ -219,11 +219,11 @@ Unify idle timeouts via a shared constant in config, or document the intentional
 
 ### BUG-012 — Missing `GDELT Doc` in Data Freshness Tracker
 
-| Field | Value |
-|---|---|
-| **Severity** | Medium |
-| **Affected** | `src/services/data-freshness.ts`, `src/App.ts` — `syncDataFreshnessWithLayers()` |
-| **Depends on** | BUG-005 |
+| Field          | Value                                                                            |
+| -------------- | -------------------------------------------------------------------------------- |
+| **Severity**   | Medium                                                                           |
+| **Affected**   | `src/services/data-freshness.ts`, `src/App.ts` — `syncDataFreshnessWithLayers()` |
+| **Depends on** | BUG-005                                                                          |
 
 **Description**
 `layerToSource` maps layers to freshness source IDs, but several API-backed data sources (GDELT Doc intelligence feed, FRED, EIA oil, USASpending, PizzINT, Polymarket, Predictions) are not tracked in the freshness system.
@@ -236,11 +236,11 @@ Register all backend data sources in `data-freshness.ts` and call `dataFreshness
 
 ### BUG-013 — `VITE_VARIANT` Env Var Not Windows-Compatible in npm Scripts
 
-| Field | Value |
-|---|---|
-| **Severity** | Medium |
-| **Affected** | `package.json` (all `VITE_VARIANT=…` scripts) |
-| **Depends on** | — |
+| Field          | Value                                         |
+| -------------- | --------------------------------------------- |
+| **Severity**   | Medium                                        |
+| **Affected**   | `package.json` (all `VITE_VARIANT=…` scripts) |
+| **Depends on** | —                                             |
 
 **Description**
 Scripts like `"build:tech": "VITE_VARIANT=tech tsc && VITE_VARIANT=tech vite build"` use Unix shell syntax.
@@ -254,11 +254,11 @@ Alternatively, use `.env` file-based variant selection.
 
 ### BUG-014 — No Automated Tests for API Handler Input Validation
 
-| Field | Value |
-|---|---|
-| **Severity** | Medium |
-| **Affected** | `api/*.js` (55 handlers) |
-| **Depends on** | — |
+| Field          | Value                    |
+| -------------- | ------------------------ |
+| **Severity**   | Medium                   |
+| **Affected**   | `api/*.js` (55 handlers) |
+| **Depends on** | —                        |
 
 **Description**
 Only `api/_cors.test.mjs`, `api/cyber-threats.test.mjs`, and `api/youtube/embed.test.mjs` have unit tests.
@@ -271,11 +271,11 @@ Write unit tests for all API handlers using the node built-in test runner. Prior
 
 ### BUG-015 — Service Worker Excludes ML WASM but Still Caches 60+ MB ML JS Chunk
 
-| Field | Value |
-|---|---|
-| **Severity** | Medium |
-| **Affected** | `vite.config.ts` (line ~200) |
-| **Depends on** | — |
+| Field          | Value                        |
+| -------------- | ---------------------------- |
+| **Severity**   | Medium                       |
+| **Affected**   | `vite.config.ts` (line ~200) |
+| **Depends on** | —                            |
 
 **Description**
 `globIgnores` excludes `**/onnx*.wasm` but the `ml` chunk (Xenova Transformers JS code) is still matched by `**/*.{js,…}` and will be precached by Workbox.
@@ -288,10 +288,10 @@ Add `**/ml-*.js` to `globPatterns` exclude (it's in `globIgnores` already — ve
 
 ### BUG-016 — `MapPopup.ts` at 113 KB — Largest Component
 
-| Field | Value |
-|---|---|
-| **Severity** | Medium (maintainability) |
-| **Affected** | `src/components/MapPopup.ts` (113 133 bytes) |
+| Field          | Value                                                                               |
+| -------------- | ----------------------------------------------------------------------------------- |
+| **Severity**   | Medium (maintainability)                                                            |
+| **Affected**   | `src/components/MapPopup.ts` (113 133 bytes)                                        |
 | **Depends on** | BUG-001 (Phase 2 — independent of `App.ts`, but same decomposition pattern applies) |
 
 **Description**
@@ -307,11 +307,11 @@ Split into per-layer popup renderers (e.g., `popups/ConflictPopup.ts`, `popups/M
 
 ### BUG-017 — Magic Numbers Across Scoring Algorithms
 
-| Field | Value |
-|---|---|
-| **Severity** | Low |
-| **Affected** | `src/services/country-instability.ts`, `src/services/hotspot-escalation.ts`, `src/services/military-surge.ts`, `src/services/geo-convergence.ts` |
-| **Depends on** | — |
+| Field          | Value                                                                                                                                            |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Severity**   | Low                                                                                                                                              |
+| **Affected**   | `src/services/country-instability.ts`, `src/services/hotspot-escalation.ts`, `src/services/military-surge.ts`, `src/services/geo-convergence.ts` |
+| **Depends on** | —                                                                                                                                                |
 
 **Description**
 Scoring thresholds (e.g., `0.35`, `0.25`, `0.15`, `min(50, count × 8)`) are scattered as raw numbers.
@@ -324,11 +324,11 @@ Extract all scoring weights and thresholds into `src/utils/analysis-constants.ts
 
 ### BUG-018 — Localization Coverage Gaps
 
-| Field | Value |
-|---|---|
-| **Severity** | Low |
-| **Affected** | `src/locales/` (22 locale files), various components |
-| **Depends on** | — |
+| Field          | Value                                                |
+| -------------- | ---------------------------------------------------- |
+| **Severity**   | Low                                                  |
+| **Affected**   | `src/locales/` (22 locale files), various components |
+| **Depends on** | —                                                    |
 
 **Description**
 Several components use hardcoded English strings (e.g., `"No instability signals detected"` in `CIIPanel.ts` line 114, `"Hide Intelligence Findings"` in `IntelligenceGapBadge.ts` line 161).
@@ -341,11 +341,11 @@ Audit all user-facing strings for missing `t(…)` calls. Add keys to `en.json` 
 
 ### BUG-019 — `test:e2e` Scripts Fail on Windows Due to Shell Syntax
 
-| Field | Value |
-|---|---|
-| **Severity** | Low |
-| **Affected** | `package.json` — all `test:e2e:*` scripts |
-| **Depends on** | BUG-013 |
+| Field          | Value                                     |
+| -------------- | ----------------------------------------- |
+| **Severity**   | Low                                       |
+| **Affected**   | `package.json` — all `test:e2e:*` scripts |
+| **Depends on** | BUG-013                                   |
 
 **Description**
 Same issue as BUG-013 — `VITE_VARIANT=full playwright test` is Unix-only.
@@ -358,11 +358,11 @@ Fix alongside BUG-013 using `cross-env`.
 
 ### BUG-020 — `DeckGLMap.ts` at 156 KB — Largest File in Project
 
-| Field | Value |
-|---|---|
-| **Severity** | Low (maintainability) |
-| **Affected** | `src/components/DeckGLMap.ts` (156 750 bytes) |
-| **Depends on** | BUG-016 |
+| Field          | Value                                         |
+| -------------- | --------------------------------------------- |
+| **Severity**   | Low (maintainability)                         |
+| **Affected**   | `src/components/DeckGLMap.ts` (156 750 bytes) |
+| **Depends on** | BUG-016                                       |
 
 **Description**
 The WebGL map implementation handles all deck.gl layer construction, interaction, controls, and popups in one massive file.

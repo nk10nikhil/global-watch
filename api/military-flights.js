@@ -1,9 +1,9 @@
-import { getCorsHeaders, isDisallowedOrigin } from './_cors.js';
+import { getCorsHeaders, isDisallowedOrigin } from "./_cors.js";
 
-export const config = { runtime: 'edge' };
+export const config = { runtime: "edge" };
 
-const REDIS_KEY = 'military:flights:v1';
-const STALE_KEY = 'military:flights:stale:v1';
+const REDIS_KEY = "military:flights:v1";
+const STALE_KEY = "military:flights:stale:v1";
 
 let cached = null;
 let cachedAt = 0;
@@ -26,7 +26,11 @@ async function readFromRedis(key) {
   const data = await resp.json();
   if (!data.result) return null;
 
-  try { return JSON.parse(data.result); } catch { return null; }
+  try {
+    return JSON.parse(data.result);
+  } catch {
+    return null;
+  }
 }
 
 async function fetchMilitaryFlightsData() {
@@ -35,10 +39,18 @@ async function fetchMilitaryFlightsData() {
   if (now < negUntil) return null;
 
   let data;
-  try { data = await readFromRedis(REDIS_KEY); } catch { data = null; }
+  try {
+    data = await readFromRedis(REDIS_KEY);
+  } catch {
+    data = null;
+  }
 
   if (!data) {
-    try { data = await readFromRedis(STALE_KEY); } catch { data = null; }
+    try {
+      data = await readFromRedis(STALE_KEY);
+    } catch {
+      data = null;
+    }
   }
 
   if (!data) {
@@ -52,37 +64,41 @@ async function fetchMilitaryFlightsData() {
 }
 
 export default async function handler(req) {
-  const corsHeaders = getCorsHeaders(req, 'GET, OPTIONS');
+  const corsHeaders = getCorsHeaders(req, "GET, OPTIONS");
 
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
   }
 
   if (isDisallowedOrigin(req)) {
-    return new Response(JSON.stringify({ error: 'Origin not allowed' }), {
+    return new Response(JSON.stringify({ error: "Origin not allowed" }), {
       status: 403,
-      headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   }
 
   const data = await fetchMilitaryFlightsData();
 
   if (!data) {
-    return new Response(JSON.stringify({ error: 'Military flight data temporarily unavailable' }), {
-      status: 503,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache, no-store',
-        ...corsHeaders,
+    return new Response(
+      JSON.stringify({ error: "Military flight data temporarily unavailable" }),
+      {
+        status: 503,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache, no-store",
+          ...corsHeaders,
+        },
       },
-    });
+    );
   }
 
   return new Response(JSON.stringify(data), {
     status: 200,
     headers: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 's-maxage=120, stale-while-revalidate=60, stale-if-error=300',
+      "Content-Type": "application/json",
+      "Cache-Control":
+        "s-maxage=120, stale-while-revalidate=60, stale-if-error=300",
       ...corsHeaders,
     },
   });

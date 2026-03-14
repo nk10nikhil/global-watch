@@ -65,9 +65,19 @@ export interface GeoCoordinates {
   longitude: number;
 }
 
-export type SummarizeStatus = "SUMMARIZE_STATUS_UNSPECIFIED" | "SUMMARIZE_STATUS_SUCCESS" | "SUMMARIZE_STATUS_CACHED" | "SUMMARIZE_STATUS_SKIPPED" | "SUMMARIZE_STATUS_ERROR";
+export type SummarizeStatus =
+  | "SUMMARIZE_STATUS_UNSPECIFIED"
+  | "SUMMARIZE_STATUS_SUCCESS"
+  | "SUMMARIZE_STATUS_CACHED"
+  | "SUMMARIZE_STATUS_SKIPPED"
+  | "SUMMARIZE_STATUS_ERROR";
 
-export type ThreatLevel = "THREAT_LEVEL_UNSPECIFIED" | "THREAT_LEVEL_LOW" | "THREAT_LEVEL_MEDIUM" | "THREAT_LEVEL_HIGH" | "THREAT_LEVEL_CRITICAL";
+export type ThreatLevel =
+  | "THREAT_LEVEL_UNSPECIFIED"
+  | "THREAT_LEVEL_LOW"
+  | "THREAT_LEVEL_MEDIUM"
+  | "THREAT_LEVEL_HIGH"
+  | "THREAT_LEVEL_CRITICAL";
 
 export interface FieldViolation {
   field: string;
@@ -117,7 +127,10 @@ export class NewsServiceClient {
     this.defaultHeaders = { ...options?.defaultHeaders };
   }
 
-  async summarizeArticle(req: SummarizeArticleRequest, options?: NewsServiceCallOptions): Promise<SummarizeArticleResponse> {
+  async summarizeArticle(
+    req: SummarizeArticleRequest,
+    options?: NewsServiceCallOptions,
+  ): Promise<SummarizeArticleResponse> {
     let path = "/api/news/v1/summarize-article";
     const url = this.baseURL + path;
 
@@ -138,14 +151,19 @@ export class NewsServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as SummarizeArticleResponse;
+    return (await resp.json()) as SummarizeArticleResponse;
   }
 
-  async getSummarizeArticleCache(req: GetSummarizeArticleCacheRequest, options?: NewsServiceCallOptions): Promise<SummarizeArticleResponse> {
+  async getSummarizeArticleCache(
+    req: GetSummarizeArticleCacheRequest,
+    options?: NewsServiceCallOptions,
+  ): Promise<SummarizeArticleResponse> {
     let path = "/api/news/v1/summarize-article-cache";
     const params = new URLSearchParams();
-    if (req.cacheKey != null && req.cacheKey !== "") params.set("cache_key", String(req.cacheKey));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.cacheKey != null && req.cacheKey !== "")
+      params.set("cache_key", String(req.cacheKey));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -163,15 +181,21 @@ export class NewsServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as SummarizeArticleResponse;
+    return (await resp.json()) as SummarizeArticleResponse;
   }
 
-  async listFeedDigest(req: ListFeedDigestRequest, options?: NewsServiceCallOptions): Promise<ListFeedDigestResponse> {
+  async listFeedDigest(
+    req: ListFeedDigestRequest,
+    options?: NewsServiceCallOptions,
+  ): Promise<ListFeedDigestResponse> {
     let path = "/api/news/v1/list-feed-digest";
     const params = new URLSearchParams();
-    if (req.variant != null && req.variant !== "") params.set("variant", String(req.variant));
-    if (req.lang != null && req.lang !== "") params.set("lang", String(req.lang));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.variant != null && req.variant !== "")
+      params.set("variant", String(req.variant));
+    if (req.lang != null && req.lang !== "")
+      params.set("lang", String(req.lang));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -189,7 +213,7 @@ export class NewsServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as ListFeedDigestResponse;
+    return (await resp.json()) as ListFeedDigestResponse;
   }
 
   private async handleError(resp: Response): Promise<never> {
@@ -204,7 +228,10 @@ export class NewsServiceClient {
         if (e instanceof ValidationError) throw e;
       }
     }
-    throw new ApiError(resp.status, `Request failed with status ${resp.status}`, body);
+    throw new ApiError(
+      resp.status,
+      `Request failed with status ${resp.status}`,
+      body,
+    );
   }
 }
-

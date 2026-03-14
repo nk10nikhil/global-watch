@@ -1,12 +1,17 @@
 #!/usr/bin/env node
 
-import { loadEnvFile, loadSharedConfig, CHROME_UA, runSeed } from './_seed-utils.mjs';
+import {
+  loadEnvFile,
+  loadSharedConfig,
+  CHROME_UA,
+  runSeed,
+} from "./_seed-utils.mjs";
 
-const etfConfig = loadSharedConfig('etfs.json');
+const etfConfig = loadSharedConfig("etfs.json");
 
 loadEnvFile(import.meta.url);
 
-const CANONICAL_KEY = 'market:etf-flows:v1';
+const CANONICAL_KEY = "market:etf-flows:v1";
 const CACHE_TTL = 3600;
 const YAHOO_DELAY_MS = 200;
 
@@ -19,12 +24,14 @@ function sleep(ms) {
 async function fetchYahooWithRetry(url, label, maxAttempts = 4) {
   for (let i = 0; i < maxAttempts; i++) {
     const resp = await fetch(url, {
-      headers: { 'User-Agent': CHROME_UA },
+      headers: { "User-Agent": CHROME_UA },
       signal: AbortSignal.timeout(10_000),
     });
     if (resp.status === 429) {
       const wait = 5000 * (i + 1);
-      console.warn(`  [Yahoo] ${label} 429 — waiting ${wait / 1000}s (attempt ${i + 1}/${maxAttempts})`);
+      console.warn(
+        `  [Yahoo] ${label} 429 — waiting ${wait / 1000}s (attempt ${i + 1}/${maxAttempts})`,
+      );
       await sleep(wait);
       continue;
     }
@@ -53,17 +60,23 @@ function parseEtfChartData(chart, ticker, issuer) {
 
   const latestPrice = validCloses[validCloses.length - 1];
   const prevPrice = validCloses[validCloses.length - 2];
-  const priceChange = prevPrice ? ((latestPrice - prevPrice) / prevPrice) * 100 : 0;
+  const priceChange = prevPrice
+    ? ((latestPrice - prevPrice) / prevPrice) * 100
+    : 0;
 
-  const latestVolume = validVolumes.length > 0 ? validVolumes[validVolumes.length - 1] : 0;
+  const latestVolume =
+    validVolumes.length > 0 ? validVolumes[validVolumes.length - 1] : 0;
   const avgVolume =
     validVolumes.length > 1
-      ? validVolumes.slice(0, -1).reduce((a, b) => a + b, 0) / (validVolumes.length - 1)
+      ? validVolumes.slice(0, -1).reduce((a, b) => a + b, 0) /
+        (validVolumes.length - 1)
       : latestVolume;
 
   const volumeRatio = avgVolume > 0 ? latestVolume / avgVolume : 1;
-  const direction = priceChange > 0.1 ? 'inflow' : priceChange < -0.1 ? 'outflow' : 'neutral';
-  const estFlowMagnitude = latestVolume * latestPrice * (priceChange > 0 ? 1 : -1) * 0.1;
+  const direction =
+    priceChange > 0.1 ? "inflow" : priceChange < -0.1 ? "outflow" : "neutral";
+  const estFlowMagnitude =
+    latestVolume * latestPrice * (priceChange > 0 ? 1 : -1) * 0.1;
 
   return {
     ticker,
@@ -115,8 +128,8 @@ async function fetchEtfFlows() {
 
   const totalVolume = etfs.reduce((sum, e) => sum + e.volume, 0);
   const totalEstFlow = etfs.reduce((sum, e) => sum + e.estFlow, 0);
-  const inflowCount = etfs.filter((e) => e.direction === 'inflow').length;
-  const outflowCount = etfs.filter((e) => e.direction === 'outflow').length;
+  const inflowCount = etfs.filter((e) => e.direction === "inflow").length;
+  const outflowCount = etfs.filter((e) => e.direction === "outflow").length;
 
   etfs.sort((a, b) => b.volume - a.volume);
 
@@ -126,7 +139,12 @@ async function fetchEtfFlows() {
       etfCount: etfs.length,
       totalVolume,
       totalEstFlow,
-      netDirection: totalEstFlow > 0 ? 'NET INFLOW' : totalEstFlow < 0 ? 'NET OUTFLOW' : 'NEUTRAL',
+      netDirection:
+        totalEstFlow > 0
+          ? "NET INFLOW"
+          : totalEstFlow < 0
+            ? "NET OUTFLOW"
+            : "NEUTRAL",
       inflowCount,
       outflowCount,
     },
@@ -139,11 +157,11 @@ function validate(data) {
   return Array.isArray(data?.etfs) && data.etfs.length >= 1;
 }
 
-runSeed('market', 'etf-flows', CANONICAL_KEY, fetchEtfFlows, {
+runSeed("market", "etf-flows", CANONICAL_KEY, fetchEtfFlows, {
   validateFn: validate,
   ttlSeconds: CACHE_TTL,
-  sourceVersion: 'yahoo-chart-5d',
+  sourceVersion: "yahoo-chart-5d",
 }).catch((err) => {
-  console.error('FATAL:', err.message || err);
+  console.error("FATAL:", err.message || err);
   process.exit(1);
 });

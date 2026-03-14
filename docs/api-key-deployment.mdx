@@ -2,6 +2,7 @@
 title: "API Key Gating & Registration — Deployment Guide"
 description: "Desktop cloud fallback is gated on a WORLDMONITOR_API_KEY. Without a valid key, the desktop app operates local-only (sidecar). A registration form collects emails via Convex DB for future key distribution."
 ---
+
 ## Overview
 
 Desktop cloud fallback is gated on a `WORLDMONITOR_API_KEY`. Without a valid key, the desktop app operates local-only (sidecar). A registration form collects emails via Convex DB for future key distribution.
@@ -29,10 +30,10 @@ Desktop App                          Cloud (Vercel)
 
 ### Vercel
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `WORLDMONITOR_VALID_KEYS` | Comma-separated list of valid API keys | `wm_abc123def456,wm_xyz789` |
-| `CONVEX_URL` | Convex deployment URL (from `npx convex deploy`) | `https://xyz-123.convex.cloud` |
+| Variable                  | Description                                      | Example                        |
+| ------------------------- | ------------------------------------------------ | ------------------------------ |
+| `WORLDMONITOR_VALID_KEYS` | Comma-separated list of valid API keys           | `wm_abc123def456,wm_xyz789`    |
+| `CONVEX_URL`              | Convex deployment URL (from `npx convex deploy`) | `https://xyz-123.convex.cloud` |
 
 ### Generating API keys
 
@@ -81,13 +82,13 @@ npx convex dashboard
 
 The `registrations` table stores:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `email` | string | Original email (for display) |
-| `normalizedEmail` | string | Lowercased email (for dedup) |
-| `registeredAt` | number | Unix timestamp |
-| `source` | string? | Where the registration came from |
-| `appVersion` | string? | Desktop app version |
+| Field             | Type    | Description                      |
+| ----------------- | ------- | -------------------------------- |
+| `email`           | string  | Original email (for display)     |
+| `normalizedEmail` | string  | Lowercased email (for dedup)     |
+| `registeredAt`    | number  | Unix timestamp                   |
+| `source`          | string? | Where the registration came from |
+| `appVersion`      | string? | Desktop app version              |
 
 Indexed by `normalizedEmail` for duplicate detection.
 
@@ -129,14 +130,14 @@ After deployment:
 
 ## Files Reference
 
-| File | Role |
-|------|------|
-| `src/services/runtime.ts` | Client-side key gate + header attachment |
-| `src/services/runtime-config.ts` | `WORLDMONITOR_API_KEY` type, validation, `secretsReady` |
-| `api/_api-key.js` | Server-side key validation (origin-aware) |
-| `api/[domain]/v1/[rpc].ts` | Sebuf gateway — calls `validateApiKey` |
-| `api/register-interest.js` | Registration endpoint → Convex |
-| `server/cors.ts` / `api/_cors.js` | CORS headers with `X-WorldMonitor-Key` |
-| `src/components/WorldMonitorTab.ts` | Settings UI for key + registration |
-| `convex/schema.ts` | Convex DB schema |
-| `convex/registerInterest.ts` | Convex mutation |
+| File                                | Role                                                    |
+| ----------------------------------- | ------------------------------------------------------- |
+| `src/services/runtime.ts`           | Client-side key gate + header attachment                |
+| `src/services/runtime-config.ts`    | `WORLDMONITOR_API_KEY` type, validation, `secretsReady` |
+| `api/_api-key.js`                   | Server-side key validation (origin-aware)               |
+| `api/[domain]/v1/[rpc].ts`          | Sebuf gateway — calls `validateApiKey`                  |
+| `api/register-interest.js`          | Registration endpoint → Convex                          |
+| `server/cors.ts` / `api/_cors.js`   | CORS headers with `X-WorldMonitor-Key`                  |
+| `src/components/WorldMonitorTab.ts` | Settings UI for key + registration                      |
+| `convex/schema.ts`                  | Convex DB schema                                        |
+| `convex/registerInterest.ts`        | Convex mutation                                         |

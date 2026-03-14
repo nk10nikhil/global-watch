@@ -1,31 +1,43 @@
-import { getRpcBaseUrl } from '@/services/rpc-client';
+import { getRpcBaseUrl } from "@/services/rpc-client";
 import {
   InfrastructureServiceClient,
   type GetCableHealthResponse,
   type CableHealthRecord as ProtoCableHealthRecord,
-} from '@/generated/client/worldmonitor/infrastructure/v1/service_client';
-import type { CableHealthRecord, CableHealthResponse, CableHealthStatus } from '@/types';
-import { createCircuitBreaker } from '@/utils';
+} from "@/generated/client/worldmonitor/infrastructure/v1/service_client";
+import type {
+  CableHealthRecord,
+  CableHealthResponse,
+  CableHealthStatus,
+} from "@/types";
+import { createCircuitBreaker } from "@/utils";
 
-const client = new InfrastructureServiceClient(getRpcBaseUrl(), { fetch: (...args) => globalThis.fetch(...args) });
-const breaker = createCircuitBreaker<GetCableHealthResponse>({ name: 'Cable Health', cacheTtlMs: 10 * 60 * 1000, persistCache: true });
+const client = new InfrastructureServiceClient(getRpcBaseUrl(), {
+  fetch: (...args) => globalThis.fetch(...args),
+});
+const breaker = createCircuitBreaker<GetCableHealthResponse>({
+  name: "Cable Health",
+  cacheTtlMs: 10 * 60 * 1000,
+  persistCache: true,
+});
 const emptyFallback: GetCableHealthResponse = { generatedAt: 0, cables: {} };
 
 // ---- Proto enum -> frontend string adapter ----
 
 const STATUS_REVERSE: Record<string, CableHealthStatus> = {
-  CABLE_HEALTH_STATUS_FAULT: 'fault',
-  CABLE_HEALTH_STATUS_DEGRADED: 'degraded',
-  CABLE_HEALTH_STATUS_OK: 'ok',
-  CABLE_HEALTH_STATUS_UNSPECIFIED: 'unknown',
+  CABLE_HEALTH_STATUS_FAULT: "fault",
+  CABLE_HEALTH_STATUS_DEGRADED: "degraded",
+  CABLE_HEALTH_STATUS_OK: "ok",
+  CABLE_HEALTH_STATUS_UNSPECIFIED: "unknown",
 };
 
 function toRecord(proto: ProtoCableHealthRecord): CableHealthRecord {
   return {
-    status: STATUS_REVERSE[proto.status] || 'unknown',
+    status: STATUS_REVERSE[proto.status] || "unknown",
     score: proto.score,
     confidence: proto.confidence,
-    lastUpdated: proto.lastUpdated ? new Date(proto.lastUpdated).toISOString() : new Date().toISOString(),
+    lastUpdated: proto.lastUpdated
+      ? new Date(proto.lastUpdated).toISOString()
+      : new Date().toISOString(),
     evidence: proto.evidence.map((e) => ({
       source: e.source,
       summary: e.summary,
@@ -56,7 +68,9 @@ export async function fetchCableHealth(): Promise<CableHealthResponse> {
   }
 
   const result: CableHealthResponse = {
-    generatedAt: resp.generatedAt ? new Date(resp.generatedAt).toISOString() : new Date().toISOString(),
+    generatedAt: resp.generatedAt
+      ? new Date(resp.generatedAt).toISOString()
+      : new Date().toISOString(),
     cables,
   };
 
@@ -66,7 +80,9 @@ export async function fetchCableHealth(): Promise<CableHealthResponse> {
   return result;
 }
 
-export function getCableHealthRecord(cableId: string): CableHealthRecord | undefined {
+export function getCableHealthRecord(
+  cableId: string,
+): CableHealthRecord | undefined {
   return cachedResponse?.cables[cableId];
 }
 

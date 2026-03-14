@@ -2,41 +2,42 @@
 title: "Natural Disaster Tracking"
 description: "Multi-source natural disaster monitoring using GDACS and NASA EONET, with intelligent deduplication and filtering for earthquakes, wildfires, cyclones, and more."
 ---
+
 The Natural layer combines two authoritative sources for comprehensive disaster monitoring, providing real-time alerts with severity assessments and satellite-derived event detection.
 
 ## GDACS (Global Disaster Alert and Coordination System)
 
 UN-backed disaster alert system providing official severity assessments:
 
-| Event Type | Code | Icon | Sources |
-|------------|------|------|---------|
-| Earthquake | EQ | Red circle | USGS, EMSC |
-| Flood | FL | Wave | Satellite imagery |
-| Tropical Cyclone | TC | Cyclone | NOAA, JMA |
-| Volcano | VO | Volcano | Smithsonian GVP |
-| Wildfire | WF | Fire | MODIS, VIIRS |
-| Drought | DR | Sun | Multiple sources |
+| Event Type       | Code | Icon       | Sources           |
+| ---------------- | ---- | ---------- | ----------------- |
+| Earthquake       | EQ   | Red circle | USGS, EMSC        |
+| Flood            | FL   | Wave       | Satellite imagery |
+| Tropical Cyclone | TC   | Cyclone    | NOAA, JMA         |
+| Volcano          | VO   | Volcano    | Smithsonian GVP   |
+| Wildfire         | WF   | Fire       | MODIS, VIIRS      |
+| Drought          | DR   | Sun        | Multiple sources  |
 
 **Alert Levels**:
 
-| Level | Color | Meaning |
-|-------|-------|---------|
-| **Red** | Critical | Significant humanitarian impact expected |
-| **Orange** | Alert | Moderate impact, monitoring required |
-| **Green** | Advisory | Minor event, localized impact |
+| Level      | Color    | Meaning                                  |
+| ---------- | -------- | ---------------------------------------- |
+| **Red**    | Critical | Significant humanitarian impact expected |
+| **Orange** | Alert    | Moderate impact, monitoring required     |
+| **Green**  | Advisory | Minor event, localized impact            |
 
 ## NASA EONET (Earth Observatory Natural Event Tracker)
 
 Near-real-time natural event detection from satellite observation:
 
-| Category | Detection Method | Typical Delay |
-|----------|------------------|---------------|
-| Severe Storms | GOES/Himawari imagery | Minutes |
-| Wildfires | MODIS thermal anomalies | 4-6 hours |
-| Volcanoes | Thermal + SO2 emissions | Hours |
-| Floods | SAR imagery + gauges | Hours to days |
-| Sea/Lake Ice | Passive microwave | Daily |
-| Dust/Haze | Aerosol optical depth | Hours |
+| Category      | Detection Method        | Typical Delay |
+| ------------- | ----------------------- | ------------- |
+| Severe Storms | GOES/Himawari imagery   | Minutes       |
+| Wildfires     | MODIS thermal anomalies | 4-6 hours     |
+| Volcanoes     | Thermal + SO2 emissions | Hours         |
+| Floods        | SAR imagery + gauges    | Hours to days |
+| Sea/Lake Ice  | Passive microwave       | Daily         |
+| Dust/Haze     | Aerosol optical depth   | Hours         |
 
 ## Multi-Source Deduplication
 

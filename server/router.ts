@@ -32,12 +32,14 @@ export function createRouter(allRoutes: RouteDescriptor[]): Router {
   const dynamicRoutes: DynamicRoute[] = [];
 
   for (const route of allRoutes) {
-    if (route.path.includes('{')) {
-      const parts = route.path.split('/').filter(Boolean);
+    if (route.path.includes("{")) {
+      const parts = route.path.split("/").filter(Boolean);
       dynamicRoutes.push({
         method: route.method,
         segmentCount: parts.length,
-        segments: parts.map((p) => (p.startsWith('{') && p.endsWith('}') ? null : p)),
+        segments: parts.map((p) =>
+          p.startsWith("{") && p.endsWith("}") ? null : p,
+        ),
         handler: route.handler,
       });
     } else {
@@ -49,7 +51,7 @@ export function createRouter(allRoutes: RouteDescriptor[]): Router {
   }
 
   function normalizePath(raw: string): string {
-    return raw.length > 1 && raw.endsWith('/') ? raw.slice(0, -1) : raw;
+    return raw.length > 1 && raw.endsWith("/") ? raw.slice(0, -1) : raw;
   }
 
   return {
@@ -61,7 +63,7 @@ export function createRouter(allRoutes: RouteDescriptor[]): Router {
       const staticHandler = staticTable.get(key);
       if (staticHandler) return staticHandler;
 
-      const parts = pathname.split('/').filter(Boolean);
+      const parts = pathname.split("/").filter(Boolean);
       for (const route of dynamicRoutes) {
         if (route.method !== req.method) continue;
         if (route.segmentCount !== parts.length) continue;
@@ -84,11 +86,12 @@ export function createRouter(allRoutes: RouteDescriptor[]): Router {
       const methods = staticPaths.get(normalized);
       if (methods) {
         const result = Array.from(methods);
-        if (result.includes('GET') && !result.includes('HEAD')) result.push('HEAD');
+        if (result.includes("GET") && !result.includes("HEAD"))
+          result.push("HEAD");
         return result;
       }
 
-      const parts = normalized.split('/').filter(Boolean);
+      const parts = normalized.split("/").filter(Boolean);
       const found = new Set<string>();
       for (const route of dynamicRoutes) {
         if (route.segmentCount !== parts.length) continue;
@@ -101,7 +104,7 @@ export function createRouter(allRoutes: RouteDescriptor[]): Router {
         }
         if (matched) found.add(route.method);
       }
-      if (found.has('GET')) found.add('HEAD');
+      if (found.has("GET")) found.add("HEAD");
       return Array.from(found);
     },
   };

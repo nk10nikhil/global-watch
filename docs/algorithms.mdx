@@ -13,10 +13,10 @@ Every country with incoming event data receives a live instability score (0-100)
 
 The server-side score (`get-risk-scores.ts`) uses the same formulas as the frontend (`country-instability.ts`):
 
-| Component            | Weight | Details |
-| -------------------- | ------ | ------- |
-| **Baseline risk**    | 40%    | Pre-configured per country reflecting structural fragility (0-50 scale) |
-| **Event score**      | 60%    | Blend of Unrest (25%), Conflict (30%), Security (20%), Information (25%) |
+| Component         | Weight | Details                                                                  |
+| ----------------- | ------ | ------------------------------------------------------------------------ |
+| **Baseline risk** | 40%    | Pre-configured per country reflecting structural fragility (0-50 scale)  |
+| **Event score**   | 60%    | Blend of Unrest (25%), Conflict (30%), Security (20%), Information (25%) |
 
 **Unrest score** (0-100): Log2 dampening for high-volume low-multiplier countries (`multiplier &lt; 0.7`), linear otherwise. Base capped at 50, plus protest/riot fatality boost (up to 30), plus outage severity boost (TOTAL: 30pts, MAJOR: 15pts, PARTIAL: 5pts, capped at 50).
 
@@ -136,12 +136,12 @@ This dual-source approach provides a more complete operational picture than eith
 
 Military flights detected via ADS-B transponder data are enriched through the Wingbits aviation intelligence API, which provides aircraft registration, manufacturer, model, owner, and operator details. Each flight receives a military confidence classification:
 
-| Confidence    | Criteria                                                         |
-| ------------- | ---------------------------------------------------------------- |
-| **Confirmed** | Operator matches a known military branch or defense contractor  |
-| **Likely**    | Aircraft type is exclusively military (tanker, AWACS, fighter)  |
-| **Possible**  | Government-registered aircraft in a military operating area      |
-| **Civilian**  | No military indicators detected                                 |
+| Confidence    | Criteria                                                       |
+| ------------- | -------------------------------------------------------------- |
+| **Confirmed** | Operator matches a known military branch or defense contractor |
+| **Likely**    | Aircraft type is exclusively military (tanker, AWACS, fighter) |
+| **Possible**  | Government-registered aircraft in a military operating area    |
+| **Civilian**  | No military indicators detected                                |
 
 Enrichment queries are batched (up to 50 aircraft per request) and cached with a circuit breaker pattern to avoid hammering the upstream API during high-traffic periods. The enriched metadata feeds into the Theater Posture Assessment — a KC-135 tanker paired with F-15s and an E-3 AWACS indicates strike packaging, not routine training.
 
@@ -221,13 +221,13 @@ Entity matching uses word-boundary regex to prevent false positives (e.g., "Iran
 
 The AI Insights panel ranks news items by geopolitical significance using a multi-signal importance scoring algorithm. Rather than displaying stories in chronological order, the algorithm surfaces the most consequential developments by applying keyword-weighted scoring across five severity tiers:
 
-| Category | Base Score | Per-Match Bonus | Keywords |
-| --- | --- | --- | --- |
-| **Violence** | +100 | +25 | killed, dead, death, shot, casualty, massacre, crackdown |
-| **Military** | +80 | +20 | war, invasion, airstrike, missile, troops, combat, fleet |
-| **Unrest** | +40 | +15 | protest, uprising, riot, demonstration, revolution |
-| **Flashpoint** | — | +20 | iran, russia, china, taiwan, ukraine, israel, gaza, north korea, syria, yemen, hamas, hezbollah, nato, kremlin |
-| **Crisis** | — | +10 | sanctions, escalation, breaking, urgent, humanitarian |
+| Category       | Base Score | Per-Match Bonus | Keywords                                                                                                       |
+| -------------- | ---------- | --------------- | -------------------------------------------------------------------------------------------------------------- |
+| **Violence**   | +100       | +25             | killed, dead, death, shot, casualty, massacre, crackdown                                                       |
+| **Military**   | +80        | +20             | war, invasion, airstrike, missile, troops, combat, fleet                                                       |
+| **Unrest**     | +40        | +15             | protest, uprising, riot, demonstration, revolution                                                             |
+| **Flashpoint** | —          | +20             | iran, russia, china, taiwan, ukraine, israel, gaza, north korea, syria, yemen, hamas, hezbollah, nato, kremlin |
+| **Crisis**     | —          | +10             | sanctions, escalation, breaking, urgent, humanitarian                                                          |
 
 **Source confirmation boost** — each additional independent source reporting the same story adds +10 points, rewarding multi-source corroboration over single-source reporting.
 
@@ -270,13 +270,13 @@ A minimum of 10 historical samples is required before anomalies are reported, pr
 
 The dashboard monitors five independent alert origins and fuses them into a unified breaking news stream with layered deduplication, cooldowns, and source quality gating:
 
-| Origin               | Trigger                                                        | Example                                      |
-| -------------------- | -------------------------------------------------------------- | -------------------------------------------- |
-| **RSS alert**        | News item with `isAlert: true` and threat level critical/high  | Reuters flash: missile strike confirmed       |
-| **Keyword spike**    | Trending keyword exceeds spike threshold                       | "nuclear" surges across 8+ feeds in 2 hours  |
-| **Hotspot escalation** | Hotspot escalation score exceeds critical threshold          | Taiwan Strait tension crosses 80/100         |
-| **Military surge**   | Theater posture assessment detects strike packaging            | Tanker + AWACS + fighters co-present in MENA |
-| **OREF siren**       | Israel Home Front Command issues incoming rocket/missile alert | Rocket barrage detected in northern Israel   |
+| Origin                 | Trigger                                                        | Example                                      |
+| ---------------------- | -------------------------------------------------------------- | -------------------------------------------- |
+| **RSS alert**          | News item with `isAlert: true` and threat level critical/high  | Reuters flash: missile strike confirmed      |
+| **Keyword spike**      | Trending keyword exceeds spike threshold                       | "nuclear" surges across 8+ feeds in 2 hours  |
+| **Hotspot escalation** | Hotspot escalation score exceeds critical threshold            | Taiwan Strait tension crosses 80/100         |
+| **Military surge**     | Theater posture assessment detects strike packaging            | Tanker + AWACS + fighters co-present in MENA |
+| **OREF siren**         | Israel Home Front Command issues incoming rocket/missile alert | Rocket barrage detected in northern Israel   |
 
 **Anti-noise safeguards**:
 
@@ -302,24 +302,24 @@ All real-time data sources feed into a central signal aggregator that builds a u
 
 ### Cross-Stream Correlation Engine
 
-Beyond aggregating signals by geography, the system detects meaningful correlations *across* data streams — identifying patterns that no single source would reveal. 14 signal types are continuously evaluated:
+Beyond aggregating signals by geography, the system detects meaningful correlations _across_ data streams — identifying patterns that no single source would reveal. 14 signal types are continuously evaluated:
 
-| Signal Type               | Detection Logic                                                                 | Why It Matters                                           |
-| ------------------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| `prediction_leads_news`   | Polymarket probability shifts >5% before matching news headlines appear        | Prediction markets as early-warning indicators           |
-| `news_leads_markets`      | News velocity spike precedes equity/crypto price move by 15–60 min             | Informational advantage detection                        |
-| `silent_divergence`       | Significant market movement with no corresponding news volume                   | Potential insider activity or unreported events           |
-| `velocity_spike`          | News cluster sources-per-hour exceeds 6+ from Tier 1–2 outlets                | Breaking story detection                                 |
-| `keyword_spike`           | Trending term exceeds 3× its 7-day baseline                                   | Emerging narrative detection                             |
-| `convergence`             | 3+ signal types co-locate in same 1°×1° geographic cell                        | Multi-domain crisis indicator                            |
-| `triangulation`           | Same entity appears across news + military tracking + market signals           | High-confidence focal point identification               |
-| `flow_drop`               | ETF flow estimates reverse direction while price continues                     | Smart money divergence                                   |
-| `flow_price_divergence`   | Commodity prices move opposite to shipping flow indicators                     | Supply chain disruption signal                           |
-| `geo_convergence`         | Geographic convergence alert from the spatial binning system                   | Regional crisis acceleration                             |
-| `explained_market_move`   | Market price change has a matching news cluster with causal keywords           | Attributable market reaction                             |
-| `hotspot_escalation`      | Hotspot escalation score exceeds threshold                                     | Conflict zone intensification                            |
-| `sector_cascade`          | Multiple companies in same sector move in same direction simultaneously        | Sector-wide event detection                              |
-| `military_surge`          | Theater posture assessment detects unusual force concentration                 | Military escalation warning                              |
+| Signal Type             | Detection Logic                                                         | Why It Matters                                  |
+| ----------------------- | ----------------------------------------------------------------------- | ----------------------------------------------- |
+| `prediction_leads_news` | Polymarket probability shifts >5% before matching news headlines appear | Prediction markets as early-warning indicators  |
+| `news_leads_markets`    | News velocity spike precedes equity/crypto price move by 15–60 min      | Informational advantage detection               |
+| `silent_divergence`     | Significant market movement with no corresponding news volume           | Potential insider activity or unreported events |
+| `velocity_spike`        | News cluster sources-per-hour exceeds 6+ from Tier 1–2 outlets          | Breaking story detection                        |
+| `keyword_spike`         | Trending term exceeds 3× its 7-day baseline                             | Emerging narrative detection                    |
+| `convergence`           | 3+ signal types co-locate in same 1°×1° geographic cell                 | Multi-domain crisis indicator                   |
+| `triangulation`         | Same entity appears across news + military tracking + market signals    | High-confidence focal point identification      |
+| `flow_drop`             | ETF flow estimates reverse direction while price continues              | Smart money divergence                          |
+| `flow_price_divergence` | Commodity prices move opposite to shipping flow indicators              | Supply chain disruption signal                  |
+| `geo_convergence`       | Geographic convergence alert from the spatial binning system            | Regional crisis acceleration                    |
+| `explained_market_move` | Market price change has a matching news cluster with causal keywords    | Attributable market reaction                    |
+| `hotspot_escalation`    | Hotspot escalation score exceeds threshold                              | Conflict zone intensification                   |
+| `sector_cascade`        | Multiple companies in same sector move in same direction simultaneously | Sector-wide event detection                     |
+| `military_surge`        | Theater posture assessment detects unusual force concentration          | Military escalation warning                     |
 
 Each signal carries a severity (low/medium/high), geographic coordinates, a human-readable summary, and the raw data that triggered it. Signals are deduplicated per-type with configurable cooldown windows (30 minutes to 6 hours) to prevent alert fatigue. The correlation output feeds into the AI Insights panel, where the narrative synthesis engine weaves detected correlations into a structured intelligence brief.
 
@@ -335,7 +335,7 @@ The dashboard integrates two complementary geopolitical pulse indicators:
 | 70% – 84%         | 2            | High Activity     |
 | 50% – 69%         | 3            | Elevated Activity |
 | 25% – 49%         | 4            | Above Normal      |
-| &lt; 25%             | 5            | Normal Activity   |
+| &lt; 25%          | 5            | Normal Activity   |
 
 Activity spikes at individual locations boost the aggregate score (+10 per spike, capped at 100). Data freshness is tracked per-location — the system distinguishes between stale readings (location sensor lag) and genuine low activity. Per-location detail includes current popularity percentage, spike magnitude, and open/closed status.
 

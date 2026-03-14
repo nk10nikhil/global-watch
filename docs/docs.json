@@ -57,19 +57,11 @@
         "groups": [
           {
             "group": "Getting Started",
-            "pages": [
-              "documentation",
-              "getting-started",
-              "architecture"
-            ]
+            "pages": ["documentation", "getting-started", "architecture"]
           },
           {
             "group": "Platform & Features",
-            "pages": [
-              "overview",
-              "features",
-              "hotspots"
-            ]
+            "pages": ["overview", "features", "hotspots"]
           },
           {
             "group": "Intelligence & Analysis",
@@ -104,9 +96,7 @@
           },
           {
             "group": "Desktop Application",
-            "pages": [
-              "desktop-app"
-            ]
+            "pages": ["desktop-app"]
           },
           {
             "group": "Developer Guide",
@@ -123,9 +113,7 @@
           },
           {
             "group": "Legal",
-            "pages": [
-              "license"
-            ]
+            "pages": ["license"]
           }
         ]
       },
@@ -252,9 +240,7 @@
         "groups": [
           {
             "group": "Changelog",
-            "pages": [
-              "changelog"
-            ]
+            "pages": ["changelog"]
           }
         ]
       }

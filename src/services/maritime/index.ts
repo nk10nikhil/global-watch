@@ -1,41 +1,57 @@
-import { getRpcBaseUrl } from '@/services/rpc-client';
+import { getRpcBaseUrl } from "@/services/rpc-client";
 import {
   MaritimeServiceClient,
   type AisDensityZone as ProtoDensityZone,
   type AisDisruption as ProtoDisruption,
   type GetVesselSnapshotResponse,
-} from '@/generated/client/worldmonitor/maritime/v1/service_client';
-import { createCircuitBreaker } from '@/utils';
-import type { AisDisruptionEvent, AisDensityZone, AisDisruptionType } from '@/types';
-import { dataFreshness } from '../data-freshness';
-import { isFeatureAvailable } from '../runtime-config';
-import { startSmartPollLoop, toApiUrl, type SmartPollLoopHandle } from '../runtime';
+} from "@/generated/client/worldmonitor/maritime/v1/service_client";
+import { createCircuitBreaker } from "@/utils";
+import type {
+  AisDisruptionEvent,
+  AisDensityZone,
+  AisDisruptionType,
+} from "@/types";
+import { dataFreshness } from "../data-freshness";
+import { isFeatureAvailable } from "../runtime-config";
+import {
+  startSmartPollLoop,
+  toApiUrl,
+  type SmartPollLoopHandle,
+} from "../runtime";
 
 // ---- Proto fallback (desktop safety when relay URL is unavailable) ----
 
-const client = new MaritimeServiceClient(getRpcBaseUrl(), { fetch: (...args) => globalThis.fetch(...args) });
-const snapshotBreaker = createCircuitBreaker<GetVesselSnapshotResponse>({ name: 'Maritime Snapshot', cacheTtlMs: 10 * 60 * 1000, persistCache: true });
-const emptySnapshotFallback: GetVesselSnapshotResponse = { snapshot: undefined };
-
-const DISRUPTION_TYPE_REVERSE: Record<string, AisDisruptionType> = {
-  AIS_DISRUPTION_TYPE_GAP_SPIKE: 'gap_spike',
-  AIS_DISRUPTION_TYPE_CHOKEPOINT_CONGESTION: 'chokepoint_congestion',
+const client = new MaritimeServiceClient(getRpcBaseUrl(), {
+  fetch: (...args) => globalThis.fetch(...args),
+});
+const snapshotBreaker = createCircuitBreaker<GetVesselSnapshotResponse>({
+  name: "Maritime Snapshot",
+  cacheTtlMs: 10 * 60 * 1000,
+  persistCache: true,
+});
+const emptySnapshotFallback: GetVesselSnapshotResponse = {
+  snapshot: undefined,
 };
 
-const SEVERITY_REVERSE: Record<string, 'low' | 'elevated' | 'high'> = {
-  AIS_DISRUPTION_SEVERITY_LOW: 'low',
-  AIS_DISRUPTION_SEVERITY_ELEVATED: 'elevated',
-  AIS_DISRUPTION_SEVERITY_HIGH: 'high',
+const DISRUPTION_TYPE_REVERSE: Record<string, AisDisruptionType> = {
+  AIS_DISRUPTION_TYPE_GAP_SPIKE: "gap_spike",
+  AIS_DISRUPTION_TYPE_CHOKEPOINT_CONGESTION: "chokepoint_congestion",
+};
+
+const SEVERITY_REVERSE: Record<string, "low" | "elevated" | "high"> = {
+  AIS_DISRUPTION_SEVERITY_LOW: "low",
+  AIS_DISRUPTION_SEVERITY_ELEVATED: "elevated",
+  AIS_DISRUPTION_SEVERITY_HIGH: "high",
 };
 
 function toDisruptionEvent(proto: ProtoDisruption): AisDisruptionEvent {
   return {
     id: proto.id,
     name: proto.name,
-    type: DISRUPTION_TYPE_REVERSE[proto.type] || 'gap_spike',
+    type: DISRUPTION_TYPE_REVERSE[proto.type] || "gap_spike",
     lat: proto.location?.latitude ?? 0,
     lon: proto.location?.longitude ?? 0,
-    severity: SEVERITY_REVERSE[proto.severity] || 'low',
+    severity: SEVERITY_REVERSE[proto.severity] || "low",
     changePct: proto.changePct,
     windowHours: proto.windowHours,
     darkShips: proto.darkShips,
@@ -60,11 +76,12 @@ function toDensityZone(proto: ProtoDensityZone): AisDensityZone {
 
 // ---- Feature Gating ----
 
-const isClientRuntime = typeof window !== 'undefined';
-const aisConfigured = isClientRuntime && import.meta.env.VITE_ENABLE_AIS !== 'false';
+const isClientRuntime = typeof window !== "undefined";
+const aisConfigured =
+  isClientRuntime && import.meta.env.VITE_ENABLE_AIS !== "false";
 
 export function isAisConfigured(): boolean {
-  return aisConfigured && isFeatureAvailable('aisRelay');
+  return aisConfigured && isFeatureAvailable("aisRelay");
 }
 
 // ---- AisPositionData (exported for military-vessels.ts) ----
@@ -136,13 +153,16 @@ const MAX_CALLBACK_TRACKED_VESSELS = 20000;
 
 // ---- Raw Relay URL (for candidate reports path) ----
 
-const SNAPSHOT_PROXY_URL = toApiUrl('/api/ais-snapshot');
-const wsRelayUrl = import.meta.env.VITE_WS_RELAY_URL || '';
+const SNAPSHOT_PROXY_URL = toApiUrl("/api/ais-snapshot");
+const wsRelayUrl = import.meta.env.VITE_WS_RELAY_URL || "";
 const DIRECT_RAILWAY_SNAPSHOT_URL = wsRelayUrl
-  ? wsRelayUrl.replace('wss://', 'https://').replace('ws://', 'http://').replace(/\/$/, '') + '/ais/snapshot'
-  : '';
-const LOCAL_SNAPSHOT_FALLBACK = 'http://localhost:3004/ais/snapshot';
-const isLocalhost = isClientRuntime && window.location.hostname === 'localhost';
+  ? wsRelayUrl
+      .replace("wss://", "https://")
+      .replace("ws://", "http://")
+      .replace(/\/$/, "") + "/ais/snapshot"
+  : "";
+const LOCAL_SNAPSHOT_FALLBACK = "http://localhost:3004/ais/snapshot";
+const isLocalhost = isClientRuntime && window.location.hostname === "localhost";
 
 // ---- Internal Helpers ----
 
@@ -157,52 +177,80 @@ function parseSnapshot(data: unknown): {
   density: AisDensityZone[];
   candidateReports: SnapshotCandidateReport[];
 } | null {
-  if (!data || typeof data !== 'object') return null;
+  if (!data || typeof data !== "object") return null;
   const raw = data as AisSnapshotResponse;
 
-  if (!Array.isArray(raw.disruptions) || !Array.isArray(raw.density)) return null;
+  if (!Array.isArray(raw.disruptions) || !Array.isArray(raw.density))
+    return null;
 
   const status = raw.status || {};
   return {
-    sequence: Number.isFinite(raw.sequence as number) ? Number(raw.sequence) : 0,
+    sequence: Number.isFinite(raw.sequence as number)
+      ? Number(raw.sequence)
+      : 0,
     status: {
       connected: Boolean(status.connected),
-      vessels: Number.isFinite(status.vessels as number) ? Number(status.vessels) : 0,
-      messages: Number.isFinite(status.messages as number) ? Number(status.messages) : 0,
+      vessels: Number.isFinite(status.vessels as number)
+        ? Number(status.vessels)
+        : 0,
+      messages: Number.isFinite(status.messages as number)
+        ? Number(status.messages)
+        : 0,
     },
     disruptions: raw.disruptions,
     density: raw.density,
-    candidateReports: Array.isArray(raw.candidateReports) ? raw.candidateReports : [],
+    candidateReports: Array.isArray(raw.candidateReports)
+      ? raw.candidateReports
+      : [],
   };
 }
 
 // ---- Hybrid Fetch Strategy ----
 
-async function fetchRawRelaySnapshot(includeCandidates: boolean, signal?: AbortSignal): Promise<unknown> {
-  const query = `?candidates=${includeCandidates ? 'true' : 'false'}`;
+async function fetchRawRelaySnapshot(
+  includeCandidates: boolean,
+  signal?: AbortSignal,
+): Promise<unknown> {
+  const query = `?candidates=${includeCandidates ? "true" : "false"}`;
 
   try {
-    const proxied = await fetch(`${SNAPSHOT_PROXY_URL}${query}`, { headers: { Accept: 'application/json' }, signal });
+    const proxied = await fetch(`${SNAPSHOT_PROXY_URL}${query}`, {
+      headers: { Accept: "application/json" },
+      signal,
+    });
     if (proxied.ok) return proxied.json();
-  } catch { /* Proxy unavailable -- fall through */ }
+  } catch {
+    /* Proxy unavailable -- fall through */
+  }
 
   // Local development fallback only.
   if (isLocalhost && DIRECT_RAILWAY_SNAPSHOT_URL) {
     try {
-      const railway = await fetch(`${DIRECT_RAILWAY_SNAPSHOT_URL}${query}`, { headers: { Accept: 'application/json' }, signal });
+      const railway = await fetch(`${DIRECT_RAILWAY_SNAPSHOT_URL}${query}`, {
+        headers: { Accept: "application/json" },
+        signal,
+      });
       if (railway.ok) return railway.json();
-    } catch { /* Railway unavailable -- fall through */ }
+    } catch {
+      /* Railway unavailable -- fall through */
+    }
   }
 
   if (isLocalhost) {
-    const local = await fetch(`${LOCAL_SNAPSHOT_FALLBACK}${query}`, { headers: { Accept: 'application/json' }, signal });
+    const local = await fetch(`${LOCAL_SNAPSHOT_FALLBACK}${query}`, {
+      headers: { Accept: "application/json" },
+      signal,
+    });
     if (local.ok) return local.json();
   }
 
-  throw new Error('AIS raw relay snapshot unavailable');
+  throw new Error("AIS raw relay snapshot unavailable");
 }
 
-async function fetchSnapshotPayload(includeCandidates: boolean, signal?: AbortSignal): Promise<unknown> {
+async function fetchSnapshotPayload(
+  includeCandidates: boolean,
+  signal?: AbortSignal,
+): Promise<unknown> {
   if (includeCandidates) {
     // Candidate reports are only available on the raw relay endpoint.
     return fetchRawRelaySnapshot(true, signal);
@@ -214,7 +262,12 @@ async function fetchSnapshotPayload(includeCandidates: boolean, signal?: AbortSi
   } catch (rawError) {
     // Desktop fallback: use proto route when relay URL/local relay is unavailable.
     const response = await snapshotBreaker.execute(async () => {
-      return client.getVesselSnapshot({ neLat: 0, neLon: 0, swLat: 0, swLon: 0 });
+      return client.getVesselSnapshot({
+        neLat: 0,
+        neLon: 0,
+        swLat: 0,
+        swLon: 0,
+      });
     }, emptySnapshotFallback);
 
     if (response.snapshot) {
@@ -249,9 +302,11 @@ function pruneCallbackTimestampIndex(now: number): void {
     return;
   }
 
-  const oldest = Array.from(lastCallbackTimestampByMmsi.entries())
-    .sort((a, b) => a[1] - b[1]);
-  const toDelete = lastCallbackTimestampByMmsi.size - MAX_CALLBACK_TRACKED_VESSELS;
+  const oldest = Array.from(lastCallbackTimestampByMmsi.entries()).sort(
+    (a, b) => a[1] - b[1],
+  );
+  const toDelete =
+    lastCallbackTimestampByMmsi.size - MAX_CALLBACK_TRACKED_VESSELS;
   for (let i = 0; i < toDelete; i++) {
     const entry = oldest[i];
     if (!entry) break;
@@ -264,16 +319,23 @@ function emitCandidateReports(reports: SnapshotCandidateReport[]): void {
   const now = Date.now();
 
   for (const report of reports) {
-    if (!report?.mmsi || !Number.isFinite(report.lat) || !Number.isFinite(report.lon)) continue;
+    if (
+      !report?.mmsi ||
+      !Number.isFinite(report.lat) ||
+      !Number.isFinite(report.lon)
+    )
+      continue;
 
-    const reportTs = Number.isFinite(report.timestamp) ? Number(report.timestamp) : now;
+    const reportTs = Number.isFinite(report.timestamp)
+      ? Number(report.timestamp)
+      : now;
     const lastTs = lastCallbackTimestampByMmsi.get(report.mmsi) || 0;
     if (reportTs <= lastTs) continue;
 
     lastCallbackTimestampByMmsi.set(report.mmsi, reportTs);
     const callbackData: AisPositionData = {
       mmsi: report.mmsi,
-      name: report.name || '',
+      name: report.name || "",
       lat: report.lat,
       lon: report.lon,
       shipType: report.shipType,
@@ -296,7 +358,10 @@ function emitCandidateReports(reports: SnapshotCandidateReport[]): void {
 
 // ---- Polling ----
 
-async function pollSnapshot(force = false, signal?: AbortSignal): Promise<void> {
+async function pollSnapshot(
+  force = false,
+  signal?: AbortSignal,
+): Promise<void> {
   if (!isAisConfigured()) return;
   if (inFlight && !force) return;
   if (signal?.aborted) return;
@@ -306,7 +371,7 @@ async function pollSnapshot(force = false, signal?: AbortSignal): Promise<void> 
     const includeCandidates = shouldIncludeCandidates();
     const payload = await fetchSnapshotPayload(includeCandidates, signal);
     const snapshot = parseSnapshot(payload);
-    if (!snapshot) throw new Error('Invalid snapshot payload');
+    if (!snapshot) throw new Error("Invalid snapshot payload");
 
     latestDisruptions = snapshot.disruptions;
     latestDensity = snapshot.density;
@@ -327,7 +392,10 @@ async function pollSnapshot(force = false, signal?: AbortSignal): Promise<void> 
 
     const itemCount = latestDisruptions.length + latestDensity.length;
     if (itemCount > 0 || latestStatus.vessels > 0) {
-      dataFreshness.recordUpdate('ais', itemCount > 0 ? itemCount : latestStatus.vessels);
+      dataFreshness.recordUpdate(
+        "ais",
+        itemCount > 0 ? itemCount : latestStatus.vessels,
+      );
     }
   } catch {
     latestStatus.connected = false;
@@ -376,7 +444,11 @@ export function disconnectAisStream(): void {
   latestStatus.connected = false;
 }
 
-export function getAisStatus(): { connected: boolean; vessels: number; messages: number } {
+export function getAisStatus(): {
+  connected: boolean;
+  vessels: number;
+  messages: number;
+} {
   const isFresh = Date.now() - lastPollAt <= SNAPSHOT_STALE_MS;
   return {
     connected: latestStatus.connected && isFresh,
@@ -385,7 +457,10 @@ export function getAisStatus(): { connected: boolean; vessels: number; messages:
   };
 }
 
-export async function fetchAisSignals(): Promise<{ disruptions: AisDisruptionEvent[]; density: AisDensityZone[] }> {
+export async function fetchAisSignals(): Promise<{
+  disruptions: AisDisruptionEvent[];
+  density: AisDensityZone[];
+}> {
   if (!aisConfigured) {
     return { disruptions: [], density: [] };
   }

@@ -13,23 +13,23 @@
  * Run: node scripts/build-military-bases-final.mjs
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import path from 'node:path';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const projectRoot = path.resolve(__dirname, '..');
-const DATA_DIR = path.join(projectRoot, 'scripts', 'data');
+const projectRoot = path.resolve(__dirname, "..");
+const DATA_DIR = path.join(projectRoot, "scripts", "data");
 
 // ---------------------------------------------------------------------------
 // File paths
 // ---------------------------------------------------------------------------
-const PIZZINT_PATH = path.join(DATA_DIR, 'pizzint-processed.json');
-const OSM_PATH = path.join(DATA_DIR, 'osm-military-processed.json');
-const MIRTA_PATH = path.join(DATA_DIR, 'mirta-processed.json');
-const CURATED_PATH = path.join(DATA_DIR, 'curated-bases.json');
-const OUTPUT_PATH = path.join(DATA_DIR, 'military-bases-final.json');
-const DEDUP_LOG_PATH = path.join(DATA_DIR, 'dedup-dropped-pairs.json');
+const PIZZINT_PATH = path.join(DATA_DIR, "pizzint-processed.json");
+const OSM_PATH = path.join(DATA_DIR, "osm-military-processed.json");
+const MIRTA_PATH = path.join(DATA_DIR, "mirta-processed.json");
+const CURATED_PATH = path.join(DATA_DIR, "curated-bases.json");
+const OUTPUT_PATH = path.join(DATA_DIR, "military-bases-final.json");
+const DEDUP_LOG_PATH = path.join(DATA_DIR, "dedup-dropped-pairs.json");
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -38,34 +38,66 @@ const PROXIMITY_THRESHOLD_M = 200;
 const EARTH_RADIUS_M = 6_371_000;
 
 const NATO_MEMBERS = new Set([
-  'GB', 'DE', 'FR', 'IT', 'CA', 'ES', 'PL', 'NL', 'BE', 'NO', 'DK', 'PT',
-  'TR', 'GR', 'CZ', 'HU', 'RO', 'BG', 'HR', 'SK', 'SI', 'LV', 'LT', 'EE',
-  'AL', 'ME', 'MK', 'FI', 'SE',
+  "GB",
+  "DE",
+  "FR",
+  "IT",
+  "CA",
+  "ES",
+  "PL",
+  "NL",
+  "BE",
+  "NO",
+  "DK",
+  "PT",
+  "TR",
+  "GR",
+  "CZ",
+  "HU",
+  "RO",
+  "BG",
+  "HR",
+  "SK",
+  "SI",
+  "LV",
+  "LT",
+  "EE",
+  "AL",
+  "ME",
+  "MK",
+  "FI",
+  "SE",
 ]);
 
 const COUNTRY_TYPE_MAP = {
-  US: 'us-nato',
-  CN: 'china',
-  RU: 'russia',
-  GB: 'uk',
-  FR: 'france',
-  IN: 'india',
-  IT: 'italy',
-  AE: 'uae',
-  TR: 'turkey',
-  JP: 'japan',
+  US: "us-nato",
+  CN: "china",
+  RU: "russia",
+  GB: "uk",
+  FR: "france",
+  IN: "india",
+  IT: "italy",
+  AE: "uae",
+  TR: "turkey",
+  JP: "japan",
 };
 
 const TIER1_KINDS = new Set([
-  'base', 'airfield', 'naval_base', 'training_area', 'nuclear_explosion_site',
+  "base",
+  "airfield",
+  "naval_base",
+  "training_area",
+  "nuclear_explosion_site",
 ]);
 
-const TIER2_KINDS = new Set([
-  'military', 'barracks', 'office', 'checkpoint',
-]);
+const TIER2_KINDS = new Set(["military", "barracks", "office", "checkpoint"]);
 
 const TIER3_KINDS = new Set([
-  'bunker', 'trench', 'shelter', 'ammunition', 'obstacle_course',
+  "bunker",
+  "trench",
+  "shelter",
+  "ammunition",
+  "obstacle_course",
 ]);
 
 // ---------------------------------------------------------------------------
@@ -77,15 +109,17 @@ function loadJson(filepath, label) {
     console.warn(`  WARNING: ${label} not found at ${filepath} — skipping`);
     return null;
   }
-  const raw = readFileSync(filepath, 'utf-8');
+  const raw = readFileSync(filepath, "utf-8");
   const data = JSON.parse(raw);
-  console.log(`  Loaded ${label}: ${Array.isArray(data) ? data.length : 'N/A'} entries`);
+  console.log(
+    `  Loaded ${label}: ${Array.isArray(data) ? data.length : "N/A"} entries`,
+  );
   return data;
 }
 
 function stripHtml(str) {
-  if (!str || typeof str !== 'string') return str || '';
-  return str.replace(/<[^>]*>/g, '').trim();
+  if (!str || typeof str !== "string") return str || "";
+  return str.replace(/<[^>]*>/g, "").trim();
 }
 
 function toRad(deg) {
@@ -102,16 +136,16 @@ function haversineMeters(lat1, lon1, lat2, lon2) {
 }
 
 function assignType(countryIso2) {
-  if (!countryIso2) return 'other';
+  if (!countryIso2) return "other";
   const iso = countryIso2.toUpperCase();
   if (COUNTRY_TYPE_MAP[iso]) return COUNTRY_TYPE_MAP[iso];
-  if (iso === 'US') return 'us-nato';
-  if (NATO_MEMBERS.has(iso)) return 'us-nato';
-  return 'other';
+  if (iso === "US") return "us-nato";
+  if (NATO_MEMBERS.has(iso)) return "us-nato";
+  return "other";
 }
 
 function assignTier(kind, source) {
-  if (source === 'mirta') return 1;
+  if (source === "mirta") return 1;
   if (!kind) return 2;
   const k = kind.toLowerCase();
   if (TIER1_KINDS.has(k)) return 1;
@@ -121,10 +155,10 @@ function assignTier(kind, source) {
 }
 
 function osmElementType(osmId) {
-  if (!osmId || typeof osmId !== 'string') return 'unknown';
-  if (osmId.startsWith('way/') || osmId.startsWith('relation/')) return 'area';
-  if (osmId.startsWith('node/')) return 'node';
-  return 'unknown';
+  if (!osmId || typeof osmId !== "string") return "unknown";
+  if (osmId.startsWith("way/") || osmId.startsWith("relation/")) return "area";
+  if (osmId.startsWith("node/")) return "node";
+  return "unknown";
 }
 
 function nameMatch(a, b) {
@@ -133,104 +167,114 @@ function nameMatch(a, b) {
 }
 
 function deriveCategoriesFromKind(kind, name) {
-  const k = (kind || '').toLowerCase();
-  const n = (name || '').toLowerCase();
+  const k = (kind || "").toLowerCase();
+  const n = (name || "").toLowerCase();
   return {
-    catAirforce: k.includes('airfield'),
-    catNaval: k.includes('naval_base'),
-    catNuclear: k.includes('nuclear_explosion_site'),
+    catAirforce: k.includes("airfield"),
+    catNaval: k.includes("naval_base"),
+    catNuclear: k.includes("nuclear_explosion_site"),
     catSpace: /space|launch|satellite/i.test(n),
-    catTraining: k.includes('training_area') || k.includes('range'),
+    catTraining: k.includes("training_area") || k.includes("range"),
   };
 }
 
 function normalizePizzintEntry(row) {
   return {
-    id: row.osm_id || '',
-    name: stripHtml(row.name_en || row.name || ''),
+    id: row.osm_id || "",
+    name: stripHtml(row.name_en || row.name || ""),
     lat: row.lat,
     lon: row.lon,
-    kind: row.kind || 'military',
-    countryIso2: (row.country_iso2 || '').toUpperCase(),
-    type: '', // assigned later
-    tier: 0,  // assigned later
-    source: 'pizzint',
+    kind: row.kind || "military",
+    countryIso2: (row.country_iso2 || "").toUpperCase(),
+    type: "", // assigned later
+    tier: 0, // assigned later
+    source: "pizzint",
     catAirforce: !!row.cat_airforce,
     catNaval: !!row.cat_naval,
     catNuclear: !!row.cat_nuclear,
     catSpace: !!row.cat_space,
     catTraining: !!row.cat_training,
-    branch: row.branch || '',
-    status: row.status || row.state || '',
-    _osmId: row.osm_id || '',
+    branch: row.branch || "",
+    status: row.status || row.state || "",
+    _osmId: row.osm_id || "",
   };
 }
 
 function normalizeOsmEntry(row) {
   const cats = deriveCategoriesFromKind(row.kind, row.name);
   return {
-    id: row.osm_id || row.id || '',
-    name: stripHtml(row.name_en || row.name || ''),
+    id: row.osm_id || row.id || "",
+    name: stripHtml(row.name_en || row.name || ""),
     lat: row.lat,
     lon: row.lon,
-    kind: row.kind || row.type || 'military',
-    countryIso2: (row.country_iso2 || row.country_code || row.country || '').toUpperCase(),
-    type: '',
+    kind: row.kind || row.type || "military",
+    countryIso2: (
+      row.country_iso2 ||
+      row.country_code ||
+      row.country ||
+      ""
+    ).toUpperCase(),
+    type: "",
     tier: 0,
-    source: 'osm',
+    source: "osm",
     catAirforce: cats.catAirforce,
     catNaval: cats.catNaval,
     catNuclear: cats.catNuclear,
     catSpace: cats.catSpace,
     catTraining: cats.catTraining,
-    branch: row.branch || '',
-    status: row.status || '',
-    _osmId: row.osm_id || row.id || '',
+    branch: row.branch || "",
+    status: row.status || "",
+    _osmId: row.osm_id || row.id || "",
   };
 }
 
 function normalizeMirtaEntry(row) {
   return {
-    id: row.id || row.osm_id || `mirta:${row.name || 'unknown'}`,
-    name: stripHtml(row.name || ''),
+    id: row.id || row.osm_id || `mirta:${row.name || "unknown"}`,
+    name: stripHtml(row.name || ""),
     lat: row.lat || row.latitude,
     lon: row.lon || row.longitude,
-    kind: row.kind || row.type || 'base',
-    countryIso2: (row.country_iso2 || row.country_code || row.country || 'US').toUpperCase(),
-    type: '',
+    kind: row.kind || row.type || "base",
+    countryIso2: (
+      row.country_iso2 ||
+      row.country_code ||
+      row.country ||
+      "US"
+    ).toUpperCase(),
+    type: "",
     tier: 1, // all MIRTA are tier 1
-    source: 'mirta',
+    source: "mirta",
     catAirforce: !!row.cat_airforce,
     catNaval: !!row.cat_naval,
     catNuclear: !!row.cat_nuclear,
     catSpace: !!row.cat_space,
     catTraining: !!row.cat_training,
-    branch: row.branch || '',
-    status: row.status || 'active',
-    _osmId: row.osm_id || row.id || '',
+    branch: row.branch || "",
+    status: row.status || "active",
+    _osmId: row.osm_id || row.id || "",
   };
 }
 
 function normalizeCuratedEntry(row) {
   return {
-    id: row.id || '',
-    name: stripHtml(row.name || ''),
+    id: row.id || "",
+    name: stripHtml(row.name || ""),
     lat: row.lat,
     lon: row.lon,
-    kind: 'base',
-    countryIso2: '', // curated uses country name, not iso2
-    type: row.type || 'other',
+    kind: "base",
+    countryIso2: "", // curated uses country name, not iso2
+    type: row.type || "other",
     tier: 1,
-    source: 'curated',
+    source: "curated",
     catAirforce: false,
     catNaval: false,
     catNuclear: false,
     catSpace: false,
     catTraining: false,
-    branch: row.arm || '',
-    status: row.status || 'active',
-    _curatedType: row.type || '',
-    _country: row.country || '',
+    branch: row.arm || "",
+    status: row.status || "active",
+    _curatedType: row.type || "",
+    _country: row.country || "",
   };
 }
 
@@ -240,27 +284,31 @@ function normalizeCuratedEntry(row) {
 function main() {
   if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
 
-  console.log('build-military-bases-final');
-  console.log('='.repeat(60));
-  console.log('');
-  console.log('Loading input files...');
+  console.log("build-military-bases-final");
+  console.log("=".repeat(60));
+  console.log("");
+  console.log("Loading input files...");
 
-  const pizzintRaw = loadJson(PIZZINT_PATH, 'pizzint-processed.json');
-  const osmRaw = loadJson(OSM_PATH, 'osm-military-processed.json');
-  const mirtaLoaded = loadJson(MIRTA_PATH, 'mirta-processed.json');
+  const pizzintRaw = loadJson(PIZZINT_PATH, "pizzint-processed.json");
+  const osmRaw = loadJson(OSM_PATH, "osm-military-processed.json");
+  const mirtaLoaded = loadJson(MIRTA_PATH, "mirta-processed.json");
   // MIRTA has { metadata, installations } wrapper — unwrap to array
-  const mirtaRaw = mirtaLoaded && !Array.isArray(mirtaLoaded) && mirtaLoaded.installations
-    ? mirtaLoaded.installations
-    : mirtaLoaded;
-  if (mirtaRaw) console.log(`  MIRTA unwrapped: ${mirtaRaw.length} installations`);
-  const curatedRaw = loadJson(CURATED_PATH, 'curated-bases.json');
+  const mirtaRaw =
+    mirtaLoaded && !Array.isArray(mirtaLoaded) && mirtaLoaded.installations
+      ? mirtaLoaded.installations
+      : mirtaLoaded;
+  if (mirtaRaw)
+    console.log(`  MIRTA unwrapped: ${mirtaRaw.length} installations`);
+  const curatedRaw = loadJson(CURATED_PATH, "curated-bases.json");
 
   if (!pizzintRaw && !osmRaw) {
-    console.error('FATAL: at least one of pizzint-processed.json or osm-military-processed.json is required.');
+    console.error(
+      "FATAL: at least one of pizzint-processed.json or osm-military-processed.json is required.",
+    );
     process.exit(1);
   }
 
-  console.log('');
+  console.log("");
 
   // -------------------------------------------------------------------------
   // Step 1: Normalize primary dataset (pizzint if available, otherwise OSM)
@@ -269,7 +317,7 @@ function main() {
   const osmIdSet = new Set();
 
   if (pizzintRaw) {
-    console.log('Step 1: Normalize pizzint entries (primary)...');
+    console.log("Step 1: Normalize pizzint entries (primary)...");
     for (const row of pizzintRaw) {
       if (row.lat == null || row.lon == null) continue;
       const entry = normalizePizzintEntry(row);
@@ -278,7 +326,7 @@ function main() {
     }
     console.log(`  Pizzint base: ${merged.length} entries`);
   } else {
-    console.log('Step 1: Pizzint data not available — using OSM as primary');
+    console.log("Step 1: Pizzint data not available — using OSM as primary");
   }
 
   // -------------------------------------------------------------------------
@@ -287,10 +335,10 @@ function main() {
   let osmAdded = 0;
   let osmSkipped = 0;
   if (osmRaw) {
-    console.log('Step 2: Merge OSM entries...');
+    console.log("Step 2: Merge OSM entries...");
     for (const row of osmRaw) {
       if (row.lat == null || row.lon == null) continue;
-      const osmId = row.osm_id || row.id || '';
+      const osmId = row.osm_id || row.id || "";
       if (osmId && osmIdSet.has(osmId)) {
         osmSkipped++;
         continue;
@@ -300,9 +348,11 @@ function main() {
       if (entry._osmId) osmIdSet.add(entry._osmId);
       osmAdded++;
     }
-    console.log(`  OSM added: ${osmAdded}, skipped (already in pizzint): ${osmSkipped}`);
+    console.log(
+      `  OSM added: ${osmAdded}, skipped (already in pizzint): ${osmSkipped}`,
+    );
   } else {
-    console.log('Step 2: OSM data not available — skipped');
+    console.log("Step 2: OSM data not available — skipped");
   }
 
   // -------------------------------------------------------------------------
@@ -311,13 +361,13 @@ function main() {
   let mirtaAdded = 0;
   let mirtaSkipped = 0;
   if (mirtaRaw) {
-    console.log('Step 3: Merge MIRTA entries...');
+    console.log("Step 3: Merge MIRTA entries...");
     for (const row of mirtaRaw) {
       const lat = row.lat || row.latitude;
       const lon = row.lon || row.longitude;
       if (lat == null || lon == null) continue;
-      const mirtaId = row.id || row.osm_id || '';
-      const mirtaPrefixed = mirtaId ? `mirta:${mirtaId}` : '';
+      const mirtaId = row.id || row.osm_id || "";
+      const mirtaPrefixed = mirtaId ? `mirta:${mirtaId}` : "";
       if (mirtaId && osmIdSet.has(mirtaId)) {
         mirtaSkipped++;
         continue;
@@ -329,7 +379,7 @@ function main() {
       // Check for mirta: prefix in existing osm_ids
       let alreadyPresent = false;
       for (const existingId of osmIdSet) {
-        if (existingId.startsWith('mirta:') && existingId === mirtaPrefixed) {
+        if (existingId.startsWith("mirta:") && existingId === mirtaPrefixed) {
           alreadyPresent = true;
           break;
         }
@@ -343,9 +393,11 @@ function main() {
       if (entry._osmId) osmIdSet.add(entry._osmId);
       mirtaAdded++;
     }
-    console.log(`  MIRTA added: ${mirtaAdded}, skipped (already matched): ${mirtaSkipped}`);
+    console.log(
+      `  MIRTA added: ${mirtaAdded}, skipped (already matched): ${mirtaSkipped}`,
+    );
   } else {
-    console.log('Step 3: MIRTA data not available — skipped');
+    console.log("Step 3: MIRTA data not available — skipped");
   }
 
   // -------------------------------------------------------------------------
@@ -354,15 +406,23 @@ function main() {
   let curatedEnriched = 0;
   let curatedUnmatched = 0;
   if (curatedRaw) {
-    console.log('Step 4: Merge curated bases (proximity + name match)...');
+    console.log("Step 4: Merge curated bases (proximity + name match)...");
     for (const row of curatedRaw) {
       if (row.lat == null || row.lon == null) continue;
       const curated = normalizeCuratedEntry(row);
       let matched = false;
 
       for (const existing of merged) {
-        const dist = haversineMeters(curated.lat, curated.lon, existing.lat, existing.lon);
-        if (dist <= PROXIMITY_THRESHOLD_M && nameMatch(curated.name, existing.name)) {
+        const dist = haversineMeters(
+          curated.lat,
+          curated.lon,
+          existing.lat,
+          existing.lon,
+        );
+        if (
+          dist <= PROXIMITY_THRESHOLD_M &&
+          nameMatch(curated.name, existing.name)
+        ) {
           // Enrich existing entry with curated type
           if (curated._curatedType) {
             existing.type = curated._curatedType;
@@ -385,9 +445,13 @@ function main() {
         curatedUnmatched++;
       }
     }
-    console.log(`  Curated enriched existing: ${curatedEnriched}, added as new: ${curatedUnmatched}`);
+    console.log(
+      `  Curated enriched existing: ${curatedEnriched}, added as new: ${curatedUnmatched}`,
+    );
   } else {
-    console.log('Step 4: curated-bases.json not found — skipping curated enrichment');
+    console.log(
+      "Step 4: curated-bases.json not found — skipping curated enrichment",
+    );
   }
 
   console.log(`\n  Pre-dedup total: ${merged.length}`);
@@ -395,7 +459,7 @@ function main() {
   // -------------------------------------------------------------------------
   // Dedup Pass 1: Exact osm_id dedup — prefer way/relation over node
   // -------------------------------------------------------------------------
-  console.log('\nDedup Pass 1: Exact osm_id dedup...');
+  console.log("\nDedup Pass 1: Exact osm_id dedup...");
   const dedupDropped = [];
   const byOsmId = new Map();
 
@@ -403,8 +467,8 @@ function main() {
     const oid = entry._osmId;
     if (!oid) {
       // No osm_id — keep
-      if (!byOsmId.has('__no_id_' + Math.random())) {
-        byOsmId.set('__noid_' + merged.indexOf(entry), entry);
+      if (!byOsmId.has("__no_id_" + Math.random())) {
+        byOsmId.set("__noid_" + merged.indexOf(entry), entry);
       }
       continue;
     }
@@ -414,20 +478,28 @@ function main() {
       const existType = osmElementType(existing._osmId);
       const newType = osmElementType(entry._osmId);
       // Prefer way/relation over node
-      if (existType === 'node' && newType === 'area') {
+      if (existType === "node" && newType === "area") {
         dedupDropped.push({
           pass: 1,
           kept: { id: entry.id, name: entry.name, source: entry.source },
-          dropped: { id: existing.id, name: existing.name, source: existing.source },
-          reason: 'exact osm_id — prefer area over node',
+          dropped: {
+            id: existing.id,
+            name: existing.name,
+            source: existing.source,
+          },
+          reason: "exact osm_id — prefer area over node",
         });
         byOsmId.set(oid, entry);
       } else {
         dedupDropped.push({
           pass: 1,
-          kept: { id: existing.id, name: existing.name, source: existing.source },
+          kept: {
+            id: existing.id,
+            name: existing.name,
+            source: existing.source,
+          },
           dropped: { id: entry.id, name: entry.name, source: entry.source },
-          reason: 'exact osm_id duplicate',
+          reason: "exact osm_id duplicate",
         });
       }
     } else {
@@ -437,20 +509,24 @@ function main() {
 
   let pass1Entries = [...byOsmId.values()];
   const pass1Dropped = merged.length - pass1Entries.length;
-  console.log(`  Pass 1: ${pass1Dropped} duplicates removed, ${pass1Entries.length} remaining`);
+  console.log(
+    `  Pass 1: ${pass1Dropped} duplicates removed, ${pass1Entries.length} remaining`,
+  );
 
   // -------------------------------------------------------------------------
   // Dedup Pass 2: Conservative proximity — nodes within 200m of way/relation
   //   centroid with case-insensitive name match
   // -------------------------------------------------------------------------
-  console.log('Dedup Pass 2: Conservative proximity dedup (200m + name match)...');
+  console.log(
+    "Dedup Pass 2: Conservative proximity dedup (200m + name match)...",
+  );
 
   // Separate into area (way/relation) and node entries
   const areaEntries = [];
   const otherEntries = [];
 
   for (const entry of pass1Entries) {
-    if (osmElementType(entry._osmId) === 'area') {
+    if (osmElementType(entry._osmId) === "area") {
       areaEntries.push(entry);
     } else {
       otherEntries.push(entry);
@@ -467,8 +543,20 @@ function main() {
       if (dist <= PROXIMITY_THRESHOLD_M && nameMatch(node.name, area.name)) {
         dedupDropped.push({
           pass: 2,
-          kept: { id: area.id, name: area.name, source: area.source, lat: area.lat, lon: area.lon },
-          dropped: { id: node.id, name: node.name, source: node.source, lat: node.lat, lon: node.lon },
+          kept: {
+            id: area.id,
+            name: area.name,
+            source: area.source,
+            lat: area.lat,
+            lon: area.lon,
+          },
+          dropped: {
+            id: node.id,
+            name: node.name,
+            source: node.source,
+            lat: node.lat,
+            lon: node.lon,
+          },
           reason: `proximity ${Math.round(dist)}m + name match`,
         });
         isDuplicate = true;
@@ -481,12 +569,14 @@ function main() {
     }
   }
 
-  console.log(`  Pass 2: ${pass2Dropped} duplicates removed, ${pass2Kept.length} remaining`);
+  console.log(
+    `  Pass 2: ${pass2Dropped} duplicates removed, ${pass2Kept.length} remaining`,
+  );
 
   // -------------------------------------------------------------------------
   // Assign type and tier
   // -------------------------------------------------------------------------
-  console.log('\nAssigning type and tier...');
+  console.log("\nAssigning type and tier...");
   const tierCounts = { 1: 0, 2: 0, 3: 0 };
   const typeCounts = {};
 
@@ -497,7 +587,10 @@ function main() {
     }
 
     // Assign tier
-    if (entry.tier === 0 || (entry.source !== 'mirta' && entry.source !== 'curated')) {
+    if (
+      entry.tier === 0 ||
+      (entry.source !== "mirta" && entry.source !== "curated")
+    ) {
       entry.tier = assignTier(entry.kind, entry.source);
     }
 
@@ -531,7 +624,10 @@ function main() {
   // Write outputs
   // -------------------------------------------------------------------------
   writeFileSync(OUTPUT_PATH, JSON.stringify(finalEntries));
-  const sizeMB = (Buffer.byteLength(JSON.stringify(finalEntries)) / (1024 * 1024)).toFixed(1);
+  const sizeMB = (
+    Buffer.byteLength(JSON.stringify(finalEntries)) /
+    (1024 * 1024)
+  ).toFixed(1);
   console.log(`\nOutput: ${OUTPUT_PATH}`);
   console.log(`  ${finalEntries.length} entries, ${sizeMB} MB`);
 
@@ -542,41 +638,53 @@ function main() {
   // -------------------------------------------------------------------------
   // Summary
   // -------------------------------------------------------------------------
-  console.log('\n' + '='.repeat(60));
-  console.log('Summary');
-  console.log('='.repeat(60));
+  console.log("\n" + "=".repeat(60));
+  console.log("Summary");
+  console.log("=".repeat(60));
 
-  console.log('\nSource counts:');
+  console.log("\nSource counts:");
   const sourceCounts = {};
   for (const e of finalEntries) {
     sourceCounts[e.source] = (sourceCounts[e.source] || 0) + 1;
   }
-  for (const [src, count] of Object.entries(sourceCounts).sort((a, b) => b[1] - a[1])) {
+  for (const [src, count] of Object.entries(sourceCounts).sort(
+    (a, b) => b[1] - a[1],
+  )) {
     console.log(`  ${src}: ${count}`);
   }
 
-  console.log('\nMerge stats:');
-  if (pizzintRaw) console.log(`  Pizzint base:       ${pizzintRaw.length} loaded`);
-  if (osmRaw) console.log(`  OSM added:          ${osmAdded} (${osmSkipped} skipped)`);
-  if (mirtaRaw) console.log(`  MIRTA added:        ${mirtaAdded} (${mirtaSkipped} skipped)`);
-  if (curatedRaw) console.log(`  Curated enriched:   ${curatedEnriched}, new: ${curatedUnmatched}`);
+  console.log("\nMerge stats:");
+  if (pizzintRaw)
+    console.log(`  Pizzint base:       ${pizzintRaw.length} loaded`);
+  if (osmRaw)
+    console.log(`  OSM added:          ${osmAdded} (${osmSkipped} skipped)`);
+  if (mirtaRaw)
+    console.log(
+      `  MIRTA added:        ${mirtaAdded} (${mirtaSkipped} skipped)`,
+    );
+  if (curatedRaw)
+    console.log(
+      `  Curated enriched:   ${curatedEnriched}, new: ${curatedUnmatched}`,
+    );
 
-  console.log('\nDedup report:');
+  console.log("\nDedup report:");
   console.log(`  Pass 1 (exact osm_id): ${pass1Dropped} removed`);
   console.log(`  Pass 2 (proximity):    ${pass2Dropped} removed`);
   console.log(`  Total deduped:         ${pass1Dropped + pass2Dropped}`);
 
-  console.log('\nTier distribution:');
+  console.log("\nTier distribution:");
   console.log(`  Tier 1 (zoom 3+):  ${tierCounts[1] || 0}`);
   console.log(`  Tier 2 (zoom 5+):  ${tierCounts[2] || 0}`);
   console.log(`  Tier 3 (zoom 8+):  ${tierCounts[3] || 0}`);
 
-  console.log('\nType distribution:');
-  for (const [type, count] of Object.entries(typeCounts).sort((a, b) => b[1] - a[1])) {
+  console.log("\nType distribution:");
+  for (const [type, count] of Object.entries(typeCounts).sort(
+    (a, b) => b[1] - a[1],
+  )) {
     console.log(`  ${type}: ${count}`);
   }
 
-  console.log('\nDone.');
+  console.log("\nDone.");
 }
 
 main();

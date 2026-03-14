@@ -1,10 +1,10 @@
-import './styles/base-layer.css';
-import './styles/happy-theme.css';
-import 'maplibre-gl/dist/maplibre-gl.css';
-import * as Sentry from '@sentry/browser';
-import { inject } from '@vercel/analytics';
-import { App } from './App';
-import { installUtmInterceptor } from './utils/utm';
+import "./styles/base-layer.css";
+import "./styles/happy-theme.css";
+import "maplibre-gl/dist/maplibre-gl.css";
+import * as Sentry from "@sentry/browser";
+import { inject } from "@vercel/analytics";
+import { App } from "./App";
+import { installUtmInterceptor } from "./utils/utm";
 
 const sentryDsn = import.meta.env.VITE_SENTRY_DSN?.trim();
 
@@ -12,15 +12,21 @@ const sentryDsn = import.meta.env.VITE_SENTRY_DSN?.trim();
 Sentry.init({
   dsn: sentryDsn || undefined,
   release: `worldmonitor@${__APP_VERSION__}`,
-  environment: location.hostname === 'worldmonitor.app' ? 'production'
-    : location.hostname.includes('vercel.app') ? 'preview'
-    : 'development',
-  enabled: Boolean(sentryDsn) && !location.hostname.startsWith('localhost') && !('__TAURI_INTERNALS__' in window),
+  environment:
+    location.hostname === "worldmonitor.app"
+      ? "production"
+      : location.hostname.includes("vercel.app")
+        ? "preview"
+        : "development",
+  enabled:
+    Boolean(sentryDsn) &&
+    !location.hostname.startsWith("localhost") &&
+    !("__TAURI_INTERNALS__" in window),
   sendDefaultPii: true,
   tracesSampleRate: 0.1,
   ignoreErrors: [
-    'Invalid WebGL2RenderingContext',
-    'WebGL context lost',
+    "Invalid WebGL2RenderingContext",
+    "WebGL context lost",
     /imageManager/,
     /ResizeObserver loop/,
     /NotAllowedError/,
@@ -235,68 +241,187 @@ Sentry.init({
     /null is not an object \(evaluating '\w{1,3}\.indexOf'\)/,
   ],
   beforeSend(event) {
-    const msg = event.exception?.values?.[0]?.value ?? '';
+    const msg = event.exception?.values?.[0]?.value ?? "";
     if (msg.length <= 3 && /^[a-zA-Z_$]+$/.test(msg)) return null;
     const frames = event.exception?.values?.[0]?.stacktrace?.frames ?? [];
     // Suppress maplibre internal null-access crashes (light, placement) only when stack is in map chunk
-    if (/this\.style\._layers|reading '_layers'|this\.(light|sky) is null|can't access property "(id|type|setFilter)"[,] ?\w+ is (null|undefined)|can't access property "(id|type)" of null|Cannot read properties of null \(reading '(id|type|setFilter|_layers)'\)|null is not an object \(evaluating '\w{1,3}\.(id|style)|^\w{1,2} is null$/.test(msg)) {
-      if (frames.some(f => /\/(map|maplibre|deck-stack)-[A-Za-z0-9_-]+\.js/.test(f.filename ?? ''))) return null;
+    if (
+      /this\.style\._layers|reading '_layers'|this\.(light|sky) is null|can't access property "(id|type|setFilter)"[,] ?\w+ is (null|undefined)|can't access property "(id|type)" of null|Cannot read properties of null \(reading '(id|type|setFilter|_layers)'\)|null is not an object \(evaluating '\w{1,3}\.(id|style)|^\w{1,2} is null$/.test(
+        msg,
+      )
+    ) {
+      if (
+        frames.some((f) =>
+          /\/(map|maplibre|deck-stack)-[A-Za-z0-9_-]+\.js/.test(
+            f.filename ?? "",
+          ),
+        )
+      )
+        return null;
     }
     // Suppress any TypeError that happens entirely within maplibre or deck.gl internals
-    const excType = event.exception?.values?.[0]?.type ?? '';
-    if ((excType === 'TypeError' || /^TypeError:/.test(msg)) && frames.length > 0) {
-      const nonSentryFrames = frames.filter(f => f.filename && f.filename !== '<anonymous>' && f.filename !== '[native code]' && !/\/sentry-[A-Za-z0-9_-]+\.js/.test(f.filename));
-      if (nonSentryFrames.length > 0 && nonSentryFrames.every(f => /\/(map|maplibre|deck-stack)-[A-Za-z0-9_-]+\.js/.test(f.filename ?? ''))) return null;
+    const excType = event.exception?.values?.[0]?.type ?? "";
+    if (
+      (excType === "TypeError" || /^TypeError:/.test(msg)) &&
+      frames.length > 0
+    ) {
+      const nonSentryFrames = frames.filter(
+        (f) =>
+          f.filename &&
+          f.filename !== "<anonymous>" &&
+          f.filename !== "[native code]" &&
+          !/\/sentry-[A-Za-z0-9_-]+\.js/.test(f.filename),
+      );
+      if (
+        nonSentryFrames.length > 0 &&
+        nonSentryFrames.every((f) =>
+          /\/(map|maplibre|deck-stack)-[A-Za-z0-9_-]+\.js/.test(
+            f.filename ?? "",
+          ),
+        )
+      )
+        return null;
     }
     // Suppress Three.js/globe.gl TypeError crashes in main bundle (reading 'type'/'pathType'/'count'/'__globeObjType' on undefined during WebGL traversal/raycast)
-    if (/reading '(?:type|pathType|count|__globeObjType)'|can't access property "(?:type|pathType|count|__globeObjType)",? \w+ is (?:undefined|null)|undefined is not an object \(evaluating '\w+\.(?:pathType|count|__globeObjType)'\)|null is not an object \(evaluating '\w+\.__globeObjType'\)/.test(msg)) {
-      const nonSentryFrames = frames.filter(f => f.filename && f.filename !== '<anonymous>' && f.filename !== '[native code]' && !/\/sentry-[A-Za-z0-9_-]+\.js/.test(f.filename));
-      const hasSourceMapped = nonSentryFrames.some(f => /\.(ts|tsx)$/.test(f.filename ?? '') || /^src\//.test(f.filename ?? ''));
+    if (
+      /reading '(?:type|pathType|count|__globeObjType)'|can't access property "(?:type|pathType|count|__globeObjType)",? \w+ is (?:undefined|null)|undefined is not an object \(evaluating '\w+\.(?:pathType|count|__globeObjType)'\)|null is not an object \(evaluating '\w+\.__globeObjType'\)/.test(
+        msg,
+      )
+    ) {
+      const nonSentryFrames = frames.filter(
+        (f) =>
+          f.filename &&
+          f.filename !== "<anonymous>" &&
+          f.filename !== "[native code]" &&
+          !/\/sentry-[A-Za-z0-9_-]+\.js/.test(f.filename),
+      );
+      const hasSourceMapped = nonSentryFrames.some(
+        (f) =>
+          /\.(ts|tsx)$/.test(f.filename ?? "") ||
+          /^src\//.test(f.filename ?? ""),
+      );
       if (!hasSourceMapped) return null;
     }
     // Suppress minified Three.js/globe.gl crashes (e.g. "l is undefined" in raycast, "b is undefined" in update/initGlobe)
-    if (/^\w{1,2} is (?:undefined|not an object)$/.test(msg) && frames.length > 0) {
-      if (frames.some(f => /\/(main|index)-[A-Za-z0-9_-]+\.js/.test(f.filename ?? '') && /(raycast|update|initGlobe|traverse|render)/.test(f.function ?? ''))) return null;
+    if (
+      /^\w{1,2} is (?:undefined|not an object)$/.test(msg) &&
+      frames.length > 0
+    ) {
+      if (
+        frames.some(
+          (f) =>
+            /\/(main|index)-[A-Za-z0-9_-]+\.js/.test(f.filename ?? "") &&
+            /(raycast|update|initGlobe|traverse|render)/.test(f.function ?? ""),
+        )
+      )
+        return null;
     }
     // Suppress Three.js OrbitControls touch crashes (finger lifted during pinch-zoom)
-    if (/undefined is not an object \(evaluating 't\.x'\)|Cannot read properties of undefined \(reading 'x'\)/.test(msg)) {
-      const nonSentryFrames = frames.filter(f => f.filename && f.filename !== '<anonymous>' && f.filename !== '[native code]' && !/\/sentry-[A-Za-z0-9_-]+\.js/.test(f.filename));
-      const hasSourceMapped = nonSentryFrames.some(f => /\.(ts|tsx)$/.test(f.filename ?? '') || /^src\//.test(f.filename ?? ''));
+    if (
+      /undefined is not an object \(evaluating 't\.x'\)|Cannot read properties of undefined \(reading 'x'\)/.test(
+        msg,
+      )
+    ) {
+      const nonSentryFrames = frames.filter(
+        (f) =>
+          f.filename &&
+          f.filename !== "<anonymous>" &&
+          f.filename !== "[native code]" &&
+          !/\/sentry-[A-Za-z0-9_-]+\.js/.test(f.filename),
+      );
+      const hasSourceMapped = nonSentryFrames.some(
+        (f) =>
+          /\.(ts|tsx)$/.test(f.filename ?? "") ||
+          /^src\//.test(f.filename ?? ""),
+      );
       if (!hasSourceMapped) return null;
     }
     // Suppress deck.gl/maplibre null-access crashes with no usable stack trace (requestAnimationFrame wrapping)
-    if (/null is not an object \(evaluating '\w{1,3}\.(id|type|style)'\)/.test(msg) && frames.length === 0) return null;
+    if (
+      /null is not an object \(evaluating '\w{1,3}\.(id|type|style)'\)/.test(
+        msg,
+      ) &&
+      frames.length === 0
+    )
+      return null;
     // Suppress Safari sortedTrackListForMenu native crash (value is generic "Type error", function name in stack)
-    if (excType === 'TypeError' && frames.some(f => /sortedTrackListForMenu/.test(f.function ?? ''))) return null;
+    if (
+      excType === "TypeError" &&
+      frames.some((f) => /sortedTrackListForMenu/.test(f.function ?? ""))
+    )
+      return null;
     // Suppress TypeErrors from anonymous/injected scripts (no real source files or only inline page URL)
-    if ((excType === 'TypeError' || /^TypeError:/.test(msg)) && frames.length > 0 && frames.every(f => !f.filename || f.filename === '<anonymous>' || /^blob:/.test(f.filename) || /^https?:\/\/[^/]+\/?$/.test(f.filename))) return null;
+    if (
+      (excType === "TypeError" || /^TypeError:/.test(msg)) &&
+      frames.length > 0 &&
+      frames.every(
+        (f) =>
+          !f.filename ||
+          f.filename === "<anonymous>" ||
+          /^blob:/.test(f.filename) ||
+          /^https?:\/\/[^/]+\/?$/.test(f.filename),
+      )
+    )
+      return null;
     // Suppress parentNode.insertBefore from injected/inline scripts (iOS WKWebView, Apple Mail)
-    if (/parentNode\.insertBefore/.test(msg) && frames.every(f => !f.filename || f.filename === '<anonymous>' || /^blob:/.test(f.filename) || /^https?:\/\/[^/]+\/?$/.test(f.filename))) return null;
+    if (
+      /parentNode\.insertBefore/.test(msg) &&
+      frames.every(
+        (f) =>
+          !f.filename ||
+          f.filename === "<anonymous>" ||
+          /^blob:/.test(f.filename) ||
+          /^https?:\/\/[^/]+\/?$/.test(f.filename),
+      )
+    )
+      return null;
     // Suppress Sentry breadcrumb DOM-measuring crashes (element.offsetWidth on detached DOM)
-    if (/evaluating '(?:element|e)\.offset(?:Width|Height)'/.test(msg) && frames.some(f => /\/sentry-[A-Za-z0-9_-]+\.js/.test(f.filename ?? ''))) return null;
+    if (
+      /evaluating '(?:element|e)\.offset(?:Width|Height)'/.test(msg) &&
+      frames.some((f) => /\/sentry-[A-Za-z0-9_-]+\.js/.test(f.filename ?? ""))
+    )
+      return null;
     // Suppress errors originating entirely from blob: URLs (browser extensions)
-    if (frames.length > 0 && frames.every(f => /^blob:/.test(f.filename ?? ''))) return null;
+    if (
+      frames.length > 0 &&
+      frames.every((f) => /^blob:/.test(f.filename ?? ""))
+    )
+      return null;
     // Suppress errors originating from UV proxy (Ultraviolet service worker)
-    if (frames.some(f => /\/uv\/service\//.test(f.filename ?? '') || /uv\.handler/.test(f.filename ?? ''))) return null;
+    if (
+      frames.some(
+        (f) =>
+          /\/uv\/service\//.test(f.filename ?? "") ||
+          /uv\.handler/.test(f.filename ?? ""),
+      )
+    )
+      return null;
     // Suppress YouTube IFrame widget API internal errors
-    if (frames.some(f => /www-widgetapi\.js/.test(f.filename ?? ''))) return null;
+    if (frames.some((f) => /www-widgetapi\.js/.test(f.filename ?? "")))
+      return null;
     return event;
   },
 });
 // Suppress NotAllowedError from YouTube IFrame API's internal play() — browser autoplay policy,
 // not actionable. The YT IFrame API doesn't expose the play() promise so it leaks as unhandled.
-window.addEventListener('unhandledrejection', (e) => {
-  if (e.reason?.name === 'NotAllowedError') e.preventDefault();
+window.addEventListener("unhandledrejection", (e) => {
+  if (e.reason?.name === "NotAllowedError") e.preventDefault();
 });
 
-import { debugGetCells, getCellCount } from '@/services/geo-convergence';
-import { initMetaTags } from '@/services/meta-tags';
-import { installRuntimeFetchPatch, installWebApiRedirect } from '@/services/runtime';
-import { loadDesktopSecrets } from '@/services/runtime-config';
-import { applyStoredTheme } from '@/utils/theme-manager';
-import { applyFont } from '@/services/font-settings';
-import { SITE_VARIANT } from '@/config/variant';
-import { clearChunkReloadGuard, installChunkReloadGuard } from '@/bootstrap/chunk-reload';
+import { debugGetCells, getCellCount } from "@/services/geo-convergence";
+import { initMetaTags } from "@/services/meta-tags";
+import {
+  installRuntimeFetchPatch,
+  installWebApiRedirect,
+} from "@/services/runtime";
+import { loadDesktopSecrets } from "@/services/runtime-config";
+import { applyStoredTheme } from "@/utils/theme-manager";
+import { applyFont } from "@/services/font-settings";
+import { SITE_VARIANT } from "@/config/variant";
+import {
+  clearChunkReloadGuard,
+  installChunkReloadGuard,
+} from "@/bootstrap/chunk-reload";
 
 // Auto-reload on stale chunk 404s after deployment (Vite fires this for modulepreload failures).
 const chunkReloadStorageKey = installChunkReloadGuard(__APP_VERSION__);
@@ -320,45 +445,54 @@ applyStoredTheme();
 applyFont();
 
 // Set data-variant on <html> so CSS theme overrides activate
-if (SITE_VARIANT && SITE_VARIANT !== 'full') {
+if (SITE_VARIANT && SITE_VARIANT !== "full") {
   document.documentElement.dataset.variant = SITE_VARIANT;
 
   // Swap favicons to variant-specific versions before browser finishes fetching defaults
-  document.querySelectorAll<HTMLLinkElement>('link[rel="icon"], link[rel="apple-touch-icon"]').forEach(link => {
-    link.href = link.href
-      .replace(/\/favico\/favicon/g, `/favico/${SITE_VARIANT}/favicon`)
-      .replace(/\/favico\/apple-touch-icon/g, `/favico/${SITE_VARIANT}/apple-touch-icon`);
-  });
+  document
+    .querySelectorAll<HTMLLinkElement>(
+      'link[rel="icon"], link[rel="apple-touch-icon"]',
+    )
+    .forEach((link) => {
+      link.href = link.href
+        .replace(/\/favico\/favicon/g, `/favico/${SITE_VARIANT}/favicon`)
+        .replace(
+          /\/favico\/apple-touch-icon/g,
+          `/favico/${SITE_VARIANT}/apple-touch-icon`,
+        );
+    });
 }
 
 // Remove no-transition class after first paint to enable smooth theme transitions
 requestAnimationFrame(() => {
-  document.documentElement.classList.remove('no-transition');
+  document.documentElement.classList.remove("no-transition");
 });
 
 // Clear stale settings-open flag (survives ungraceful shutdown)
-localStorage.removeItem('wm-settings-open');
+localStorage.removeItem("wm-settings-open");
 
 // Standalone windows: ?settings=1 = panel display settings, ?live-channels=1 = channel management
 // Both need i18n initialized so t() does not return undefined.
 const urlParams = new URL(location.href).searchParams;
-if (urlParams.get('settings') === '1') {
-  void Promise.all([import('./services/i18n'), import('./settings-window')]).then(
-    async ([i18n, m]) => {
-      await i18n.initI18n();
-      m.initSettingsWindow();
-    }
-  );
-} else if (urlParams.get('live-channels') === '1') {
-  void Promise.all([import('./services/i18n'), import('./live-channels-window')]).then(
-    async ([i18n, m]) => {
-      await i18n.initI18n();
-      m.initLiveChannelsWindow();
-    }
-  );
+if (urlParams.get("settings") === "1") {
+  void Promise.all([
+    import("./services/i18n"),
+    import("./settings-window"),
+  ]).then(async ([i18n, m]) => {
+    await i18n.initI18n();
+    m.initSettingsWindow();
+  });
+} else if (urlParams.get("live-channels") === "1") {
+  void Promise.all([
+    import("./services/i18n"),
+    import("./live-channels-window"),
+  ]).then(async ([i18n, m]) => {
+    await i18n.initI18n();
+    m.initLiveChannelsWindow();
+  });
 } else {
   installUtmInterceptor();
-  const app = new App('app');
+  const app = new App("app");
   app
     .init()
     .then(() => {
@@ -374,49 +508,65 @@ if (urlParams.get('settings') === '1') {
 };
 
 // Beta mode toggle: type `beta=true` / `beta=false` in console
-Object.defineProperty(window, 'beta', {
+Object.defineProperty(window, "beta", {
   get() {
-    const on = localStorage.getItem('worldmonitor-beta-mode') === 'true';
-    console.log(`[Beta] ${on ? 'ON' : 'OFF'}`);
+    const on = localStorage.getItem("worldmonitor-beta-mode") === "true";
+    console.log(`[Beta] ${on ? "ON" : "OFF"}`);
     return on;
   },
   set(v: boolean) {
-    if (v) localStorage.setItem('worldmonitor-beta-mode', 'true');
-    else localStorage.removeItem('worldmonitor-beta-mode');
+    if (v) localStorage.setItem("worldmonitor-beta-mode", "true");
+    else localStorage.removeItem("worldmonitor-beta-mode");
     location.reload();
   },
 });
 
 // Suppress native WKWebView context menu in Tauri — allows custom JS context menus
-if ('__TAURI_INTERNALS__' in window || '__TAURI__' in window) {
-  document.addEventListener('contextmenu', (e) => {
+if ("__TAURI_INTERNALS__" in window || "__TAURI__" in window) {
+  document.addEventListener("contextmenu", (e) => {
     const target = e.target as HTMLElement;
     // Allow native menu on text inputs/textareas for copy/paste
-    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return;
+    if (
+      target.tagName === "INPUT" ||
+      target.tagName === "TEXTAREA" ||
+      target.isContentEditable
+    )
+      return;
     e.preventDefault();
   });
 }
 
-if (!('__TAURI_INTERNALS__' in window) && !('__TAURI__' in window) && 'serviceWorker' in navigator) {
+if (
+  !("__TAURI_INTERNALS__" in window) &&
+  !("__TAURI__" in window) &&
+  "serviceWorker" in navigator
+) {
   // Auto-reload when a new SW takes control (fixes stale HTML after deploys)
   let refreshing = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
     if (refreshing) return;
     refreshing = true;
     window.location.reload();
   });
 
-  navigator.serviceWorker.register('/sw.js', { scope: '/' })
+  navigator.serviceWorker
+    .register("/sw.js", { scope: "/" })
     .then((registration) => {
-      console.log('[PWA] Service worker registered');
-      const swUpdateInterval = setInterval(async () => {
-        if (!navigator.onLine) return;
-        try { await registration.update(); } catch {}
-      }, 5 * 60 * 1000);
-      (window as unknown as Record<string, unknown>).__swUpdateInterval = swUpdateInterval;
+      console.log("[PWA] Service worker registered");
+      const swUpdateInterval = setInterval(
+        async () => {
+          if (!navigator.onLine) return;
+          try {
+            await registration.update();
+          } catch {}
+        },
+        5 * 60 * 1000,
+      );
+      (window as unknown as Record<string, unknown>).__swUpdateInterval =
+        swUpdateInterval;
     })
     .catch((err) => {
-      console.warn('[PWA] Service worker registration failed:', err);
+      console.warn("[PWA] Service worker registration failed:", err);
     });
 }
 

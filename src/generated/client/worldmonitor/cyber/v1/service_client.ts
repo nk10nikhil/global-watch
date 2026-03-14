@@ -42,13 +42,33 @@ export interface PaginationResponse {
   totalCount: number;
 }
 
-export type CriticalityLevel = "CRITICALITY_LEVEL_UNSPECIFIED" | "CRITICALITY_LEVEL_LOW" | "CRITICALITY_LEVEL_MEDIUM" | "CRITICALITY_LEVEL_HIGH" | "CRITICALITY_LEVEL_CRITICAL";
+export type CriticalityLevel =
+  | "CRITICALITY_LEVEL_UNSPECIFIED"
+  | "CRITICALITY_LEVEL_LOW"
+  | "CRITICALITY_LEVEL_MEDIUM"
+  | "CRITICALITY_LEVEL_HIGH"
+  | "CRITICALITY_LEVEL_CRITICAL";
 
-export type CyberThreatIndicatorType = "CYBER_THREAT_INDICATOR_TYPE_UNSPECIFIED" | "CYBER_THREAT_INDICATOR_TYPE_IP" | "CYBER_THREAT_INDICATOR_TYPE_DOMAIN" | "CYBER_THREAT_INDICATOR_TYPE_URL";
+export type CyberThreatIndicatorType =
+  | "CYBER_THREAT_INDICATOR_TYPE_UNSPECIFIED"
+  | "CYBER_THREAT_INDICATOR_TYPE_IP"
+  | "CYBER_THREAT_INDICATOR_TYPE_DOMAIN"
+  | "CYBER_THREAT_INDICATOR_TYPE_URL";
 
-export type CyberThreatSource = "CYBER_THREAT_SOURCE_UNSPECIFIED" | "CYBER_THREAT_SOURCE_FEODO" | "CYBER_THREAT_SOURCE_URLHAUS" | "CYBER_THREAT_SOURCE_C2INTEL" | "CYBER_THREAT_SOURCE_OTX" | "CYBER_THREAT_SOURCE_ABUSEIPDB";
+export type CyberThreatSource =
+  | "CYBER_THREAT_SOURCE_UNSPECIFIED"
+  | "CYBER_THREAT_SOURCE_FEODO"
+  | "CYBER_THREAT_SOURCE_URLHAUS"
+  | "CYBER_THREAT_SOURCE_C2INTEL"
+  | "CYBER_THREAT_SOURCE_OTX"
+  | "CYBER_THREAT_SOURCE_ABUSEIPDB";
 
-export type CyberThreatType = "CYBER_THREAT_TYPE_UNSPECIFIED" | "CYBER_THREAT_TYPE_C2_SERVER" | "CYBER_THREAT_TYPE_MALWARE_HOST" | "CYBER_THREAT_TYPE_PHISHING" | "CYBER_THREAT_TYPE_MALICIOUS_URL";
+export type CyberThreatType =
+  | "CYBER_THREAT_TYPE_UNSPECIFIED"
+  | "CYBER_THREAT_TYPE_C2_SERVER"
+  | "CYBER_THREAT_TYPE_MALWARE_HOST"
+  | "CYBER_THREAT_TYPE_PHISHING"
+  | "CYBER_THREAT_TYPE_MALICIOUS_URL";
 
 export interface FieldViolation {
   field: string;
@@ -98,17 +118,27 @@ export class CyberServiceClient {
     this.defaultHeaders = { ...options?.defaultHeaders };
   }
 
-  async listCyberThreats(req: ListCyberThreatsRequest, options?: CyberServiceCallOptions): Promise<ListCyberThreatsResponse> {
+  async listCyberThreats(
+    req: ListCyberThreatsRequest,
+    options?: CyberServiceCallOptions,
+  ): Promise<ListCyberThreatsResponse> {
     let path = "/api/cyber/v1/list-cyber-threats";
     const params = new URLSearchParams();
-    if (req.start != null && req.start !== 0) params.set("start", String(req.start));
+    if (req.start != null && req.start !== 0)
+      params.set("start", String(req.start));
     if (req.end != null && req.end !== 0) params.set("end", String(req.end));
-    if (req.pageSize != null && req.pageSize !== 0) params.set("page_size", String(req.pageSize));
-    if (req.cursor != null && req.cursor !== "") params.set("cursor", String(req.cursor));
-    if (req.type != null && req.type !== "") params.set("type", String(req.type));
-    if (req.source != null && req.source !== "") params.set("source", String(req.source));
-    if (req.minSeverity != null && req.minSeverity !== "") params.set("min_severity", String(req.minSeverity));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.pageSize != null && req.pageSize !== 0)
+      params.set("page_size", String(req.pageSize));
+    if (req.cursor != null && req.cursor !== "")
+      params.set("cursor", String(req.cursor));
+    if (req.type != null && req.type !== "")
+      params.set("type", String(req.type));
+    if (req.source != null && req.source !== "")
+      params.set("source", String(req.source));
+    if (req.minSeverity != null && req.minSeverity !== "")
+      params.set("min_severity", String(req.minSeverity));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -126,7 +156,7 @@ export class CyberServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as ListCyberThreatsResponse;
+    return (await resp.json()) as ListCyberThreatsResponse;
   }
 
   private async handleError(resp: Response): Promise<never> {
@@ -141,7 +171,10 @@ export class CyberServiceClient {
         if (e instanceof ValidationError) throw e;
       }
     }
-    throw new ApiError(resp.status, `Request failed with status ${resp.status}`, body);
+    throw new ApiError(
+      resp.status,
+      `Request failed with status ${resp.status}`,
+      body,
+    );
   }
 }
-

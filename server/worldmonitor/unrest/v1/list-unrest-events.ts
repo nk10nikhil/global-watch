@@ -10,7 +10,7 @@ import type {
   UnrestEvent,
   UnrestSourceType,
   ConfidenceLevel,
-} from '../../../../src/generated/server/worldmonitor/unrest/v1/service_server';
+} from "../../../../src/generated/server/worldmonitor/unrest/v1/service_server";
 
 import {
   GDELT_GEO_URL,
@@ -20,29 +20,31 @@ import {
   classifyGdeltEventType,
   deduplicateEvents,
   sortBySeverityAndRecency,
-} from './_shared';
-import { CHROME_UA } from '../../../_shared/constants';
-import { cachedFetchJson, getCachedJson } from '../../../_shared/redis';
-import { fetchAcledCached } from '../../../_shared/acled';
+} from "./_shared";
+import { CHROME_UA } from "../../../_shared/constants";
+import { cachedFetchJson, getCachedJson } from "../../../_shared/redis";
+import { fetchAcledCached } from "../../../_shared/acled";
 
-const REDIS_CACHE_KEY = 'unrest:events:v1';
+const REDIS_CACHE_KEY = "unrest:events:v1";
 const REDIS_CACHE_TTL = 900; // 15 min — ACLED + GDELT merge
-const SEED_KEY = 'unrest:events:v1';
-const SEED_META_KEY = 'seed-meta:unrest:events';
+const SEED_KEY = "unrest:events:v1";
+const SEED_META_KEY = "seed-meta:unrest:events";
 const SEED_FRESHNESS_MS = 45 * 60 * 1000; // 45 min
 
 // ---------- ACLED Fetch (ported from api/acled.js + src/services/protests.ts) ----------
 
-async function fetchAcledProtests(req: ListUnrestEventsRequest): Promise<UnrestEvent[]> {
+async function fetchAcledProtests(
+  req: ListUnrestEventsRequest,
+): Promise<UnrestEvent[]> {
   try {
     const now = Date.now();
-    const startMs = req.start ?? (now - 30 * 24 * 60 * 60 * 1000);
+    const startMs = req.start ?? now - 30 * 24 * 60 * 60 * 1000;
     const endMs = req.end ?? now;
-    const startDate = new Date(startMs).toISOString().split('T')[0]!;
-    const endDate = new Date(endMs).toISOString().split('T')[0]!;
+    const startDate = new Date(startMs).toISOString().split("T")[0]!;
+    const endDate = new Date(endMs).toISOString().split("T")[0]!;
 
     const rawEvents = await fetchAcledCached({
-      eventTypes: 'Protests',
+      eventTypes: "Protests",
       startDate,
       endDate,
       country: req.country || undefined,
@@ -50,32 +52,47 @@ async function fetchAcledProtests(req: ListUnrestEventsRequest): Promise<UnrestE
 
     return rawEvents
       .filter((e) => {
-        const lat = parseFloat(e.latitude || '');
-        const lon = parseFloat(e.longitude || '');
-        return Number.isFinite(lat) && Number.isFinite(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
+        const lat = parseFloat(e.latitude || "");
+        const lon = parseFloat(e.longitude || "");
+        return (
+          Number.isFinite(lat) &&
+          Number.isFinite(lon) &&
+          lat >= -90 &&
+          lat <= 90 &&
+          lon >= -180 &&
+          lon <= 180
+        );
       })
       .map((e): UnrestEvent => {
-        const fatalities = parseInt(e.fatalities || '', 10) || 0;
+        const fatalities = parseInt(e.fatalities || "", 10) || 0;
         return {
           id: `acled-${e.event_id_cnty}`,
-          title: e.notes?.slice(0, 200) || `${e.sub_event_type} in ${e.location}`,
-          summary: typeof e.notes === 'string' ? e.notes.substring(0, 500) : '',
-          eventType: mapAcledEventType(e.event_type || '', e.sub_event_type || ''),
-          city: e.location || '',
-          country: e.country || '',
-          region: e.admin1 || '',
+          title:
+            e.notes?.slice(0, 200) || `${e.sub_event_type} in ${e.location}`,
+          summary: typeof e.notes === "string" ? e.notes.substring(0, 500) : "",
+          eventType: mapAcledEventType(
+            e.event_type || "",
+            e.sub_event_type || "",
+          ),
+          city: e.location || "",
+          country: e.country || "",
+          region: e.admin1 || "",
           location: {
-            latitude: parseFloat(e.latitude || '0'),
-            longitude: parseFloat(e.longitude || '0'),
+            latitude: parseFloat(e.latitude || "0"),
+            longitude: parseFloat(e.longitude || "0"),
           },
-          occurredAt: new Date(e.event_date || '').getTime(),
-          severity: classifySeverity(fatalities, e.event_type || ''),
+          occurredAt: new Date(e.event_date || "").getTime(),
+          severity: classifySeverity(fatalities, e.event_type || ""),
           fatalities,
           sources: [e.source].filter(Boolean) as string[],
-          sourceType: 'UNREST_SOURCE_TYPE_ACLED' as UnrestSourceType,
-          tags: e.tags?.split(';').map((t: string) => t.trim()).filter(Boolean) ?? [],
+          sourceType: "UNREST_SOURCE_TYPE_ACLED" as UnrestSourceType,
+          tags:
+            e.tags
+              ?.split(";")
+              .map((t: string) => t.trim())
+              .filter(Boolean) ?? [],
           actors: [e.actor1, e.actor2].filter(Boolean) as string[],
-          confidence: 'CONFIDENCE_LEVEL_HIGH' as ConfidenceLevel,
+          confidence: "CONFIDENCE_LEVEL_HIGH" as ConfidenceLevel,
         };
       });
   } catch {
@@ -88,14 +105,14 @@ async function fetchAcledProtests(req: ListUnrestEventsRequest): Promise<UnrestE
 async function fetchGdeltEvents(): Promise<UnrestEvent[]> {
   try {
     const params = new URLSearchParams({
-      query: 'protest',
-      format: 'geojson',
-      maxrecords: '250',
-      timespan: '7d',
+      query: "protest",
+      format: "geojson",
+      maxrecords: "250",
+      timespan: "7d",
     });
 
     const response = await fetch(`${GDELT_GEO_URL}?${params}`, {
-      headers: { Accept: 'application/json', 'User-Agent': CHROME_UA },
+      headers: { Accept: "application/json", "User-Agent": CHROME_UA },
       signal: AbortSignal.timeout(10000),
     });
 
@@ -107,7 +124,7 @@ async function fetchGdeltEvents(): Promise<UnrestEvent[]> {
     const events: UnrestEvent[] = [];
 
     for (const feature of features as any[]) {
-      const name: string = feature.properties?.name || '';
+      const name: string = feature.properties?.name || "";
       if (!name || seenLocations.has(name)) continue;
 
       const count: number = feature.properties?.count || 1;
@@ -128,27 +145,27 @@ async function fetchGdeltEvents(): Promise<UnrestEvent[]> {
         continue;
 
       seenLocations.add(name);
-      const country = name.split(',').pop()?.trim() || name;
+      const country = name.split(",").pop()?.trim() || name;
 
       events.push({
         id: `gdelt-${lat.toFixed(2)}-${lon.toFixed(2)}-${Date.now()}`,
         title: `${name} (${count} reports)`,
-        summary: '',
+        summary: "",
         eventType: classifyGdeltEventType(name),
-        city: name.split(',')[0]?.trim() || '',
+        city: name.split(",")[0]?.trim() || "",
         country,
-        region: '',
+        region: "",
         location: { latitude: lat, longitude: lon },
         occurredAt: Date.now(),
         severity: classifyGdeltSeverity(count, name),
         fatalities: 0,
-        sources: ['GDELT'],
-        sourceType: 'UNREST_SOURCE_TYPE_GDELT' as UnrestSourceType,
+        sources: ["GDELT"],
+        sourceType: "UNREST_SOURCE_TYPE_GDELT" as UnrestSourceType,
         tags: [],
         actors: [],
         confidence: (count > 20
-          ? 'CONFIDENCE_LEVEL_HIGH'
-          : 'CONFIDENCE_LEVEL_MEDIUM') as ConfidenceLevel,
+          ? "CONFIDENCE_LEVEL_HIGH"
+          : "CONFIDENCE_LEVEL_MEDIUM") as ConfidenceLevel,
       });
     }
 
@@ -168,7 +185,9 @@ function filterSeedEvents(
   if (req.country) {
     const country = req.country.toLowerCase();
     filtered = filtered.filter(
-      (e) => e.country.toLowerCase() === country || e.country.toLowerCase().includes(country),
+      (e) =>
+        e.country.toLowerCase() === country ||
+        e.country.toLowerCase().includes(country),
     );
   }
   if (req.start > 0) {
@@ -188,11 +207,18 @@ export async function listUnrestEvents(
     // Try seed data first
     try {
       const [seedData, seedMeta] = await Promise.all([
-        getCachedJson(SEED_KEY, true) as Promise<ListUnrestEventsResponse | null>,
-        getCachedJson(SEED_META_KEY, true) as Promise<{ fetchedAt?: number } | null>,
+        getCachedJson(
+          SEED_KEY,
+          true,
+        ) as Promise<ListUnrestEventsResponse | null>,
+        getCachedJson(SEED_META_KEY, true) as Promise<{
+          fetchedAt?: number;
+        } | null>,
       ]);
       if (seedData?.events?.length) {
-        const isFresh = (seedMeta?.fetchedAt ?? 0) > 0 && (Date.now() - seedMeta!.fetchedAt!) < SEED_FRESHNESS_MS;
+        const isFresh =
+          (seedMeta?.fetchedAt ?? 0) > 0 &&
+          Date.now() - seedMeta!.fetchedAt! < SEED_FRESHNESS_MS;
         if (isFresh || !process.env.SEED_FALLBACK_UNREST) {
           const filtered = filterSeedEvents(seedData.events, req);
           const sorted = sortBySeverityAndRecency(filtered);
@@ -202,9 +228,13 @@ export async function listUnrestEvents(
     } catch {}
 
     // Fallback: live fetch with caching
-    const startBucket = req.start > 0 ? new Date(req.start).toISOString().slice(0, 10) : 'default';
-    const endBucket = req.end > 0 ? new Date(req.end).toISOString().slice(0, 10) : 'default';
-    const cacheKey = `${REDIS_CACHE_KEY}:${req.country || 'all'}:${startBucket}:${endBucket}`;
+    const startBucket =
+      req.start > 0
+        ? new Date(req.start).toISOString().slice(0, 10)
+        : "default";
+    const endBucket =
+      req.end > 0 ? new Date(req.end).toISOString().slice(0, 10) : "default";
+    const cacheKey = `${REDIS_CACHE_KEY}:${req.country || "all"}:${startBucket}:${endBucket}`;
     const result = await cachedFetchJson<ListUnrestEventsResponse>(
       cacheKey,
       REDIS_CACHE_TTL,
@@ -213,13 +243,25 @@ export async function listUnrestEvents(
           fetchAcledProtests(req),
           fetchGdeltEvents(),
         ]);
-        const acledEvents = acledResult.status === 'fulfilled' ? acledResult.value : [];
-        const gdeltEvents = gdeltResult.status === 'fulfilled' ? gdeltResult.value : [];
-        if (acledResult.status === 'rejected') console.warn('[unrest] ACLED fetch failed, using partial results:', acledResult.reason);
-        if (gdeltResult.status === 'rejected') console.warn('[unrest] GDELT fetch failed, using partial results:', gdeltResult.reason);
+        const acledEvents =
+          acledResult.status === "fulfilled" ? acledResult.value : [];
+        const gdeltEvents =
+          gdeltResult.status === "fulfilled" ? gdeltResult.value : [];
+        if (acledResult.status === "rejected")
+          console.warn(
+            "[unrest] ACLED fetch failed, using partial results:",
+            acledResult.reason,
+          );
+        if (gdeltResult.status === "rejected")
+          console.warn(
+            "[unrest] GDELT fetch failed, using partial results:",
+            gdeltResult.reason,
+          );
         const merged = deduplicateEvents([...acledEvents, ...gdeltEvents]);
         const sorted = sortBySeverityAndRecency(merged);
-        return sorted.length > 0 ? { events: sorted, clusters: [], pagination: undefined } : null;
+        return sorted.length > 0
+          ? { events: sorted, clusters: [], pagination: undefined }
+          : null;
       },
     );
     return result || { events: [], clusters: [], pagination: undefined };

@@ -11,8 +11,8 @@ function errMsg(err: unknown): string {
  */
 function getKeyPrefix(): string {
   const env = process.env.VERCEL_ENV; // 'production' | 'preview' | 'development'
-  if (!env || env === 'production') return '';
-  const sha = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 8) || 'dev';
+  if (!env || env === "production") return "";
+  const sha = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 8) || "dev";
   return `${env}:${sha}:`;
 }
 
@@ -23,9 +23,12 @@ function prefixKey(key: string): string {
   return `${cachedPrefix}${key}`;
 }
 
-export async function getCachedJson(key: string, raw = false): Promise<unknown | null> {
-  if (process.env.LOCAL_API_MODE === 'tauri-sidecar') {
-    const { sidecarCacheGet } = await import('./sidecar-cache');
+export async function getCachedJson(
+  key: string,
+  raw = false,
+): Promise<unknown | null> {
+  if (process.env.LOCAL_API_MODE === "tauri-sidecar") {
+    const { sidecarCacheGet } = await import("./sidecar-cache");
     return sidecarCacheGet(key);
   }
 
@@ -42,14 +45,18 @@ export async function getCachedJson(key: string, raw = false): Promise<unknown |
     const data = (await resp.json()) as { result?: string };
     return data.result ? JSON.parse(data.result) : null;
   } catch (err) {
-    console.warn('[redis] getCachedJson failed:', errMsg(err));
+    console.warn("[redis] getCachedJson failed:", errMsg(err));
     return null;
   }
 }
 
-export async function setCachedJson(key: string, value: unknown, ttlSeconds: number): Promise<void> {
-  if (process.env.LOCAL_API_MODE === 'tauri-sidecar') {
-    const { sidecarCacheSet } = await import('./sidecar-cache');
+export async function setCachedJson(
+  key: string,
+  value: unknown,
+  ttlSeconds: number,
+): Promise<void> {
+  if (process.env.LOCAL_API_MODE === "tauri-sidecar") {
+    const { sidecarCacheSet } = await import("./sidecar-cache");
     sidecarCacheSet(key, value, ttlSeconds);
     return;
   }
@@ -59,22 +66,25 @@ export async function setCachedJson(key: string, value: unknown, ttlSeconds: num
   if (!url || !token) return;
   try {
     // Atomic SET with EX — single call avoids race between SET and EXPIRE (C-3 fix)
-    await fetch(`${url}/set/${encodeURIComponent(prefixKey(key))}/${encodeURIComponent(JSON.stringify(value))}/EX/${ttlSeconds}`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-      signal: AbortSignal.timeout(REDIS_OP_TIMEOUT_MS),
-    });
+    await fetch(
+      `${url}/set/${encodeURIComponent(prefixKey(key))}/${encodeURIComponent(JSON.stringify(value))}/EX/${ttlSeconds}`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        signal: AbortSignal.timeout(REDIS_OP_TIMEOUT_MS),
+      },
+    );
   } catch (err) {
-    console.warn('[redis] setCachedJson failed:', errMsg(err));
+    console.warn("[redis] setCachedJson failed:", errMsg(err));
   }
 }
 
-const NEG_SENTINEL = '__WM_NEG__';
+const NEG_SENTINEL = "__WM_NEG__";
 const SEED_META_TTL = 604800; // 7 days
 
 /** Estimate record count from an RPC response object for seed-meta tracking. */
 function estimateRecordCount(obj: unknown): number {
-  if (!obj || typeof obj !== 'object') return 0;
+  if (!obj || typeof obj !== "object") return 0;
   if (Array.isArray(obj)) return obj.length;
   // Check common array fields in RPC responses
   for (const v of Object.values(obj as Record<string, unknown>)) {
@@ -93,16 +103,23 @@ function writeSeedMeta(cacheKey: string, recordCount: number): void {
   if (now - last < SEED_META_THROTTLE_MS) return;
   seedMetaLastWrite.set(cacheKey, now);
 
-  const metaKey = `seed-meta:${cacheKey.replace(/[-:]v\d+$/, '')}`;
-  setCachedJson(metaKey, { fetchedAt: now, recordCount }, SEED_META_TTL)
-    .catch((err: unknown) => console.warn(`[redis] seed-meta write failed for "${metaKey}":`, errMsg(err)));
+  const metaKey = `seed-meta:${cacheKey.replace(/[-:]v\d+$/, "")}`;
+  setCachedJson(metaKey, { fetchedAt: now, recordCount }, SEED_META_TTL).catch(
+    (err: unknown) =>
+      console.warn(
+        `[redis] seed-meta write failed for "${metaKey}":`,
+        errMsg(err),
+      ),
+  );
 }
 
 /**
  * Batch GET using Upstash pipeline API — single HTTP round-trip for N keys.
  * Returns a Map of key → parsed JSON value (missing/failed/sentinel keys omitted).
  */
-export async function getCachedJsonBatch(keys: string[]): Promise<Map<string, unknown>> {
+export async function getCachedJsonBatch(
+  keys: string[],
+): Promise<Map<string, unknown>> {
   const result = new Map<string, unknown>();
   if (keys.length === 0) return result;
 
@@ -111,10 +128,13 @@ export async function getCachedJsonBatch(keys: string[]): Promise<Map<string, un
   if (!url || !token) return result;
 
   try {
-    const pipeline = keys.map((k) => ['GET', prefixKey(k)]);
+    const pipeline = keys.map((k) => ["GET", prefixKey(k)]);
     const resp = await fetch(`${url}/pipeline`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(pipeline),
       signal: AbortSignal.timeout(REDIS_PIPELINE_TIMEOUT_MS),
     });
@@ -127,11 +147,13 @@ export async function getCachedJsonBatch(keys: string[]): Promise<Map<string, un
         try {
           const parsed = JSON.parse(raw);
           if (parsed !== NEG_SENTINEL) result.set(keys[i]!, parsed);
-        } catch { /* skip malformed */ }
+        } catch {
+          /* skip malformed */
+        }
       }
     }
   } catch (err) {
-    console.warn('[redis] getCachedJsonBatch failed:', errMsg(err));
+    console.warn("[redis] getCachedJsonBatch failed:", errMsg(err));
   }
   return result;
 }
@@ -176,7 +198,10 @@ export async function cachedFetchJson<T extends object>(
       return result;
     })
     .catch((err: unknown) => {
-      console.warn(`[redis] cachedFetchJson fetcher failed for "${key}":`, errMsg(err));
+      console.warn(
+        `[redis] cachedFetchJson fetcher failed for "${key}":`,
+        errMsg(err),
+      );
       throw err;
     })
     .finally(() => {
@@ -201,18 +226,18 @@ export async function cachedFetchJsonWithMeta<T extends object>(
   ttlSeconds: number,
   fetcher: () => Promise<T | null>,
   negativeTtlSeconds = 120,
-): Promise<{ data: T | null; source: 'cache' | 'fresh' }> {
+): Promise<{ data: T | null; source: "cache" | "fresh" }> {
   const cached = await getCachedJson(key);
-  if (cached === NEG_SENTINEL) return { data: null, source: 'cache' };
+  if (cached === NEG_SENTINEL) return { data: null, source: "cache" };
   if (cached !== null) {
     writeSeedMeta(key, estimateRecordCount(cached));
-    return { data: cached as T, source: 'cache' };
+    return { data: cached as T, source: "cache" };
   }
 
   const existing = inflight.get(key);
   if (existing) {
     const data = (await existing) as T | null;
-    return { data, source: 'fresh' };
+    return { data, source: "fresh" };
   }
 
   const promise = fetcher()
@@ -226,7 +251,10 @@ export async function cachedFetchJsonWithMeta<T extends object>(
       return result;
     })
     .catch((err: unknown) => {
-      console.warn(`[redis] cachedFetchJsonWithMeta fetcher failed for "${key}":`, errMsg(err));
+      console.warn(
+        `[redis] cachedFetchJsonWithMeta fetcher failed for "${key}":`,
+        errMsg(err),
+      );
       throw err;
     })
     .finally(() => {
@@ -235,12 +263,17 @@ export async function cachedFetchJsonWithMeta<T extends object>(
 
   inflight.set(key, promise);
   const data = await promise;
-  return { data, source: 'fresh' };
+  return { data, source: "fresh" };
 }
 
 export async function geoSearchByBox(
-  key: string, lon: number, lat: number,
-  widthKm: number, heightKm: number, count: number, raw = false,
+  key: string,
+  lon: number,
+  lat: number,
+  widthKm: number,
+  heightKm: number,
+  count: number,
+  raw = false,
 ): Promise<string[]> {
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -248,12 +281,27 @@ export async function geoSearchByBox(
   try {
     const finalKey = raw ? key : prefixKey(key);
     const pipeline = [
-      ['GEOSEARCH', finalKey, 'FROMLONLAT', String(lon), String(lat),
-       'BYBOX', String(widthKm), String(heightKm), 'km', 'ASC', 'COUNT', String(count)],
+      [
+        "GEOSEARCH",
+        finalKey,
+        "FROMLONLAT",
+        String(lon),
+        String(lat),
+        "BYBOX",
+        String(widthKm),
+        String(heightKm),
+        "km",
+        "ASC",
+        "COUNT",
+        String(count),
+      ],
     ];
     const resp = await fetch(`${url}/pipeline`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(pipeline),
       signal: AbortSignal.timeout(REDIS_PIPELINE_TIMEOUT_MS),
     });
@@ -261,13 +309,15 @@ export async function geoSearchByBox(
     const data = (await resp.json()) as Array<{ result?: string[] }>;
     return data[0]?.result ?? [];
   } catch (err) {
-    console.warn('[redis] geoSearchByBox failed:', errMsg(err));
+    console.warn("[redis] geoSearchByBox failed:", errMsg(err));
     return [];
   }
 }
 
 export async function getHashFieldsBatch(
-  key: string, fields: string[], raw = false,
+  key: string,
+  fields: string[],
+  raw = false,
 ): Promise<Map<string, string>> {
   const result = new Map<string, string>();
   if (fields.length === 0) return result;
@@ -276,10 +326,13 @@ export async function getHashFieldsBatch(
   if (!url || !token) return result;
   try {
     const finalKey = raw ? key : prefixKey(key);
-    const pipeline = [['HMGET', finalKey, ...fields]];
+    const pipeline = [["HMGET", finalKey, ...fields]];
     const resp = await fetch(`${url}/pipeline`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(pipeline),
       signal: AbortSignal.timeout(REDIS_PIPELINE_TIMEOUT_MS),
     });
@@ -292,7 +345,7 @@ export async function getHashFieldsBatch(
       }
     }
   } catch (err) {
-    console.warn('[redis] getHashFieldsBatch failed:', errMsg(err));
+    console.warn("[redis] getHashFieldsBatch failed:", errMsg(err));
   }
   return result;
 }
@@ -309,16 +362,23 @@ export async function runRedisPipeline(
 
   const pipeline = commands.map((command) => {
     const [verb, ...rest] = command;
-    if (raw || rest.length === 0 || typeof rest[0] !== 'string') {
+    if (raw || rest.length === 0 || typeof rest[0] !== "string") {
       return command.map((part) => String(part));
     }
-    return [String(verb), prefixKey(rest[0]), ...rest.slice(1).map((part) => String(part))];
+    return [
+      String(verb),
+      prefixKey(rest[0]),
+      ...rest.slice(1).map((part) => String(part)),
+    ];
   });
 
   try {
     const resp = await fetch(`${url}/pipeline`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(pipeline),
       signal: AbortSignal.timeout(REDIS_PIPELINE_TIMEOUT_MS),
     });
@@ -326,9 +386,9 @@ export async function runRedisPipeline(
       console.warn(`[redis] runRedisPipeline HTTP ${resp.status}`);
       return [];
     }
-    return await resp.json() as Array<{ result?: unknown }>;
+    return (await resp.json()) as Array<{ result?: unknown }>;
   } catch (err) {
-    console.warn('[redis] runRedisPipeline failed:', errMsg(err));
+    console.warn("[redis] runRedisPipeline failed:", errMsg(err));
     return [];
   }
 }

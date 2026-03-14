@@ -266,7 +266,7 @@
 - [ ] Document all 14 supported locales: en, fr, de, es, it, pt, nl, sv, pl, ru, ar, zh, ja, he
 - [ ] Document i18n key structure and naming conventions
 - [ ] Document the translation workflow (how to add/update translations)
-- [ ] Document RTL support (`rtl-overrides.css`) for Arabic 
+- [ ] Document RTL support (`rtl-overrides.css`) for Arabic
 - [ ] Guide for adding a new locale (files to create, registration, testing)
 - [ ] Document translation completeness per locale (which keys are missing)
 - [ ] Document language detection and fallback chain
@@ -458,13 +458,13 @@
 
 ## Prioritization Guide
 
-| Priority | Tasks | Rationale |
-|----------|-------|-----------|
-| **P0 — Critical** | 1.2 `.env.example`, 2.1 Architecture, 12.2 AI Agent Guide | Unblocks AI agent development immediately |
-| **P1 — High** | 1.3 Contributing, 3.1 API Reference, 5.1 Services, 6.1 Configuration | Core reference for any code changes |
-| **P2 — Medium** | 2.2 Data Model, 4.1 Components, 9.1 Testing, 10.1 Map System, 12.1 Dev Guide | Deeper understanding for complex changes |
-| **P3 — Standard** | 7.1 Deployment, 8.1 i18n, 11.1 PWA, 13.x Updates, 14.2 Data Sources | Operational completeness |
-| **P4 — Nice to Have** | 1.4 Security, 14.1 Glossary, 14.3 Troubleshooting, 15.x Infrastructure | Polish and maintenance |
+| Priority              | Tasks                                                                        | Rationale                                 |
+| --------------------- | ---------------------------------------------------------------------------- | ----------------------------------------- |
+| **P0 — Critical**     | 1.2 `.env.example`, 2.1 Architecture, 12.2 AI Agent Guide                    | Unblocks AI agent development immediately |
+| **P1 — High**         | 1.3 Contributing, 3.1 API Reference, 5.1 Services, 6.1 Configuration         | Core reference for any code changes       |
+| **P2 — Medium**       | 2.2 Data Model, 4.1 Components, 9.1 Testing, 10.1 Map System, 12.1 Dev Guide | Deeper understanding for complex changes  |
+| **P3 — Standard**     | 7.1 Deployment, 8.1 i18n, 11.1 PWA, 13.x Updates, 14.2 Data Sources          | Operational completeness                  |
+| **P4 — Nice to Have** | 1.4 Security, 14.1 Glossary, 14.3 Troubleshooting, 15.x Infrastructure       | Polish and maintenance                    |
 
 ---
 

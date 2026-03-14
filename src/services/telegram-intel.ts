@@ -1,9 +1,9 @@
-import { proxyUrl } from '@/utils';
-import { isDesktopRuntime, toApiUrl } from '@/services/runtime';
+import { proxyUrl } from "@/utils";
+import { isDesktopRuntime, toApiUrl } from "@/services/runtime";
 
 export interface TelegramItem {
   id: string;
-  source: 'telegram';
+  source: "telegram";
   channel: string;
   channelTitle: string;
   url: string;
@@ -24,13 +24,13 @@ export interface TelegramFeedResponse {
 }
 
 export const TELEGRAM_TOPICS = [
-  { id: 'all', labelKey: 'components.telegramIntel.filterAll' },
-  { id: 'breaking', labelKey: 'components.telegramIntel.filterBreaking' },
-  { id: 'conflict', labelKey: 'components.telegramIntel.filterConflict' },
-  { id: 'alerts', labelKey: 'components.telegramIntel.filterAlerts' },
-  { id: 'osint', labelKey: 'components.telegramIntel.filterOsint' },
-  { id: 'politics', labelKey: 'components.telegramIntel.filterPolitics' },
-  { id: 'middleeast', labelKey: 'components.telegramIntel.filterMiddleeast' },
+  { id: "all", labelKey: "components.telegramIntel.filterAll" },
+  { id: "breaking", labelKey: "components.telegramIntel.filterBreaking" },
+  { id: "conflict", labelKey: "components.telegramIntel.filterConflict" },
+  { id: "alerts", labelKey: "components.telegramIntel.filterAlerts" },
+  { id: "osint", labelKey: "components.telegramIntel.filterOsint" },
+  { id: "politics", labelKey: "components.telegramIntel.filterPolitics" },
+  { id: "middleeast", labelKey: "components.telegramIntel.filterMiddleeast" },
 ] as const;
 
 let cachedResponse: TelegramFeedResponse | null = null;
@@ -42,8 +42,11 @@ function telegramFeedUrl(limit: number): string {
   return isDesktopRuntime() ? proxyUrl(path) : toApiUrl(path);
 }
 
-export async function fetchTelegramFeed(limit = 50): Promise<TelegramFeedResponse> {
-  if (cachedResponse && Date.now() - cachedAt < CACHE_TTL) return cachedResponse;
+export async function fetchTelegramFeed(
+  limit = 50,
+): Promise<TelegramFeedResponse> {
+  if (cachedResponse && Date.now() - cachedAt < CACHE_TTL)
+    return cachedResponse;
 
   const res = await fetch(telegramFeedUrl(limit));
   if (!res.ok) throw new Error(`Telegram feed ${res.status}`);
@@ -56,7 +59,7 @@ export async function fetchTelegramFeed(limit = 50): Promise<TelegramFeedRespons
 
 export function formatTelegramTime(ts: string): string {
   const diff = Date.now() - new Date(ts).getTime();
-  if (diff < 0) return 'now';
+  if (diff < 0) return "now";
   const secs = Math.floor(diff / 1000);
   if (secs < 60) return `${secs}s`;
   const mins = Math.floor(secs / 60);

@@ -1,10 +1,10 @@
 // Base configuration shared across all variants
-import type { PanelConfig, MapLayers } from '@/types';
+import type { PanelConfig, MapLayers } from "@/types";
 
 // Shared exports (re-exported by all variants)
-export { SECTORS, COMMODITIES, MARKET_SYMBOLS } from '../markets';
-export { UNDERSEA_CABLES } from '../geo';
-export { AI_DATA_CENTERS } from '../ai-datacenters';
+export { SECTORS, COMMODITIES, MARKET_SYMBOLS } from "../markets";
+export { UNDERSEA_CABLES } from "../geo";
+export { AI_DATA_CENTERS } from "../ai-datacenters";
 
 // Idle pause duration - shared across map and stream panels (5 minutes)
 export const IDLE_PAUSE_MS = 5 * 60 * 1000;
@@ -20,26 +20,26 @@ export const REFRESH_INTERVALS = {
 
 // Monitor colors - shared
 export const MONITOR_COLORS = [
-  '#44ff88',
-  '#ff8844',
-  '#4488ff',
-  '#ff44ff',
-  '#ffff44',
-  '#ff4444',
-  '#44ffff',
-  '#88ff44',
-  '#ff88ff',
-  '#88ffff',
+  "#44ff88",
+  "#ff8844",
+  "#4488ff",
+  "#ff44ff",
+  "#ffff44",
+  "#ff4444",
+  "#44ffff",
+  "#88ff44",
+  "#ff88ff",
+  "#88ffff",
 ];
 
 // Storage keys - shared
 export const STORAGE_KEYS = {
-  panels: 'worldmonitor-panels',
-  monitors: 'worldmonitor-monitors',
-  mapLayers: 'worldmonitor-layers',
-  disabledFeeds: 'worldmonitor-disabled-feeds',
-  liveChannels: 'worldmonitor-live-channels',
-  mapMode: 'worldmonitor-map-mode',          // 'flat' | 'globe'
+  panels: "worldmonitor-panels",
+  monitors: "worldmonitor-monitors",
+  mapLayers: "worldmonitor-layers",
+  disabledFeeds: "worldmonitor-disabled-feeds",
+  liveChannels: "worldmonitor-live-channels",
+  mapMode: "worldmonitor-map-mode", // 'flat' | 'globe'
 } as const;
 
 // Type definitions for variant configs

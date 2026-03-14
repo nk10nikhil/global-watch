@@ -46,13 +46,38 @@ export interface PaginationResponse {
   totalCount: number;
 }
 
-export type AirportRegion = "AIRPORT_REGION_UNSPECIFIED" | "AIRPORT_REGION_AMERICAS" | "AIRPORT_REGION_EUROPE" | "AIRPORT_REGION_APAC" | "AIRPORT_REGION_MENA" | "AIRPORT_REGION_AFRICA";
+export type AirportRegion =
+  | "AIRPORT_REGION_UNSPECIFIED"
+  | "AIRPORT_REGION_AMERICAS"
+  | "AIRPORT_REGION_EUROPE"
+  | "AIRPORT_REGION_APAC"
+  | "AIRPORT_REGION_MENA"
+  | "AIRPORT_REGION_AFRICA";
 
-export type FlightDelaySeverity = "FLIGHT_DELAY_SEVERITY_UNSPECIFIED" | "FLIGHT_DELAY_SEVERITY_NORMAL" | "FLIGHT_DELAY_SEVERITY_MINOR" | "FLIGHT_DELAY_SEVERITY_MODERATE" | "FLIGHT_DELAY_SEVERITY_MAJOR" | "FLIGHT_DELAY_SEVERITY_SEVERE";
+export type FlightDelaySeverity =
+  | "FLIGHT_DELAY_SEVERITY_UNSPECIFIED"
+  | "FLIGHT_DELAY_SEVERITY_NORMAL"
+  | "FLIGHT_DELAY_SEVERITY_MINOR"
+  | "FLIGHT_DELAY_SEVERITY_MODERATE"
+  | "FLIGHT_DELAY_SEVERITY_MAJOR"
+  | "FLIGHT_DELAY_SEVERITY_SEVERE";
 
-export type FlightDelaySource = "FLIGHT_DELAY_SOURCE_UNSPECIFIED" | "FLIGHT_DELAY_SOURCE_FAA" | "FLIGHT_DELAY_SOURCE_EUROCONTROL" | "FLIGHT_DELAY_SOURCE_COMPUTED" | "FLIGHT_DELAY_SOURCE_AVIATIONSTACK" | "FLIGHT_DELAY_SOURCE_NOTAM";
+export type FlightDelaySource =
+  | "FLIGHT_DELAY_SOURCE_UNSPECIFIED"
+  | "FLIGHT_DELAY_SOURCE_FAA"
+  | "FLIGHT_DELAY_SOURCE_EUROCONTROL"
+  | "FLIGHT_DELAY_SOURCE_COMPUTED"
+  | "FLIGHT_DELAY_SOURCE_AVIATIONSTACK"
+  | "FLIGHT_DELAY_SOURCE_NOTAM";
 
-export type FlightDelayType = "FLIGHT_DELAY_TYPE_UNSPECIFIED" | "FLIGHT_DELAY_TYPE_GROUND_STOP" | "FLIGHT_DELAY_TYPE_GROUND_DELAY" | "FLIGHT_DELAY_TYPE_DEPARTURE_DELAY" | "FLIGHT_DELAY_TYPE_ARRIVAL_DELAY" | "FLIGHT_DELAY_TYPE_GENERAL" | "FLIGHT_DELAY_TYPE_CLOSURE";
+export type FlightDelayType =
+  | "FLIGHT_DELAY_TYPE_UNSPECIFIED"
+  | "FLIGHT_DELAY_TYPE_GROUND_STOP"
+  | "FLIGHT_DELAY_TYPE_GROUND_DELAY"
+  | "FLIGHT_DELAY_TYPE_DEPARTURE_DELAY"
+  | "FLIGHT_DELAY_TYPE_ARRIVAL_DELAY"
+  | "FLIGHT_DELAY_TYPE_GENERAL"
+  | "FLIGHT_DELAY_TYPE_CLOSURE";
 
 // ---- New entity types ----
 
@@ -106,7 +131,11 @@ export interface FlightInstance {
   updatedAt: number;
 }
 
-export type PositionSource = "POSITION_SOURCE_UNSPECIFIED" | "POSITION_SOURCE_OPENSKY" | "POSITION_SOURCE_WINGBITS" | "POSITION_SOURCE_SIMULATED";
+export type PositionSource =
+  | "POSITION_SOURCE_UNSPECIFIED"
+  | "POSITION_SOURCE_OPENSKY"
+  | "POSITION_SOURCE_WINGBITS"
+  | "POSITION_SOURCE_SIMULATED";
 
 export interface PositionSample {
   icao24: string;
@@ -122,7 +151,12 @@ export interface PositionSample {
   observedAt: number;
 }
 
-export type CabinClass = "CABIN_CLASS_UNSPECIFIED" | "CABIN_CLASS_ECONOMY" | "CABIN_CLASS_PREMIUM_ECONOMY" | "CABIN_CLASS_BUSINESS" | "CABIN_CLASS_FIRST";
+export type CabinClass =
+  | "CABIN_CLASS_UNSPECIFIED"
+  | "CABIN_CLASS_ECONOMY"
+  | "CABIN_CLASS_PREMIUM_ECONOMY"
+  | "CABIN_CLASS_BUSINESS"
+  | "CABIN_CLASS_FIRST";
 
 export interface PriceQuote {
   id: string;
@@ -136,12 +170,12 @@ export interface PriceQuote {
   cabin: CabinClass;
   stops: number;
   durationMinutes: number;
-  bookingUrl: string;        // keep empty for cached/demo providers
-  checkoutRef: string;       // opaque ref for future click-only checkout flow
+  bookingUrl: string; // keep empty for cached/demo providers
+  checkoutRef: string; // opaque ref for future click-only checkout flow
   provider: string;
   isIndicative: boolean;
   observedAt: number;
-  expiresAt: number;         // ms UTC (0 if unknown)
+  expiresAt: number; // ms UTC (0 if unknown)
 }
 
 export interface AviationNewsItem {
@@ -183,7 +217,11 @@ export interface GetAirportOpsSummaryResponse {
   cacheHit: boolean;
 }
 
-export type FlightDirection = "FLIGHT_DIRECTION_UNSPECIFIED" | "FLIGHT_DIRECTION_DEPARTURE" | "FLIGHT_DIRECTION_ARRIVAL" | "FLIGHT_DIRECTION_BOTH";
+export type FlightDirection =
+  | "FLIGHT_DIRECTION_UNSPECIFIED"
+  | "FLIGHT_DIRECTION_DEPARTURE"
+  | "FLIGHT_DIRECTION_ARRIVAL"
+  | "FLIGHT_DIRECTION_BOTH";
 
 export interface ListAirportFlightsRequest {
   airport: string;
@@ -257,15 +295,15 @@ export interface SearchFlightPricesRequest {
   cabin: CabinClass;
   nonstopOnly: boolean;
   maxResults: number;
-  currency: string;          // optional, default "usd"
-  market: string;            // optional, inferred by origin
+  currency: string; // optional, default "usd"
+  market: string; // optional, inferred by origin
 }
 
 export interface SearchFlightPricesResponse {
   quotes: PriceQuote[];
   provider: string;
   isDemoMode: boolean;
-  isIndicative: boolean;     // always true for this RPC
+  isIndicative: boolean; // always true for this RPC
   updatedAt: number;
 }
 
@@ -318,7 +356,10 @@ export interface ServerContext {
 
 export interface ServerOptions {
   onError?: (error: unknown, req: Request) => Response | Promise<Response>;
-  validateRequest?: (methodName: string, body: unknown) => FieldViolation[] | undefined;
+  validateRequest?: (
+    methodName: string,
+    body: unknown,
+  ) => FieldViolation[] | undefined;
 }
 
 export interface RouteDescriptor {
@@ -328,14 +369,38 @@ export interface RouteDescriptor {
 }
 
 export interface AviationServiceHandler {
-  listAirportDelays(ctx: ServerContext, req: ListAirportDelaysRequest): Promise<ListAirportDelaysResponse>;
-  getAirportOpsSummary(ctx: ServerContext, req: GetAirportOpsSummaryRequest): Promise<GetAirportOpsSummaryResponse>;
-  listAirportFlights(ctx: ServerContext, req: ListAirportFlightsRequest): Promise<ListAirportFlightsResponse>;
-  getCarrierOps(ctx: ServerContext, req: GetCarrierOpsRequest): Promise<GetCarrierOpsResponse>;
-  getFlightStatus(ctx: ServerContext, req: GetFlightStatusRequest): Promise<GetFlightStatusResponse>;
-  trackAircraft(ctx: ServerContext, req: TrackAircraftRequest): Promise<TrackAircraftResponse>;
-  searchFlightPrices(ctx: ServerContext, req: SearchFlightPricesRequest): Promise<SearchFlightPricesResponse>;
-  listAviationNews(ctx: ServerContext, req: ListAviationNewsRequest): Promise<ListAviationNewsResponse>;
+  listAirportDelays(
+    ctx: ServerContext,
+    req: ListAirportDelaysRequest,
+  ): Promise<ListAirportDelaysResponse>;
+  getAirportOpsSummary(
+    ctx: ServerContext,
+    req: GetAirportOpsSummaryRequest,
+  ): Promise<GetAirportOpsSummaryResponse>;
+  listAirportFlights(
+    ctx: ServerContext,
+    req: ListAirportFlightsRequest,
+  ): Promise<ListAirportFlightsResponse>;
+  getCarrierOps(
+    ctx: ServerContext,
+    req: GetCarrierOpsRequest,
+  ): Promise<GetCarrierOpsResponse>;
+  getFlightStatus(
+    ctx: ServerContext,
+    req: GetFlightStatusRequest,
+  ): Promise<GetFlightStatusResponse>;
+  trackAircraft(
+    ctx: ServerContext,
+    req: TrackAircraftRequest,
+  ): Promise<TrackAircraftResponse>;
+  searchFlightPrices(
+    ctx: ServerContext,
+    req: SearchFlightPricesRequest,
+  ): Promise<SearchFlightPricesResponse>;
+  listAviationNews(
+    ctx: ServerContext,
+    req: ListAviationNewsRequest,
+  ): Promise<ListAviationNewsResponse>;
 }
 
 function makeHandler<Req, Res>(

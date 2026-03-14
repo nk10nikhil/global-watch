@@ -5,14 +5,14 @@ export function formatTime(date: Date): string {
 
   // Safe fallback if Intl is not available (though it is in all modern browsers)
   try {
-    const rtf = new Intl.RelativeTimeFormat(lang, { numeric: 'auto' });
+    const rtf = new Intl.RelativeTimeFormat(lang, { numeric: "auto" });
 
-    if (diff < 60) return rtf.format(-Math.round(diff), 'second');
-    if (diff < 3600) return rtf.format(-Math.round(diff / 60), 'minute');
-    if (diff < 86400) return rtf.format(-Math.round(diff / 3600), 'hour');
-    return rtf.format(-Math.round(diff / 86400), 'day');
+    if (diff < 60) return rtf.format(-Math.round(diff), "second");
+    if (diff < 3600) return rtf.format(-Math.round(diff / 60), "minute");
+    if (diff < 86400) return rtf.format(-Math.round(diff / 3600), "hour");
+    return rtf.format(-Math.round(diff / 86400), "day");
   } catch (e) {
-    if (diff < 60) return 'Just now';
+    if (diff < 60) return "Just now";
     if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
     if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
     return `${Math.floor(diff / 86400)}d ago`;
@@ -33,17 +33,17 @@ export function formatPrice(price: number): string {
 }
 
 export function formatChange(change: number): string {
-  const sign = change >= 0 ? '+' : '';
+  const sign = change >= 0 ? "+" : "";
   return `${sign}${change.toFixed(2)}%`;
 }
 
 export function getChangeClass(change: number): string {
-  return change >= 0 ? 'up' : 'down';
+  return change >= 0 ? "up" : "down";
 }
 
 export function getHeatmapClass(change: number): string {
   const abs = Math.abs(change);
-  const direction = change >= 0 ? 'up' : 'down';
+  const direction = change >= 0 ? "up" : "down";
 
   if (abs >= 2) return `${direction}-3`;
   if (abs >= 1) return `${direction}-2`;
@@ -52,20 +52,22 @@ export function getHeatmapClass(change: number): string {
 
 export function debounce<T extends (...args: unknown[]) => void>(
   fn: T,
-  delay: number
+  delay: number,
 ): ((...args: Parameters<T>) => void) & { cancel(): void } {
   let timeoutId: ReturnType<typeof setTimeout>;
   const debounced = (...args: Parameters<T>) => {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => fn(...args), delay);
   };
-  debounced.cancel = () => { clearTimeout(timeoutId); };
+  debounced.cancel = () => {
+    clearTimeout(timeoutId);
+  };
   return debounced;
 }
 
 export function throttle<T extends (...args: unknown[]) => void>(
   fn: T,
-  limit: number
+  limit: number,
 ): (...args: Parameters<T>) => void {
   // Time-based throttling for non-visual work where a fixed minimum interval is desired.
   let inThrottle = false;
@@ -73,12 +75,16 @@ export function throttle<T extends (...args: unknown[]) => void>(
     if (!inThrottle) {
       fn(...args);
       inThrottle = true;
-      setTimeout(() => { inThrottle = false; }, limit);
+      setTimeout(() => {
+        inThrottle = false;
+      }, limit);
     }
   };
 }
 
-export function rafSchedule<T extends (...args: unknown[]) => void>(fn: T): ((...args: Parameters<T>) => void) & { cancel(): void } {
+export function rafSchedule<T extends (...args: unknown[]) => void>(
+  fn: T,
+): ((...args: Parameters<T>) => void) & { cancel(): void } {
   // Frame-synchronized scheduling for visual updates; batches repeated calls into one render frame.
   let scheduled = false;
   let rafId = 0;
@@ -110,7 +116,11 @@ export function loadFromStorage<T>(key: string, defaultValue: T): T {
     if (stored) {
       const parsed = JSON.parse(stored) as T;
       // Merge with defaults for object types to handle new properties
-      if (typeof defaultValue === 'object' && defaultValue !== null && !Array.isArray(defaultValue)) {
+      if (
+        typeof defaultValue === "object" &&
+        defaultValue !== null &&
+        !Array.isArray(defaultValue)
+      ) {
         return { ...defaultValue, ...parsed };
       }
       return parsed;
@@ -128,13 +138,16 @@ export function isStorageQuotaExceeded(): boolean {
 }
 
 export function isQuotaError(e: unknown): boolean {
-  return e instanceof DOMException && (e.name === 'QuotaExceededError' || e.code === 22);
+  return (
+    e instanceof DOMException &&
+    (e.name === "QuotaExceededError" || e.code === 22)
+  );
 }
 
 export function markStorageQuotaExceeded(): void {
   if (!_storageQuotaExceeded) {
     _storageQuotaExceeded = true;
-    console.warn('[Storage] Quota exceeded — disabling further writes');
+    console.warn("[Storage] Quota exceeded — disabling further writes");
   }
 }
 
@@ -180,16 +193,28 @@ export function toUniqueSortedLowercase(items: string[]): string[] {
   return toUniqueSorted(items.map((item) => item.toLowerCase()));
 }
 
-export { proxyUrl, fetchWithProxy, rssProxyUrl } from './proxy';
-export { exportToJSON, exportToCSV, ExportPanel } from './export';
-export { buildMapUrl, parseMapUrlState } from './urlState';
-export type { ParsedMapUrlState } from './urlState';
-export { CircuitBreaker, createCircuitBreaker, getCircuitBreakerStatus, getCircuitBreakerCooldownInfo } from './circuit-breaker';
-export type { CircuitBreakerOptions } from './circuit-breaker';
-export * from './analysis-constants';
-export { getCSSColor, invalidateColorCache } from './theme-colors';
-export { getStoredTheme, getCurrentTheme, setTheme, applyStoredTheme, getThemePreference, setThemePreference } from './theme-manager';
-export type { Theme, ThemePreference } from './theme-manager';
-export { toFlagEmoji } from './country-flag';
+export { proxyUrl, fetchWithProxy, rssProxyUrl } from "./proxy";
+export { exportToJSON, exportToCSV, ExportPanel } from "./export";
+export { buildMapUrl, parseMapUrlState } from "./urlState";
+export type { ParsedMapUrlState } from "./urlState";
+export {
+  CircuitBreaker,
+  createCircuitBreaker,
+  getCircuitBreakerStatus,
+  getCircuitBreakerCooldownInfo,
+} from "./circuit-breaker";
+export type { CircuitBreakerOptions } from "./circuit-breaker";
+export * from "./analysis-constants";
+export { getCSSColor, invalidateColorCache } from "./theme-colors";
+export {
+  getStoredTheme,
+  getCurrentTheme,
+  setTheme,
+  applyStoredTheme,
+  getThemePreference,
+  setThemePreference,
+} from "./theme-manager";
+export type { Theme, ThemePreference } from "./theme-manager";
+export { toFlagEmoji } from "./country-flag";
 
-import { getCurrentLanguage } from '../services/i18n';
+import { getCurrentLanguage } from "../services/i18n";

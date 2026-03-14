@@ -20,13 +20,13 @@ Users can toggle 45+ data layers on and off, zoom into regions, click on any eve
 
 World Monitor runs five thematic variants from a single codebase, each tailored to a different audience:
 
-| Variant | Domain | Focus |
-|---------|--------|-------|
-| **World Monitor** | worldmonitor.app | Geopolitics, military, conflicts, infrastructure |
-| **Tech Monitor** | tech.worldmonitor.app | AI/ML, startups, cybersecurity, tech ecosystems |
-| **Finance Monitor** | finance.worldmonitor.app | Markets, central banks, Gulf FDI, commodities |
-| **Commodity Monitor** | commodity.worldmonitor.app | Mining, metals, energy, critical minerals |
-| **Happy Monitor** | happy.worldmonitor.app | Good news, conservation, positive global trends |
+| Variant               | Domain                     | Focus                                            |
+| --------------------- | -------------------------- | ------------------------------------------------ |
+| **World Monitor**     | worldmonitor.app           | Geopolitics, military, conflicts, infrastructure |
+| **Tech Monitor**      | tech.worldmonitor.app      | AI/ML, startups, cybersecurity, tech ecosystems  |
+| **Finance Monitor**   | finance.worldmonitor.app   | Markets, central banks, Gulf FDI, commodities    |
+| **Commodity Monitor** | commodity.worldmonitor.app | Mining, metals, energy, critical minerals        |
+| **Happy Monitor**     | happy.worldmonitor.app     | Good news, conservation, positive global trends  |
 
 ### AI Intelligence Layer
 
@@ -110,23 +110,23 @@ World Monitor aggregates publicly available data from dozens of sources. No prop
 
 ## Key Numbers
 
-| Metric | Value |
-|--------|-------|
-| News feeds monitored | 435+ |
-| Live video streams | 30+ |
-| Data layers on map | 45+ |
-| Countries monitored | 200+ |
-| Languages supported | 21 (including RTL) |
-| Military bases mapped | 210+ |
-| AI datacenters mapped | 111 |
-| Stock exchanges mapped | 92 |
-| Strategic ports mapped | 83 |
-| Undersea cables tracked | 55+ |
-| Pipelines mapped | 88 |
-| Intelligence satellites tracked | 80-120 |
-| Telegram OSINT channels | 26 |
-| Airports monitored | 107 |
-| Prediction market events | 100+ |
+| Metric                          | Value              |
+| ------------------------------- | ------------------ |
+| News feeds monitored            | 435+               |
+| Live video streams              | 30+                |
+| Data layers on map              | 45+                |
+| Countries monitored             | 200+               |
+| Languages supported             | 21 (including RTL) |
+| Military bases mapped           | 210+               |
+| AI datacenters mapped           | 111                |
+| Stock exchanges mapped          | 92                 |
+| Strategic ports mapped          | 83                 |
+| Undersea cables tracked         | 55+                |
+| Pipelines mapped                | 88                 |
+| Intelligence satellites tracked | 80-120             |
+| Telegram OSINT channels         | 26                 |
+| Airports monitored              | 107                |
+| Prediction market events        | 100+               |
 
 ---
 
@@ -145,17 +145,17 @@ World Monitor serves several audiences:
 
 ## How Is It Different from Existing Tools?
 
-| Feature | World Monitor | Traditional OSINT Tools | News Aggregators |
-|---------|--------------|------------------------|-----------------|
-| Real-time map visualization | Yes (3D globe + flat map) | Often static or delayed | No map |
-| AI summarization | Yes (multi-tier LLM) | Rarely | Basic or none |
-| Military tracking | ADS-B + AIS + satellites | Specialized tools only | No |
-| Prediction markets | Integrated | No | No |
-| Multiple thematic variants | 5 dashboards | Usually single-focus | No |
-| Browser-based ML | Yes (no data leaves device) | Server-dependent | No |
-| Desktop app | Yes (macOS, Windows, Linux) | Varies | Rarely |
-| Cost | Free tier available | $10K-100K+/year | Free but limited |
-| Open source | AGPL-3.0 | Almost never | Rarely |
+| Feature                     | World Monitor               | Traditional OSINT Tools | News Aggregators |
+| --------------------------- | --------------------------- | ----------------------- | ---------------- |
+| Real-time map visualization | Yes (3D globe + flat map)   | Often static or delayed | No map           |
+| AI summarization            | Yes (multi-tier LLM)        | Rarely                  | Basic or none    |
+| Military tracking           | ADS-B + AIS + satellites    | Specialized tools only  | No               |
+| Prediction markets          | Integrated                  | No                      | No               |
+| Multiple thematic variants  | 5 dashboards                | Usually single-focus    | No               |
+| Browser-based ML            | Yes (no data leaves device) | Server-dependent        | No               |
+| Desktop app                 | Yes (macOS, Windows, Linux) | Varies                  | Rarely           |
+| Cost                        | Free tier available         | $10K-100K+/year         | Free but limited |
+| Open source                 | AGPL-3.0                    | Almost never            | Rarely           |
 
 ---
 
@@ -282,4 +282,4 @@ For press inquiries, interview requests, or additional information:
 
 ---
 
-*This document was last updated March 2026. World Monitor is an independent, open-source project licensed under AGPL-3.0.*
+_This document was last updated March 2026. World Monitor is an independent, open-source project licensed under AGPL-3.0._

@@ -1,12 +1,12 @@
-import { getRpcBaseUrl } from '@/services/rpc-client';
+import { getRpcBaseUrl } from "@/services/rpc-client";
 import {
   WildfireServiceClient,
   type FireDetection,
   type FireConfidence,
   type ListFireDetectionsResponse,
-} from '@/generated/client/worldmonitor/wildfire/v1/service_client';
-import { createCircuitBreaker } from '@/utils';
-import { getHydratedData } from '@/services/bootstrap';
+} from "@/generated/client/worldmonitor/wildfire/v1/service_client";
+import { createCircuitBreaker } from "@/utils";
+import { getHydratedData } from "@/services/bootstrap";
 
 export type { FireDetection };
 
@@ -40,39 +40,60 @@ export interface MapFire {
 
 // -- Client --
 
-const client = new WildfireServiceClient(getRpcBaseUrl(), { fetch: (...args) => globalThis.fetch(...args) });
-const breaker = createCircuitBreaker<ListFireDetectionsResponse>({ name: 'Wildfires', cacheTtlMs: 30 * 60 * 1000, persistCache: true });
+const client = new WildfireServiceClient(getRpcBaseUrl(), {
+  fetch: (...args) => globalThis.fetch(...args),
+});
+const breaker = createCircuitBreaker<ListFireDetectionsResponse>({
+  name: "Wildfires",
+  cacheTtlMs: 30 * 60 * 1000,
+  persistCache: true,
+});
 
 const emptyFallback: ListFireDetectionsResponse = { fireDetections: [] };
 
 // -- Public API --
 
 export async function fetchAllFires(_days?: number): Promise<FetchResult> {
-  const hydrated = getHydratedData('wildfires') as ListFireDetectionsResponse | undefined;
-  const response = (hydrated?.fireDetections?.length ? hydrated : null) ?? await breaker.execute(async () => {
-    return client.listFireDetections({ start: 0, end: 0, pageSize: 0, cursor: '', neLat: 0, neLon: 0, swLat: 0, swLon: 0 });
-  }, emptyFallback);
+  const hydrated = getHydratedData("wildfires") as
+    | ListFireDetectionsResponse
+    | undefined;
+  const response =
+    (hydrated?.fireDetections?.length ? hydrated : null) ??
+    (await breaker.execute(async () => {
+      return client.listFireDetections({
+        start: 0,
+        end: 0,
+        pageSize: 0,
+        cursor: "",
+        neLat: 0,
+        neLon: 0,
+        swLat: 0,
+        swLon: 0,
+      });
+    }, emptyFallback));
   const detections = response.fireDetections;
 
   if (detections.length === 0) {
-    return { regions: {}, totalCount: 0, skipped: true, reason: 'no_data' };
+    return { regions: {}, totalCount: 0, skipped: true, reason: "no_data" };
   }
 
   const regions: Record<string, FireDetection[]> = {};
   for (const d of detections) {
-    const r = d.region || 'Unknown';
+    const r = d.region || "Unknown";
     (regions[r] ??= []).push(d);
   }
 
   return { regions, totalCount: detections.length };
 }
 
-export function computeRegionStats(regions: Record<string, FireDetection[]>): FireRegionStats[] {
+export function computeRegionStats(
+  regions: Record<string, FireDetection[]>,
+): FireRegionStats[] {
   const stats: FireRegionStats[] = [];
 
   for (const [region, fires] of Object.entries(regions)) {
     const highIntensity = fires.filter(
-      f => f.brightness > 360 && f.confidence === 'FIRE_CONFIDENCE_HIGH',
+      (f) => f.brightness > 360 && f.confidence === "FIRE_CONFIDENCE_HIGH",
     );
     stats.push({
       region,
@@ -86,7 +107,9 @@ export function computeRegionStats(regions: Record<string, FireDetection[]>): Fi
   return stats.sort((a, b) => b.fireCount - a.fireCount);
 }
 
-export function flattenFires(regions: Record<string, FireDetection[]>): FireDetection[] {
+export function flattenFires(
+  regions: Record<string, FireDetection[]>,
+): FireDetection[] {
   const all: FireDetection[] = [];
   for (const fires of Object.values(regions)) {
     for (const f of fires) {
@@ -97,7 +120,7 @@ export function flattenFires(regions: Record<string, FireDetection[]>): FireDete
 }
 
 export function toMapFires(fires: FireDetection[]): MapFire[] {
-  return fires.map(f => ({
+  return fires.map((f) => ({
     lat: f.location?.latitude ?? 0,
     lon: f.location?.longitude ?? 0,
     brightness: f.brightness,
@@ -111,9 +134,13 @@ export function toMapFires(fires: FireDetection[]): MapFire[] {
 
 function confidenceToNumber(c: FireConfidence): number {
   switch (c) {
-    case 'FIRE_CONFIDENCE_HIGH': return 95;
-    case 'FIRE_CONFIDENCE_NOMINAL': return 50;
-    case 'FIRE_CONFIDENCE_LOW': return 20;
-    default: return 0;
+    case "FIRE_CONFIDENCE_HIGH":
+      return 95;
+    case "FIRE_CONFIDENCE_NOMINAL":
+      return 50;
+    case "FIRE_CONFIDENCE_LOW":
+      return 20;
+    default:
+      return 0;
   }
 }

@@ -1,7 +1,7 @@
-import { Panel } from './Panel';
-import { sanitizeUrl } from '@/utils/sanitize';
-import { t } from '@/services/i18n';
-import { h, replaceChildren } from '@/utils/dom-utils';
+import { Panel } from "./Panel";
+import { sanitizeUrl } from "@/utils/sanitize";
+import { t } from "@/services/i18n";
+import { h, replaceChildren } from "@/utils/dom-utils";
 import {
   getIntelTopics,
   fetchTopicIntelligence,
@@ -10,7 +10,7 @@ import {
   type GdeltArticle,
   type IntelTopic,
   type TopicIntelligence,
-} from '@/services/gdelt-intel';
+} from "@/services/gdelt-intel";
 
 export class GdeltIntelPanel extends Panel {
   private activeTopic: IntelTopic = getIntelTopics()[0]!;
@@ -19,27 +19,31 @@ export class GdeltIntelPanel extends Panel {
 
   constructor() {
     super({
-      id: 'gdelt-intel',
-      title: t('panels.gdeltIntel'),
+      id: "gdelt-intel",
+      title: t("panels.gdeltIntel"),
       showCount: true,
       trackActivity: true,
-      infoTooltip: t('components.gdeltIntel.infoTooltip'),
+      infoTooltip: t("components.gdeltIntel.infoTooltip"),
     });
     this.createTabs();
     this.loadActiveTopic();
   }
 
   private createTabs(): void {
-    this.tabsEl = h('div', { className: 'panel-tabs' },
-      ...getIntelTopics().map(topic =>
-        h('button', {
-          className: `panel-tab ${topic.id === this.activeTopic.id ? 'active' : ''}`,
-          dataset: { topicId: topic.id },
-          title: topic.description,
-          onClick: () => this.selectTopic(topic),
-        },
-          h('span', { className: 'tab-icon' }, topic.icon),
-          h('span', { className: 'tab-label' }, topic.name),
+    this.tabsEl = h(
+      "div",
+      { className: "panel-tabs" },
+      ...getIntelTopics().map((topic) =>
+        h(
+          "button",
+          {
+            className: `panel-tab ${topic.id === this.activeTopic.id ? "active" : ""}`,
+            dataset: { topicId: topic.id },
+            title: topic.description,
+            onClick: () => this.selectTopic(topic),
+          },
+          h("span", { className: "tab-icon" }, topic.icon),
+          h("span", { className: "tab-label" }, topic.name),
         ),
       ),
     );
@@ -52,8 +56,11 @@ export class GdeltIntelPanel extends Panel {
 
     this.activeTopic = topic;
 
-    this.tabsEl?.querySelectorAll('.panel-tab').forEach(tab => {
-      tab.classList.toggle('active', (tab as HTMLElement).dataset.topicId === topic.id);
+    this.tabsEl?.querySelectorAll(".panel-tab").forEach((tab) => {
+      tab.classList.toggle(
+        "active",
+        (tab as HTMLElement).dataset.topicId === topic.id,
+      );
     });
 
     const cached = this.topicData.get(topic.id);
@@ -78,8 +85,9 @@ export class GdeltIntelPanel extends Panel {
 
         if (!data.articles?.length && attempt < 2) {
           this.showRetrying(undefined, 15);
-          await new Promise(r => setTimeout(r, 15_000));
-          if (!this.element?.isConnected || topic.id !== this.activeTopic.id) return;
+          await new Promise((r) => setTimeout(r, 15_000));
+          if (!this.element?.isConnected || topic.id !== this.activeTopic.id)
+            return;
           continue;
         }
 
@@ -88,15 +96,22 @@ export class GdeltIntelPanel extends Panel {
         return;
       } catch (error) {
         if (this.isAbortError(error)) return;
-        if (!this.element?.isConnected || topic.id !== this.activeTopic.id) return;
-        console.error(`[GdeltIntelPanel] Load error (attempt ${attempt + 1}):`, error);
+        if (!this.element?.isConnected || topic.id !== this.activeTopic.id)
+          return;
+        console.error(
+          `[GdeltIntelPanel] Load error (attempt ${attempt + 1}):`,
+          error,
+        );
         if (attempt < 2) {
           this.showRetrying(undefined, 15);
-          await new Promise(r => setTimeout(r, 15_000));
-          if (!this.element?.isConnected || topic.id !== this.activeTopic.id) return;
+          await new Promise((r) => setTimeout(r, 15_000));
+          if (!this.element?.isConnected || topic.id !== this.activeTopic.id)
+            return;
           continue;
         }
-        this.showError(t('common.failedIntelFeed'), () => this.loadActiveTopic());
+        this.showError(t("common.failedIntelFeed"), () =>
+          this.loadActiveTopic(),
+        );
       }
     }
   }
@@ -104,13 +119,19 @@ export class GdeltIntelPanel extends Panel {
   private renderArticles(articles: GdeltArticle[]): void {
     this.setErrorState(false);
     if (articles.length === 0) {
-      replaceChildren(this.content, h('div', { className: 'empty-state' }, t('components.gdelt.empty')));
+      replaceChildren(
+        this.content,
+        h("div", { className: "empty-state" }, t("components.gdelt.empty")),
+      );
       return;
     }
 
-    replaceChildren(this.content,
-      h('div', { className: 'gdelt-intel-articles' },
-        ...articles.map(article => this.buildArticle(article)),
+    replaceChildren(
+      this.content,
+      h(
+        "div",
+        { className: "gdelt-intel-articles" },
+        ...articles.map((article) => this.buildArticle(article)),
       ),
     );
   }
@@ -118,19 +139,29 @@ export class GdeltIntelPanel extends Panel {
   private buildArticle(article: GdeltArticle): HTMLElement {
     const domain = article.source || extractDomain(article.url);
     const timeAgo = formatArticleDate(article.date);
-    const toneClass = article.tone ? (article.tone < -2 ? 'tone-negative' : article.tone > 2 ? 'tone-positive' : '') : '';
+    const toneClass = article.tone
+      ? article.tone < -2
+        ? "tone-negative"
+        : article.tone > 2
+          ? "tone-positive"
+          : ""
+      : "";
 
-    return h('a', {
-      href: sanitizeUrl(article.url),
-      target: '_blank',
-      rel: 'noopener',
-      className: `gdelt-intel-article ${toneClass}`.trim(),
-    },
-      h('div', { className: 'article-header' },
-        h('span', { className: 'article-source' }, domain),
-        h('span', { className: 'article-time' }, timeAgo),
+    return h(
+      "a",
+      {
+        href: sanitizeUrl(article.url),
+        target: "_blank",
+        rel: "noopener",
+        className: `gdelt-intel-article ${toneClass}`.trim(),
+      },
+      h(
+        "div",
+        { className: "article-header" },
+        h("span", { className: "article-source" }, domain),
+        h("span", { className: "article-time" }, timeAgo),
       ),
-      h('div', { className: 'article-title' }, article.title),
+      h("div", { className: "article-title" }, article.title),
     );
   }
 

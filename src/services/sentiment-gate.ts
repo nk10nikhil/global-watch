@@ -1,5 +1,5 @@
-import { mlWorker } from './ml-worker';
-import type { NewsItem } from '@/types';
+import { mlWorker } from "./ml-worker";
+import type { NewsItem } from "@/types";
 
 const DEFAULT_THRESHOLD = 0.85;
 const BATCH_SIZE = 20; // ML_THRESHOLDS.maxTextsPerBatch from ml-config.ts
@@ -19,20 +19,22 @@ const BATCH_SIZE = 20; // ML_THRESHOLDS.maxTextsPerBatch from ml-config.ts
  */
 export async function filterBySentiment(
   items: NewsItem[],
-  threshold = DEFAULT_THRESHOLD
+  threshold = DEFAULT_THRESHOLD,
 ): Promise<NewsItem[]> {
   if (items.length === 0) return [];
 
   // Check localStorage override for threshold tuning during development
   try {
-    const override = localStorage.getItem('positive-threshold');
+    const override = localStorage.getItem("positive-threshold");
     if (override) {
       const parsed = parseFloat(override);
       if (!isNaN(parsed) && parsed >= 0 && parsed <= 1) {
         threshold = parsed;
       }
     }
-  } catch { /* ignore localStorage errors */ }
+  } catch {
+    /* ignore localStorage errors */
+  }
 
   // Graceful degradation: if ML not available, pass all items through
   if (!mlWorker.isAvailable) {
@@ -40,7 +42,7 @@ export async function filterBySentiment(
   }
 
   try {
-    const titles = items.map(item => item.title);
+    const titles = items.map((item) => item.title);
     const allResults: Array<{ label: string; score: number }> = [];
 
     // Batch to avoid overwhelming the worker
@@ -52,12 +54,15 @@ export async function filterBySentiment(
 
     const passed = items.filter((_, idx) => {
       const result = allResults[idx];
-      return result && result.label === 'positive' && result.score >= threshold;
+      return result && result.label === "positive" && result.score >= threshold;
     });
 
     return passed;
   } catch (err) {
-    console.warn('[SentimentGate] Sentiment classification failed, passing all items through:', err);
+    console.warn(
+      "[SentimentGate] Sentiment classification failed, passing all items through:",
+      err,
+    );
     return items;
   }
 }

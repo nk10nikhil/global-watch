@@ -1,4 +1,4 @@
-import { getHydratedData } from '@/services/bootstrap';
+import { getHydratedData } from "@/services/bootstrap";
 
 export interface ServerInsightStory {
   primaryTitle: string;
@@ -15,7 +15,7 @@ export interface ServerInsightStory {
 export interface ServerInsights {
   worldBrief: string;
   briefProvider: string;
-  status: 'ok' | 'degraded';
+  status: "ok" | "degraded";
   topStories: ServerInsightStory[];
   generatedAt: string;
   clusterCount: number;
@@ -37,11 +37,12 @@ export function getServerInsights(): ServerInsights | null {
   }
   cached = null;
 
-  const raw = getHydratedData('insights');
-  if (!raw || typeof raw !== 'object') return null;
+  const raw = getHydratedData("insights");
+  if (!raw || typeof raw !== "object") return null;
   const data = raw as ServerInsights;
-  if (!Array.isArray(data.topStories) || data.topStories.length === 0) return null;
-  if (typeof data.generatedAt !== 'string') return null;
+  if (!Array.isArray(data.topStories) || data.topStories.length === 0)
+    return null;
+  if (typeof data.generatedAt !== "string") return null;
   if (!isFresh(data)) return null;
 
   cached = data;

@@ -1,21 +1,26 @@
-import type { AppContext } from '@/app/app-context';
-import type { DomainAdapter, SignalEvidence } from '../types';
+import type { AppContext } from "@/app/app-context";
+import type { DomainAdapter, SignalEvidence } from "../types";
 
 // v1 weights: only military_flight, ais_gap, military_vessel collected.
 // gps_jamming and base_activity deferred — renormalized to sum to 1.0.
 const WEIGHTS: Record<string, number> = {
-  military_flight: 0.40,
-  ais_gap: 0.30,
-  military_vessel: 0.30,
+  military_flight: 0.4,
+  ais_gap: 0.3,
+  military_vessel: 0.3,
 };
 
-const STRIKE_TYPES = new Set(['fighter', 'bomber', 'attack']);
-const SUPPORT_TYPES = new Set(['tanker', 'awacs', 'surveillance', 'electronic_warfare']);
+const STRIKE_TYPES = new Set(["fighter", "bomber", "attack"]);
+const SUPPORT_TYPES = new Set([
+  "tanker",
+  "awacs",
+  "surveillance",
+  "electronic_warfare",
+]);
 
 export const militaryAdapter: DomainAdapter = {
-  domain: 'military',
-  label: 'Force Posture',
-  clusterMode: 'geographic',
+  domain: "military",
+  label: "Force Posture",
+  clusterMode: "geographic",
   spatialRadius: 500,
   timeWindow: 24,
   threshold: 20,
@@ -38,8 +43,8 @@ export const militaryAdapter: DomainAdapter = {
       const severity = isStrike ? 80 : isSupport ? 60 : 55;
 
       signals.push({
-        type: 'military_flight',
-        source: 'signal-aggregator',
+        type: "military_flight",
+        source: "signal-aggregator",
         severity,
         lat: f.lat,
         lon: f.lon,
@@ -58,30 +63,35 @@ export const militaryAdapter: DomainAdapter = {
 
       // Dark vessels (AIS gap) are a separate, high-severity signal
       if (v.isDark || (v.aisGapMinutes != null && v.aisGapMinutes > 60)) {
-        const gapSeverity = v.aisGapMinutes != null
-          ? Math.min(100, 50 + v.aisGapMinutes / 10)
-          : 75;
+        const gapSeverity =
+          v.aisGapMinutes != null
+            ? Math.min(100, 50 + v.aisGapMinutes / 10)
+            : 75;
         signals.push({
-          type: 'ais_gap',
-          source: 'signal-aggregator',
+          type: "ais_gap",
+          source: "signal-aggregator",
           severity: gapSeverity,
           lat: v.lat,
           lon: v.lon,
           country: v.operatorCountry,
           timestamp: v.lastAisUpdate?.getTime?.() ?? now,
-          label: `AIS dark: ${v.name} (${v.aisGapMinutes ?? '?'}min gap)`,
+          label: `AIS dark: ${v.name} (${v.aisGapMinutes ?? "?"}min gap)`,
           rawData: v,
         });
       }
 
-      const severity = v.vesselType === 'carrier' ? 90
-        : v.vesselType === 'destroyer' ? 70
-        : v.vesselType === 'submarine' ? 80
-        : 50;
+      const severity =
+        v.vesselType === "carrier"
+          ? 90
+          : v.vesselType === "destroyer"
+            ? 70
+            : v.vesselType === "submarine"
+              ? 80
+              : 50;
 
       signals.push({
-        type: 'military_vessel',
-        source: 'signal-aggregator',
+        type: "military_vessel",
+        source: "signal-aggregator",
         severity,
         lat: v.lat,
         lon: v.lon,
@@ -96,24 +106,29 @@ export const militaryAdapter: DomainAdapter = {
   },
 
   generateTitle(cluster: SignalEvidence[]): string {
-    const types = new Set(cluster.map(s => s.type));
-    const countries = [...new Set(cluster.map(s => s.country).filter(Boolean))];
-    const countryLabel = countries.slice(0, 2).join('/') || 'Unknown region';
+    const types = new Set(cluster.map((s) => s.type));
+    const countries = [
+      ...new Set(cluster.map((s) => s.country).filter(Boolean)),
+    ];
+    const countryLabel = countries.slice(0, 2).join("/") || "Unknown region";
 
-    const hasFlights = types.has('military_flight');
-    const hasVessels = types.has('military_vessel');
+    const hasFlights = types.has("military_flight");
+    const hasVessels = types.has("military_vessel");
 
     const flightTypes = new Set(
       cluster
-        .filter(s => s.type === 'military_flight')
-        .map(s => (s.rawData as { aircraftType?: string })?.aircraftType)
+        .filter((s) => s.type === "military_flight")
+        .map((s) => (s.rawData as { aircraftType?: string })?.aircraftType)
         .filter(Boolean),
     );
-    const hasStrikePackage = [...STRIKE_TYPES].some(t => flightTypes.has(t)) &&
-                             [...SUPPORT_TYPES].some(t => flightTypes.has(t));
+    const hasStrikePackage =
+      [...STRIKE_TYPES].some((t) => flightTypes.has(t)) &&
+      [...SUPPORT_TYPES].some((t) => flightTypes.has(t));
 
-    if (hasStrikePackage) return `Strike packaging detected \u2014 ${countryLabel}`;
-    if (hasFlights && hasVessels) return `Combined air-naval activity \u2014 ${countryLabel}`;
+    if (hasStrikePackage)
+      return `Strike packaging detected \u2014 ${countryLabel}`;
+    if (hasFlights && hasVessels)
+      return `Combined air-naval activity \u2014 ${countryLabel}`;
     if (hasFlights) return `Military flight cluster \u2014 ${countryLabel}`;
     if (hasVessels) return `Naval vessel concentration \u2014 ${countryLabel}`;
     return `Military activity convergence \u2014 ${countryLabel}`;

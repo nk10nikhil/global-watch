@@ -6,13 +6,17 @@ import type {
   USNIStrikeGroup,
   BattleForceSummary,
   USNIFleetReport,
-} from '../../../../src/generated/server/worldmonitor/military/v1/service_server';
+} from "../../../../src/generated/server/worldmonitor/military/v1/service_server";
 
-import { getCachedJson, setCachedJson, cachedFetchJsonWithMeta } from '../../../_shared/redis';
-import { CHROME_UA } from '../../../_shared/constants';
+import {
+  getCachedJson,
+  setCachedJson,
+  cachedFetchJsonWithMeta,
+} from "../../../_shared/redis";
+import { CHROME_UA } from "../../../_shared/constants";
 
-const USNI_CACHE_KEY = 'usni-fleet:sebuf:v1';
-const USNI_STALE_CACHE_KEY = 'usni-fleet:sebuf:stale:v1';
+const USNI_CACHE_KEY = "usni-fleet:sebuf:v1";
+const USNI_STALE_CACHE_KEY = "usni-fleet:sebuf:stale:v1";
 const USNI_CACHE_TTL = 21600; // 6 hours
 const USNI_STALE_TTL = 604800; // 7 days
 
@@ -21,106 +25,145 @@ const USNI_STALE_TTL = 604800; // 7 days
 // ========================================================================
 
 const HULL_TYPE_MAP: Record<string, string> = {
-  CVN: 'carrier', CV: 'carrier',
-  DDG: 'destroyer', CG: 'destroyer',
-  LHD: 'amphibious', LHA: 'amphibious', LPD: 'amphibious', LSD: 'amphibious', LCC: 'amphibious',
-  SSN: 'submarine', SSBN: 'submarine', SSGN: 'submarine',
-  FFG: 'frigate', LCS: 'frigate',
-  MCM: 'patrol', PC: 'patrol',
-  AS: 'auxiliary', ESB: 'auxiliary', ESD: 'auxiliary',
-  'T-AO': 'auxiliary', 'T-AKE': 'auxiliary', 'T-AOE': 'auxiliary',
-  'T-ARS': 'auxiliary', 'T-ESB': 'auxiliary', 'T-EPF': 'auxiliary',
-  'T-AGOS': 'research', 'T-AGS': 'research', 'T-AGM': 'research', AGOS: 'research',
+  CVN: "carrier",
+  CV: "carrier",
+  DDG: "destroyer",
+  CG: "destroyer",
+  LHD: "amphibious",
+  LHA: "amphibious",
+  LPD: "amphibious",
+  LSD: "amphibious",
+  LCC: "amphibious",
+  SSN: "submarine",
+  SSBN: "submarine",
+  SSGN: "submarine",
+  FFG: "frigate",
+  LCS: "frigate",
+  MCM: "patrol",
+  PC: "patrol",
+  AS: "auxiliary",
+  ESB: "auxiliary",
+  ESD: "auxiliary",
+  "T-AO": "auxiliary",
+  "T-AKE": "auxiliary",
+  "T-AOE": "auxiliary",
+  "T-ARS": "auxiliary",
+  "T-ESB": "auxiliary",
+  "T-EPF": "auxiliary",
+  "T-AGOS": "research",
+  "T-AGS": "research",
+  "T-AGM": "research",
+  AGOS: "research",
 };
 
 function hullToVesselType(hull: string): string {
-  if (!hull) return 'unknown';
+  if (!hull) return "unknown";
   for (const [prefix, type] of Object.entries(HULL_TYPE_MAP)) {
     if (hull.startsWith(prefix)) return type;
   }
-  return 'unknown';
+  return "unknown";
 }
 
 function detectDeploymentStatus(text: string): string {
-  if (!text) return 'unknown';
+  if (!text) return "unknown";
   const lower = text.toLowerCase();
-  if (lower.includes('deployed') || lower.includes('deployment')) return 'deployed';
-  if (lower.includes('underway') || lower.includes('transiting') || lower.includes('transit')) return 'underway';
-  if (lower.includes('homeport') || lower.includes('in port') || lower.includes('pierside') || lower.includes('returned')) return 'in-port';
-  return 'unknown';
+  if (lower.includes("deployed") || lower.includes("deployment"))
+    return "deployed";
+  if (
+    lower.includes("underway") ||
+    lower.includes("transiting") ||
+    lower.includes("transit")
+  )
+    return "underway";
+  if (
+    lower.includes("homeport") ||
+    lower.includes("in port") ||
+    lower.includes("pierside") ||
+    lower.includes("returned")
+  )
+    return "in-port";
+  return "unknown";
 }
 
 function extractHomePort(text: string): string | undefined {
-  const match = text.match(/homeported (?:at|in) ([^.,]+)/i) || text.match(/home[ -]?ported (?:at|in) ([^.,]+)/i);
+  const match =
+    text.match(/homeported (?:at|in) ([^.,]+)/i) ||
+    text.match(/home[ -]?ported (?:at|in) ([^.,]+)/i);
   return match ? match[1]!.trim() : undefined;
 }
 
 function stripHtml(html: string): string {
   return html
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
     .replace(/&#8217;/g, "'")
     .replace(/&#8220;/g, '"')
     .replace(/&#8221;/g, '"')
-    .replace(/&#8211;/g, '\u2013')
-    .replace(/\s+/g, ' ')
+    .replace(/&#8211;/g, "\u2013")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
 const REGION_COORDS: Record<string, { lat: number; lon: number }> = {
-  'Philippine Sea': { lat: 18.0, lon: 130.0 },
-  'South China Sea': { lat: 14.0, lon: 115.0 },
-  'East China Sea': { lat: 28.0, lon: 125.0 },
-  'Sea of Japan': { lat: 40.0, lon: 135.0 },
-  'Arabian Sea': { lat: 18.0, lon: 63.0 },
-  'Red Sea': { lat: 20.0, lon: 38.0 },
-  'Mediterranean Sea': { lat: 35.0, lon: 18.0 },
-  'Eastern Mediterranean': { lat: 34.5, lon: 33.0 },
-  'Western Mediterranean': { lat: 37.0, lon: 3.0 },
-  'Persian Gulf': { lat: 26.5, lon: 52.0 },
-  'Gulf of Oman': { lat: 24.5, lon: 58.5 },
-  'Gulf of Aden': { lat: 12.0, lon: 47.0 },
-  'Caribbean Sea': { lat: 15.0, lon: -73.0 },
-  'North Atlantic': { lat: 45.0, lon: -30.0 },
-  'Atlantic Ocean': { lat: 30.0, lon: -40.0 },
-  'Western Atlantic': { lat: 30.0, lon: -60.0 },
-  'Pacific Ocean': { lat: 20.0, lon: -150.0 },
-  'Eastern Pacific': { lat: 18.0, lon: -125.0 },
-  'Western Pacific': { lat: 20.0, lon: 140.0 },
-  'Indian Ocean': { lat: -5.0, lon: 75.0 },
+  "Philippine Sea": { lat: 18.0, lon: 130.0 },
+  "South China Sea": { lat: 14.0, lon: 115.0 },
+  "East China Sea": { lat: 28.0, lon: 125.0 },
+  "Sea of Japan": { lat: 40.0, lon: 135.0 },
+  "Arabian Sea": { lat: 18.0, lon: 63.0 },
+  "Red Sea": { lat: 20.0, lon: 38.0 },
+  "Mediterranean Sea": { lat: 35.0, lon: 18.0 },
+  "Eastern Mediterranean": { lat: 34.5, lon: 33.0 },
+  "Western Mediterranean": { lat: 37.0, lon: 3.0 },
+  "Persian Gulf": { lat: 26.5, lon: 52.0 },
+  "Gulf of Oman": { lat: 24.5, lon: 58.5 },
+  "Gulf of Aden": { lat: 12.0, lon: 47.0 },
+  "Caribbean Sea": { lat: 15.0, lon: -73.0 },
+  "North Atlantic": { lat: 45.0, lon: -30.0 },
+  "Atlantic Ocean": { lat: 30.0, lon: -40.0 },
+  "Western Atlantic": { lat: 30.0, lon: -60.0 },
+  "Pacific Ocean": { lat: 20.0, lon: -150.0 },
+  "Eastern Pacific": { lat: 18.0, lon: -125.0 },
+  "Western Pacific": { lat: 20.0, lon: 140.0 },
+  "Indian Ocean": { lat: -5.0, lon: 75.0 },
   Antarctic: { lat: -70.0, lon: 20.0 },
-  'Baltic Sea': { lat: 58.0, lon: 20.0 },
-  'Black Sea': { lat: 43.5, lon: 34.0 },
-  'Bay of Bengal': { lat: 14.0, lon: 87.0 },
+  "Baltic Sea": { lat: 58.0, lon: 20.0 },
+  "Black Sea": { lat: 43.5, lon: 34.0 },
+  "Bay of Bengal": { lat: 14.0, lon: 87.0 },
   Yokosuka: { lat: 35.29, lon: 139.67 },
   Japan: { lat: 35.29, lon: 139.67 },
   Sasebo: { lat: 33.16, lon: 129.72 },
   Guam: { lat: 13.45, lon: 144.79 },
-  'Pearl Harbor': { lat: 21.35, lon: -157.95 },
-  'San Diego': { lat: 32.68, lon: -117.15 },
-  Norfolk: { lat: 36.95, lon: -76.30 },
-  Mayport: { lat: 30.39, lon: -81.40 },
+  "Pearl Harbor": { lat: 21.35, lon: -157.95 },
+  "San Diego": { lat: 32.68, lon: -117.15 },
+  Norfolk: { lat: 36.95, lon: -76.3 },
+  Mayport: { lat: 30.39, lon: -81.4 },
   Bahrain: { lat: 26.23, lon: 50.55 },
   Rota: { lat: 36.63, lon: -6.35 },
-  'Diego Garcia': { lat: -7.32, lon: 72.42 },
+  "Diego Garcia": { lat: -7.32, lon: 72.42 },
   Djibouti: { lat: 11.55, lon: 43.15 },
   Singapore: { lat: 1.35, lon: 103.82 },
-  'Souda Bay': { lat: 35.49, lon: 24.08 },
+  "Souda Bay": { lat: 35.49, lon: 24.08 },
   Naples: { lat: 40.84, lon: 14.25 },
 };
 
-function getRegionCoords(regionText: string): { lat: number; lon: number } | null {
+function getRegionCoords(
+  regionText: string,
+): { lat: number; lon: number } | null {
   const normalized = regionText
-    .replace(/^(In the|In|The)\s+/i, '')
-    .replace(/\s+/g, ' ')
+    .replace(/^(In the|In|The)\s+/i, "")
+    .replace(/\s+/g, " ")
     .trim();
   if (REGION_COORDS[normalized]) return REGION_COORDS[normalized];
   const lower = normalized.toLowerCase();
   for (const [key, coords] of Object.entries(REGION_COORDS)) {
-    if (key.toLowerCase() === lower || lower.includes(key.toLowerCase()) || key.toLowerCase().includes(lower)) {
+    if (
+      key.toLowerCase() === lower ||
+      lower.includes(key.toLowerCase()) ||
+      key.toLowerCase().includes(lower)
+    ) {
       return coords;
     }
   }
@@ -130,33 +173,45 @@ function getRegionCoords(regionText: string): { lat: number; lon: number } | nul
 function parseLeadingInteger(text: string): number | undefined {
   const match = text.match(/\d{1,3}(?:,\d{3})*/);
   if (!match) return undefined;
-  return parseInt(match[0].replace(/,/g, ''), 10);
+  return parseInt(match[0].replace(/,/g, ""), 10);
 }
 
-function extractBattleForceSummary(tableHtml: string): BattleForceSummary | undefined {
+function extractBattleForceSummary(
+  tableHtml: string,
+): BattleForceSummary | undefined {
   const rows = Array.from(tableHtml.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi));
   if (rows.length < 2) return undefined;
 
-  const headerCells = Array.from(rows[0]![1]!.matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi))
-    .map((m) => stripHtml(m[1]!).toLowerCase());
-  const valueCells = Array.from(rows[1]![1]!.matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi))
-    .map((m) => parseLeadingInteger(stripHtml(m[1]!)));
+  const headerCells = Array.from(
+    rows[0]![1]!.matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi),
+  ).map((m) => stripHtml(m[1]!).toLowerCase());
+  const valueCells = Array.from(
+    rows[1]![1]!.matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi),
+  ).map((m) => parseLeadingInteger(stripHtml(m[1]!)));
 
-  const summary: BattleForceSummary = { totalShips: 0, deployed: 0, underway: 0 };
+  const summary: BattleForceSummary = {
+    totalShips: 0,
+    deployed: 0,
+    underway: 0,
+  };
   let matched = false;
 
   for (let idx = 0; idx < headerCells.length; idx++) {
-    const label = headerCells[idx] || '';
+    const label = headerCells[idx] || "";
     const value = valueCells[idx];
     if (!Number.isFinite(value)) continue;
 
-    if (label.includes('battle force') || label.includes('total') || label.includes('ships')) {
+    if (
+      label.includes("battle force") ||
+      label.includes("total") ||
+      label.includes("ships")
+    ) {
       summary.totalShips = value!;
       matched = true;
-    } else if (label.includes('deployed')) {
+    } else if (label.includes("deployed")) {
       summary.deployed = value!;
       matched = true;
-    } else if (label.includes('underway')) {
+    } else if (label.includes("underway")) {
       summary.underway = value!;
       matched = true;
     }
@@ -165,18 +220,29 @@ function extractBattleForceSummary(tableHtml: string): BattleForceSummary | unde
   if (matched) return summary;
 
   const tableText = stripHtml(tableHtml);
-  const totalMatch = tableText.match(/(?:battle[- ]?force|ships?|total)[^0-9]{0,40}(\d{1,3}(?:,\d{3})*)/i)
-    || tableText.match(/(\d{1,3}(?:,\d{3})*)\s*(?:battle[- ]?force|ships?|total)/i);
-  const deployedMatch = tableText.match(/deployed[^0-9]{0,40}(\d{1,3}(?:,\d{3})*)/i)
-    || tableText.match(/(\d{1,3}(?:,\d{3})*)\s*deployed/i);
-  const underwayMatch = tableText.match(/underway[^0-9]{0,40}(\d{1,3}(?:,\d{3})*)/i)
-    || tableText.match(/(\d{1,3}(?:,\d{3})*)\s*underway/i);
+  const totalMatch =
+    tableText.match(
+      /(?:battle[- ]?force|ships?|total)[^0-9]{0,40}(\d{1,3}(?:,\d{3})*)/i,
+    ) ||
+    tableText.match(
+      /(\d{1,3}(?:,\d{3})*)\s*(?:battle[- ]?force|ships?|total)/i,
+    );
+  const deployedMatch =
+    tableText.match(/deployed[^0-9]{0,40}(\d{1,3}(?:,\d{3})*)/i) ||
+    tableText.match(/(\d{1,3}(?:,\d{3})*)\s*deployed/i);
+  const underwayMatch =
+    tableText.match(/underway[^0-9]{0,40}(\d{1,3}(?:,\d{3})*)/i) ||
+    tableText.match(/(\d{1,3}(?:,\d{3})*)\s*underway/i);
 
   if (!totalMatch && !deployedMatch && !underwayMatch) return undefined;
   return {
-    totalShips: totalMatch ? parseInt(totalMatch[1]!.replace(/,/g, ''), 10) : 0,
-    deployed: deployedMatch ? parseInt(deployedMatch[1]!.replace(/,/g, ''), 10) : 0,
-    underway: underwayMatch ? parseInt(underwayMatch[1]!.replace(/,/g, ''), 10) : 0,
+    totalShips: totalMatch ? parseInt(totalMatch[1]!.replace(/,/g, ""), 10) : 0,
+    deployed: deployedMatch
+      ? parseInt(deployedMatch[1]!.replace(/,/g, ""), 10)
+      : 0,
+    underway: underwayMatch
+      ? parseInt(underwayMatch[1]!.replace(/,/g, ""), 10)
+      : 0,
   };
 }
 
@@ -210,14 +276,14 @@ function parseUSNIArticle(
 
   for (let i = 1; i < h2Parts.length; i++) {
     const part = h2Parts[i]!;
-    const h2EndIdx = part.indexOf('</h2>');
+    const h2EndIdx = part.indexOf("</h2>");
     if (h2EndIdx === -1) continue;
     const regionRaw = stripHtml(part.substring(0, h2EndIdx));
     const regionContent = part.substring(h2EndIdx + 5);
 
     const regionName = regionRaw
-      .replace(/^(In the|In|The)\s+/i, '')
-      .replace(/\s+/g, ' ')
+      .replace(/^(In the|In|The)\s+/i, "")
+      .replace(/\s+/g, " ")
       .trim();
 
     if (!regionName) continue;
@@ -238,7 +304,7 @@ function parseUSNIArticle(
       const section = h3Parts[j]!;
 
       if (j > 0) {
-        const h3EndIdx = section.indexOf('</h3>');
+        const h3EndIdx = section.indexOf("</h3>");
         if (h3EndIdx !== -1) {
           const sgName = stripHtml(section.substring(0, h3EndIdx));
           if (sgName) {
@@ -256,24 +322,36 @@ function parseUSNIArticle(
 
       // Broadened regex: matches any inline HTML tag (or no tag) wrapping the ship name.
       // Handles <em>, <i>, <strong>, <b>, <span>, or plain text.
-      const shipRegex = /(USS|USNS)\s+(?:<[^>]+>)?([^<(]+?)(?:<\/[^>]+>)?\s*\(([^)]+)\)/gi;
+      const shipRegex =
+        /(USS|USNS)\s+(?:<[^>]+>)?([^<(]+?)(?:<\/[^>]+>)?\s*\(([^)]+)\)/gi;
       let match: RegExpExecArray | null;
       const sectionText = stripHtml(section);
       const deploymentStatus = detectDeploymentStatus(sectionText);
       const homePort = extractHomePort(sectionText);
-      const activityDesc = sectionText.length > 10 ? sectionText.substring(0, 200).trim() : '';
+      const activityDesc =
+        sectionText.length > 10 ? sectionText.substring(0, 200).trim() : "";
       let sectionShipCount = 0;
 
       const upsertVessel = (entry: USNIVessel) => {
         const key = `${entry.region}|${entry.hullNumber.toUpperCase()}`;
         const existing = vesselByRegionHull.get(key);
         if (existing) {
-          if (!existing.strikeGroup && entry.strikeGroup) existing.strikeGroup = entry.strikeGroup;
-          if (existing.deploymentStatus === 'unknown' && entry.deploymentStatus !== 'unknown') {
+          if (!existing.strikeGroup && entry.strikeGroup)
+            existing.strikeGroup = entry.strikeGroup;
+          if (
+            existing.deploymentStatus === "unknown" &&
+            entry.deploymentStatus !== "unknown"
+          ) {
             existing.deploymentStatus = entry.deploymentStatus;
           }
-          if (!existing.homePort && entry.homePort) existing.homePort = entry.homePort;
-          if ((!existing.activityDescription || existing.activityDescription.length < (entry.activityDescription || '').length) && entry.activityDescription) {
+          if (!existing.homePort && entry.homePort)
+            existing.homePort = entry.homePort;
+          if (
+            (!existing.activityDescription ||
+              existing.activityDescription.length <
+                (entry.activityDescription || "").length) &&
+            entry.activityDescription
+          ) {
             existing.activityDescription = entry.activityDescription;
           }
           return;
@@ -283,17 +361,23 @@ function parseUSNIArticle(
       };
 
       while ((match = shipRegex.exec(section)) !== null) {
-        const prefix = match[1]!.toUpperCase() as 'USS' | 'USNS';
+        const prefix = match[1]!.toUpperCase() as "USS" | "USNS";
         const shipName = match[2]!.trim();
         const hullNumber = match[3]!.trim();
         const vesselType = hullToVesselType(hullNumber);
         sectionShipCount++;
 
-        if (prefix === 'USS' && vesselType === 'carrier' && currentStrikeGroup) {
+        if (
+          prefix === "USS" &&
+          vesselType === "carrier" &&
+          currentStrikeGroup
+        ) {
           currentStrikeGroup.carrier = `USS ${shipName} (${hullNumber})`;
         }
         if (currentStrikeGroup) {
-          currentStrikeGroup.escorts.push(`${prefix} ${shipName} (${hullNumber})`);
+          currentStrikeGroup.escorts.push(
+            `${prefix} ${shipName} (${hullNumber})`,
+          );
         }
 
         upsertVessel({
@@ -304,8 +388,8 @@ function parseUSNIArticle(
           regionLat,
           regionLon,
           deploymentStatus,
-          homePort: homePort || '',
-          strikeGroup: currentStrikeGroup?.name || '',
+          homePort: homePort || "",
+          strikeGroup: currentStrikeGroup?.name || "",
           activityDescription: activityDesc,
           articleUrl,
           articleDate,
@@ -314,28 +398,39 @@ function parseUSNIArticle(
 
       // Warn when a strike group section contains text but yields zero ships —
       // likely means the HTML format changed and the regex no longer matches.
-      if (currentStrikeGroup && sectionShipCount === 0 && sectionText.length > 20) {
+      if (
+        currentStrikeGroup &&
+        sectionShipCount === 0 &&
+        sectionText.length > 20
+      ) {
         console.warn(
           `[USNI Fleet] Strike group section "${currentStrikeGroup.name}" in region "${regionName}" yielded 0 ships — HTML format may have changed`,
         );
-        warnings.push(`Strike group "${currentStrikeGroup.name}" yielded 0 ships`);
+        warnings.push(
+          `Strike group "${currentStrikeGroup.name}" yielded 0 ships`,
+        );
       }
     }
   }
 
   for (const sg of strikeGroups) {
-    const wingMatch = html.match(new RegExp(sg.name + '[\\s\\S]{0,500}Carrier Air Wing\\s*(\\w+)', 'i'));
+    const wingMatch = html.match(
+      new RegExp(sg.name + "[\\s\\S]{0,500}Carrier Air Wing\\s*(\\w+)", "i"),
+    );
     if (wingMatch) sg.airWing = `Carrier Air Wing ${wingMatch[1]}`;
-    const desronMatch = html.match(new RegExp(sg.name + '[\\s\\S]{0,500}Destroyer Squadron\\s*(\\w+)', 'i'));
-    if (desronMatch) sg.destroyerSquadron = `Destroyer Squadron ${desronMatch[1]}`;
+    const desronMatch = html.match(
+      new RegExp(sg.name + "[\\s\\S]{0,500}Destroyer Squadron\\s*(\\w+)", "i"),
+    );
+    if (desronMatch)
+      sg.destroyerSquadron = `Destroyer Squadron ${desronMatch[1]}`;
     sg.escorts = Array.from(new Set(sg.escorts));
   }
 
   const protoStrikeGroups: USNIStrikeGroup[] = strikeGroups.map((sg) => ({
     name: sg.name,
-    carrier: sg.carrier || '',
-    airWing: sg.airWing || '',
-    destroyerSquadron: sg.destroyerSquadron || '',
+    carrier: sg.carrier || "",
+    airWing: sg.airWing || "",
+    destroyerSquadron: sg.destroyerSquadron || "",
     escorts: sg.escorts,
   }));
 
@@ -363,9 +458,9 @@ async function fetchUSNIReport(): Promise<USNIFleetReport | null> {
   let wpData: Array<Record<string, unknown>>;
   try {
     const response = await fetch(
-      'https://news.usni.org/wp-json/wp/v2/posts?categories=4137&per_page=1',
+      "https://news.usni.org/wp-json/wp/v2/posts?categories=4137&per_page=1",
       {
-        headers: { Accept: 'application/json', 'User-Agent': CHROME_UA },
+        headers: { Accept: "application/json", "User-Agent": CHROME_UA },
         signal: controller.signal,
       },
     );
@@ -378,18 +473,28 @@ async function fetchUSNIReport(): Promise<USNIFleetReport | null> {
   if (!wpData || !wpData.length) return null;
 
   const post = wpData[0]!;
-  const articleUrl = (post.link as string) || `https://news.usni.org/?p=${post.id}`;
+  const articleUrl =
+    (post.link as string) || `https://news.usni.org/?p=${post.id}`;
   const articleDate = (post.date as string) || new Date().toISOString();
-  const articleTitle = stripHtml(((post.title as Record<string, string>)?.rendered) || 'USNI Fleet Tracker');
-  const htmlContent = ((post.content as Record<string, string>)?.rendered) || '';
+  const articleTitle = stripHtml(
+    (post.title as Record<string, string>)?.rendered || "USNI Fleet Tracker",
+  );
+  const htmlContent = (post.content as Record<string, string>)?.rendered || "";
 
   if (!htmlContent) return null;
 
-  const report = parseUSNIArticle(htmlContent, articleUrl, articleDate, articleTitle);
-  console.warn(`[USNI Fleet] Parsed: ${report.vessels.length} vessels, ${report.strikeGroups.length} CSGs, ${report.regions.length} regions`);
+  const report = parseUSNIArticle(
+    htmlContent,
+    articleUrl,
+    articleDate,
+    articleTitle,
+  );
+  console.warn(
+    `[USNI Fleet] Parsed: ${report.vessels.length} vessels, ${report.strikeGroups.length} CSGs, ${report.regions.length} regions`,
+  );
 
   if (report.parsingWarnings.length > 0) {
-    console.warn('[USNI Fleet] Warnings:', report.parsingWarnings.join('; '));
+    console.warn("[USNI Fleet] Warnings:", report.parsingWarnings.join("; "));
   }
 
   // Also write to stale backup cache
@@ -406,28 +511,49 @@ export async function getUSNIFleetReport(
     if (req.forceRefresh) {
       // Bypass cachedFetchJson — fetch fresh and write both caches
       const report = await fetchUSNIReport();
-      if (!report) return { report: undefined, cached: false, stale: false, error: 'No USNI fleet tracker articles found' };
+      if (!report)
+        return {
+          report: undefined,
+          cached: false,
+          stale: false,
+          error: "No USNI fleet tracker articles found",
+        };
       await setCachedJson(USNI_CACHE_KEY, report, USNI_CACHE_TTL);
-      return { report, cached: false, stale: false, error: '' };
+      return { report, cached: false, stale: false, error: "" };
     }
 
     // Single atomic call — source tracking inside cachedFetchJsonWithMeta eliminates TOCTOU race
-    const { data: report, source } = await cachedFetchJsonWithMeta<USNIFleetReport>(
-      USNI_CACHE_KEY, USNI_CACHE_TTL, fetchUSNIReport,
-    );
+    const { data: report, source } =
+      await cachedFetchJsonWithMeta<USNIFleetReport>(
+        USNI_CACHE_KEY,
+        USNI_CACHE_TTL,
+        fetchUSNIReport,
+      );
     if (report) {
-      return { report, cached: source === 'cache', stale: false, error: '' };
+      return { report, cached: source === "cache", stale: false, error: "" };
     }
 
-    return { report: undefined, cached: false, stale: false, error: 'No USNI fleet tracker articles found' };
+    return {
+      report: undefined,
+      cached: false,
+      stale: false,
+      error: "No USNI fleet tracker articles found",
+    };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
-    console.warn('[USNI Fleet] Error:', message);
+    console.warn("[USNI Fleet] Error:", message);
 
-    const stale = (await getCachedJson(USNI_STALE_CACHE_KEY)) as USNIFleetReport | null;
+    const stale = (await getCachedJson(
+      USNI_STALE_CACHE_KEY,
+    )) as USNIFleetReport | null;
     if (stale) {
-      console.warn('[USNI Fleet] Returning stale cached data');
-      return { report: stale, cached: true, stale: true, error: 'Using cached data' };
+      console.warn("[USNI Fleet] Returning stale cached data");
+      return {
+        report: stale,
+        cached: true,
+        stale: true,
+        error: "Using cached data",
+      };
     }
 
     return { report: undefined, cached: false, stale: false, error: message };

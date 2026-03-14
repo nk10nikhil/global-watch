@@ -3,13 +3,13 @@
  * Provides typed async interface to the analysis Web Worker.
  */
 
-import type { NewsItem, ClusteredEvent, MarketData } from '@/types';
-import type { PredictionMarket } from '@/services/prediction';
-import type { CorrelationSignal } from './correlation';
-import { SOURCE_TIERS, SOURCE_TYPES, type SourceType } from '@/config/feeds';
+import type { NewsItem, ClusteredEvent, MarketData } from "@/types";
+import type { PredictionMarket } from "@/services/prediction";
+import type { CorrelationSignal } from "./correlation";
+import { SOURCE_TIERS, SOURCE_TYPES, type SourceType } from "@/config/feeds";
 
 // Import worker using Vite's worker syntax
-import AnalysisWorker from '@/workers/analysis.worker?worker';
+import AnalysisWorker from "@/workers/analysis.worker?worker";
 
 interface PendingRequest<T> {
   resolve: (value: T) => void;
@@ -18,18 +18,18 @@ interface PendingRequest<T> {
 }
 
 interface ClusterResult {
-  type: 'cluster-result';
+  type: "cluster-result";
   id: string;
   clusters: ClusteredEvent[];
 }
 
 interface CorrelationResult {
-  type: 'correlation-result';
+  type: "correlation-result";
   id: string;
   signals: CorrelationSignal[];
 }
 
-type WorkerResult = ClusterResult | CorrelationResult | { type: 'ready' };
+type WorkerResult = ClusterResult | CorrelationResult | { type: "ready" };
 
 class AnalysisWorkerManager {
   private worker: Worker | null = null;
@@ -57,8 +57,8 @@ class AnalysisWorkerManager {
     // Set ready timeout - reject if worker doesn't become ready in time
     this.readyTimeout = setTimeout(() => {
       if (!this.isReady) {
-        const error = new Error('Worker failed to become ready within timeout');
-        console.error('[AnalysisWorker]', error.message);
+        const error = new Error("Worker failed to become ready within timeout");
+        console.error("[AnalysisWorker]", error.message);
         this.readyReject?.(error);
         this.cleanup();
       }
@@ -67,8 +67,10 @@ class AnalysisWorkerManager {
     try {
       this.worker = new AnalysisWorker();
     } catch (error) {
-      console.error('[AnalysisWorker] Failed to create worker:', error);
-      this.readyReject?.(error instanceof Error ? error : new Error(String(error)));
+      console.error("[AnalysisWorker] Failed to create worker:", error);
+      this.readyReject?.(
+        error instanceof Error ? error : new Error(String(error)),
+      );
       this.cleanup();
       return;
     }
@@ -76,7 +78,7 @@ class AnalysisWorkerManager {
     this.worker.onmessage = (event: MessageEvent<WorkerResult>) => {
       const data = event.data;
 
-      if (data.type === 'ready') {
+      if (data.type === "ready") {
         this.isReady = true;
         if (this.readyTimeout) {
           clearTimeout(this.readyTimeout);
@@ -86,27 +88,27 @@ class AnalysisWorkerManager {
         return;
       }
 
-      if ('id' in data) {
+      if ("id" in data) {
         const pending = this.pendingRequests.get(data.id);
         if (pending) {
           clearTimeout(pending.timeout);
           this.pendingRequests.delete(data.id);
 
-          if (data.type === 'cluster-result') {
+          if (data.type === "cluster-result") {
             // Deserialize dates
-            const clusters = data.clusters.map(cluster => ({
+            const clusters = data.clusters.map((cluster) => ({
               ...cluster,
               firstSeen: new Date(cluster.firstSeen),
               lastUpdated: new Date(cluster.lastUpdated),
-              allItems: cluster.allItems.map(item => ({
+              allItems: cluster.allItems.map((item) => ({
                 ...item,
                 pubDate: new Date(item.pubDate),
               })),
             }));
             pending.resolve(clusters);
-          } else if (data.type === 'correlation-result') {
+          } else if (data.type === "correlation-result") {
             // Deserialize dates
-            const signals = data.signals.map(signal => ({
+            const signals = data.signals.map((signal) => ({
               ...signal,
               timestamp: new Date(signal.timestamp),
             }));
@@ -117,11 +119,13 @@ class AnalysisWorkerManager {
     };
 
     this.worker.onerror = (error) => {
-      console.error('[AnalysisWorker] Error:', error);
+      console.error("[AnalysisWorker] Error:", error);
 
       // If not ready yet, reject the ready promise
       if (!this.isReady) {
-        this.readyReject?.(new Error(`Worker failed to initialize: ${error.message}`));
+        this.readyReject?.(
+          new Error(`Worker failed to initialize: ${error.message}`),
+        );
         this.cleanup();
         return;
       }
@@ -182,7 +186,7 @@ class AnalysisWorkerManager {
       // Set timeout (30 seconds - clustering can take a while for large datasets)
       const timeout = setTimeout(() => {
         this.pendingRequests.delete(id);
-        reject(new Error('Clustering request timed out'));
+        reject(new Error("Clustering request timed out"));
       }, 30000);
 
       this.pendingRequests.set(id, {
@@ -192,7 +196,7 @@ class AnalysisWorkerManager {
       });
 
       this.worker!.postMessage({
-        type: 'cluster',
+        type: "cluster",
         id,
         items,
         sourceTiers: SOURCE_TIERS,
@@ -207,7 +211,7 @@ class AnalysisWorkerManager {
   async analyzeCorrelations(
     clusters: ClusteredEvent[],
     predictions: PredictionMarket[],
-    markets: MarketData[]
+    markets: MarketData[],
   ): Promise<CorrelationSignal[]> {
     await this.waitForReady();
 
@@ -217,7 +221,7 @@ class AnalysisWorkerManager {
       // Set timeout (10 seconds should be plenty for correlation)
       const timeout = setTimeout(() => {
         this.pendingRequests.delete(id);
-        reject(new Error('Correlation analysis request timed out'));
+        reject(new Error("Correlation analysis request timed out"));
       }, 10000);
 
       this.pendingRequests.set(id, {
@@ -227,7 +231,7 @@ class AnalysisWorkerManager {
       });
 
       this.worker!.postMessage({
-        type: 'correlation',
+        type: "correlation",
         id,
         clusters,
         predictions,
@@ -244,12 +248,12 @@ class AnalysisWorkerManager {
     // Reject all pending requests - reset worker won't answer old queries
     for (const pending of this.pendingRequests.values()) {
       clearTimeout(pending.timeout);
-      pending.reject(new Error('Worker reset'));
+      pending.reject(new Error("Worker reset"));
     }
     this.pendingRequests.clear();
 
     if (this.worker) {
-      this.worker.postMessage({ type: 'reset' });
+      this.worker.postMessage({ type: "reset" });
     }
   }
 
@@ -260,7 +264,7 @@ class AnalysisWorkerManager {
     // Reject all pending requests
     for (const [id, pending] of this.pendingRequests) {
       clearTimeout(pending.timeout);
-      pending.reject(new Error('Worker terminated'));
+      pending.reject(new Error("Worker terminated"));
       this.pendingRequests.delete(id);
     }
     this.cleanup();

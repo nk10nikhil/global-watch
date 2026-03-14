@@ -75,9 +75,16 @@ export interface PaginationResponse {
   totalCount: number;
 }
 
-export type AisDisruptionSeverity = "AIS_DISRUPTION_SEVERITY_UNSPECIFIED" | "AIS_DISRUPTION_SEVERITY_LOW" | "AIS_DISRUPTION_SEVERITY_ELEVATED" | "AIS_DISRUPTION_SEVERITY_HIGH";
+export type AisDisruptionSeverity =
+  | "AIS_DISRUPTION_SEVERITY_UNSPECIFIED"
+  | "AIS_DISRUPTION_SEVERITY_LOW"
+  | "AIS_DISRUPTION_SEVERITY_ELEVATED"
+  | "AIS_DISRUPTION_SEVERITY_HIGH";
 
-export type AisDisruptionType = "AIS_DISRUPTION_TYPE_UNSPECIFIED" | "AIS_DISRUPTION_TYPE_GAP_SPIKE" | "AIS_DISRUPTION_TYPE_CHOKEPOINT_CONGESTION";
+export type AisDisruptionType =
+  | "AIS_DISRUPTION_TYPE_UNSPECIFIED"
+  | "AIS_DISRUPTION_TYPE_GAP_SPIKE"
+  | "AIS_DISRUPTION_TYPE_CHOKEPOINT_CONGESTION";
 
 export interface FieldViolation {
   field: string;
@@ -127,14 +134,22 @@ export class MaritimeServiceClient {
     this.defaultHeaders = { ...options?.defaultHeaders };
   }
 
-  async getVesselSnapshot(req: GetVesselSnapshotRequest, options?: MaritimeServiceCallOptions): Promise<GetVesselSnapshotResponse> {
+  async getVesselSnapshot(
+    req: GetVesselSnapshotRequest,
+    options?: MaritimeServiceCallOptions,
+  ): Promise<GetVesselSnapshotResponse> {
     let path = "/api/maritime/v1/get-vessel-snapshot";
     const params = new URLSearchParams();
-    if (req.neLat != null && req.neLat !== 0) params.set("ne_lat", String(req.neLat));
-    if (req.neLon != null && req.neLon !== 0) params.set("ne_lon", String(req.neLon));
-    if (req.swLat != null && req.swLat !== 0) params.set("sw_lat", String(req.swLat));
-    if (req.swLon != null && req.swLon !== 0) params.set("sw_lon", String(req.swLon));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.neLat != null && req.neLat !== 0)
+      params.set("ne_lat", String(req.neLat));
+    if (req.neLon != null && req.neLon !== 0)
+      params.set("ne_lon", String(req.neLon));
+    if (req.swLat != null && req.swLat !== 0)
+      params.set("sw_lat", String(req.swLat));
+    if (req.swLon != null && req.swLon !== 0)
+      params.set("sw_lon", String(req.swLon));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -152,16 +167,23 @@ export class MaritimeServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as GetVesselSnapshotResponse;
+    return (await resp.json()) as GetVesselSnapshotResponse;
   }
 
-  async listNavigationalWarnings(req: ListNavigationalWarningsRequest, options?: MaritimeServiceCallOptions): Promise<ListNavigationalWarningsResponse> {
+  async listNavigationalWarnings(
+    req: ListNavigationalWarningsRequest,
+    options?: MaritimeServiceCallOptions,
+  ): Promise<ListNavigationalWarningsResponse> {
     let path = "/api/maritime/v1/list-navigational-warnings";
     const params = new URLSearchParams();
-    if (req.pageSize != null && req.pageSize !== 0) params.set("page_size", String(req.pageSize));
-    if (req.cursor != null && req.cursor !== "") params.set("cursor", String(req.cursor));
-    if (req.area != null && req.area !== "") params.set("area", String(req.area));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.pageSize != null && req.pageSize !== 0)
+      params.set("page_size", String(req.pageSize));
+    if (req.cursor != null && req.cursor !== "")
+      params.set("cursor", String(req.cursor));
+    if (req.area != null && req.area !== "")
+      params.set("area", String(req.area));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -179,7 +201,7 @@ export class MaritimeServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as ListNavigationalWarningsResponse;
+    return (await resp.json()) as ListNavigationalWarningsResponse;
   }
 
   private async handleError(resp: Response): Promise<never> {
@@ -194,7 +216,10 @@ export class MaritimeServiceClient {
         if (e instanceof ValidationError) throw e;
       }
     }
-    throw new ApiError(resp.status, `Request failed with status ${resp.status}`, body);
+    throw new ApiError(
+      resp.status,
+      `Request failed with status ${resp.status}`,
+      body,
+    );
   }
 }
-

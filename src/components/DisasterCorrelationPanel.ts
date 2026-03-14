@@ -1,7 +1,7 @@
-import { CorrelationPanel } from './CorrelationPanel';
+import { CorrelationPanel } from "./CorrelationPanel";
 
 export class DisasterCorrelationPanel extends CorrelationPanel {
   constructor() {
-    super('disaster-correlation', 'Disaster Cascade', 'disaster');
+    super("disaster-correlation", "Disaster Cascade", "disaster");
   }
 }

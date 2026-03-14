@@ -4,18 +4,48 @@ import type {
   ListMilitaryBasesResponse,
   MilitaryBaseEntry,
   MilitaryBaseCluster,
-} from '../../../../src/generated/server/worldmonitor/military/v1/service_server';
+} from "../../../../src/generated/server/worldmonitor/military/v1/service_server";
 
-import { cachedFetchJson, getCachedJson, geoSearchByBox, getHashFieldsBatch } from '../../../_shared/redis';
-import { markNoCacheResponse, setResponseHeader } from '../../../_shared/response-headers';
+import {
+  cachedFetchJson,
+  getCachedJson,
+  geoSearchByBox,
+  getHashFieldsBatch,
+} from "../../../_shared/redis";
+import {
+  markNoCacheResponse,
+  setResponseHeader,
+} from "../../../_shared/response-headers";
 
 const VALID_TYPES = new Set([
-  'us-nato', 'china', 'russia', 'uk', 'france', 'india', 'italy', 'uae', 'turkey', 'japan', 'other',
+  "us-nato",
+  "china",
+  "russia",
+  "uk",
+  "france",
+  "india",
+  "italy",
+  "uae",
+  "turkey",
+  "japan",
+  "other",
 ]);
 const VALID_KINDS = new Set([
-  'base', 'airfield', 'naval_base', 'military', 'barracks', 'bunker', 'trench',
-  'training_area', 'checkpoint', 'shelter', 'ammunition', 'office', 'obstacle_course',
-  'nuclear_explosion_site', 'range',
+  "base",
+  "airfield",
+  "naval_base",
+  "military",
+  "barracks",
+  "bunker",
+  "trench",
+  "training_area",
+  "checkpoint",
+  "shelter",
+  "ammunition",
+  "office",
+  "obstacle_course",
+  "nuclear_explosion_site",
+  "range",
 ]);
 const COUNTRY_RE = /^[A-Z]{2}$/;
 
@@ -27,23 +57,39 @@ function getBboxGridStep(zoom: number): number {
   return 0.5;
 }
 
-function haversineDistKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+function haversineDistKm(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+): number {
   const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat / 2) ** 2 +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
 function bboxDimensionsKm(
-  swLat: number, swLon: number, neLat: number, neLon: number,
+  swLat: number,
+  swLon: number,
+  neLat: number,
+  neLon: number,
 ): { centerLat: number; centerLon: number; widthKm: number; heightKm: number } {
   const centerLat = (swLat + neLat) / 2;
   const centerLon = (swLon + neLon) / 2;
   const heightKm = haversineDistKm(swLat, centerLon, neLat, centerLon);
   const widthKm = haversineDistKm(centerLat, swLon, centerLat, neLon);
-  return { centerLat, centerLon, widthKm: Math.max(widthKm, 1), heightKm: Math.max(heightKm, 1) };
+  return {
+    centerLat,
+    centerLon,
+    widthKm: Math.max(widthKm, 1),
+    heightKm: Math.max(heightKm, 1),
+  };
 }
 
 function getGeoSearchCap(zoom: number): number {
@@ -60,15 +106,20 @@ function getClusterCellSize(zoom: number): number {
 }
 
 function clusterBases(
-  bases: MilitaryBaseEntry[], cellSize: number,
+  bases: MilitaryBaseEntry[],
+  cellSize: number,
 ): { entries: MilitaryBaseEntry[]; clusters: MilitaryBaseCluster[] } {
-  if (cellSize === 0 || bases.length <= 200) return { entries: bases, clusters: [] };
+  if (cellSize === 0 || bases.length <= 200)
+    return { entries: bases, clusters: [] };
 
   const cells = new Map<string, MilitaryBaseEntry[]>();
   for (const b of bases) {
     const ck = `${Math.floor(b.latitude / cellSize)}:${Math.floor(b.longitude / cellSize)}`;
     let arr = cells.get(ck);
-    if (!arr) { arr = []; cells.set(ck, arr); }
+    if (!arr) {
+      arr = [];
+      cells.set(ck, arr);
+    }
     arr.push(b);
   }
 
@@ -80,17 +131,21 @@ function clusterBases(
       entries.push(group[0]!);
       continue;
     }
-    let latSum = 0, lonSum = 0;
+    let latSum = 0,
+      lonSum = 0;
     const typeCounts = new Map<string, number>();
     for (const b of group) {
       latSum += b.latitude;
       lonSum += b.longitude;
       typeCounts.set(b.type, (typeCounts.get(b.type) || 0) + 1);
     }
-    let dominantType = 'other';
+    let dominantType = "other";
     let maxCount = 0;
     for (const [t, c] of typeCounts) {
-      if (c > maxCount) { maxCount = c; dominantType = t; }
+      if (c > maxCount) {
+        maxCount = c;
+        dominantType = t;
+      }
     }
     clusters.push({
       latitude: latSum / group.length,
@@ -109,7 +164,12 @@ export async function listMilitaryBases(
   req: ListMilitaryBasesRequest,
 ): Promise<ListMilitaryBasesResponse> {
   try {
-    const empty: ListMilitaryBasesResponse = { bases: [], clusters: [], totalInView: 0, truncated: false };
+    const empty: ListMilitaryBasesResponse = {
+      bases: [],
+      clusters: [],
+      totalInView: 0,
+      truncated: false,
+    };
 
     if (!req.neLat && !req.neLon && !req.swLat && !req.swLon) return empty;
 
@@ -119,40 +179,53 @@ export async function listMilitaryBases(
     const neLon = Math.max(-180, Math.min(180, req.neLon));
     const zoom = Math.max(0, Math.min(22, req.zoom || 3));
 
-    const typeFilter = req.type ? req.type.toLowerCase().trim().slice(0, 20) : '';
-    const kindFilter = req.kind ? req.kind.toLowerCase().trim().slice(0, 20) : '';
-    const countryFilter = req.country ? req.country.toUpperCase().trim().slice(0, 20) : '';
+    const typeFilter = req.type
+      ? req.type.toLowerCase().trim().slice(0, 20)
+      : "";
+    const kindFilter = req.kind
+      ? req.kind.toLowerCase().trim().slice(0, 20)
+      : "";
+    const countryFilter = req.country
+      ? req.country.toUpperCase().trim().slice(0, 20)
+      : "";
 
     if (typeFilter && !VALID_TYPES.has(typeFilter)) return empty;
     if (kindFilter && !VALID_KINDS.has(kindFilter)) return empty;
     if (countryFilter && !COUNTRY_RE.test(countryFilter)) return empty;
 
-    let activeVersion = await getCachedJson('military:bases:active') as string | null;
+    let activeVersion = (await getCachedJson("military:bases:active")) as
+      | string
+      | null;
     let rawKeys = false;
     if (!activeVersion) {
-      activeVersion = await getCachedJson('military:bases:active', true) as string | null;
+      activeVersion = (await getCachedJson("military:bases:active", true)) as
+        | string
+        | null;
       rawKeys = true;
     }
     if (!activeVersion) {
       markNoCacheResponse(ctx.request);
-      setResponseHeader(ctx.request, 'X-Bases-Debug', 'no-active-version');
-      console.warn('military:bases:active key missing — run seed script');
+      setResponseHeader(ctx.request, "X-Bases-Debug", "no-active-version");
+      console.warn("military:bases:active key missing — run seed script");
       return empty;
     }
     const v = String(activeVersion);
-    setResponseHeader(ctx.request, 'X-Bases-Debug', `v=${v},raw=${rawKeys}`);
+    setResponseHeader(ctx.request, "X-Bases-Debug", `v=${v},raw=${rawKeys}`);
     const geoKey = `military:bases:geo:${v}`;
     const metaKey = `military:bases:meta:${v}`;
 
     const gridStep = getBboxGridStep(zoom);
     const qBB = [
-      quantize(swLat, gridStep), quantize(swLon, gridStep),
-      quantize(neLat, gridStep), quantize(neLon, gridStep),
-    ].join(':');
+      quantize(swLat, gridStep),
+      quantize(swLon, gridStep),
+      quantize(neLat, gridStep),
+      quantize(neLon, gridStep),
+    ].join(":");
     const cacheKey = `military:bases:v1:${qBB}:${zoom}:${typeFilter}:${kindFilter}:${countryFilter}:${v}`;
 
     const result = await cachedFetchJson<ListMilitaryBasesResponse>(
-      cacheKey, 3600,
+      cacheKey,
+      3600,
       async () => {
         const antimeridian = swLon > neLon;
         let allIds: string[];
@@ -162,22 +235,50 @@ export async function listMilitaryBases(
           const dims2 = bboxDimensionsKm(swLat, -180, neLat, neLon);
           const cap = getGeoSearchCap(zoom);
           const [ids1, ids2] = await Promise.all([
-            geoSearchByBox(geoKey, dims1.centerLon, dims1.centerLat, dims1.widthKm, dims1.heightKm, cap, rawKeys),
-            geoSearchByBox(geoKey, dims2.centerLon, dims2.centerLat, dims2.widthKm, dims2.heightKm, cap, rawKeys),
+            geoSearchByBox(
+              geoKey,
+              dims1.centerLon,
+              dims1.centerLat,
+              dims1.widthKm,
+              dims1.heightKm,
+              cap,
+              rawKeys,
+            ),
+            geoSearchByBox(
+              geoKey,
+              dims2.centerLon,
+              dims2.centerLat,
+              dims2.widthKm,
+              dims2.heightKm,
+              cap,
+              rawKeys,
+            ),
           ]);
           const seen = new Set<string>();
           allIds = [];
           for (const id of [...ids1, ...ids2]) {
-            if (!seen.has(id)) { seen.add(id); allIds.push(id); }
+            if (!seen.has(id)) {
+              seen.add(id);
+              allIds.push(id);
+            }
           }
         } else {
           const dims = bboxDimensionsKm(swLat, swLon, neLat, neLon);
           const cap = getGeoSearchCap(zoom);
-          allIds = await geoSearchByBox(geoKey, dims.centerLon, dims.centerLat, dims.widthKm, dims.heightKm, cap, rawKeys);
+          allIds = await geoSearchByBox(
+            geoKey,
+            dims.centerLon,
+            dims.centerLat,
+            dims.widthKm,
+            dims.heightKm,
+            cap,
+            rawKeys,
+          );
         }
 
         const truncated = allIds.length >= getGeoSearchCap(zoom);
-        if (allIds.length === 0) return { bases: [], clusters: [], totalInView: 0, truncated: false };
+        if (allIds.length === 0)
+          return { bases: [], clusters: [], totalInView: 0, truncated: false };
 
         const metaMap = await getHashFieldsBatch(metaKey, allIds, rawKeys);
         const bases: MilitaryBaseEntry[] = [];
@@ -186,7 +287,11 @@ export async function listMilitaryBases(
           const raw = metaMap.get(id);
           if (!raw) continue;
           let meta: Record<string, unknown>;
-          try { meta = JSON.parse(raw); } catch { continue; }
+          try {
+            meta = JSON.parse(raw);
+          } catch {
+            continue;
+          }
 
           const tier = (meta.tier as number) || 2;
           if (zoom < 5 && tier > 1) continue;
@@ -198,20 +303,20 @@ export async function listMilitaryBases(
 
           bases.push({
             id: String(meta.id || id),
-            name: String(meta.name || ''),
+            name: String(meta.name || ""),
             latitude: Number(meta.lat) || 0,
             longitude: Number(meta.lon) || 0,
-            kind: String(meta.kind || ''),
-            countryIso2: String(meta.countryIso2 || ''),
-            type: String(meta.type || 'other'),
+            kind: String(meta.kind || ""),
+            countryIso2: String(meta.countryIso2 || ""),
+            type: String(meta.type || "other"),
             tier,
             catAirforce: Boolean(meta.catAirforce),
             catNaval: Boolean(meta.catNaval),
             catNuclear: Boolean(meta.catNuclear),
             catSpace: Boolean(meta.catSpace),
             catTraining: Boolean(meta.catTraining),
-            branch: String(meta.branch || ''),
-            status: String(meta.status || ''),
+            branch: String(meta.branch || ""),
+            status: String(meta.status || ""),
           });
         }
 
@@ -234,7 +339,11 @@ export async function listMilitaryBases(
     return result;
   } catch (err) {
     markNoCacheResponse(ctx.request);
-    setResponseHeader(ctx.request, 'X-Bases-Debug', `error:${err instanceof Error ? err.message : String(err)}`);
+    setResponseHeader(
+      ctx.request,
+      "X-Bases-Debug",
+      `error:${err instanceof Error ? err.message : String(err)}`,
+    );
     return { bases: [], clusters: [], totalInView: 0, truncated: false };
   }
 }

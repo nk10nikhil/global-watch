@@ -3,8 +3,8 @@ import type {
   BacktestStockResponse,
   BacktestStockEvaluation,
   MarketServiceHandler,
-} from '../../../../src/generated/server/worldmonitor/market/v1/service_server';
-import { cachedFetchJson } from '../../../_shared/redis';
+} from "../../../../src/generated/server/worldmonitor/market/v1/service_server";
+import { cachedFetchJson } from "../../../_shared/redis";
 import {
   buildAnalysisResponse,
   buildTechnicalSnapshot,
@@ -13,13 +13,13 @@ import {
   signalDirection,
   type Candle,
   STOCK_ANALYSIS_ENGINE_VERSION,
-} from './analyze-stock';
+} from "./analyze-stock";
 import {
   getStoredHistoricalBacktestAnalyses,
   storeHistoricalBacktestAnalysisRecords,
   storeStockBacktestSnapshot,
-} from './premium-stock-store';
-import { sanitizeSymbol } from './_shared';
+} from "./premium-stock-store";
+import { sanitizeSymbol } from "./_shared";
 
 const CACHE_TTL_SECONDS = 900;
 const DEFAULT_WINDOW_DAYS = 10;
@@ -31,7 +31,10 @@ function round(value: number, digits = 2): number {
   return Number.isFinite(value) ? Number(value.toFixed(digits)) : 0;
 }
 
-function compareByAnalysisAtDesc<T extends { analysisAt: number }>(a: T, b: T): number {
+function compareByAnalysisAtDesc<T extends { analysisAt: number }>(
+  a: T,
+  b: T,
+): number {
   return (b.analysisAt || 0) - (a.analysisAt || 0);
 }
 
@@ -48,18 +51,18 @@ function simulateEvaluation(
   if (!entryPrice || !stopLoss || !takeProfit) return null;
 
   let exitPrice = forwardBars[forwardBars.length - 1]?.close ?? entryPrice;
-  let outcome = 'window_close';
+  let outcome = "window_close";
 
   for (const bar of forwardBars) {
-    if (direction === 'long') {
+    if (direction === "long") {
       if (bar.low <= stopLoss) {
         exitPrice = stopLoss;
-        outcome = 'stop_loss';
+        outcome = "stop_loss";
         break;
       }
       if (bar.high >= takeProfit) {
         exitPrice = takeProfit;
-        outcome = 'take_profit';
+        outcome = "take_profit";
         break;
       }
       continue;
@@ -67,19 +70,20 @@ function simulateEvaluation(
 
     if (bar.high >= stopLoss) {
       exitPrice = stopLoss;
-      outcome = 'stop_loss';
+      outcome = "stop_loss";
       break;
     }
     if (bar.low <= takeProfit) {
       exitPrice = takeProfit;
-      outcome = 'take_profit';
+      outcome = "take_profit";
       break;
     }
   }
 
-  const simulatedReturnPct = direction === 'long'
-    ? ((exitPrice - entryPrice) / entryPrice) * 100
-    : ((entryPrice - exitPrice) / entryPrice) * 100;
+  const simulatedReturnPct =
+    direction === "long"
+      ? ((exitPrice - entryPrice) / entryPrice) * 100
+      : ((entryPrice - exitPrice) / entryPrice) * 100;
 
   return {
     analysisId: analysis.analysisId,
@@ -106,7 +110,12 @@ async function ensureHistoricalAnalysisLedger(
 ): Promise<AnalyzeStockResponse[]> {
   const existing = ledgerInFlight.get(symbol);
   if (existing) return existing;
-  const promise = _ensureHistoricalAnalysisLedger(symbol, name, currency, candles);
+  const promise = _ensureHistoricalAnalysisLedger(
+    symbol,
+    name,
+    currency,
+    candles,
+  );
   ledgerInFlight.set(symbol, promise);
   try {
     return await promise;
@@ -136,36 +145,38 @@ async function _ensureHistoricalAnalysisLedger(
     const analysisAt = candles[index]?.timestamp || 0;
     if (!analysisAt) continue;
 
-    generated.push(buildAnalysisResponse({
-      symbol,
-      name,
-      currency,
-      technical,
-      headlines: [],
-      overlay: getFallbackOverlay(name, technical, []),
-      includeNews: false,
-      analysisAt,
-      generatedAt: new Date(analysisAt).toISOString(),
-      analysisId: `ledger:${STOCK_ANALYSIS_ENGINE_VERSION}:${symbol}:${analysisAt}`,
-    }));
+    generated.push(
+      buildAnalysisResponse({
+        symbol,
+        name,
+        currency,
+        technical,
+        headlines: [],
+        overlay: getFallbackOverlay(name, technical, []),
+        includeNews: false,
+        analysisAt,
+        generatedAt: new Date(analysisAt).toISOString(),
+        analysisId: `ledger:${STOCK_ANALYSIS_ENGINE_VERSION}:${symbol}:${analysisAt}`,
+      }),
+    );
   }
 
   await storeHistoricalBacktestAnalysisRecords(generated);
   return generated.sort(compareByAnalysisAtDesc);
 }
 
-export const backtestStock: MarketServiceHandler['backtestStock'] = async (
+export const backtestStock: MarketServiceHandler["backtestStock"] = async (
   _ctx,
   req,
 ): Promise<BacktestStockResponse> => {
-  const symbol = sanitizeSymbol(req.symbol || '');
+  const symbol = sanitizeSymbol(req.symbol || "");
   if (!symbol) {
     return {
       available: false,
-      symbol: '',
-      name: req.name || '',
-      display: '',
-      currency: 'USD',
+      symbol: "",
+      name: req.name || "",
+      display: "",
+      currency: "USD",
       evalWindowDays: req.evalWindowDays || DEFAULT_WINDOW_DAYS,
       evaluationsRun: 0,
       actionableEvaluations: 0,
@@ -173,79 +184,104 @@ export const backtestStock: MarketServiceHandler['backtestStock'] = async (
       directionAccuracy: 0,
       avgSimulatedReturnPct: 0,
       cumulativeSimulatedReturnPct: 0,
-      latestSignal: '',
+      latestSignal: "",
       latestSignalScore: 0,
-      summary: 'No symbol provided.',
+      summary: "No symbol provided.",
       generatedAt: new Date().toISOString(),
       evaluations: [],
       engineVersion: STOCK_ANALYSIS_ENGINE_VERSION,
     };
   }
 
-  const evalWindowDays = Math.max(3, Math.min(30, req.evalWindowDays || DEFAULT_WINDOW_DAYS));
+  const evalWindowDays = Math.max(
+    3,
+    Math.min(30, req.evalWindowDays || DEFAULT_WINDOW_DAYS),
+  );
   const cacheKey = `market:backtest:v2:${symbol}:${evalWindowDays}`;
 
   try {
-    const cached = await cachedFetchJson<BacktestStockResponse>(cacheKey, CACHE_TTL_SECONDS, async () => {
-      const history = await fetchYahooHistory(symbol);
-      if (!history || history.candles.length < MIN_REQUIRED_BARS) return null;
+    const cached = await cachedFetchJson<BacktestStockResponse>(
+      cacheKey,
+      CACHE_TTL_SECONDS,
+      async () => {
+        const history = await fetchYahooHistory(symbol);
+        if (!history || history.candles.length < MIN_REQUIRED_BARS) return null;
 
-      const analyses = await ensureHistoricalAnalysisLedger(
-        symbol,
-        req.name || symbol,
-        history.currency || 'USD',
-        history.candles,
-      );
-      if (analyses.length === 0) return null;
+        const analyses = await ensureHistoricalAnalysisLedger(
+          symbol,
+          req.name || symbol,
+          history.currency || "USD",
+          history.candles,
+        );
+        if (analyses.length === 0) return null;
 
-      const candleIndexByTimestamp = new Map<number, number>();
-      history.candles.forEach((candle, index) => {
-        candleIndexByTimestamp.set(candle.timestamp, index);
-      });
+        const candleIndexByTimestamp = new Map<number, number>();
+        history.candles.forEach((candle, index) => {
+          candleIndexByTimestamp.set(candle.timestamp, index);
+        });
 
-      const evaluations = analyses
-        .map((analysis) => {
-          const candleIndex = candleIndexByTimestamp.get(analysis.analysisAt);
-          if (candleIndex == null) return null;
-          const forwardBars = history.candles.slice(candleIndex + 1, candleIndex + 1 + evalWindowDays);
-          if (forwardBars.length < evalWindowDays) return null;
-          return simulateEvaluation(analysis, forwardBars);
-        })
-        .filter((evaluation): evaluation is BacktestStockEvaluation => !!evaluation)
-        .sort(compareByAnalysisAtDesc);
+        const evaluations = analyses
+          .map((analysis) => {
+            const candleIndex = candleIndexByTimestamp.get(analysis.analysisAt);
+            if (candleIndex == null) return null;
+            const forwardBars = history.candles.slice(
+              candleIndex + 1,
+              candleIndex + 1 + evalWindowDays,
+            );
+            if (forwardBars.length < evalWindowDays) return null;
+            return simulateEvaluation(analysis, forwardBars);
+          })
+          .filter(
+            (evaluation): evaluation is BacktestStockEvaluation => !!evaluation,
+          )
+          .sort(compareByAnalysisAtDesc);
 
-      if (evaluations.length === 0) return null;
+        if (evaluations.length === 0) return null;
 
-      const actionableEvaluations = evaluations.length;
-      const profitable = evaluations.filter((evaluation) => evaluation.simulatedReturnPct > 0);
-      const winRate = (profitable.length / actionableEvaluations) * 100;
-      const directionAccuracy = (evaluations.filter((evaluation) => evaluation.directionCorrect).length / actionableEvaluations) * 100;
-      const avgSimulatedReturnPct = evaluations.reduce((sum, evaluation) => sum + evaluation.simulatedReturnPct, 0) / actionableEvaluations;
-      const cumulativeSimulatedReturnPct = evaluations.reduce((sum, evaluation) => sum + evaluation.simulatedReturnPct, 0);
-      const latest = evaluations[0]!;
-      const response: BacktestStockResponse = {
-        available: true,
-        symbol,
-        name: req.name || symbol,
-        display: symbol,
-        currency: history.currency || 'USD',
-        evalWindowDays,
-        evaluationsRun: analyses.length,
-        actionableEvaluations,
-        winRate: round(winRate),
-        directionAccuracy: round(directionAccuracy),
-        avgSimulatedReturnPct: round(avgSimulatedReturnPct),
-        cumulativeSimulatedReturnPct: round(cumulativeSimulatedReturnPct),
-        latestSignal: latest.signal,
-        latestSignalScore: round(latest.signalScore),
-        summary: `Validated ${actionableEvaluations} stored analysis records over ${evalWindowDays} trading days with ${round(winRate)}% win rate and ${round(avgSimulatedReturnPct)}% average simulated return.`,
-        generatedAt: new Date().toISOString(),
-        evaluations: evaluations.slice(0, MAX_EVALUATIONS),
-        engineVersion: STOCK_ANALYSIS_ENGINE_VERSION,
-      };
-      await storeStockBacktestSnapshot(response);
-      return response;
-    });
+        const actionableEvaluations = evaluations.length;
+        const profitable = evaluations.filter(
+          (evaluation) => evaluation.simulatedReturnPct > 0,
+        );
+        const winRate = (profitable.length / actionableEvaluations) * 100;
+        const directionAccuracy =
+          (evaluations.filter((evaluation) => evaluation.directionCorrect)
+            .length /
+            actionableEvaluations) *
+          100;
+        const avgSimulatedReturnPct =
+          evaluations.reduce(
+            (sum, evaluation) => sum + evaluation.simulatedReturnPct,
+            0,
+          ) / actionableEvaluations;
+        const cumulativeSimulatedReturnPct = evaluations.reduce(
+          (sum, evaluation) => sum + evaluation.simulatedReturnPct,
+          0,
+        );
+        const latest = evaluations[0]!;
+        const response: BacktestStockResponse = {
+          available: true,
+          symbol,
+          name: req.name || symbol,
+          display: symbol,
+          currency: history.currency || "USD",
+          evalWindowDays,
+          evaluationsRun: analyses.length,
+          actionableEvaluations,
+          winRate: round(winRate),
+          directionAccuracy: round(directionAccuracy),
+          avgSimulatedReturnPct: round(avgSimulatedReturnPct),
+          cumulativeSimulatedReturnPct: round(cumulativeSimulatedReturnPct),
+          latestSignal: latest.signal,
+          latestSignalScore: round(latest.signalScore),
+          summary: `Validated ${actionableEvaluations} stored analysis records over ${evalWindowDays} trading days with ${round(winRate)}% win rate and ${round(avgSimulatedReturnPct)}% average simulated return.`,
+          generatedAt: new Date().toISOString(),
+          evaluations: evaluations.slice(0, MAX_EVALUATIONS),
+          engineVersion: STOCK_ANALYSIS_ENGINE_VERSION,
+        };
+        await storeStockBacktestSnapshot(response);
+        return response;
+      },
+    );
     if (cached) return cached;
   } catch (err) {
     console.warn(`[backtestStock] ${symbol} failed:`, (err as Error).message);
@@ -256,7 +292,7 @@ export const backtestStock: MarketServiceHandler['backtestStock'] = async (
     symbol,
     name: req.name || symbol,
     display: symbol,
-    currency: 'USD',
+    currency: "USD",
     evalWindowDays,
     evaluationsRun: 0,
     actionableEvaluations: 0,
@@ -264,9 +300,9 @@ export const backtestStock: MarketServiceHandler['backtestStock'] = async (
     directionAccuracy: 0,
     avgSimulatedReturnPct: 0,
     cumulativeSimulatedReturnPct: 0,
-    latestSignal: '',
+    latestSignal: "",
     latestSignalScore: 0,
-    summary: 'Backtest unavailable for this symbol.',
+    summary: "Backtest unavailable for this symbol.",
     generatedAt: new Date().toISOString(),
     evaluations: [],
     engineVersion: STOCK_ANALYSIS_ENGINE_VERSION,

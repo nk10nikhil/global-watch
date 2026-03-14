@@ -1,40 +1,46 @@
-import { Panel } from './Panel';
-import { sanitizeUrl } from '@/utils/sanitize';
-import { t } from '@/services/i18n';
-import { h, replaceChildren } from '@/utils/dom-utils';
+import { Panel } from "./Panel";
+import { sanitizeUrl } from "@/utils/sanitize";
+import { t } from "@/services/i18n";
+import { h, replaceChildren } from "@/utils/dom-utils";
 import {
   TELEGRAM_TOPICS,
   formatTelegramTime,
   type TelegramItem,
   type TelegramFeedResponse,
-} from '@/services/telegram-intel';
+} from "@/services/telegram-intel";
 
 export class TelegramIntelPanel extends Panel {
   private items: TelegramItem[] = [];
-  private activeTopic = 'all';
+  private activeTopic = "all";
   private tabsEl: HTMLElement | null = null;
   private relayEnabled = true;
 
   constructor() {
     super({
-      id: 'telegram-intel',
-      title: t('panels.telegramIntel'),
+      id: "telegram-intel",
+      title: t("panels.telegramIntel"),
       showCount: true,
       trackActivity: true,
-      infoTooltip: t('components.telegramIntel.infoTooltip'),
+      infoTooltip: t("components.telegramIntel.infoTooltip"),
     });
     this.createTabs();
-    this.showLoading(t('components.telegramIntel.loading'));
+    this.showLoading(t("components.telegramIntel.loading"));
   }
 
   private createTabs(): void {
-    this.tabsEl = h('div', { className: 'panel-tabs' },
-      ...TELEGRAM_TOPICS.map(topic =>
-        h('button', {
-          className: `panel-tab ${topic.id === this.activeTopic ? 'active' : ''}`,
-          dataset: { topicId: topic.id },
-          onClick: () => this.selectTopic(topic.id),
-        }, t(topic.labelKey)),
+    this.tabsEl = h(
+      "div",
+      { className: "panel-tabs" },
+      ...TELEGRAM_TOPICS.map((topic) =>
+        h(
+          "button",
+          {
+            className: `panel-tab ${topic.id === this.activeTopic ? "active" : ""}`,
+            dataset: { topicId: topic.id },
+            onClick: () => this.selectTopic(topic.id),
+          },
+          t(topic.labelKey),
+        ),
       ),
     );
     this.element.insertBefore(this.tabsEl, this.content);
@@ -44,8 +50,11 @@ export class TelegramIntelPanel extends Panel {
     if (topicId === this.activeTopic) return;
     this.activeTopic = topicId;
 
-    this.tabsEl?.querySelectorAll('.panel-tab').forEach(tab => {
-      tab.classList.toggle('active', (tab as HTMLElement).dataset.topicId === topicId);
+    this.tabsEl?.querySelectorAll(".panel-tab").forEach((tab) => {
+      tab.classList.toggle(
+        "active",
+        (tab as HTMLElement).dataset.topicId === topicId,
+      );
     });
 
     this.renderItems();
@@ -57,8 +66,13 @@ export class TelegramIntelPanel extends Panel {
 
     if (!this.relayEnabled) {
       this.setCount(0);
-      replaceChildren(this.content,
-        h('div', { className: 'empty-state' }, t('components.telegramIntel.disabled')),
+      replaceChildren(
+        this.content,
+        h(
+          "div",
+          { className: "empty-state" },
+          t("components.telegramIntel.disabled"),
+        ),
       );
       return;
     }
@@ -67,22 +81,31 @@ export class TelegramIntelPanel extends Panel {
   }
 
   private renderItems(): void {
-    const filtered = this.activeTopic === 'all'
-      ? this.items
-      : this.items.filter(item => item.topic === this.activeTopic);
+    const filtered =
+      this.activeTopic === "all"
+        ? this.items
+        : this.items.filter((item) => item.topic === this.activeTopic);
 
     this.setCount(filtered.length);
 
     if (filtered.length === 0) {
-      replaceChildren(this.content,
-        h('div', { className: 'empty-state' }, t('components.telegramIntel.empty')),
+      replaceChildren(
+        this.content,
+        h(
+          "div",
+          { className: "empty-state" },
+          t("components.telegramIntel.empty"),
+        ),
       );
       return;
     }
 
-    replaceChildren(this.content,
-      h('div', { className: 'telegram-intel-items' },
-        ...filtered.map(item => this.buildItem(item)),
+    replaceChildren(
+      this.content,
+      h(
+        "div",
+        { className: "telegram-intel-items" },
+        ...filtered.map((item) => this.buildItem(item)),
       ),
     );
   }
@@ -90,18 +113,26 @@ export class TelegramIntelPanel extends Panel {
   private buildItem(item: TelegramItem): HTMLElement {
     const timeAgo = formatTelegramTime(item.ts);
 
-    return h('a', {
-      href: sanitizeUrl(item.url),
-      target: '_blank',
-      rel: 'noopener noreferrer',
-      className: 'telegram-intel-item',
-    },
-      h('div', { className: 'telegram-intel-item-header' },
-        h('span', { className: 'telegram-intel-channel' }, item.channelTitle || item.channel),
-        h('span', { className: 'telegram-intel-topic' }, item.topic),
-        h('span', { className: 'telegram-intel-time' }, timeAgo),
+    return h(
+      "a",
+      {
+        href: sanitizeUrl(item.url),
+        target: "_blank",
+        rel: "noopener noreferrer",
+        className: "telegram-intel-item",
+      },
+      h(
+        "div",
+        { className: "telegram-intel-item-header" },
+        h(
+          "span",
+          { className: "telegram-intel-channel" },
+          item.channelTitle || item.channel,
+        ),
+        h("span", { className: "telegram-intel-topic" }, item.topic),
+        h("span", { className: "telegram-intel-time" }, timeAgo),
       ),
-      h('div', { className: 'telegram-intel-text' }, item.text),
+      h("div", { className: "telegram-intel-text" }, item.text),
     );
   }
 

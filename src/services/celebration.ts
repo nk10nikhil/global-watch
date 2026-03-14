@@ -11,7 +11,7 @@
  * Respects prefers-reduced-motion: no animations when that media query matches.
  */
 
-import confetti from 'canvas-confetti';
+import confetti from "canvas-confetti";
 
 // ---- Types ----
 
@@ -24,12 +24,20 @@ export interface MilestoneData {
 // ---- Constants ----
 
 /** Checked once at module load -- if user prefers reduced motion, skip all celebrations. */
-const REDUCED_MOTION = typeof window !== 'undefined'
-  ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  : false;
+const REDUCED_MOTION =
+  typeof window !== "undefined"
+    ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    : false;
 
 /** Nature-inspired warm palette matching the happy theme. */
-const WARM_COLORS = ['#6B8F5E', '#C4A35A', '#7BA5C4', '#8BAF7A', '#E8B96E', '#7FC4C4'];
+const WARM_COLORS = [
+  "#6B8F5E",
+  "#C4A35A",
+  "#7BA5C4",
+  "#8BAF7A",
+  "#E8B96E",
+  "#7FC4C4",
+];
 
 /** Session-level dedup set. Stores milestone keys that have already been celebrated this session. */
 const celebrated = new Set<string>();
@@ -42,10 +50,10 @@ const celebrated = new Set<string>();
  * @param type - 'milestone' for species recovery (40 particles, single burst),
  *               'record' for renewable energy records (80 particles, double burst).
  */
-export function celebrate(type: 'milestone' | 'record' = 'milestone'): void {
+export function celebrate(type: "milestone" | "record" = "milestone"): void {
   if (REDUCED_MOTION) return;
 
-  if (type === 'milestone') {
+  if (type === "milestone") {
     void confetti({
       particleCount: 40,
       spread: 60,
@@ -86,11 +94,11 @@ export function checkMilestones(data: MilestoneData): void {
   if (data.speciesRecoveries) {
     for (const species of data.speciesRecoveries) {
       const status = species.status.toLowerCase();
-      if (status === 'recovered' || status === 'stabilized') {
+      if (status === "recovered" || status === "stabilized") {
         const key = `species:${species.name}`;
         if (!celebrated.has(key)) {
           celebrated.add(key);
-          celebrate('milestone');
+          celebrate("milestone");
           return; // one celebration per call
         }
       }
@@ -103,7 +111,7 @@ export function checkMilestones(data: MilestoneData): void {
     const key = `renewable:${threshold}`;
     if (!celebrated.has(key)) {
       celebrated.add(key);
-      celebrate('record');
+      celebrate("record");
       return;
     }
   }
@@ -113,7 +121,7 @@ export function checkMilestones(data: MilestoneData): void {
     const key = `species-count:${data.newSpeciesCount}`;
     if (!celebrated.has(key)) {
       celebrated.add(key);
-      celebrate('milestone');
+      celebrate("milestone");
       return;
     }
   }

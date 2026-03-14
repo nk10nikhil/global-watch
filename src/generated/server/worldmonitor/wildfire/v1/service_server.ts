@@ -40,7 +40,11 @@ export interface PaginationResponse {
   totalCount: number;
 }
 
-export type FireConfidence = "FIRE_CONFIDENCE_UNSPECIFIED" | "FIRE_CONFIDENCE_LOW" | "FIRE_CONFIDENCE_NOMINAL" | "FIRE_CONFIDENCE_HIGH";
+export type FireConfidence =
+  | "FIRE_CONFIDENCE_UNSPECIFIED"
+  | "FIRE_CONFIDENCE_LOW"
+  | "FIRE_CONFIDENCE_NOMINAL"
+  | "FIRE_CONFIDENCE_HIGH";
 
 export interface FieldViolation {
   field: string;
@@ -77,7 +81,10 @@ export interface ServerContext {
 
 export interface ServerOptions {
   onError?: (error: unknown, req: Request) => Response | Promise<Response>;
-  validateRequest?: (methodName: string, body: unknown) => FieldViolation[] | undefined;
+  validateRequest?: (
+    methodName: string,
+    body: unknown,
+  ) => FieldViolation[] | undefined;
 }
 
 export interface RouteDescriptor {
@@ -87,7 +94,10 @@ export interface RouteDescriptor {
 }
 
 export interface WildfireServiceHandler {
-  listFireDetections(ctx: ServerContext, req: ListFireDetectionsRequest): Promise<ListFireDetectionsResponse>;
+  listFireDetections(
+    ctx: ServerContext,
+    req: ListFireDetectionsRequest,
+  ): Promise<ListFireDetectionsResponse>;
 }
 
 export function createWildfireServiceRoutes(
@@ -114,7 +124,10 @@ export function createWildfireServiceRoutes(
             swLon: Number(params.get("sw_lon") ?? "0"),
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("listFireDetections", body);
+            const bodyViolations = options.validateRequest(
+              "listFireDetections",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -127,16 +140,22 @@ export function createWildfireServiceRoutes(
           };
 
           const result = await handler.listFireDetections(ctx, body);
-          return new Response(JSON.stringify(result as ListFireDetectionsResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as ListFireDetectionsResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -151,4 +170,3 @@ export function createWildfireServiceRoutes(
     },
   ];
 }
-

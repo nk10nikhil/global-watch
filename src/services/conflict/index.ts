@@ -1,4 +1,4 @@
-import { getRpcBaseUrl } from '@/services/rpc-client';
+import { getRpcBaseUrl } from "@/services/rpc-client";
 import {
   ConflictServiceClient,
   ApiError,
@@ -11,37 +11,64 @@ import {
   type GetHumanitarianSummaryBatchResponse,
   type IranEvent,
   type ListIranEventsResponse,
-} from '@/generated/client/worldmonitor/conflict/v1/service_client';
-import type { UcdpGeoEvent, UcdpEventType } from '@/types';
-import { createCircuitBreaker } from '@/utils';
-import { getHydratedData } from '@/services/bootstrap';
-import { toApiUrl } from '@/services/runtime';
+} from "@/generated/client/worldmonitor/conflict/v1/service_client";
+import type { UcdpGeoEvent, UcdpEventType } from "@/types";
+import { createCircuitBreaker } from "@/utils";
+import { getHydratedData } from "@/services/bootstrap";
+import { toApiUrl } from "@/services/runtime";
 
 // ---- Client + Circuit Breakers (per-RPC; HAPI uses per-country map) ----
 
-const client = new ConflictServiceClient(getRpcBaseUrl(), { fetch: (...args) => globalThis.fetch(...args) });
-const acledBreaker = createCircuitBreaker<ListAcledEventsResponse>({ name: 'ACLED Conflicts', cacheTtlMs: 10 * 60 * 1000, persistCache: true });
-const ucdpBreaker = createCircuitBreaker<ListUcdpEventsResponse>({ name: 'UCDP Events', cacheTtlMs: 10 * 60 * 1000, persistCache: true });
-const hapiBreakers = new Map<string, ReturnType<typeof createCircuitBreaker<GetHumanitarianSummaryResponse>>>();
+const client = new ConflictServiceClient(getRpcBaseUrl(), {
+  fetch: (...args) => globalThis.fetch(...args),
+});
+const acledBreaker = createCircuitBreaker<ListAcledEventsResponse>({
+  name: "ACLED Conflicts",
+  cacheTtlMs: 10 * 60 * 1000,
+  persistCache: true,
+});
+const ucdpBreaker = createCircuitBreaker<ListUcdpEventsResponse>({
+  name: "UCDP Events",
+  cacheTtlMs: 10 * 60 * 1000,
+  persistCache: true,
+});
+const hapiBreakers = new Map<
+  string,
+  ReturnType<typeof createCircuitBreaker<GetHumanitarianSummaryResponse>>
+>();
 function getHapiBreaker(iso2: string) {
   if (!hapiBreakers.has(iso2)) {
-    hapiBreakers.set(iso2, createCircuitBreaker<GetHumanitarianSummaryResponse>({
-      name: `HDX HAPI:${iso2}`,
-      cacheTtlMs: 10 * 60 * 1000,
-      persistCache: true,
-    }));
+    hapiBreakers.set(
+      iso2,
+      createCircuitBreaker<GetHumanitarianSummaryResponse>({
+        name: `HDX HAPI:${iso2}`,
+        cacheTtlMs: 10 * 60 * 1000,
+        persistCache: true,
+      }),
+    );
   }
   return hapiBreakers.get(iso2)!;
 }
-const iranBreaker = createCircuitBreaker<ListIranEventsResponse>({ name: 'Iran Events', cacheTtlMs: 10 * 60 * 1000, persistCache: true });
+const iranBreaker = createCircuitBreaker<ListIranEventsResponse>({
+  name: "Iran Events",
+  cacheTtlMs: 10 * 60 * 1000,
+  persistCache: true,
+});
 
-const emptyIranFallback: ListIranEventsResponse = { events: [], scrapedAt: '0' };
+const emptyIranFallback: ListIranEventsResponse = {
+  events: [],
+  scrapedAt: "0",
+};
 
 export type { IranEvent };
 
 // ---- Exported Types (match legacy shapes exactly) ----
 
-export type ConflictEventType = 'battle' | 'explosion' | 'remote_violence' | 'violence_against_civilians';
+export type ConflictEventType =
+  | "battle"
+  | "explosion"
+  | "remote_violence"
+  | "violence_against_civilians";
 
 export interface ConflictEvent {
   id: string;
@@ -65,7 +92,7 @@ export interface ConflictData {
   count: number;
 }
 
-export type ConflictIntensity = 'none' | 'minor' | 'war';
+export type ConflictIntensity = "none" | "minor" | "war";
 
 export interface UcdpConflictStatus {
   location: string;
@@ -94,21 +121,21 @@ export interface HapiConflictSummary {
 
 function mapProtoEventType(eventType: string): ConflictEventType {
   const lower = eventType.toLowerCase();
-  if (lower.includes('battle')) return 'battle';
-  if (lower.includes('explosion')) return 'explosion';
-  if (lower.includes('remote violence')) return 'remote_violence';
-  if (lower.includes('violence against')) return 'violence_against_civilians';
-  return 'battle';
+  if (lower.includes("battle")) return "battle";
+  if (lower.includes("explosion")) return "explosion";
+  if (lower.includes("remote violence")) return "remote_violence";
+  if (lower.includes("violence against")) return "violence_against_civilians";
+  return "battle";
 }
 
 function toConflictEvent(proto: ProtoAcledEvent): ConflictEvent {
   return {
     id: proto.id,
     eventType: mapProtoEventType(proto.eventType),
-    subEventType: '',
+    subEventType: "",
     country: proto.country,
     region: proto.admin1 || undefined,
-    location: '',
+    location: "",
     lat: proto.location?.latitude ?? 0,
     lon: proto.location?.longitude ?? 0,
     time: new Date(proto.occurredAt),
@@ -121,16 +148,20 @@ function toConflictEvent(proto: ProtoAcledEvent): ConflictEvent {
 // ---- Adapter 2: Proto UcdpViolenceEvent -> legacy UcdpGeoEvent ----
 
 const VIOLENCE_TYPE_REVERSE: Record<string, UcdpEventType> = {
-  UCDP_VIOLENCE_TYPE_STATE_BASED: 'state-based',
-  UCDP_VIOLENCE_TYPE_NON_STATE: 'non-state',
-  UCDP_VIOLENCE_TYPE_ONE_SIDED: 'one-sided',
+  UCDP_VIOLENCE_TYPE_STATE_BASED: "state-based",
+  UCDP_VIOLENCE_TYPE_NON_STATE: "non-state",
+  UCDP_VIOLENCE_TYPE_ONE_SIDED: "one-sided",
 };
 
 function toUcdpGeoEvent(proto: ProtoUcdpEvent): UcdpGeoEvent {
   return {
     id: proto.id,
-    date_start: proto.dateStart ? new Date(proto.dateStart).toISOString().substring(0, 10) : '',
-    date_end: proto.dateEnd ? new Date(proto.dateEnd).toISOString().substring(0, 10) : '',
+    date_start: proto.dateStart
+      ? new Date(proto.dateStart).toISOString().substring(0, 10)
+      : "",
+    date_end: proto.dateEnd
+      ? new Date(proto.dateEnd).toISOString().substring(0, 10)
+      : "",
     latitude: proto.location?.latitude ?? 0,
     longitude: proto.location?.longitude ?? 0,
     country: proto.country,
@@ -139,7 +170,8 @@ function toUcdpGeoEvent(proto: ProtoUcdpEvent): UcdpGeoEvent {
     deaths_best: proto.deathsBest,
     deaths_low: proto.deathsLow,
     deaths_high: proto.deathsHigh,
-    type_of_violence: VIOLENCE_TYPE_REVERSE[proto.violenceType] || 'state-based',
+    type_of_violence:
+      VIOLENCE_TYPE_REVERSE[proto.violenceType] || "state-based",
     source_original: proto.sourceOriginal,
   };
 }
@@ -147,16 +179,34 @@ function toUcdpGeoEvent(proto: ProtoUcdpEvent): UcdpGeoEvent {
 // ---- Adapter 3: Proto HumanitarianCountrySummary -> legacy HapiConflictSummary ----
 
 const HAPI_COUNTRY_CODES = [
-  'US', 'RU', 'CN', 'UA', 'IR', 'IL', 'TW', 'KP', 'SA', 'TR',
-  'PL', 'DE', 'FR', 'GB', 'IN', 'PK', 'SY', 'YE', 'MM', 'VE',
+  "US",
+  "RU",
+  "CN",
+  "UA",
+  "IR",
+  "IL",
+  "TW",
+  "KP",
+  "SA",
+  "TR",
+  "PL",
+  "DE",
+  "FR",
+  "GB",
+  "IN",
+  "PK",
+  "SY",
+  "YE",
+  "MM",
+  "VE",
 ];
 
 function toHapiSummary(proto: ProtoHumanSummary): HapiConflictSummary {
   // Proto fields now accurately represent HAPI conflict event data (MEDIUM-1 fix)
   return {
-    iso2: proto.countryCode || '',
+    iso2: proto.countryCode || "",
     locationName: proto.countryName,
-    month: proto.referencePeriod || '',
+    month: proto.referencePeriod || "",
     eventsTotal: proto.conflictEventsTotal || 0,
     eventsPoliticalViolence: proto.conflictPoliticalViolenceEvents || 0,
     eventsCivilianTargeting: 0, // Included in conflictPoliticalViolenceEvents
@@ -168,7 +218,9 @@ function toHapiSummary(proto: ProtoHumanSummary): HapiConflictSummary {
 
 // ---- UCDP classification derivation heuristic ----
 
-function deriveUcdpClassifications(events: ProtoUcdpEvent[]): Map<string, UcdpConflictStatus> {
+function deriveUcdpClassifications(
+  events: ProtoUcdpEvent[],
+): Map<string, UcdpConflictStatus> {
   const byCountry = new Map<string, ProtoUcdpEvent[]>();
   for (const e of events) {
     const country = e.country;
@@ -182,17 +234,19 @@ function deriveUcdpClassifications(events: ProtoUcdpEvent[]): Map<string, UcdpCo
 
   for (const [country, countryEvents] of byCountry) {
     // Filter to trailing 2-year window
-    const recentEvents = countryEvents.filter(e => (now - e.dateStart) < twoYearsMs);
+    const recentEvents = countryEvents.filter(
+      (e) => now - e.dateStart < twoYearsMs,
+    );
     const totalDeaths = recentEvents.reduce((sum, e) => sum + e.deathsBest, 0);
     const eventCount = recentEvents.length;
 
     let intensity: ConflictIntensity;
     if (totalDeaths > 1000 || eventCount > 100) {
-      intensity = 'war';
+      intensity = "war";
     } else if (eventCount > 10) {
-      intensity = 'minor';
+      intensity = "minor";
     } else {
-      intensity = 'none';
+      intensity = "none";
     }
 
     // Find the highest-death event for sideA/sideB
@@ -205,10 +259,12 @@ function deriveUcdpClassifications(events: ProtoUcdpEvent[]): Map<string, UcdpCo
 
     // Most recent event year
     const mostRecentEvent = recentEvents.reduce<ProtoUcdpEvent | undefined>(
-      (latest, e) => (!latest || e.dateStart > latest.dateStart) ? e : latest,
+      (latest, e) => (!latest || e.dateStart > latest.dateStart ? e : latest),
       undefined,
     );
-    const year = mostRecentEvent ? new Date(mostRecentEvent.dateStart).getFullYear() : new Date().getFullYear();
+    const year = mostRecentEvent
+      ? new Date(mostRecentEvent.dateStart).getFullYear()
+      : new Date().getFullYear();
 
     result.set(country, {
       location: country,
@@ -224,13 +280,20 @@ function deriveUcdpClassifications(events: ProtoUcdpEvent[]): Map<string, UcdpCo
 
 // ---- Haversine helper (ported exactly from legacy ucdp-events.ts) ----
 
-function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+function haversineKm(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+): number {
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a = Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) *
-    Math.sin(dLon / 2) ** 2;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
@@ -245,17 +308,40 @@ interface AcledEvent {
 
 // ---- Empty fallbacks ----
 
-const emptyAcledFallback: ListAcledEventsResponse = { events: [], pagination: undefined };
-const emptyUcdpFallback: ListUcdpEventsResponse = { events: [], pagination: undefined };
-const emptyHapiFallback: GetHumanitarianSummaryResponse = { summary: undefined };
-const emptyHapiBatchFallback: GetHumanitarianSummaryBatchResponse = { results: {}, fetched: 0, requested: 0 };
-const hapiBatchBreaker = createCircuitBreaker<GetHumanitarianSummaryBatchResponse>({ name: 'HDX HAPI Batch', cacheTtlMs: 10 * 60 * 1000, persistCache: true });
+const emptyAcledFallback: ListAcledEventsResponse = {
+  events: [],
+  pagination: undefined,
+};
+const emptyUcdpFallback: ListUcdpEventsResponse = {
+  events: [],
+  pagination: undefined,
+};
+const emptyHapiFallback: GetHumanitarianSummaryResponse = {
+  summary: undefined,
+};
+const emptyHapiBatchFallback: GetHumanitarianSummaryBatchResponse = {
+  results: {},
+  fetched: 0,
+  requested: 0,
+};
+const hapiBatchBreaker =
+  createCircuitBreaker<GetHumanitarianSummaryBatchResponse>({
+    name: "HDX HAPI Batch",
+    cacheTtlMs: 10 * 60 * 1000,
+    persistCache: true,
+  });
 
 // ---- Exported Functions ----
 
 export async function fetchConflictEvents(): Promise<ConflictData> {
   const resp = await acledBreaker.execute(async () => {
-    return client.listAcledEvents({ country: '', start: 0, end: 0, pageSize: 0, cursor: '' });
+    return client.listAcledEvents({
+      country: "",
+      start: 0,
+      end: 0,
+      pageSize: 0,
+      cursor: "",
+    });
   }, emptyAcledFallback);
 
   const events = resp.events.map(toConflictEvent);
@@ -278,11 +364,20 @@ export async function fetchConflictEvents(): Promise<ConflictData> {
   };
 }
 
-export async function fetchUcdpClassifications(hydrated?: ListUcdpEventsResponse): Promise<Map<string, UcdpConflictStatus>> {
-  if (hydrated?.events?.length) return deriveUcdpClassifications(hydrated.events);
+export async function fetchUcdpClassifications(
+  hydrated?: ListUcdpEventsResponse,
+): Promise<Map<string, UcdpConflictStatus>> {
+  if (hydrated?.events?.length)
+    return deriveUcdpClassifications(hydrated.events);
 
   const resp = await ucdpBreaker.execute(async () => {
-    return client.listUcdpEvents({ country: '', start: 0, end: 0, pageSize: 0, cursor: '' });
+    return client.listUcdpEvents({
+      country: "",
+      start: 0,
+      end: 0,
+      pageSize: 0,
+      cursor: "",
+    });
   }, emptyUcdpFallback);
 
   // Don't let the breaker cache empty responses — clear so next call retries
@@ -291,7 +386,9 @@ export async function fetchUcdpClassifications(hydrated?: ListUcdpEventsResponse
   return deriveUcdpClassifications(resp.events);
 }
 
-export async function fetchHapiSummary(): Promise<Map<string, HapiConflictSummary>> {
+export async function fetchHapiSummary(): Promise<
+  Map<string, HapiConflictSummary>
+> {
   const byCode = new Map<string, HapiConflictSummary>();
 
   const resp = await hapiBatchBreaker.execute(async () => {
@@ -313,11 +410,15 @@ export async function fetchHapiSummary(): Promise<Map<string, HapiConflictSummar
         );
         const fallbackResults: Record<string, ProtoHumanSummary> = {};
         for (const result of results) {
-          if (result.status === 'fulfilled' && result.value.r.summary) {
+          if (result.status === "fulfilled" && result.value.r.summary) {
             fallbackResults[result.value.iso2] = result.value.r.summary;
           }
         }
-        return { results: fallbackResults, fetched: Object.keys(fallbackResults).length, requested: HAPI_COUNTRY_CODES.length };
+        return {
+          results: fallbackResults,
+          fetched: Object.keys(fallbackResults).length,
+          requested: HAPI_COUNTRY_CODES.length,
+        };
       }
       throw err;
     }
@@ -337,14 +438,22 @@ interface UcdpEventsResponse {
   cached_at: string;
 }
 
-export async function fetchUcdpEvents(hydrated?: ListUcdpEventsResponse): Promise<UcdpEventsResponse> {
+export async function fetchUcdpEvents(
+  hydrated?: ListUcdpEventsResponse,
+): Promise<UcdpEventsResponse> {
   if (hydrated?.events?.length) {
     const events = hydrated.events.map(toUcdpGeoEvent);
-    return { success: true, count: events.length, data: events, cached_at: '' };
+    return { success: true, count: events.length, data: events, cached_at: "" };
   }
 
   const resp = await ucdpBreaker.execute(async () => {
-    return client.listUcdpEvents({ country: '', start: 0, end: 0, pageSize: 0, cursor: '' });
+    return client.listUcdpEvents({
+      country: "",
+      start: 0,
+      end: 0,
+      pageSize: 0,
+      cursor: "",
+    });
   }, emptyUcdpFallback);
 
   // Don't let the breaker cache empty responses — clear so next call retries
@@ -356,7 +465,7 @@ export async function fetchUcdpEvents(hydrated?: ListUcdpEventsResponse): Promis
     success: events.length > 0,
     count: events.length,
     data: events,
-    cached_at: '',
+    cached_at: "",
   };
 }
 
@@ -366,7 +475,7 @@ export function deduplicateAgainstAcled(
 ): UcdpGeoEvent[] {
   if (!acledEvents.length) return ucdpEvents;
 
-  return ucdpEvents.filter(ucdp => {
+  return ucdpEvents.filter((ucdp) => {
     const uLat = ucdp.latitude;
     const uLon = ucdp.longitude;
     const uDate = new Date(ucdp.date_start).getTime();
@@ -394,75 +503,94 @@ export function deduplicateAgainstAcled(
   });
 }
 
-export function groupByCountry(events: UcdpGeoEvent[]): Map<string, UcdpGeoEvent[]> {
+export function groupByCountry(
+  events: UcdpGeoEvent[],
+): Map<string, UcdpGeoEvent[]> {
   const map = new Map<string, UcdpGeoEvent[]>();
   for (const e of events) {
-    const country = e.country || 'Unknown';
+    const country = e.country || "Unknown";
     if (!map.has(country)) map.set(country, []);
     map.get(country)!.push(e);
   }
   return map;
 }
 
-export function groupByType(events: UcdpGeoEvent[]): Record<string, UcdpGeoEvent[]> {
+export function groupByType(
+  events: UcdpGeoEvent[],
+): Record<string, UcdpGeoEvent[]> {
   return {
-    'state-based': events.filter(e => e.type_of_violence === 'state-based'),
-    'non-state': events.filter(e => e.type_of_violence === 'non-state'),
-    'one-sided': events.filter(e => e.type_of_violence === 'one-sided'),
+    "state-based": events.filter((e) => e.type_of_violence === "state-based"),
+    "non-state": events.filter((e) => e.type_of_violence === "non-state"),
+    "one-sided": events.filter((e) => e.type_of_violence === "one-sided"),
   };
 }
 
-const IRAN_RED_CATEGORIES = new Set(['military', 'airstrike', 'defense']);
-const IRAN_ORANGE_CATEGORIES = new Set(['political', 'international']);
+const IRAN_RED_CATEGORIES = new Set(["military", "airstrike", "defense"]);
+const IRAN_ORANGE_CATEGORIES = new Set(["political", "international"]);
 
-type IranColorTier = 'red' | 'orange' | 'yellow';
+type IranColorTier = "red" | "orange" | "yellow";
 
-function iranColorTier(ev: Pick<IranEvent, 'severity' | 'category'>): IranColorTier {
-  if (ev.severity === 'critical' || IRAN_RED_CATEGORIES.has(ev.category)) return 'red';
-  if (IRAN_ORANGE_CATEGORIES.has(ev.category)) return 'orange';
-  return 'yellow';
+function iranColorTier(
+  ev: Pick<IranEvent, "severity" | "category">,
+): IranColorTier {
+  if (ev.severity === "critical" || IRAN_RED_CATEGORIES.has(ev.category))
+    return "red";
+  if (IRAN_ORANGE_CATEGORIES.has(ev.category)) return "orange";
+  return "yellow";
 }
 
 const IRAN_RGBA: Record<IranColorTier, [number, number, number, number]> = {
-  red: [255, 50, 50, 220], orange: [255, 165, 0, 200], yellow: [255, 255, 0, 180],
+  red: [255, 50, 50, 220],
+  orange: [255, 165, 0, 200],
+  yellow: [255, 255, 0, 180],
 };
 const IRAN_CSS: Record<IranColorTier, string> = {
-  red: 'rgba(255,50,50,0.85)', orange: 'rgba(255,165,0,0.8)', yellow: 'rgba(255,255,0,0.7)',
+  red: "rgba(255,50,50,0.85)",
+  orange: "rgba(255,165,0,0.8)",
+  yellow: "rgba(255,255,0,0.7)",
 };
 
-export function getIranEventColor(ev: Pick<IranEvent, 'severity' | 'category'>): [number, number, number, number] {
+export function getIranEventColor(
+  ev: Pick<IranEvent, "severity" | "category">,
+): [number, number, number, number] {
   return IRAN_RGBA[iranColorTier(ev)];
 }
 
-export function getIranEventCssColor(ev: Pick<IranEvent, 'severity' | 'category'>): string {
+export function getIranEventCssColor(
+  ev: Pick<IranEvent, "severity" | "category">,
+): string {
   return IRAN_CSS[iranColorTier(ev)];
 }
 
-export function getIranEventHexColor(ev: Pick<IranEvent, 'severity'>): string {
-  if (ev.severity === 'high' || ev.severity === 'critical') return '#ff3030';
-  if (ev.severity === 'elevated') return '#ff8800';
-  return '#ffcc00';
+export function getIranEventHexColor(ev: Pick<IranEvent, "severity">): string {
+  if (ev.severity === "high" || ev.severity === "critical") return "#ff3030";
+  if (ev.severity === "elevated") return "#ff8800";
+  return "#ffcc00";
 }
 
 export function getIranEventRadius(severity: string): number {
-  if (severity === 'high' || severity === 'critical') return 20000;
-  if (severity === 'elevated') return 15000;
+  if (severity === "high" || severity === "critical") return 20000;
+  if (severity === "elevated") return 15000;
   return 10000;
 }
 
 export function getIranEventSize(severity: string): number {
-  if (severity === 'high' || severity === 'critical') return 14;
-  if (severity === 'elevated') return 11;
+  if (severity === "high" || severity === "critical") return 14;
+  if (severity === "elevated") return 11;
   return 8;
 }
 
 export async function fetchIranEvents(): Promise<IranEvent[]> {
-  const hydrated = getHydratedData('iranEvents') as ListIranEventsResponse | undefined;
+  const hydrated = getHydratedData("iranEvents") as
+    | ListIranEventsResponse
+    | undefined;
   if (hydrated?.events?.length) return hydrated.events;
 
   const resp = await iranBreaker.execute(async () => {
     const cacheBust = Math.floor(Date.now() / 120_000);
-    const r = await globalThis.fetch(toApiUrl(`/api/conflict/v1/list-iran-events?_v=${cacheBust}`));
+    const r = await globalThis.fetch(
+      toApiUrl(`/api/conflict/v1/list-iran-events?_v=${cacheBust}`),
+    );
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     return r.json() as Promise<ListIranEventsResponse>;
   }, emptyIranFallback);

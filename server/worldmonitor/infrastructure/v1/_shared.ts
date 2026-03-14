@@ -12,7 +12,12 @@ export const Z_THRESHOLD_MEDIUM = 2.0;
 export const Z_THRESHOLD_HIGH = 3.0;
 
 export const VALID_BASELINE_TYPES = [
-  'military_flights', 'vessels', 'protests', 'news', 'ais_gaps', 'satellite_fires',
+  "military_flights",
+  "vessels",
+  "protests",
+  "news",
+  "ais_gaps",
+  "satellite_fires",
 ];
 
 // ========================================================================
@@ -26,29 +31,39 @@ export interface BaselineEntry {
   lastUpdated: string;
 }
 
-export function makeBaselineKey(type: string, region: string, weekday: number, month: number): string {
+export function makeBaselineKey(
+  type: string,
+  region: string,
+  weekday: number,
+  month: number,
+): string {
   return `baseline:${type}:${region}:${weekday}:${month}`;
 }
 
-export function makeBaselineKeyV2(type: string, region: string, weekday: number, month: number): string {
+export function makeBaselineKeyV2(
+  type: string,
+  region: string,
+  weekday: number,
+  month: number,
+): string {
   return `baseline:v2:${type}:${region}:${weekday}:${month}`;
 }
 
 export const COUNT_SOURCE_KEYS: Record<string, string> = {
-  news: 'news:insights:v1',
-  satellite_fires: 'wildfire:fires:v1',
+  news: "news:insights:v1",
+  satellite_fires: "wildfire:fires:v1",
 };
 
-export const TEMPORAL_ANOMALIES_KEY = 'temporal:anomalies:v1';
+export const TEMPORAL_ANOMALIES_KEY = "temporal:anomalies:v1";
 export const TEMPORAL_ANOMALIES_TTL = 900;
-export const BASELINE_LOCK_KEY = 'baseline:lock';
+export const BASELINE_LOCK_KEY = "baseline:lock";
 export const BASELINE_LOCK_TTL = 30;
 
 export function getBaselineSeverity(zScore: number): string {
-  if (zScore >= Z_THRESHOLD_HIGH) return 'critical';
-  if (zScore >= Z_THRESHOLD_MEDIUM) return 'high';
-  if (zScore >= Z_THRESHOLD_LOW) return 'medium';
-  return 'normal';
+  if (zScore >= Z_THRESHOLD_HIGH) return "critical";
+  if (zScore >= Z_THRESHOLD_MEDIUM) return "high";
+  if (zScore >= Z_THRESHOLD_LOW) return "medium";
+  return "normal";
 }
 
 // ========================================================================
@@ -62,17 +77,17 @@ export async function mgetJson(keys: string[]): Promise<(unknown | null)[]> {
   if (!url || !token) return keys.map(() => null);
   try {
     const resp = await fetch(`${url}`, {
-      method: 'POST',
+      method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(['MGET', ...keys]),
+      body: JSON.stringify(["MGET", ...keys]),
       signal: AbortSignal.timeout(5_000),
     });
     if (!resp.ok) return keys.map(() => null);
     const data = (await resp.json()) as { result?: (string | null)[] };
-    return (data.result || []).map(v => v ? JSON.parse(v) : null);
+    return (data.result || []).map((v) => (v ? JSON.parse(v) : null));
   } catch {
     return keys.map(() => null);
   }

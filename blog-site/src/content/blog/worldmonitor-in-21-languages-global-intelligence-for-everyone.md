@@ -27,29 +27,29 @@ This isn't machine translation bolted on as an afterthought. The localization sy
 
 ## Supported Languages
 
-| Language | Script | Direction | Region Coverage |
-|----------|--------|-----------|-----------------|
-| English | Latin | LTR | Global |
-| French | Latin | LTR | France, Africa, Middle East |
-| German | Latin | LTR | Central Europe |
-| Spanish | Latin | LTR | Americas, Spain |
-| Italian | Latin | LTR | Mediterranean |
-| Portuguese | Latin | LTR | Brazil, Portugal, Africa |
-| Dutch | Latin | LTR | Netherlands, Belgium |
-| Swedish | Latin | LTR | Scandinavia |
-| Polish | Latin | LTR | Eastern Europe |
-| Czech | Latin | LTR | Central Europe |
-| Romanian | Latin | LTR | Southeast Europe |
-| Bulgarian | Cyrillic | LTR | Balkans |
-| Greek | Greek | LTR | Eastern Mediterranean |
-| Russian | Cyrillic | LTR | Russia, Central Asia |
-| Turkish | Latin | LTR | Turkey, Central Asia |
-| **Arabic** | **Arabic** | **RTL** | **MENA, Gulf** |
-| Chinese (Simplified) | CJK | LTR | China, Singapore |
-| Japanese | CJK | LTR | Japan |
-| Korean | Hangul | LTR | Korea |
-| Thai | Thai | LTR | Southeast Asia |
-| Vietnamese | Latin (diacritics) | LTR | Southeast Asia |
+| Language             | Script             | Direction | Region Coverage             |
+| -------------------- | ------------------ | --------- | --------------------------- |
+| English              | Latin              | LTR       | Global                      |
+| French               | Latin              | LTR       | France, Africa, Middle East |
+| German               | Latin              | LTR       | Central Europe              |
+| Spanish              | Latin              | LTR       | Americas, Spain             |
+| Italian              | Latin              | LTR       | Mediterranean               |
+| Portuguese           | Latin              | LTR       | Brazil, Portugal, Africa    |
+| Dutch                | Latin              | LTR       | Netherlands, Belgium        |
+| Swedish              | Latin              | LTR       | Scandinavia                 |
+| Polish               | Latin              | LTR       | Eastern Europe              |
+| Czech                | Latin              | LTR       | Central Europe              |
+| Romanian             | Latin              | LTR       | Southeast Europe            |
+| Bulgarian            | Cyrillic           | LTR       | Balkans                     |
+| Greek                | Greek              | LTR       | Eastern Mediterranean       |
+| Russian              | Cyrillic           | LTR       | Russia, Central Asia        |
+| Turkish              | Latin              | LTR       | Turkey, Central Asia        |
+| **Arabic**           | **Arabic**         | **RTL**   | **MENA, Gulf**              |
+| Chinese (Simplified) | CJK                | LTR       | China, Singapore            |
+| Japanese             | CJK                | LTR       | Japan                       |
+| Korean               | Hangul             | LTR       | Korea                       |
+| Thai                 | Thai               | LTR       | Southeast Asia              |
+| Vietnamese           | Latin (diacritics) | LTR       | Southeast Asia              |
 
 ## Arabic and RTL: First-Class Support
 

@@ -1,7 +1,7 @@
-import type { BreakingAlert } from '@/services/breaking-news-alerts';
-import { getAlertSettings } from '@/services/breaking-news-alerts';
-import { getSourcePanelId } from '@/config/feeds';
-import { t } from '@/services/i18n';
+import type { BreakingAlert } from "@/services/breaking-news-alerts";
+import { getAlertSettings } from "@/services/breaking-news-alerts";
+import { getSourcePanelId } from "@/config/feeds";
+import { t } from "@/services/i18n";
 
 const MAX_ALERTS = 3;
 const CRITICAL_DISMISS_MS = 60_000;
@@ -30,40 +30,43 @@ export class BreakingNewsBanner {
   private dismissed = new Map<string, number>();
 
   constructor() {
-    this.container = document.createElement('div');
-    this.container.className = 'breaking-news-container';
+    this.container = document.createElement("div");
+    this.container.className = "breaking-news-container";
     document.body.appendChild(this.container);
 
     this.initAudio();
     this.updatePosition();
     this.setupObservers();
 
-    this.boundOnAlert = (e: Event) => this.handleAlert((e as CustomEvent<BreakingAlert>).detail);
+    this.boundOnAlert = (e: Event) =>
+      this.handleAlert((e as CustomEvent<BreakingAlert>).detail);
     this.boundOnVisibility = () => this.handleVisibility();
     this.boundOnResize = () => this.updatePosition();
 
-    document.addEventListener('wm:breaking-news', this.boundOnAlert);
-    document.addEventListener('visibilitychange', this.boundOnVisibility);
-    window.addEventListener('resize', this.boundOnResize);
+    document.addEventListener("wm:breaking-news", this.boundOnAlert);
+    document.addEventListener("visibilitychange", this.boundOnVisibility);
+    window.addEventListener("resize", this.boundOnResize);
 
-    this.container.addEventListener('click', (e) => {
+    this.container.addEventListener("click", (e) => {
       const target = e.target as HTMLElement;
-      const alertEl = target.closest('.breaking-alert') as HTMLElement | null;
+      const alertEl = target.closest(".breaking-alert") as HTMLElement | null;
       if (!alertEl) return;
 
-      if (target.closest('.breaking-alert-dismiss')) {
-        const id = alertEl.getAttribute('data-alert-id');
+      if (target.closest(".breaking-alert-dismiss")) {
+        const id = alertEl.getAttribute("data-alert-id");
         if (id) this.dismissAlert(id);
         return;
       }
 
-      const panelId = alertEl.getAttribute('data-target-panel');
+      const panelId = alertEl.getAttribute("data-target-panel");
       if (panelId) this.scrollToPanel(panelId);
     });
   }
 
   private initAudio(): void {
-    this.audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleQYjfKapmWswEjCJvuPQfSoXZZ+3qqBJESSP0unGaxMJVYiytrFeLhR6p8znrFUXRW+bs7V3Qx1hn8Xjp1cYPnegprhkMCFmoLi1k0sZTYGlqqlUIA==');
+    this.audio = new Audio(
+      "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleQYjfKapmWswEjCJvuPQfSoXZZ+3qqBJESSP0unGaxMJVYiytrFeLhR6p8znrFUXRW+bs7V3Qx1hn8Xjp1cYPnegprhkMCFmoLi1k0sZTYGlqqlUIA==",
+    );
     this.audio.volume = 0.3;
   }
 
@@ -80,12 +83,12 @@ export class BreakingNewsBanner {
     this.mutationObserver = new MutationObserver(() => this.updatePosition());
     this.mutationObserver.observe(document.body, {
       attributes: true,
-      attributeFilter: ['class'],
+      attributeFilter: ["class"],
     });
   }
 
   private attachResizeObserverIfNeeded(): void {
-    const postureBanner = document.querySelector('.critical-posture-banner');
+    const postureBanner = document.querySelector(".critical-posture-banner");
     if (!postureBanner) return;
     if (postureBanner === this.observedPostureBanner) return;
 
@@ -97,9 +100,9 @@ export class BreakingNewsBanner {
 
   private updatePosition(): void {
     let top = 50;
-    if (document.body?.classList.contains('has-critical-banner')) {
+    if (document.body?.classList.contains("has-critical-banner")) {
       this.attachResizeObserverIfNeeded();
-      const postureBanner = document.querySelector('.critical-posture-banner');
+      const postureBanner = document.querySelector(".critical-posture-banner");
       if (postureBanner) {
         top += postureBanner.getBoundingClientRect().height;
       }
@@ -111,10 +114,13 @@ export class BreakingNewsBanner {
   private updateOffset(): void {
     const height = this.container.offsetHeight;
     document.documentElement.style.setProperty(
-      '--breaking-alert-offset',
-      height > 0 ? `${height}px` : '0px'
+      "--breaking-alert-offset",
+      height > 0 ? `${height}px` : "0px",
     );
-    document.body?.classList.toggle('has-breaking-alert', this.activeAlerts.length > 0);
+    document.body?.classList.toggle(
+      "has-breaking-alert",
+      this.activeAlerts.length > 0,
+    );
   }
 
   private isDismissedRecently(id: string): boolean {
@@ -130,11 +136,13 @@ export class BreakingNewsBanner {
   private handleAlert(alert: BreakingAlert): void {
     if (this.isDismissedRecently(alert.id)) return;
 
-    const existing = this.activeAlerts.find(a => a.alert.id === alert.id);
+    const existing = this.activeAlerts.find((a) => a.alert.id === alert.id);
     if (existing) return;
 
-    if (alert.threatLevel === 'critical') {
-      const highAlerts = this.activeAlerts.filter(a => a.alert.threatLevel === 'high');
+    if (alert.threatLevel === "critical") {
+      const highAlerts = this.activeAlerts.filter(
+        (a) => a.alert.threatLevel === "high",
+      );
       for (const h of highAlerts) {
         this.removeAlert(h);
         const idx = this.activeAlerts.indexOf(h);
@@ -150,7 +158,8 @@ export class BreakingNewsBanner {
     const el = this.createAlertElement(alert);
     this.container.appendChild(el);
 
-    const dismissMs = alert.threatLevel === 'critical' ? CRITICAL_DISMISS_MS : HIGH_DISMISS_MS;
+    const dismissMs =
+      alert.threatLevel === "critical" ? CRITICAL_DISMISS_MS : HIGH_DISMISS_MS;
     const now = Date.now();
     const active: ActiveAlert = {
       alert,
@@ -170,59 +179,60 @@ export class BreakingNewsBanner {
   }
 
   private resolveTargetPanel(alert: BreakingAlert): string {
-    if (alert.origin === 'oref_siren') return 'oref-sirens';
-    if (alert.origin === 'rss_alert') return getSourcePanelId(alert.source);
-    return 'politics';
+    if (alert.origin === "oref_siren") return "oref-sirens";
+    if (alert.origin === "rss_alert") return getSourcePanelId(alert.source);
+    return "politics";
   }
 
   private scrollToPanel(panelId: string): void {
     const panel = document.querySelector(`[data-panel="${panelId}"]`);
     if (!panel) return;
-    panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    panel.classList.add('flash-highlight');
-    setTimeout(() => panel.classList.remove('flash-highlight'), 1500);
+    panel.scrollIntoView({ behavior: "smooth", block: "center" });
+    panel.classList.add("flash-highlight");
+    setTimeout(() => panel.classList.remove("flash-highlight"), 1500);
   }
 
   private createAlertElement(alert: BreakingAlert): HTMLElement {
-    const el = document.createElement('div');
+    const el = document.createElement("div");
     el.className = `breaking-alert severity-${alert.threatLevel}`;
-    el.setAttribute('data-alert-id', alert.id);
-    el.setAttribute('data-target-panel', this.resolveTargetPanel(alert));
-    el.style.cursor = 'pointer';
+    el.setAttribute("data-alert-id", alert.id);
+    el.setAttribute("data-target-panel", this.resolveTargetPanel(alert));
+    el.style.cursor = "pointer";
 
-    const icon = alert.threatLevel === 'critical' ? '🚨' : '⚠️';
-    const levelText = alert.threatLevel === 'critical'
-      ? t('components.breakingNews.critical')
-      : t('components.breakingNews.high');
+    const icon = alert.threatLevel === "critical" ? "🚨" : "⚠️";
+    const levelText =
+      alert.threatLevel === "critical"
+        ? t("components.breakingNews.critical")
+        : t("components.breakingNews.high");
     const timeAgo = this.formatTimeAgo(alert.timestamp);
 
-    const iconSpan = document.createElement('span');
-    iconSpan.className = 'breaking-alert-icon';
+    const iconSpan = document.createElement("span");
+    iconSpan.className = "breaking-alert-icon";
     iconSpan.textContent = icon;
 
-    const content = document.createElement('div');
-    content.className = 'breaking-alert-content';
+    const content = document.createElement("div");
+    content.className = "breaking-alert-content";
 
-    const levelSpan = document.createElement('span');
-    levelSpan.className = 'breaking-alert-level';
+    const levelSpan = document.createElement("span");
+    levelSpan.className = "breaking-alert-level";
     levelSpan.textContent = levelText;
 
-    const headlineSpan = document.createElement('span');
-    headlineSpan.className = 'breaking-alert-headline';
+    const headlineSpan = document.createElement("span");
+    headlineSpan.className = "breaking-alert-headline";
     headlineSpan.textContent = alert.headline;
 
-    const metaSpan = document.createElement('span');
-    metaSpan.className = 'breaking-alert-meta';
+    const metaSpan = document.createElement("span");
+    metaSpan.className = "breaking-alert-meta";
     metaSpan.textContent = `${alert.source} · ${timeAgo}`;
 
     content.appendChild(levelSpan);
     content.appendChild(headlineSpan);
     content.appendChild(metaSpan);
 
-    const dismissBtn = document.createElement('button');
-    dismissBtn.className = 'breaking-alert-dismiss';
-    dismissBtn.textContent = '×';
-    dismissBtn.title = t('components.breakingNews.dismiss');
+    const dismissBtn = document.createElement("button");
+    dismissBtn.className = "breaking-alert-dismiss";
+    dismissBtn.textContent = "×";
+    dismissBtn.title = t("components.breakingNews.dismiss");
 
     el.appendChild(iconSpan);
     el.appendChild(content);
@@ -233,14 +243,19 @@ export class BreakingNewsBanner {
 
   private formatTimeAgo(date: Date): string {
     const ms = Date.now() - date.getTime();
-    if (ms < 60_000) return t('components.intelligenceFindings.time.justNow');
-    if (ms < 3_600_000) return t('components.intelligenceFindings.time.minutesAgo', { count: String(Math.floor(ms / 60_000)) });
-    return t('components.intelligenceFindings.time.hoursAgo', { count: String(Math.floor(ms / 3_600_000)) });
+    if (ms < 60_000) return t("components.intelligenceFindings.time.justNow");
+    if (ms < 3_600_000)
+      return t("components.intelligenceFindings.time.minutesAgo", {
+        count: String(Math.floor(ms / 60_000)),
+      });
+    return t("components.intelligenceFindings.time.hoursAgo", {
+      count: String(Math.floor(ms / 3_600_000)),
+    });
   }
 
   private dismissAlert(id: string): void {
     this.dismissed.set(id, Date.now());
-    const idx = this.activeAlerts.findIndex(a => a.alert.id === id);
+    const idx = this.activeAlerts.findIndex((a) => a.alert.id === id);
     if (idx === -1) return;
     const active = this.activeAlerts[idx]!;
     this.removeAlert(active);
@@ -269,7 +284,10 @@ export class BreakingNewsBanner {
       for (const active of this.activeAlerts) {
         if (!active.timer && active.remainingMs > 0) {
           active.timerStartedAt = now;
-          active.timer = setTimeout(() => this.dismissAlert(active.alert.id), active.remainingMs);
+          active.timer = setTimeout(
+            () => this.dismissAlert(active.alert.id),
+            active.remainingMs,
+          );
         } else if (active.remainingMs <= 0) {
           expired.push(active.alert.id);
         }
@@ -279,9 +297,9 @@ export class BreakingNewsBanner {
   }
 
   public destroy(): void {
-    document.removeEventListener('wm:breaking-news', this.boundOnAlert);
-    document.removeEventListener('visibilitychange', this.boundOnVisibility);
-    window.removeEventListener('resize', this.boundOnResize);
+    document.removeEventListener("wm:breaking-news", this.boundOnAlert);
+    document.removeEventListener("visibilitychange", this.boundOnVisibility);
+    window.removeEventListener("resize", this.boundOnResize);
     this.mutationObserver?.disconnect();
     this.resizeObserver?.disconnect();
 
@@ -290,7 +308,7 @@ export class BreakingNewsBanner {
     }
     this.activeAlerts = [];
     this.container.remove();
-    document.body.classList.remove('has-breaking-alert');
-    document.documentElement.style.removeProperty('--breaking-alert-offset');
+    document.body.classList.remove("has-breaking-alert");
+    document.documentElement.style.removeProperty("--breaking-alert-offset");
   }
 }

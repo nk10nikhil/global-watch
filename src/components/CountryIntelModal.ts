@@ -1,13 +1,13 @@
 /**
  * CountryIntelModal - Shows AI-generated intelligence brief when user clicks a country
  */
-import { escapeHtml } from '@/utils/sanitize';
-import { t } from '@/services/i18n';
-import { sanitizeUrl } from '@/utils/sanitize';
-import { getCSSColor } from '@/utils';
-import type { CountryScore } from '@/services/country-instability';
-import type { PredictionMarket } from '@/services/prediction';
-import { toFlagEmoji } from '@/utils/country-flag';
+import { escapeHtml } from "@/utils/sanitize";
+import { t } from "@/services/i18n";
+import { sanitizeUrl } from "@/utils/sanitize";
+import { getCSSColor } from "@/utils";
+import type { CountryScore } from "@/services/country-instability";
+import type { PredictionMarket } from "@/services/prediction";
+import { toFlagEmoji } from "@/utils/country-flag";
 
 interface CountryIntelData {
   brief: string;
@@ -48,8 +48,8 @@ export class CountryIntelModal {
   private keydownHandler: (e: KeyboardEvent) => void;
 
   constructor() {
-    this.overlay = document.createElement('div');
-    this.overlay.className = 'country-intel-overlay';
+    this.overlay = document.createElement("div");
+    this.overlay.className = "country-intel-overlay";
     this.overlay.innerHTML = `
       <div class="country-intel-modal">
         <div class="country-intel-header">
@@ -61,37 +61,47 @@ export class CountryIntelModal {
     `;
     document.body.appendChild(this.overlay);
 
-    this.headerEl = this.overlay.querySelector('.country-intel-title')!;
-    this.contentEl = this.overlay.querySelector('.country-intel-content')!;
+    this.headerEl = this.overlay.querySelector(".country-intel-title")!;
+    this.contentEl = this.overlay.querySelector(".country-intel-content")!;
 
-    this.overlay.querySelector('.country-intel-close')?.addEventListener('click', () => this.hide());
-    this.overlay.addEventListener('click', (e) => {
-      if ((e.target as HTMLElement).classList.contains('country-intel-overlay')) this.hide();
+    this.overlay
+      .querySelector(".country-intel-close")
+      ?.addEventListener("click", () => this.hide());
+    this.overlay.addEventListener("click", (e) => {
+      if ((e.target as HTMLElement).classList.contains("country-intel-overlay"))
+        this.hide();
     });
     this.keydownHandler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') this.hide();
+      if (e.key === "Escape") this.hide();
     };
   }
 
   private countryFlag(code: string): string {
-    return toFlagEmoji(code, '🌍');
+    return toFlagEmoji(code, "🌍");
   }
 
   private levelBadge(level: string): string {
     const varMap: Record<string, string> = {
-      critical: '--semantic-critical',
-      high: '--semantic-high',
-      elevated: '--semantic-elevated',
-      normal: '--semantic-normal',
-      low: '--semantic-low',
+      critical: "--semantic-critical",
+      high: "--semantic-high",
+      elevated: "--semantic-elevated",
+      normal: "--semantic-normal",
+      low: "--semantic-low",
     };
-    const color = getCSSColor(varMap[level] || '--text-dim');
+    const color = getCSSColor(varMap[level] || "--text-dim");
     return `<span class="cii-badge" style="background:${color}20;color:${color};border:1px solid ${color}40">${level.toUpperCase()}</span>`;
   }
 
   private scoreBar(score: number): string {
     const pct = Math.min(100, Math.max(0, score));
-    const color = pct >= 70 ? getCSSColor('--semantic-critical') : pct >= 50 ? getCSSColor('--semantic-high') : pct >= 30 ? getCSSColor('--semantic-elevated') : getCSSColor('--semantic-normal');
+    const color =
+      pct >= 70
+        ? getCSSColor("--semantic-critical")
+        : pct >= 50
+          ? getCSSColor("--semantic-high")
+          : pct >= 30
+            ? getCSSColor("--semantic-elevated")
+            : getCSSColor("--semantic-normal");
     return `
       <div class="cii-score-bar">
         <div class="cii-score-fill" style="width:${pct}%;background:${color}"></div>
@@ -101,49 +111,54 @@ export class CountryIntelModal {
   }
 
   public showLoading(): void {
-    this.currentCode = '__loading__';
-    document.addEventListener('keydown', this.keydownHandler);
+    this.currentCode = "__loading__";
+    document.addEventListener("keydown", this.keydownHandler);
     this.headerEl.innerHTML = `
       <span class="country-flag">🌍</span>
-      <span class="country-name">${t('modals.countryIntel.identifying')}</span>
+      <span class="country-name">${t("modals.countryIntel.identifying")}</span>
     `;
     this.contentEl.innerHTML = `
       <div class="intel-brief-section">
         <div class="intel-brief-loading">
           <div class="intel-skeleton"></div>
           <div class="intel-skeleton short"></div>
-          <span class="intel-loading-text">${t('modals.countryIntel.locating')}</span>
+          <span class="intel-loading-text">${t("modals.countryIntel.locating")}</span>
         </div>
       </div>
     `;
-    this.overlay.classList.add('active');
+    this.overlay.classList.add("active");
   }
 
-  public show(country: string, code: string, score: CountryScore | null, signals?: ActiveSignals): void {
+  public show(
+    country: string,
+    code: string,
+    score: CountryScore | null,
+    signals?: ActiveSignals,
+  ): void {
     this.currentCode = code;
     this.currentName = country;
     const flag = this.countryFlag(code);
-    let html = '';
-    document.addEventListener('keydown', this.keydownHandler);
-    this.overlay.classList.add('active');
+    let html = "";
+    document.addEventListener("keydown", this.keydownHandler);
+    this.overlay.classList.add("active");
 
     this.headerEl.innerHTML = `
       <span class="country-flag">${flag}</span>
       <span class="country-name">${escapeHtml(country)}</span>
-      ${score ? this.levelBadge(score.level) : ''}
-      <button class="country-intel-share-btn" title="${t('modals.story.shareTitle')}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a2 2 0 002 2h12a2 2 0 002-2v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>
+      ${score ? this.levelBadge(score.level) : ""}
+      <button class="country-intel-share-btn" title="${t("modals.story.shareTitle")}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a2 2 0 002 2h12a2 2 0 002-2v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>
     `;
 
     if (score) {
       html += `
         <div class="cii-section">
-          <div class="cii-label">${t('modals.countryIntel.instabilityIndex')} ${this.scoreBar(score.score)}</div>
+          <div class="cii-label">${t("modals.countryIntel.instabilityIndex")} ${this.scoreBar(score.score)}</div>
           <div class="cii-components">
-            <span title="${t('common.unrest')}">📢 ${score.components.unrest.toFixed(0)}</span>
-            <span title="${t('common.conflict')}">⚔ ${score.components.conflict.toFixed(0)}</span>
-            <span title="${t('common.security')}">🛡️ ${score.components.security.toFixed(0)}</span>
-            <span title="${t('common.information')}">📡 ${score.components.information.toFixed(0)}</span>
-            <span class="cii-trend ${score.trend}">${score.trend === 'rising' ? '↗' : score.trend === 'falling' ? '↘' : '→'} ${score.trend}</span>
+            <span title="${t("common.unrest")}">📢 ${score.components.unrest.toFixed(0)}</span>
+            <span title="${t("common.conflict")}">⚔ ${score.components.conflict.toFixed(0)}</span>
+            <span title="${t("common.security")}">🛡️ ${score.components.security.toFixed(0)}</span>
+            <span title="${t("common.information")}">📡 ${score.components.information.toFixed(0)}</span>
+            <span class="cii-trend ${score.trend}">${score.trend === "rising" ? "↗" : score.trend === "falling" ? "↘" : "→"} ${score.trend}</span>
           </div>
         </div>
       `;
@@ -151,16 +166,33 @@ export class CountryIntelModal {
 
     const chips: string[] = [];
     if (signals) {
-      if (signals.protests > 0) chips.push(`<span class="signal-chip protest">📢 ${signals.protests} ${t('modals.countryIntel.protests')}</span>`);
-      if (signals.militaryFlights > 0) chips.push(`<span class="signal-chip military">✈️ ${signals.militaryFlights} ${t('modals.countryIntel.militaryAircraft')}</span>`);
-      if (signals.militaryVessels > 0) chips.push(`<span class="signal-chip military">⚓ ${signals.militaryVessels} ${t('modals.countryIntel.militaryVessels')}</span>`);
-      if (signals.outages > 0) chips.push(`<span class="signal-chip outage">🌐 ${signals.outages} ${t('modals.countryIntel.outages')}</span>`);
-      if (signals.earthquakes > 0) chips.push(`<span class="signal-chip quake">🌍 ${signals.earthquakes} ${t('modals.countryIntel.earthquakes')}</span>`);
+      if (signals.protests > 0)
+        chips.push(
+          `<span class="signal-chip protest">📢 ${signals.protests} ${t("modals.countryIntel.protests")}</span>`,
+        );
+      if (signals.militaryFlights > 0)
+        chips.push(
+          `<span class="signal-chip military">✈️ ${signals.militaryFlights} ${t("modals.countryIntel.militaryAircraft")}</span>`,
+        );
+      if (signals.militaryVessels > 0)
+        chips.push(
+          `<span class="signal-chip military">⚓ ${signals.militaryVessels} ${t("modals.countryIntel.militaryVessels")}</span>`,
+        );
+      if (signals.outages > 0)
+        chips.push(
+          `<span class="signal-chip outage">🌐 ${signals.outages} ${t("modals.countryIntel.outages")}</span>`,
+        );
+      if (signals.earthquakes > 0)
+        chips.push(
+          `<span class="signal-chip quake">🌍 ${signals.earthquakes} ${t("modals.countryIntel.earthquakes")}</span>`,
+        );
     }
-    chips.push(`<span class="signal-chip stock-loading">📈 ${t('modals.countryIntel.loadingIndex')}</span>`);
-    html += `<div class="active-signals">${chips.join('')}</div>`;
+    chips.push(
+      `<span class="signal-chip stock-loading">📈 ${t("modals.countryIntel.loadingIndex")}</span>`,
+    );
+    html += `<div class="active-signals">${chips.join("")}</div>`;
 
-    html += `<div class="country-markets-section"><span class="intel-loading-text">${t('modals.countryIntel.loadingMarkets')}</span></div>`;
+    html += `<div class="country-markets-section"><span class="intel-loading-text">${t("modals.countryIntel.loadingMarkets")}</span></div>`;
 
     html += `
       <div class="intel-brief-section">
@@ -169,15 +201,15 @@ export class CountryIntelModal {
           <div class="intel-skeleton short"></div>
           <div class="intel-skeleton"></div>
           <div class="intel-skeleton short"></div>
-          <span class="intel-loading-text">${t('modals.countryIntel.generatingBrief')}</span>
+          <span class="intel-loading-text">${t("modals.countryIntel.generatingBrief")}</span>
         </div>
       </div>
     `;
 
     this.contentEl.innerHTML = html;
 
-    const shareBtn = this.headerEl.querySelector('.country-intel-share-btn');
-    shareBtn?.addEventListener('click', (e) => {
+    const shareBtn = this.headerEl.querySelector(".country-intel-share-btn");
+    shareBtn?.addEventListener("click", (e) => {
       e.stopPropagation();
       if (this.currentCode && this.currentName && this.onShareStory) {
         this.onShareStory(this.currentCode, this.currentName);
@@ -185,46 +217,55 @@ export class CountryIntelModal {
     });
   }
 
-  public updateBrief(data: CountryIntelData & { skipped?: boolean; reason?: string; fallback?: boolean }): void {
-    if (this.currentCode !== data.code && this.currentCode !== '__loading__') return;
+  public updateBrief(
+    data: CountryIntelData & {
+      skipped?: boolean;
+      reason?: string;
+      fallback?: boolean;
+    },
+  ): void {
+    if (this.currentCode !== data.code && this.currentCode !== "__loading__")
+      return;
 
     // If modal closed, don't update
     if (!this.isVisible()) return;
 
     if (data.error || data.skipped || !data.brief) {
-      const msg = data.error || data.reason || t('modals.countryIntel.unavailable');
-      const briefSection = this.contentEl.querySelector('.intel-brief-section');
+      const msg =
+        data.error || data.reason || t("modals.countryIntel.unavailable");
+      const briefSection = this.contentEl.querySelector(".intel-brief-section");
       if (briefSection) {
         briefSection.innerHTML = `<div class="intel-error">${escapeHtml(msg)}</div>`;
       }
       return;
     }
 
-    const briefSection = this.contentEl.querySelector('.intel-brief-section');
+    const briefSection = this.contentEl.querySelector(".intel-brief-section");
     if (!briefSection) return;
 
     const formatted = this.formatBrief(data.brief);
     briefSection.innerHTML = `
       <div class="intel-brief">${formatted}</div>
       <div class="intel-footer">
-        ${data.cached ? `<span class="intel-cached">📋 ${t('modals.countryIntel.cached')}</span>` : `<span class="intel-fresh">✨ ${t('modals.countryIntel.fresh')}</span>`}
-        <span class="intel-timestamp">${data.generatedAt ? new Date(data.generatedAt).toLocaleTimeString() : ''}</span>
+        ${data.cached ? `<span class="intel-cached">📋 ${t("modals.countryIntel.cached")}</span>` : `<span class="intel-fresh">✨ ${t("modals.countryIntel.fresh")}</span>`}
+        <span class="intel-timestamp">${data.generatedAt ? new Date(data.generatedAt).toLocaleTimeString() : ""}</span>
       </div>
     `;
   }
 
   public updateMarkets(markets: PredictionMarket[]): void {
-    const section = this.contentEl.querySelector('.country-markets-section');
+    const section = this.contentEl.querySelector(".country-markets-section");
     if (!section) return;
 
     if (markets.length === 0) {
-      section.innerHTML = `<span class="intel-loading-text" style="opacity:0.5">${t('modals.countryIntel.noMarkets')}</span>`;
+      section.innerHTML = `<span class="intel-loading-text" style="opacity:0.5">${t("modals.countryIntel.noMarkets")}</span>`;
       return;
     }
 
-    const items = markets.map(market => {
-      const href = sanitizeUrl(market.url || '#') || '#';
-      return `
+    const items = markets
+      .map((market) => {
+        const href = sanitizeUrl(market.url || "#") || "#";
+        return `
       <div class="market-item">
         <a href="${href}" target="_blank" rel="noopener noreferrer" class="prediction-market-card">
         <div class="market-provider">Polymarket</div>
@@ -232,13 +273,14 @@ export class CountryIntelModal {
         <div class="market-prob">${market.yesPrice.toFixed(1)}%</div>
       </a>
     `;
-    }).join('');
+      })
+      .join("");
 
-    section.innerHTML = `<div class="markets-label">📊 ${t('modals.countryIntel.predictionMarkets')}</div>${items}`;
+    section.innerHTML = `<div class="markets-label">📊 ${t("modals.countryIntel.predictionMarkets")}</div>${items}`;
   }
 
   public updateStock(data: StockIndexData): void {
-    const el = this.contentEl.querySelector('.stock-loading');
+    const el = this.contentEl.querySelector(".stock-loading");
     if (!el) return;
 
     if (!data.available) {
@@ -247,25 +289,25 @@ export class CountryIntelModal {
     }
 
     const pct = parseFloat(data.weekChangePercent);
-    const sign = pct >= 0 ? '+' : '';
-    const cls = pct >= 0 ? 'stock-up' : 'stock-down';
-    const arrow = pct >= 0 ? '📈' : '📉';
+    const sign = pct >= 0 ? "+" : "";
+    const cls = pct >= 0 ? "stock-up" : "stock-down";
+    const arrow = pct >= 0 ? "📈" : "📉";
     el.className = `signal-chip stock ${cls}`;
     el.innerHTML = `${arrow} ${escapeHtml(data.indexName)}: ${sign}${data.weekChangePercent}% (1W)`;
   }
 
   private formatBrief(text: string): string {
     return escapeHtml(text)
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\n\n/g, '</p><p>')
-      .replace(/\n/g, '<br>')
-      .replace(/^/, '<p>')
-      .replace(/$/, '</p>');
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\n\n/g, "</p><p>")
+      .replace(/\n/g, "<br>")
+      .replace(/^/, "<p>")
+      .replace(/$/, "</p>");
   }
 
   public hide(): void {
-    this.overlay.classList.remove('active');
-    document.removeEventListener('keydown', this.keydownHandler);
+    this.overlay.classList.remove("active");
+    document.removeEventListener("keydown", this.keydownHandler);
     this.currentCode = null;
     this.onCloseCallback?.();
   }
@@ -275,6 +317,6 @@ export class CountryIntelModal {
   }
 
   public isVisible(): boolean {
-    return this.overlay.classList.contains('active');
+    return this.overlay.classList.contains("active");
   }
 }

@@ -1,32 +1,36 @@
-import { Panel } from './Panel';
-import { escapeHtml } from '@/utils/sanitize';
-import { t } from '@/services/i18n';
-import { getCSSColor } from '@/utils';
+import { Panel } from "./Panel";
+import { escapeHtml } from "@/utils/sanitize";
+import { t } from "@/services/i18n";
+import { getCSSColor } from "@/utils";
 import {
   buildDependencyGraph,
   calculateCascade,
   getGraphStats,
   clearGraphCache,
   type DependencyGraph,
-} from '@/services/infrastructure-cascade';
-import type { CascadeResult, CascadeImpactLevel, InfrastructureNode } from '@/types';
+} from "@/services/infrastructure-cascade";
+import type {
+  CascadeResult,
+  CascadeImpactLevel,
+  InfrastructureNode,
+} from "@/types";
 
-type NodeFilter = 'all' | 'cable' | 'pipeline' | 'port' | 'chokepoint';
+type NodeFilter = "all" | "cable" | "pipeline" | "port" | "chokepoint";
 
 export class CascadePanel extends Panel {
   private graph: DependencyGraph | null = null;
   private selectedNode: string | null = null;
   private cascadeResult: CascadeResult | null = null;
-  private filter: NodeFilter = 'cable';
+  private filter: NodeFilter = "cable";
   private onSelectCallback: ((nodeId: string | null) => void) | null = null;
 
   constructor() {
     super({
-      id: 'cascade',
-      title: t('panels.cascade'),
+      id: "cascade",
+      title: t("panels.cascade"),
       showCount: true,
       trackActivity: true,
-      infoTooltip: t('components.cascade.infoTooltip'),
+      infoTooltip: t("components.cascade.infoTooltip"),
     });
     this.setupDelegatedListeners();
     this.init();
@@ -40,46 +44,60 @@ export class CascadePanel extends Panel {
       this.setCount(stats.nodes);
       this.render();
     } catch (error) {
-      console.error('[CascadePanel] Init error:', error);
-      this.showError(t('common.failedDependencyGraph'));
+      console.error("[CascadePanel] Init error:", error);
+      this.showError(t("common.failedDependencyGraph"));
     }
   }
 
   private getImpactColor(level: CascadeImpactLevel): string {
     switch (level) {
-      case 'critical': return getCSSColor('--semantic-critical');
-      case 'high': return getCSSColor('--semantic-high');
-      case 'medium': return getCSSColor('--semantic-elevated');
-      case 'low': return getCSSColor('--semantic-normal');
+      case "critical":
+        return getCSSColor("--semantic-critical");
+      case "high":
+        return getCSSColor("--semantic-high");
+      case "medium":
+        return getCSSColor("--semantic-elevated");
+      case "low":
+        return getCSSColor("--semantic-normal");
     }
   }
 
   private getImpactEmoji(level: CascadeImpactLevel): string {
     switch (level) {
-      case 'critical': return '🔴';
-      case 'high': return '🟠';
-      case 'medium': return '🟡';
-      case 'low': return '🟢';
+      case "critical":
+        return "🔴";
+      case "high":
+        return "🟠";
+      case "medium":
+        return "🟡";
+      case "low":
+        return "🟢";
     }
   }
 
   private getNodeTypeEmoji(type: string): string {
     switch (type) {
-      case 'cable': return '🔌';
-      case 'pipeline': return '🛢️';
-      case 'port': return '⚓';
-      case 'chokepoint': return '🚢';
-      case 'country': return '🏳️';
-      default: return '📍';
+      case "cable":
+        return "🔌";
+      case "pipeline":
+        return "🛢️";
+      case "port":
+        return "⚓";
+      case "chokepoint":
+        return "🚢";
+      case "country":
+        return "🏳️";
+      default:
+        return "📍";
     }
   }
 
-  private getFilterLabel(filter: Exclude<NodeFilter, 'all'>): string {
-    const labels: Record<Exclude<NodeFilter, 'all'>, string> = {
-      cable: t('components.cascade.filters.cables'),
-      pipeline: t('components.cascade.filters.pipelines'),
-      port: t('components.cascade.filters.ports'),
-      chokepoint: t('components.cascade.filters.chokepoints'),
+  private getFilterLabel(filter: Exclude<NodeFilter, "all">): string {
+    const labels: Record<Exclude<NodeFilter, "all">, string> = {
+      cable: t("components.cascade.filters.cables"),
+      pipeline: t("components.cascade.filters.pipelines"),
+      port: t("components.cascade.filters.ports"),
+      chokepoint: t("components.cascade.filters.chokepoints"),
     };
     return labels[filter];
   }
@@ -88,8 +106,8 @@ export class CascadePanel extends Panel {
     if (!this.graph) return [];
     const nodes: InfrastructureNode[] = [];
     for (const node of this.graph.nodes.values()) {
-      if (this.filter === 'all' || node.type === this.filter) {
-        if (node.type !== 'country') {
+      if (this.filter === "all" || node.type === this.filter) {
+        if (node.type !== "country") {
           nodes.push(node);
         }
       }
@@ -99,62 +117,78 @@ export class CascadePanel extends Panel {
 
   private renderSelector(): string {
     const nodes = this.getFilteredNodes();
-    const filterButtons = ['cable', 'pipeline', 'port', 'chokepoint'].map((f) =>
-      `<button class="panel-tab ${this.filter === f ? 'active' : ''}" data-filter="${f}" role="radio" aria-checked="${this.filter === f}" aria-label="${this.getFilterLabel(f as Exclude<NodeFilter, 'all'>)}">
-        ${this.getNodeTypeEmoji(f)} ${this.getFilterLabel(f as Exclude<NodeFilter, 'all'>)}
-      </button>`
-    ).join('');
+    const filterButtons = ["cable", "pipeline", "port", "chokepoint"]
+      .map(
+        (f) =>
+          `<button class="panel-tab ${this.filter === f ? "active" : ""}" data-filter="${f}" role="radio" aria-checked="${this.filter === f}" aria-label="${this.getFilterLabel(f as Exclude<NodeFilter, "all">)}">
+        ${this.getNodeTypeEmoji(f)} ${this.getFilterLabel(f as Exclude<NodeFilter, "all">)}
+      </button>`,
+      )
+      .join("");
 
-    const nodeOptions = nodes.map(n =>
-      `<option value="${escapeHtml(n.id)}" ${this.selectedNode === n.id ? 'selected' : ''}>
+    const nodeOptions = nodes
+      .map(
+        (n) =>
+          `<option value="${escapeHtml(n.id)}" ${this.selectedNode === n.id ? "selected" : ""}>
         ${escapeHtml(n.name)}
-      </option>`
-    ).join('');
+      </option>`,
+      )
+      .join("");
     const selectedType = t(`components.cascade.filterType.${this.filter}`);
 
     return `
       <div class="cascade-selector">
         <div class="panel-tabs panel-tabs--wrap" role="radiogroup" aria-label="Infrastructure type filter">${filterButtons}</div>
-        <select class="cascade-select" ${nodes.length === 0 ? 'disabled' : ''}>
-          <option value="">${t('components.cascade.selectPrompt', { type: selectedType })}</option>
+        <select class="cascade-select" ${nodes.length === 0 ? "disabled" : ""}>
+          <option value="">${t("components.cascade.selectPrompt", { type: selectedType })}</option>
           ${nodeOptions}
         </select>
-        <button class="cascade-analyze-btn" ${!this.selectedNode ? 'disabled' : ''}>
-          ${t('components.cascade.analyzeImpact')}
+        <button class="cascade-analyze-btn" ${!this.selectedNode ? "disabled" : ""}>
+          ${t("components.cascade.analyzeImpact")}
         </button>
       </div>
     `;
   }
 
   private renderCascadeResult(): string {
-    if (!this.cascadeResult) return '';
+    if (!this.cascadeResult) return "";
 
     const { source, countriesAffected, redundancies } = this.cascadeResult;
 
-    const countriesHtml = countriesAffected.length > 0
-      ? countriesAffected.map(c => `
+    const countriesHtml =
+      countriesAffected.length > 0
+        ? countriesAffected
+            .map(
+              (c) => `
           <div class="cascade-country" style="border-left: 3px solid ${this.getImpactColor(c.impactLevel)}">
             <span class="cascade-emoji">${this.getImpactEmoji(c.impactLevel)}</span>
             <span class="cascade-country-name">${escapeHtml(c.countryName)}</span>
             <span class="cascade-impact">${t(`components.cascade.impactLevels.${c.impactLevel}`)}</span>
-            ${c.affectedCapacity > 0 ? `<span class="cascade-capacity">${t('components.cascade.capacityPercent', { percent: String(Math.round(c.affectedCapacity * 100)) })}</span>` : ''}
+            ${c.affectedCapacity > 0 ? `<span class="cascade-capacity">${t("components.cascade.capacityPercent", { percent: String(Math.round(c.affectedCapacity * 100)) })}</span>` : ""}
           </div>
-        `).join('')
-      : `<div class="empty-state">${t('components.cascade.noCountryImpacts')}</div>`;
+        `,
+            )
+            .join("")
+        : `<div class="empty-state">${t("components.cascade.noCountryImpacts")}</div>`;
 
-    const redundanciesHtml = redundancies && redundancies.length > 0
-      ? `
+    const redundanciesHtml =
+      redundancies && redundancies.length > 0
+        ? `
         <div class="cascade-section">
-          <div class="cascade-section-title">${t('components.cascade.alternativeRoutes')}</div>
-          ${redundancies.map(r => `
+          <div class="cascade-section-title">${t("components.cascade.alternativeRoutes")}</div>
+          ${redundancies
+            .map(
+              (r) => `
             <div class="cascade-redundancy">
               <span class="cascade-redundancy-name">${escapeHtml(r.name)}</span>
               <span class="cascade-redundancy-capacity">${Math.round(r.capacityShare * 100)}%</span>
             </div>
-          `).join('')}
+          `,
+            )
+            .join("")}
         </div>
       `
-      : '';
+        : "";
 
     return `
       <div class="cascade-result">
@@ -164,7 +198,7 @@ export class CascadePanel extends Panel {
           <span class="cascade-source-type">${t(`components.cascade.filterType.${source.type}`)}</span>
         </div>
         <div class="cascade-section">
-          <div class="cascade-section-title">${t('components.cascade.countriesAffected', { count: String(countriesAffected.length) })}</div>
+          <div class="cascade-section-title">${t("components.cascade.countriesAffected", { count: String(countriesAffected.length) })}</div>
           <div class="cascade-countries">${countriesHtml}</div>
         </div>
         ${redundanciesHtml}
@@ -186,7 +220,7 @@ export class CascadePanel extends Panel {
         <span>⚓ ${stats.ports}</span>
         <span>🌊 ${stats.chokepoints}</span>
         <span>🏳️ ${stats.countries}</span>
-        <span>📊 ${stats.edges} ${t('components.cascade.links')}</span>
+        <span>📊 ${stats.edges} ${t("components.cascade.links")}</span>
       </div>
     `;
 
@@ -194,7 +228,7 @@ export class CascadePanel extends Panel {
       <div class="cascade-panel">
         ${statsHtml}
         ${this.renderSelector()}
-        ${this.cascadeResult ? this.renderCascadeResult() : `<div class="cascade-hint">${t('components.cascade.selectInfrastructureHint')}</div>`}
+        ${this.cascadeResult ? this.renderCascadeResult() : `<div class="cascade-hint">${t("components.cascade.selectInfrastructureHint")}</div>`}
       </div>
     `;
   }
@@ -204,26 +238,26 @@ export class CascadePanel extends Panel {
    * re-renders (which replace innerHTML) never accumulate listeners.
    */
   private setupDelegatedListeners(): void {
-    this.content.addEventListener('click', (e: Event) => {
+    this.content.addEventListener("click", (e: Event) => {
       const target = e.target as HTMLElement;
 
-      const filterBtn = target.closest<HTMLElement>('.panel-tab');
+      const filterBtn = target.closest<HTMLElement>(".panel-tab");
       if (filterBtn) {
-        this.filter = filterBtn.getAttribute('data-filter') as NodeFilter;
+        this.filter = filterBtn.getAttribute("data-filter") as NodeFilter;
         this.selectedNode = null;
         this.cascadeResult = null;
         this.render();
         return;
       }
 
-      if (target.closest('.cascade-analyze-btn')) {
+      if (target.closest(".cascade-analyze-btn")) {
         this.runAnalysis();
       }
     });
 
-    this.content.addEventListener('change', (e: Event) => {
+    this.content.addEventListener("change", (e: Event) => {
       const target = e.target as HTMLElement;
-      if (target.closest('.cascade-select')) {
+      if (target.closest(".cascade-select")) {
         const select = target as HTMLSelectElement;
         this.selectedNode = select.value || null;
         this.cascadeResult = null;
@@ -248,8 +282,8 @@ export class CascadePanel extends Panel {
 
   public selectNode(nodeId: string): void {
     this.selectedNode = nodeId;
-    const nodeType = nodeId.split(':')[0] as NodeFilter;
-    if (['cable', 'pipeline', 'port', 'chokepoint'].includes(nodeType)) {
+    const nodeType = nodeId.split(":")[0] as NodeFilter;
+    if (["cable", "pipeline", "port", "chokepoint"].includes(nodeType)) {
       this.filter = nodeType;
     }
     this.runAnalysis();

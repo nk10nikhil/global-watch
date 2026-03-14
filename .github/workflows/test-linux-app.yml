@@ -1,4 +1,4 @@
-name: 'Test Linux App'
+name: "Test Linux App"
 
 on:
   workflow_dispatch:
@@ -23,8 +23,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
-          node-version: '22'
-          cache: 'npm'
+          node-version: "22"
+          cache: "npm"
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@631a55b12751854ce901bb631d5902ceb48146f7
@@ -34,7 +34,7 @@ jobs:
       - name: Rust cache
         uses: swatinem/rust-cache@ad397744b0d591a723ab90405b7247fac0e6b8db
         with:
-          workspaces: './src-tauri -> target'
+          workspaces: "./src-tauri -> target"
           cache-on-failure: true
 
       - name: Install Linux system dependencies
@@ -58,8 +58,8 @@ jobs:
       - name: Bundle Node.js runtime
         shell: bash
         env:
-          NODE_VERSION: '22.14.0'
-          NODE_TARGET: 'x86_64-unknown-linux-gnu'
+          NODE_VERSION: "22.14.0"
+          NODE_TARGET: "x86_64-unknown-linux-gnu"
         run: bash scripts/download-node.sh --target "$NODE_TARGET"
 
       - name: Build Tauri app
@@ -67,10 +67,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VITE_VARIANT: full
-          VITE_DESKTOP_RUNTIME: '1'
+          VITE_DESKTOP_RUNTIME: "1"
           CONVEX_URL: ${{ secrets.CONVEX_URL }}
         with:
-          args: ''
+          args: ""
           retryAttempts: 1
 
       - name: Smoke-test AppImage

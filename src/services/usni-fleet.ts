@@ -1,16 +1,27 @@
-import type { MilitaryVessel, MilitaryVesselCluster, USNIFleetReport, USNIVesselEntry } from '@/types';
-import { getRpcBaseUrl } from '@/services/rpc-client';
-import { createCircuitBreaker } from '@/utils';
-import { getUSNIRegionApproxCoords, getUSNIRegionCoords, HULL_HOMEPORT } from '@/config/military';
+import type {
+  MilitaryVessel,
+  MilitaryVesselCluster,
+  USNIFleetReport,
+  USNIVesselEntry,
+} from "@/types";
+import { getRpcBaseUrl } from "@/services/rpc-client";
+import { createCircuitBreaker } from "@/utils";
+import {
+  getUSNIRegionApproxCoords,
+  getUSNIRegionCoords,
+  HULL_HOMEPORT,
+} from "@/config/military";
 import {
   MilitaryServiceClient,
   type GetUSNIFleetReportResponse,
-} from '@/generated/client/worldmonitor/military/v1/service_client';
+} from "@/generated/client/worldmonitor/military/v1/service_client";
 
-const client = new MilitaryServiceClient(getRpcBaseUrl(), { fetch: (...args) => globalThis.fetch(...args) });
+const client = new MilitaryServiceClient(getRpcBaseUrl(), {
+  fetch: (...args) => globalThis.fetch(...args),
+});
 
 const breaker = createCircuitBreaker<USNIFleetReport | null>({
-  name: 'USNI Fleet Tracker',
+  name: "USNI Fleet Tracker",
   maxFailures: 3,
   cooldownMs: 10 * 60 * 1000,
   cacheTtlMs: 60 * 60 * 1000, // 1hr local cache
@@ -20,18 +31,20 @@ let lastReport: USNIFleetReport | null = null;
 let lastFetchTime = 0;
 const LOCAL_CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
-function mapProtoToReport(resp: GetUSNIFleetReportResponse): USNIFleetReport | null {
+function mapProtoToReport(
+  resp: GetUSNIFleetReportResponse,
+): USNIFleetReport | null {
   const r = resp.report;
   if (!r) return null;
 
   const vessels: USNIVesselEntry[] = r.vessels.map((v) => ({
     name: v.name,
     hullNumber: v.hullNumber,
-    vesselType: v.vesselType as USNIVesselEntry['vesselType'],
+    vesselType: v.vesselType as USNIVesselEntry["vesselType"],
     region: v.region,
     regionLat: v.regionLat,
     regionLon: v.regionLon,
-    deploymentStatus: v.deploymentStatus as USNIVesselEntry['deploymentStatus'],
+    deploymentStatus: v.deploymentStatus as USNIVesselEntry["deploymentStatus"],
     homePort: v.homePort || undefined,
     strikeGroup: v.strikeGroup || undefined,
     activityDescription: v.activityDescription || undefined,
@@ -72,15 +85,18 @@ export async function fetchUSNIFleetReport(): Promise<USNIFleetReport | null> {
 }
 
 function normalizeHull(hull: string | undefined): string {
-  if (!hull) return '';
-  return hull.toUpperCase().replace(/\s+/g, '').replace(/[–—]/g, '-');
+  if (!hull) return "";
+  return hull.toUpperCase().replace(/\s+/g, "").replace(/[–—]/g, "-");
 }
 
-function scatterOffset(hullNumber: string, index: number): { lat: number; lon: number } {
+function scatterOffset(
+  hullNumber: string,
+  index: number,
+): { lat: number; lon: number } {
   let hash = 0;
   const str = hullNumber || String(index);
   for (let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash = (hash << 5) - hash + str.charCodeAt(i);
     hash |= 0;
   }
   const angle = (hash % 360) * (Math.PI / 180);
@@ -89,11 +105,14 @@ function scatterOffset(hullNumber: string, index: number): { lat: number; lon: n
 }
 
 /** Tighter scatter for in-port ships — just enough to separate icons at the same pier. */
-function portScatterOffset(hullNumber: string, index: number): { lat: number; lon: number } {
+function portScatterOffset(
+  hullNumber: string,
+  index: number,
+): { lat: number; lon: number } {
   let hash = 0;
   const str = hullNumber || String(index);
   for (let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash = (hash << 5) - hash + str.charCodeAt(i);
     hash |= 0;
   }
   const angle = (hash % 360) * (Math.PI / 180);
@@ -116,7 +135,10 @@ function resolvePortCoords(
   }
   // Option B — hull number fallback table
   if (hullNumber) {
-    const normalized = hullNumber.toUpperCase().replace(/\s+/g, '').replace(/[–—]/g, '-');
+    const normalized = hullNumber
+      .toUpperCase()
+      .replace(/\s+/g, "")
+      .replace(/[–—]/g, "-");
     const portName = HULL_HOMEPORT[normalized];
     if (portName) {
       const coords = getUSNIRegionCoords(portName);
@@ -148,9 +170,10 @@ export function mergeUSNIWithAIS(
         vessel.usniActivityDescription = usniVessel.activityDescription;
         vessel.usniArticleUrl = usniVessel.usniArticleUrl;
         vessel.usniArticleDate = usniVessel.usniArticleDate;
-        const portRes = usniVessel.deploymentStatus === 'in-port'
-          ? resolvePortCoords(usniVessel.homePort, usniVessel.hullNumber)
-          : undefined;
+        const portRes =
+          usniVessel.deploymentStatus === "in-port"
+            ? resolvePortCoords(usniVessel.homePort, usniVessel.hullNumber)
+            : undefined;
         vessel.usniHomePort = portRes?.portName ?? usniVessel.homePort;
         matchedHulls.add(normalizeHull(usniVessel.hullNumber));
         break;
@@ -161,22 +184,34 @@ export function mergeUSNIWithAIS(
   // Also try name matching for vessels without hull numbers
   for (const vessel of merged) {
     if (vessel.usniRegion) continue; // Already matched
-    const aisName = vessel.name.replace(/^USS\s+/i, '').toUpperCase().trim();
+    const aisName = vessel.name
+      .replace(/^USS\s+/i, "")
+      .toUpperCase()
+      .trim();
     if (!aisName) continue;
 
     for (const usniVessel of usniReport.vessels) {
       if (matchedHulls.has(normalizeHull(usniVessel.hullNumber))) continue;
-      const usniName = usniVessel.name.replace(/^USS\s+/i, '').replace(/^USNS\s+/i, '').toUpperCase().trim();
-      if (aisName === usniName || aisName.includes(usniName) || usniName.includes(aisName)) {
+      const usniName = usniVessel.name
+        .replace(/^USS\s+/i, "")
+        .replace(/^USNS\s+/i, "")
+        .toUpperCase()
+        .trim();
+      if (
+        aisName === usniName ||
+        aisName.includes(usniName) ||
+        usniName.includes(aisName)
+      ) {
         vessel.usniRegion = usniVessel.region;
         vessel.usniDeploymentStatus = usniVessel.deploymentStatus;
         vessel.usniStrikeGroup = usniVessel.strikeGroup;
         vessel.usniActivityDescription = usniVessel.activityDescription;
         vessel.usniArticleUrl = usniVessel.usniArticleUrl;
         vessel.usniArticleDate = usniVessel.usniArticleDate;
-        const portRes = usniVessel.deploymentStatus === 'in-port'
-          ? resolvePortCoords(usniVessel.homePort, usniVessel.hullNumber)
-          : undefined;
+        const portRes =
+          usniVessel.deploymentStatus === "in-port"
+            ? resolvePortCoords(usniVessel.homePort, usniVessel.hullNumber)
+            : undefined;
         vessel.usniHomePort = portRes?.portName ?? usniVessel.homePort;
         matchedHulls.add(normalizeHull(usniVessel.hullNumber));
         break;
@@ -191,23 +226,26 @@ export function mergeUSNIWithAIS(
 
     // Resolve position: in-port ships use port coords (Option A + B),
     // deployed/underway ships use deployment theater coords.
-    const inPort = usniVessel.deploymentStatus === 'in-port';
+    const inPort = usniVessel.deploymentStatus === "in-port";
     const portResolution = inPort
       ? resolvePortCoords(usniVessel.homePort, usniVessel.hullNumber)
       : undefined;
 
     const regionCoords = getUSNIRegionCoords(usniVessel.region);
-    const hasParsedCoords = Number.isFinite(usniVessel.regionLat)
-      && Number.isFinite(usniVessel.regionLon)
-      && !(usniVessel.regionLat === 0 && usniVessel.regionLon === 0);
+    const hasParsedCoords =
+      Number.isFinite(usniVessel.regionLat) &&
+      Number.isFinite(usniVessel.regionLon) &&
+      !(usniVessel.regionLat === 0 && usniVessel.regionLon === 0);
     const fallbackCoords = getUSNIRegionApproxCoords(usniVessel.region);
 
-    const baseLat = portResolution?.lat
-      ?? regionCoords?.lat
-      ?? (hasParsedCoords ? usniVessel.regionLat : fallbackCoords.lat);
-    const baseLon = portResolution?.lon
-      ?? regionCoords?.lon
-      ?? (hasParsedCoords ? usniVessel.regionLon : fallbackCoords.lon);
+    const baseLat =
+      portResolution?.lat ??
+      regionCoords?.lat ??
+      (hasParsedCoords ? usniVessel.regionLat : fallbackCoords.lat);
+    const baseLon =
+      portResolution?.lon ??
+      regionCoords?.lon ??
+      (hasParsedCoords ? usniVessel.regionLon : fallbackCoords.lon);
 
     const offset = portResolution
       ? portScatterOffset(usniVessel.hullNumber, syntheticIndex++)
@@ -219,19 +257,21 @@ export function mergeUSNIWithAIS(
 
     merged.push({
       id: `usni-${usniVessel.hullNumber || usniVessel.name}`,
-      mmsi: '',
+      mmsi: "",
       name: usniVessel.name,
       vesselType: usniVessel.vesselType,
       hullNumber: usniVessel.hullNumber,
-      operator: 'usn',
-      operatorCountry: 'USA',
+      operator: "usn",
+      operatorCountry: "USA",
       lat: baseLat + offset.lat,
       lon: baseLon + offset.lon,
       heading: 0,
       speed: 0,
       lastAisUpdate: new Date(usniVessel.usniArticleDate),
-      confidence: 'low',
-      isInteresting: usniVessel.vesselType === 'carrier' || usniVessel.vesselType === 'amphibious',
+      confidence: "low",
+      isInteresting:
+        usniVessel.vesselType === "carrier" ||
+        usniVessel.vesselType === "amphibious",
       note: noteBase,
       usniRegion: usniVessel.region,
       usniDeploymentStatus: usniVessel.deploymentStatus,
@@ -265,19 +305,21 @@ function buildUSNIClusters(vessels: MilitaryVessel[]): MilitaryVesselCluster[] {
   for (const [name, groupVessels] of regionGroups) {
     if (groupVessels.length < 2) continue;
 
-    const avgLat = groupVessels.reduce((s, v) => s + v.lat, 0) / groupVessels.length;
-    const avgLon = groupVessels.reduce((s, v) => s + v.lon, 0) / groupVessels.length;
-    const hasCarrier = groupVessels.some((v) => v.vesselType === 'carrier');
+    const avgLat =
+      groupVessels.reduce((s, v) => s + v.lat, 0) / groupVessels.length;
+    const avgLon =
+      groupVessels.reduce((s, v) => s + v.lon, 0) / groupVessels.length;
+    const hasCarrier = groupVessels.some((v) => v.vesselType === "carrier");
 
     clusters.push({
-      id: `usni-cluster-${name.toLowerCase().replace(/\s+/g, '-')}`,
+      id: `usni-cluster-${name.toLowerCase().replace(/\s+/g, "-")}`,
       name: hasCarrier ? `${name} CSG` : `${name} Naval Group`,
       lat: avgLat,
       lon: avgLon,
       vesselCount: groupVessels.length,
       vessels: groupVessels,
       region: groupVessels[0]?.usniRegion || name,
-      activityType: hasCarrier ? 'deployment' : 'transit',
+      activityType: hasCarrier ? "deployment" : "transit",
     });
   }
 

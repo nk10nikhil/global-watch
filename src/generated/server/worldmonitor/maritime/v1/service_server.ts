@@ -75,9 +75,16 @@ export interface PaginationResponse {
   totalCount: number;
 }
 
-export type AisDisruptionSeverity = "AIS_DISRUPTION_SEVERITY_UNSPECIFIED" | "AIS_DISRUPTION_SEVERITY_LOW" | "AIS_DISRUPTION_SEVERITY_ELEVATED" | "AIS_DISRUPTION_SEVERITY_HIGH";
+export type AisDisruptionSeverity =
+  | "AIS_DISRUPTION_SEVERITY_UNSPECIFIED"
+  | "AIS_DISRUPTION_SEVERITY_LOW"
+  | "AIS_DISRUPTION_SEVERITY_ELEVATED"
+  | "AIS_DISRUPTION_SEVERITY_HIGH";
 
-export type AisDisruptionType = "AIS_DISRUPTION_TYPE_UNSPECIFIED" | "AIS_DISRUPTION_TYPE_GAP_SPIKE" | "AIS_DISRUPTION_TYPE_CHOKEPOINT_CONGESTION";
+export type AisDisruptionType =
+  | "AIS_DISRUPTION_TYPE_UNSPECIFIED"
+  | "AIS_DISRUPTION_TYPE_GAP_SPIKE"
+  | "AIS_DISRUPTION_TYPE_CHOKEPOINT_CONGESTION";
 
 export interface FieldViolation {
   field: string;
@@ -114,7 +121,10 @@ export interface ServerContext {
 
 export interface ServerOptions {
   onError?: (error: unknown, req: Request) => Response | Promise<Response>;
-  validateRequest?: (methodName: string, body: unknown) => FieldViolation[] | undefined;
+  validateRequest?: (
+    methodName: string,
+    body: unknown,
+  ) => FieldViolation[] | undefined;
 }
 
 export interface RouteDescriptor {
@@ -124,8 +134,14 @@ export interface RouteDescriptor {
 }
 
 export interface MaritimeServiceHandler {
-  getVesselSnapshot(ctx: ServerContext, req: GetVesselSnapshotRequest): Promise<GetVesselSnapshotResponse>;
-  listNavigationalWarnings(ctx: ServerContext, req: ListNavigationalWarningsRequest): Promise<ListNavigationalWarningsResponse>;
+  getVesselSnapshot(
+    ctx: ServerContext,
+    req: GetVesselSnapshotRequest,
+  ): Promise<GetVesselSnapshotResponse>;
+  listNavigationalWarnings(
+    ctx: ServerContext,
+    req: ListNavigationalWarningsRequest,
+  ): Promise<ListNavigationalWarningsResponse>;
 }
 
 export function createMaritimeServiceRoutes(
@@ -148,7 +164,10 @@ export function createMaritimeServiceRoutes(
             swLon: Number(params.get("sw_lon") ?? "0"),
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getVesselSnapshot", body);
+            const bodyViolations = options.validateRequest(
+              "getVesselSnapshot",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -161,16 +180,22 @@ export function createMaritimeServiceRoutes(
           };
 
           const result = await handler.getVesselSnapshot(ctx, body);
-          return new Response(JSON.stringify(result as GetVesselSnapshotResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetVesselSnapshotResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -197,7 +222,10 @@ export function createMaritimeServiceRoutes(
             area: params.get("area") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("listNavigationalWarnings", body);
+            const bodyViolations = options.validateRequest(
+              "listNavigationalWarnings",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -210,16 +238,22 @@ export function createMaritimeServiceRoutes(
           };
 
           const result = await handler.listNavigationalWarnings(ctx, body);
-          return new Response(JSON.stringify(result as ListNavigationalWarningsResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as ListNavigationalWarningsResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -234,4 +268,3 @@ export function createMaritimeServiceRoutes(
     },
   ];
 }
-

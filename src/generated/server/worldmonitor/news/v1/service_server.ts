@@ -65,9 +65,19 @@ export interface GeoCoordinates {
   longitude: number;
 }
 
-export type SummarizeStatus = "SUMMARIZE_STATUS_UNSPECIFIED" | "SUMMARIZE_STATUS_SUCCESS" | "SUMMARIZE_STATUS_CACHED" | "SUMMARIZE_STATUS_SKIPPED" | "SUMMARIZE_STATUS_ERROR";
+export type SummarizeStatus =
+  | "SUMMARIZE_STATUS_UNSPECIFIED"
+  | "SUMMARIZE_STATUS_SUCCESS"
+  | "SUMMARIZE_STATUS_CACHED"
+  | "SUMMARIZE_STATUS_SKIPPED"
+  | "SUMMARIZE_STATUS_ERROR";
 
-export type ThreatLevel = "THREAT_LEVEL_UNSPECIFIED" | "THREAT_LEVEL_LOW" | "THREAT_LEVEL_MEDIUM" | "THREAT_LEVEL_HIGH" | "THREAT_LEVEL_CRITICAL";
+export type ThreatLevel =
+  | "THREAT_LEVEL_UNSPECIFIED"
+  | "THREAT_LEVEL_LOW"
+  | "THREAT_LEVEL_MEDIUM"
+  | "THREAT_LEVEL_HIGH"
+  | "THREAT_LEVEL_CRITICAL";
 
 export interface FieldViolation {
   field: string;
@@ -104,7 +114,10 @@ export interface ServerContext {
 
 export interface ServerOptions {
   onError?: (error: unknown, req: Request) => Response | Promise<Response>;
-  validateRequest?: (methodName: string, body: unknown) => FieldViolation[] | undefined;
+  validateRequest?: (
+    methodName: string,
+    body: unknown,
+  ) => FieldViolation[] | undefined;
 }
 
 export interface RouteDescriptor {
@@ -114,9 +127,18 @@ export interface RouteDescriptor {
 }
 
 export interface NewsServiceHandler {
-  summarizeArticle(ctx: ServerContext, req: SummarizeArticleRequest): Promise<SummarizeArticleResponse>;
-  getSummarizeArticleCache(ctx: ServerContext, req: GetSummarizeArticleCacheRequest): Promise<SummarizeArticleResponse>;
-  listFeedDigest(ctx: ServerContext, req: ListFeedDigestRequest): Promise<ListFeedDigestResponse>;
+  summarizeArticle(
+    ctx: ServerContext,
+    req: SummarizeArticleRequest,
+  ): Promise<SummarizeArticleResponse>;
+  getSummarizeArticleCache(
+    ctx: ServerContext,
+    req: GetSummarizeArticleCacheRequest,
+  ): Promise<SummarizeArticleResponse>;
+  listFeedDigest(
+    ctx: ServerContext,
+    req: ListFeedDigestRequest,
+  ): Promise<ListFeedDigestResponse>;
 }
 
 export function createNewsServiceRoutes(
@@ -130,9 +152,12 @@ export function createNewsServiceRoutes(
       handler: async (req: Request): Promise<Response> => {
         try {
           const pathParams: Record<string, string> = {};
-          const body = await req.json() as SummarizeArticleRequest;
+          const body = (await req.json()) as SummarizeArticleRequest;
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("summarizeArticle", body);
+            const bodyViolations = options.validateRequest(
+              "summarizeArticle",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -145,16 +170,22 @@ export function createNewsServiceRoutes(
           };
 
           const result = await handler.summarizeArticle(ctx, body);
-          return new Response(JSON.stringify(result as SummarizeArticleResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as SummarizeArticleResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -179,7 +210,10 @@ export function createNewsServiceRoutes(
             cacheKey: params.get("cache_key") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getSummarizeArticleCache", body);
+            const bodyViolations = options.validateRequest(
+              "getSummarizeArticleCache",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -192,16 +226,22 @@ export function createNewsServiceRoutes(
           };
 
           const result = await handler.getSummarizeArticleCache(ctx, body);
-          return new Response(JSON.stringify(result as SummarizeArticleResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as SummarizeArticleResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -227,7 +267,10 @@ export function createNewsServiceRoutes(
             lang: params.get("lang") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("listFeedDigest", body);
+            const bodyViolations = options.validateRequest(
+              "listFeedDigest",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -240,16 +283,22 @@ export function createNewsServiceRoutes(
           };
 
           const result = await handler.listFeedDigest(ctx, body);
-          return new Response(JSON.stringify(result as ListFeedDigestResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as ListFeedDigestResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -264,4 +313,3 @@ export function createNewsServiceRoutes(
     },
   ];
 }
-

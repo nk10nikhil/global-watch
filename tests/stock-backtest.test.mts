@@ -1,9 +1,9 @@
-import assert from 'node:assert/strict';
-import { afterEach, describe, it } from 'node:test';
+import assert from "node:assert/strict";
+import { afterEach, describe, it } from "node:test";
 
-import { backtestStock } from '../server/worldmonitor/market/v1/backtest-stock.ts';
-import { listStoredStockBacktests } from '../server/worldmonitor/market/v1/list-stored-stock-backtests.ts';
-import { MarketServiceClient } from '../src/generated/client/worldmonitor/market/v1/service_client.ts';
+import { backtestStock } from "../server/worldmonitor/market/v1/backtest-stock.ts";
+import { listStoredStockBacktests } from "../server/worldmonitor/market/v1/list-stored-stock-backtests.ts";
+import { MarketServiceClient } from "../src/generated/client/worldmonitor/market/v1/service_client.ts";
 
 const originalFetch = globalThis.fetch;
 const originalRedisUrl = process.env.UPSTASH_REDIS_REST_URL;
@@ -32,7 +32,7 @@ function buildReplaySeries(length = 120) {
     const low = Math.min(open, close) - 0.6;
     const volume = index % 14 >= 10 && index % 14 <= 12 ? 780_000 : 1_120_000;
     candles.push({
-      timestamp: 1_700_000_000 + (index * 86_400),
+      timestamp: 1_700_000_000 + index * 86_400,
       open,
       high,
       low,
@@ -54,64 +54,92 @@ afterEach(() => {
 
 function createRedisAwareBacktestFetch(mockChartPayload: unknown) {
   const redis = new Map<string, string>();
-  const sortedSets = new Map<string, Array<{ member: string; score: number }>>();
+  const sortedSets = new Map<
+    string,
+    Array<{ member: string; score: number }>
+  >();
 
   const upsertSortedSet = (key: string, score: number, member: string) => {
-    const next = (sortedSets.get(key) ?? []).filter((item) => item.member !== member);
+    const next = (sortedSets.get(key) ?? []).filter(
+      (item) => item.member !== member,
+    );
     next.push({ member, score });
     next.sort((a, b) => a.score - b.score || a.member.localeCompare(b.member));
     sortedSets.set(key, next);
   };
 
   return (async (input: RequestInfo | URL, init?: RequestInit) => {
-    const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+    const url =
+      typeof input === "string"
+        ? input
+        : input instanceof URL
+          ? input.toString()
+          : input.url;
 
-    if (url.includes('query1.finance.yahoo.com')) {
+    if (url.includes("query1.finance.yahoo.com")) {
       return new Response(JSON.stringify(mockChartPayload), { status: 200 });
     }
 
-    if (url.startsWith(process.env.UPSTASH_REDIS_REST_URL || '')) {
+    if (url.startsWith(process.env.UPSTASH_REDIS_REST_URL || "")) {
       const parsed = new URL(url);
-      if (parsed.pathname.startsWith('/get/')) {
-        const key = decodeURIComponent(parsed.pathname.slice('/get/'.length));
-        return new Response(JSON.stringify({ result: redis.get(key) ?? null }), { status: 200 });
+      if (parsed.pathname.startsWith("/get/")) {
+        const key = decodeURIComponent(parsed.pathname.slice("/get/".length));
+        return new Response(
+          JSON.stringify({ result: redis.get(key) ?? null }),
+          { status: 200 },
+        );
       }
-      if (parsed.pathname.startsWith('/set/')) {
-        const parts = parsed.pathname.split('/');
-        const key = decodeURIComponent(parts[2] || '');
-        const value = decodeURIComponent(parts[3] || '');
+      if (parsed.pathname.startsWith("/set/")) {
+        const parts = parsed.pathname.split("/");
+        const key = decodeURIComponent(parts[2] || "");
+        const value = decodeURIComponent(parts[3] || "");
         redis.set(key, value);
-        return new Response(JSON.stringify({ result: 'OK' }), { status: 200 });
+        return new Response(JSON.stringify({ result: "OK" }), { status: 200 });
       }
-      if (parsed.pathname === '/pipeline') {
-        const commands = JSON.parse(typeof init?.body === 'string' ? init.body : '[]') as string[][];
+      if (parsed.pathname === "/pipeline") {
+        const commands = JSON.parse(
+          typeof init?.body === "string" ? init.body : "[]",
+        ) as string[][];
         const result = commands.map((command) => {
-          const [verb, key = '', ...args] = command;
-          if (verb === 'GET') {
+          const [verb, key = "", ...args] = command;
+          if (verb === "GET") {
             return { result: redis.get(key) ?? null };
           }
-          if (verb === 'SET') {
-            redis.set(key, args[0] || '');
-            return { result: 'OK' };
+          if (verb === "SET") {
+            redis.set(key, args[0] || "");
+            return { result: "OK" };
           }
-          if (verb === 'ZADD') {
+          if (verb === "ZADD") {
             for (let index = 0; index < args.length; index += 2) {
-              upsertSortedSet(key, Number(args[index] || 0), args[index + 1] || '');
+              upsertSortedSet(
+                key,
+                Number(args[index] || 0),
+                args[index + 1] || "",
+              );
             }
             return { result: 1 };
           }
-          if (verb === 'ZREVRANGE') {
-            const items = [...(sortedSets.get(key) ?? [])].sort((a, b) => b.score - a.score || a.member.localeCompare(b.member));
+          if (verb === "ZREVRANGE") {
+            const items = [...(sortedSets.get(key) ?? [])].sort(
+              (a, b) => b.score - a.score || a.member.localeCompare(b.member),
+            );
             const start = Number(args[0] || 0);
             const stop = Number(args[1] || 0);
-            return { result: items.slice(start, stop + 1).map((item) => item.member) };
+            return {
+              result: items.slice(start, stop + 1).map((item) => item.member),
+            };
           }
-          if (verb === 'ZREM') {
+          if (verb === "ZREM") {
             const removals = new Set(args);
-            sortedSets.set(key, (sortedSets.get(key) ?? []).filter((item) => !removals.has(item.member)));
+            sortedSets.set(
+              key,
+              (sortedSets.get(key) ?? []).filter(
+                (item) => !removals.has(item.member),
+              ),
+            );
             return { result: removals.size };
           }
-          if (verb === 'EXPIRE') {
+          if (verb === "EXPIRE") {
             return { result: 1 };
           }
           throw new Error(`Unexpected pipeline command: ${verb}`);
@@ -124,15 +152,15 @@ function createRedisAwareBacktestFetch(mockChartPayload: unknown) {
   }) as typeof fetch;
 }
 
-describe('backtestStock handler', () => {
-  it('replays actionable stock-analysis signals over recent Yahoo history', async () => {
+describe("backtestStock handler", () => {
+  it("replays actionable stock-analysis signals over recent Yahoo history", async () => {
     const candles = buildReplaySeries();
     const mockChartPayload = {
       chart: {
         result: [
           {
             meta: {
-              currency: 'USD',
+              currency: "USD",
               regularMarketPrice: 148,
               previousClose: 147,
             },
@@ -154,39 +182,44 @@ describe('backtestStock handler', () => {
     };
 
     globalThis.fetch = (async (input: RequestInfo | URL) => {
-      const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
-      if (url.includes('query1.finance.yahoo.com')) {
+      const url =
+        typeof input === "string"
+          ? input
+          : input instanceof URL
+            ? input.toString()
+            : input.url;
+      if (url.includes("query1.finance.yahoo.com")) {
         return new Response(JSON.stringify(mockChartPayload), { status: 200 });
       }
       throw new Error(`Unexpected URL: ${url}`);
     }) as typeof fetch;
 
     const response = await backtestStock({} as never, {
-      symbol: 'AAPL',
-      name: 'Apple',
+      symbol: "AAPL",
+      name: "Apple",
       evalWindowDays: 10,
     });
 
     assert.equal(response.available, true);
-    assert.equal(response.symbol, 'AAPL');
-    assert.equal(response.currency, 'USD');
+    assert.equal(response.symbol, "AAPL");
+    assert.equal(response.currency, "USD");
     assert.ok(response.actionableEvaluations > 0);
     assert.ok(response.evaluations.length > 0);
-    assert.match(response.evaluations[0]?.analysisId || '', /^ledger:/);
+    assert.match(response.evaluations[0]?.analysisId || "", /^ledger:/);
     assert.match(response.latestSignal, /buy/i);
     assert.match(response.summary, /stored analysis/i);
   });
 });
 
-describe('server-backed stored stock backtests', () => {
-  it('stores fresh backtests in Redis and serves them back in batch', async () => {
+describe("server-backed stored stock backtests", () => {
+  it("stores fresh backtests in Redis and serves them back in batch", async () => {
     const candles = buildReplaySeries();
     const mockChartPayload = {
       chart: {
         result: [
           {
             meta: {
-              currency: 'USD',
+              currency: "USD",
               regularMarketPrice: 148,
               previousClose: 147,
             },
@@ -207,39 +240,51 @@ describe('server-backed stored stock backtests', () => {
       },
     };
 
-    process.env.UPSTASH_REDIS_REST_URL = 'https://redis.example';
-    process.env.UPSTASH_REDIS_REST_TOKEN = 'token';
+    process.env.UPSTASH_REDIS_REST_URL = "https://redis.example";
+    process.env.UPSTASH_REDIS_REST_TOKEN = "token";
     globalThis.fetch = createRedisAwareBacktestFetch(mockChartPayload);
 
     const response = await backtestStock({} as never, {
-      symbol: 'AAPL',
-      name: 'Apple',
+      symbol: "AAPL",
+      name: "Apple",
       evalWindowDays: 10,
     });
 
     assert.equal(response.available, true);
 
     const stored = await listStoredStockBacktests({} as never, {
-      symbols: 'AAPL,MSFT' as never,
+      symbols: "AAPL,MSFT" as never,
       evalWindowDays: 10,
     });
 
     assert.equal(stored.items.length, 1);
-    assert.equal(stored.items[0]?.symbol, 'AAPL');
+    assert.equal(stored.items[0]?.symbol, "AAPL");
     assert.equal(stored.items[0]?.latestSignal, response.latestSignal);
   });
 });
 
-describe('MarketServiceClient backtestStock', () => {
-  it('serializes the backtest-stock query parameters using generated names', async () => {
-    let requestedUrl = '';
+describe("MarketServiceClient backtestStock", () => {
+  it("serializes the backtest-stock query parameters using generated names", async () => {
+    let requestedUrl = "";
     globalThis.fetch = (async (input: RequestInfo | URL) => {
-      requestedUrl = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
-      return new Response(JSON.stringify({ available: false, evaluations: [] }), { status: 200 });
+      requestedUrl =
+        typeof input === "string"
+          ? input
+          : input instanceof URL
+            ? input.toString()
+            : input.url;
+      return new Response(
+        JSON.stringify({ available: false, evaluations: [] }),
+        { status: 200 },
+      );
     }) as typeof fetch;
 
-    const client = new MarketServiceClient('');
-    await client.backtestStock({ symbol: 'MSFT', name: 'Microsoft', evalWindowDays: 7 });
+    const client = new MarketServiceClient("");
+    await client.backtestStock({
+      symbol: "MSFT",
+      name: "Microsoft",
+      evalWindowDays: 7,
+    });
 
     assert.match(requestedUrl, /\/api\/market\/v1\/backtest-stock\?/);
     assert.match(requestedUrl, /symbol=MSFT/);
@@ -248,18 +293,29 @@ describe('MarketServiceClient backtestStock', () => {
   });
 });
 
-describe('MarketServiceClient listStoredStockBacktests', () => {
-  it('serializes the stored backtest batch query parameters using generated names', async () => {
-    let requestedUrl = '';
+describe("MarketServiceClient listStoredStockBacktests", () => {
+  it("serializes the stored backtest batch query parameters using generated names", async () => {
+    let requestedUrl = "";
     globalThis.fetch = (async (input: RequestInfo | URL) => {
-      requestedUrl = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+      requestedUrl =
+        typeof input === "string"
+          ? input
+          : input instanceof URL
+            ? input.toString()
+            : input.url;
       return new Response(JSON.stringify({ items: [] }), { status: 200 });
     }) as typeof fetch;
 
-    const client = new MarketServiceClient('');
-    await client.listStoredStockBacktests({ symbols: ['MSFT', 'NVDA'], evalWindowDays: 7 });
+    const client = new MarketServiceClient("");
+    await client.listStoredStockBacktests({
+      symbols: ["MSFT", "NVDA"],
+      evalWindowDays: 7,
+    });
 
-    assert.match(requestedUrl, /\/api\/market\/v1\/list-stored-stock-backtests\?/);
+    assert.match(
+      requestedUrl,
+      /\/api\/market\/v1\/list-stored-stock-backtests\?/,
+    );
     assert.match(requestedUrl, /symbols=MSFT%2CNVDA|symbols=MSFT,NVDA/);
     assert.match(requestedUrl, /eval_window_days=7/);
   });

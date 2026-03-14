@@ -1,22 +1,30 @@
-import type { AppContext, AppModule } from '@/app/app-context';
-import { invokeTauri } from '@/services/tauri-bridge';
-import { trackUpdateShown, trackUpdateClicked, trackUpdateDismissed } from '@/services/analytics';
-import { escapeHtml } from '@/utils/sanitize';
-import { getDismissed, setDismissed } from '@/utils/cross-domain-storage';
+import type { AppContext, AppModule } from "@/app/app-context";
+import { invokeTauri } from "@/services/tauri-bridge";
+import {
+  trackUpdateShown,
+  trackUpdateClicked,
+  trackUpdateDismissed,
+} from "@/services/analytics";
+import { escapeHtml } from "@/utils/sanitize";
+import { getDismissed, setDismissed } from "@/utils/cross-domain-storage";
 
 interface DesktopRuntimeInfo {
   os: string;
   arch: string;
 }
 
-type UpdaterOutcome = 'no_update' | 'update_available' | 'open_failed' | 'fetch_failed';
-type DesktopBuildVariant = 'full' | 'tech' | 'finance';
+type UpdaterOutcome =
+  | "no_update"
+  | "update_available"
+  | "open_failed"
+  | "fetch_failed";
+type DesktopBuildVariant = "full" | "tech" | "finance";
 
-const DESKTOP_BUILD_VARIANT: DesktopBuildVariant = (
-  import.meta.env.VITE_VARIANT === 'tech' || import.meta.env.VITE_VARIANT === 'finance'
+const DESKTOP_BUILD_VARIANT: DesktopBuildVariant =
+  import.meta.env.VITE_VARIANT === "tech" ||
+  import.meta.env.VITE_VARIANT === "finance"
     ? import.meta.env.VITE_VARIANT
-    : 'full'
-);
+    : "full";
 
 export class DesktopUpdater implements AppModule {
   private ctx: AppContext;
@@ -55,11 +63,15 @@ export class DesktopUpdater implements AppModule {
     }, this.UPDATE_CHECK_INTERVAL_MS);
   }
 
-  private logUpdaterOutcome(outcome: UpdaterOutcome, context: Record<string, unknown> = {}): void {
-    const logger = outcome === 'open_failed' || outcome === 'fetch_failed'
-      ? console.warn
-      : console.info;
-    logger('[updater]', outcome, context);
+  private logUpdaterOutcome(
+    outcome: UpdaterOutcome,
+    context: Record<string, unknown> = {},
+  ): void {
+    const logger =
+      outcome === "open_failed" || outcome === "fetch_failed"
+        ? console.warn
+        : console.info;
+    logger("[updater]", outcome, context);
   }
 
   private getDesktopBuildVariant(): DesktopBuildVariant {
@@ -68,48 +80,59 @@ export class DesktopUpdater implements AppModule {
 
   private async checkForUpdate(): Promise<void> {
     try {
-      const res = await fetch('https://api.worldmonitor.app/api/version', {
+      const res = await fetch("https://api.worldmonitor.app/api/version", {
         signal: AbortSignal.timeout(8000),
       });
       if (!res.ok) {
-        this.logUpdaterOutcome('fetch_failed', { status: res.status });
+        this.logUpdaterOutcome("fetch_failed", { status: res.status });
         return;
       }
       const data = await res.json();
       const remote = data.version as string;
       if (!remote) {
-        this.logUpdaterOutcome('fetch_failed', { reason: 'missing_remote_version' });
+        this.logUpdaterOutcome("fetch_failed", {
+          reason: "missing_remote_version",
+        });
         return;
       }
 
       const current = __APP_VERSION__;
       if (!this.isNewerVersion(remote, current)) {
-        this.logUpdaterOutcome('no_update', { current, remote });
+        this.logUpdaterOutcome("no_update", { current, remote });
         return;
       }
 
       const dismissKey = `wm-update-dismissed-${remote}`;
       if (getDismissed(dismissKey)) {
-        this.logUpdaterOutcome('update_available', { current, remote, dismissed: true });
+        this.logUpdaterOutcome("update_available", {
+          current,
+          remote,
+          dismissed: true,
+        });
         return;
       }
 
-      const releaseUrl = typeof data.url === 'string' && data.url
-        ? data.url
-        : 'https://github.com/koala73/worldmonitor/releases/latest';
-      this.logUpdaterOutcome('update_available', { current, remote, dismissed: false });
+      const releaseUrl =
+        typeof data.url === "string" && data.url
+          ? data.url
+          : "https://github.com/koala73/worldmonitor/releases/latest";
+      this.logUpdaterOutcome("update_available", {
+        current,
+        remote,
+        dismissed: false,
+      });
       trackUpdateShown(current, remote);
       await this.showUpdateToast(remote, releaseUrl);
     } catch (error) {
-      this.logUpdaterOutcome('fetch_failed', {
+      this.logUpdaterOutcome("fetch_failed", {
         error: error instanceof Error ? error.message : String(error),
       });
     }
   }
 
   private isNewerVersion(remote: string, current: string): boolean {
-    const r = remote.split('.').map(Number);
-    const c = current.split('.').map(Number);
+    const r = remote.split(".").map(Number);
+    const c = current.split(".").map(Number);
     for (let i = 0; i < Math.max(r.length, c.length); i++) {
       const rv = r[i] ?? 0;
       const cv = c[i] ?? 0;
@@ -121,24 +144,25 @@ export class DesktopUpdater implements AppModule {
 
   private mapDesktopDownloadPlatform(os: string, arch: string): string | null {
     const normalizedOs = os.toLowerCase();
-    const normalizedArch = arch.toLowerCase()
-      .replace('amd64', 'x86_64')
-      .replace('x64', 'x86_64')
-      .replace('arm64', 'aarch64');
+    const normalizedArch = arch
+      .toLowerCase()
+      .replace("amd64", "x86_64")
+      .replace("x64", "x86_64")
+      .replace("arm64", "aarch64");
 
-    if (normalizedOs === 'windows') {
-      return normalizedArch === 'x86_64' ? 'windows-msi' : null;
+    if (normalizedOs === "windows") {
+      return normalizedArch === "x86_64" ? "windows-msi" : null;
     }
 
-    if (normalizedOs === 'macos' || normalizedOs === 'darwin') {
-      if (normalizedArch === 'aarch64') return 'macos-arm64';
-      if (normalizedArch === 'x86_64') return 'macos-x64';
+    if (normalizedOs === "macos" || normalizedOs === "darwin") {
+      if (normalizedArch === "aarch64") return "macos-arm64";
+      if (normalizedArch === "x86_64") return "macos-x64";
       return null;
     }
 
-    if (normalizedOs === 'linux') {
-      if (normalizedArch === 'x86_64') return 'linux-appimage';
-      if (normalizedArch === 'aarch64') return 'linux-appimage-arm64';
+    if (normalizedOs === "linux") {
+      if (normalizedArch === "x86_64") return "linux-appimage";
+      if (normalizedArch === "aarch64") return "linux-appimage-arm64";
       return null;
     }
 
@@ -147,8 +171,13 @@ export class DesktopUpdater implements AppModule {
 
   private async resolveUpdateDownloadUrl(releaseUrl: string): Promise<string> {
     try {
-      const runtimeInfo = await invokeTauri<DesktopRuntimeInfo>('get_desktop_runtime_info');
-      const platform = this.mapDesktopDownloadPlatform(runtimeInfo.os, runtimeInfo.arch);
+      const runtimeInfo = await invokeTauri<DesktopRuntimeInfo>(
+        "get_desktop_runtime_info",
+      );
+      const platform = this.mapDesktopDownloadPlatform(
+        runtimeInfo.os,
+        runtimeInfo.arch,
+      );
       if (platform) {
         const variant = this.getDesktopBuildVariant();
         return `https://api.worldmonitor.app/api/download?platform=${platform}&variant=${variant}`;
@@ -159,15 +188,18 @@ export class DesktopUpdater implements AppModule {
     return releaseUrl;
   }
 
-  private async showUpdateToast(version: string, releaseUrl: string): Promise<void> {
-    const existing = document.querySelector<HTMLElement>('.update-toast');
+  private async showUpdateToast(
+    version: string,
+    releaseUrl: string,
+  ): Promise<void> {
+    const existing = document.querySelector<HTMLElement>(".update-toast");
     if (existing?.dataset.version === version) return;
     existing?.remove();
 
     const url = await this.resolveUpdateDownloadUrl(releaseUrl);
 
-    const toast = document.createElement('div');
-    toast.className = 'update-toast';
+    const toast = document.createElement("div");
+    toast.className = "update-toast";
     toast.dataset.version = version;
     toast.innerHTML = `
       <div class="update-toast-icon">
@@ -187,25 +219,29 @@ export class DesktopUpdater implements AppModule {
 
     const dismissToast = () => {
       setDismissed(`wm-update-dismissed-${version}`);
-      toast.classList.remove('visible');
+      toast.classList.remove("visible");
       setTimeout(() => toast.remove(), 300);
     };
 
-    toast.addEventListener('click', (e) => {
+    toast.addEventListener("click", (e) => {
       const target = e.target as HTMLElement;
-      const action = target.closest<HTMLElement>('[data-action]')?.dataset.action;
-      if (action === 'download') {
+      const action =
+        target.closest<HTMLElement>("[data-action]")?.dataset.action;
+      if (action === "download") {
         trackUpdateClicked(version);
         if (this.ctx.isDesktopApp) {
-          void invokeTauri<void>('open_url', { url }).catch((error) => {
-            this.logUpdaterOutcome('open_failed', { url, error: error instanceof Error ? error.message : String(error) });
-            window.open(url, '_blank', 'noopener');
+          void invokeTauri<void>("open_url", { url }).catch((error) => {
+            this.logUpdaterOutcome("open_failed", {
+              url,
+              error: error instanceof Error ? error.message : String(error),
+            });
+            window.open(url, "_blank", "noopener");
           });
         } else {
-          window.open(url, '_blank', 'noopener');
+          window.open(url, "_blank", "noopener");
         }
         dismissToast();
-      } else if (action === 'dismiss') {
+      } else if (action === "dismiss") {
         trackUpdateDismissed(version);
         dismissToast();
       }
@@ -213,7 +249,7 @@ export class DesktopUpdater implements AppModule {
 
     document.body.appendChild(toast);
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => toast.classList.add('visible'));
+      requestAnimationFrame(() => toast.classList.add("visible"));
     });
   }
 }

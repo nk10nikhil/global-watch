@@ -5,14 +5,14 @@
  * pause streams after inactivity to reduce CPU/bandwidth.
  */
 
-const STORAGE_KEY_LIVE_STREAMS_ALWAYS_ON = 'wm-live-streams-always-on';
-const EVENT_NAME = 'wm-live-streams-settings-changed';
+const STORAGE_KEY_LIVE_STREAMS_ALWAYS_ON = "wm-live-streams-always-on";
+const EVENT_NAME = "wm-live-streams-settings-changed";
 
 function readBool(key: string, defaultValue: boolean): boolean {
   try {
     const raw = localStorage.getItem(key);
     if (raw === null) return defaultValue;
-    return raw === 'true';
+    return raw === "true";
   } catch {
     return defaultValue;
   }
@@ -35,9 +35,13 @@ export function setLiveStreamsAlwaysOn(alwaysOn: boolean): void {
   window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: { alwaysOn } }));
 }
 
-export function subscribeLiveStreamsSettingsChange(cb: (alwaysOn: boolean) => void): () => void {
+export function subscribeLiveStreamsSettingsChange(
+  cb: (alwaysOn: boolean) => void,
+): () => void {
   const handler = (e: Event) => {
-    const detail = (e as CustomEvent).detail as { alwaysOn?: boolean } | undefined;
+    const detail = (e as CustomEvent).detail as
+      | { alwaysOn?: boolean }
+      | undefined;
     cb(detail?.alwaysOn ?? getLiveStreamsAlwaysOn());
   };
   window.addEventListener(EVENT_NAME, handler);

@@ -17,17 +17,17 @@
  * Fixes: https://github.com/koala73/worldmonitor/issues/1283
  */
 
-import { CHROME_UA } from './constants';
-import { getCachedJson, setCachedJson } from './redis';
+import { CHROME_UA } from "./constants";
+import { getCachedJson, setCachedJson } from "./redis";
 
-const ACLED_TOKEN_URL = 'https://acleddata.com/oauth/token';
-const ACLED_CLIENT_ID = 'acled';
+const ACLED_TOKEN_URL = "https://acleddata.com/oauth/token";
+const ACLED_CLIENT_ID = "acled";
 
 /** Refresh 5 minutes before the token actually expires. */
 const EXPIRY_MARGIN_MS = 5 * 60 * 1000;
 
 /** Redis cache key for the ACLED OAuth token state. */
-const REDIS_CACHE_KEY = 'acled:oauth:token';
+const REDIS_CACHE_KEY = "acled:oauth:token";
 
 /** Cache token in Redis for 23 hours (token lasts 24 h, minus margin). */
 const REDIS_TTL_SECONDS = 23 * 60 * 60;
@@ -56,22 +56,22 @@ async function exchangeCredentials(
   const body = new URLSearchParams({
     username: email,
     password,
-    grant_type: 'password',
+    grant_type: "password",
     client_id: ACLED_CLIENT_ID,
   });
 
   const resp = await fetch(ACLED_TOKEN_URL, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'User-Agent': CHROME_UA,
+      "Content-Type": "application/x-www-form-urlencoded",
+      "User-Agent": CHROME_UA,
     },
     body,
     signal: AbortSignal.timeout(15_000),
   });
 
   if (!resp.ok) {
-    const text = await resp.text().catch(() => '');
+    const text = await resp.text().catch(() => "");
     throw new Error(
       `ACLED OAuth token exchange failed (${resp.status}): ${text.slice(0, 200)}`,
     );
@@ -84,7 +84,9 @@ async function exchangeCredentials(
   };
 
   if (!data.access_token || !data.refresh_token) {
-    throw new Error('ACLED OAuth response missing access_token or refresh_token');
+    throw new Error(
+      "ACLED OAuth response missing access_token or refresh_token",
+    );
   }
 
   return {
@@ -100,22 +102,22 @@ async function exchangeCredentials(
 async function refreshAccessToken(refreshToken: string): Promise<TokenState> {
   const body = new URLSearchParams({
     refresh_token: refreshToken,
-    grant_type: 'refresh_token',
+    grant_type: "refresh_token",
     client_id: ACLED_CLIENT_ID,
   });
 
   const resp = await fetch(ACLED_TOKEN_URL, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'User-Agent': CHROME_UA,
+      "Content-Type": "application/x-www-form-urlencoded",
+      "User-Agent": CHROME_UA,
     },
     body,
     signal: AbortSignal.timeout(15_000),
   });
 
   if (!resp.ok) {
-    const text = await resp.text().catch(() => '');
+    const text = await resp.text().catch(() => "");
     throw new Error(
       `ACLED OAuth token refresh failed (${resp.status}): ${text.slice(0, 200)}`,
     );
@@ -128,7 +130,7 @@ async function refreshAccessToken(refreshToken: string): Promise<TokenState> {
   };
 
   if (!data.access_token) {
-    throw new Error('ACLED OAuth refresh response missing access_token');
+    throw new Error("ACLED OAuth refresh response missing access_token");
   }
 
   return {
@@ -145,7 +147,7 @@ async function cacheToRedis(state: TokenState): Promise<void> {
   try {
     await setCachedJson(REDIS_CACHE_KEY, state, REDIS_TTL_SECONDS);
   } catch (err) {
-    console.warn('[acled-auth] Failed to cache token in Redis', err);
+    console.warn("[acled-auth] Failed to cache token in Redis", err);
   }
 }
 
@@ -157,15 +159,15 @@ async function restoreFromRedis(): Promise<TokenState | null> {
     const data = await getCachedJson(REDIS_CACHE_KEY);
     if (
       data &&
-      typeof data === 'object' &&
-      'accessToken' in (data as Record<string, unknown>) &&
-      'refreshToken' in (data as Record<string, unknown>) &&
-      'expiresAt' in (data as Record<string, unknown>)
+      typeof data === "object" &&
+      "accessToken" in (data as Record<string, unknown>) &&
+      "refreshToken" in (data as Record<string, unknown>) &&
+      "expiresAt" in (data as Record<string, unknown>)
     ) {
       return data as TokenState;
     }
   } catch (err) {
-    console.warn('[acled-auth] Failed to restore token from Redis', err);
+    console.warn("[acled-auth] Failed to restore token from Redis", err);
   }
   return null;
 }
@@ -217,7 +219,10 @@ export async function getAcledAccessToken(): Promise<string | null> {
             await cacheToRedis(memCached);
             return memCached.accessToken;
           } catch (refreshErr) {
-            console.warn('[acled-auth] Refresh token expired, re-authenticating', refreshErr);
+            console.warn(
+              "[acled-auth] Refresh token expired, re-authenticating",
+              refreshErr,
+            );
           }
         }
 
@@ -226,7 +231,7 @@ export async function getAcledAccessToken(): Promise<string | null> {
         await cacheToRedis(memCached);
         return memCached.accessToken;
       } catch (err) {
-        console.error('[acled-auth] Failed to obtain ACLED access token', err);
+        console.error("[acled-auth] Failed to obtain ACLED access token", err);
         // If we still have a cached token (even if near-expiry), try using it.
         return memCached?.accessToken ?? null;
       } finally {

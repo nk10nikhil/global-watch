@@ -1,31 +1,36 @@
-import { Panel } from './Panel';
-import { t } from '@/services/i18n';
-import type { MarketData, CryptoData } from '@/types';
-import { formatPrice, formatChange, getChangeClass, getHeatmapClass } from '@/utils';
-import { escapeHtml } from '@/utils/sanitize';
-import { miniSparkline } from '@/utils/sparkline';
+import { Panel } from "./Panel";
+import { t } from "@/services/i18n";
+import type { MarketData, CryptoData } from "@/types";
+import {
+  formatPrice,
+  formatChange,
+  getChangeClass,
+  getHeatmapClass,
+} from "@/utils";
+import { escapeHtml } from "@/utils/sanitize";
+import { miniSparkline } from "@/utils/sparkline";
 import {
   getMarketWatchlistEntries,
   parseMarketWatchlistInput,
   resetMarketWatchlist,
   setMarketWatchlistEntries,
-} from '@/services/market-watchlist';
+} from "@/services/market-watchlist";
 
 export class MarketPanel extends Panel {
   private settingsBtn: HTMLButtonElement | null = null;
   private overlay: HTMLElement | null = null;
 
   constructor() {
-    super({ id: 'markets', title: t('panels.markets') });
+    super({ id: "markets", title: t("panels.markets") });
     this.createSettingsButton();
   }
 
   private createSettingsButton(): void {
-    this.settingsBtn = document.createElement('button');
-    this.settingsBtn.className = 'live-news-settings-btn';
-    this.settingsBtn.title = 'Customize market watchlist';
-    this.settingsBtn.textContent = 'Watchlist';
-    this.settingsBtn.addEventListener('click', (e) => {
+    this.settingsBtn = document.createElement("button");
+    this.settingsBtn.className = "live-news-settings-btn";
+    this.settingsBtn.title = "Customize market watchlist";
+    this.settingsBtn.textContent = "Watchlist";
+    this.settingsBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       this.openWatchlistModal();
     });
@@ -37,19 +42,21 @@ export class MarketPanel extends Panel {
 
     const current = getMarketWatchlistEntries();
     const currentText = current.length
-      ? current.map((e) => (e.name ? `${e.symbol}|${e.name}` : e.symbol)).join('\n')
-      : '';
+      ? current
+          .map((e) => (e.name ? `${e.symbol}|${e.name}` : e.symbol))
+          .join("\n")
+      : "";
 
-    const overlay = document.createElement('div');
-    overlay.className = 'modal-overlay active';
-    overlay.id = 'marketWatchlistModal';
-    overlay.addEventListener('click', (e) => {
+    const overlay = document.createElement("div");
+    overlay.className = "modal-overlay active";
+    overlay.id = "marketWatchlistModal";
+    overlay.addEventListener("click", (e) => {
       if (e.target === overlay) this.closeWatchlistModal();
     });
 
-    const modal = document.createElement('div');
-    modal.className = 'modal unified-settings-modal';
-    modal.style.maxWidth = '680px';
+    const modal = document.createElement("div");
+    modal.className = "modal unified-settings-modal";
+    modal.style.maxWidth = "680px";
 
     modal.innerHTML = `
       <div class="modal-header">
@@ -74,29 +81,39 @@ export class MarketPanel extends Panel {
       </div>
     `;
 
-    const closeBtn = modal.querySelector('.modal-close') as HTMLButtonElement | null;
-    closeBtn?.addEventListener('click', () => this.closeWatchlistModal());
+    const closeBtn = modal.querySelector(
+      ".modal-close",
+    ) as HTMLButtonElement | null;
+    closeBtn?.addEventListener("click", () => this.closeWatchlistModal());
 
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
     this.overlay = overlay;
 
-    const input = modal.querySelector<HTMLTextAreaElement>('#wmMarketWatchlistInput');
+    const input = modal.querySelector<HTMLTextAreaElement>(
+      "#wmMarketWatchlistInput",
+    );
     if (input) input.value = currentText;
 
-    modal.querySelector<HTMLButtonElement>('#wmMarketCancelBtn')?.addEventListener('click', () => this.closeWatchlistModal());
-    modal.querySelector<HTMLButtonElement>('#wmMarketResetBtn')?.addEventListener('click', () => {
-      resetMarketWatchlist();
-      if (input) input.value = ''; // defaults are always included automatically
-      this.closeWatchlistModal();
-    });
-    modal.querySelector<HTMLButtonElement>('#wmMarketSaveBtn')?.addEventListener('click', () => {
-      const raw = input?.value || '';
-      const parsed = parseMarketWatchlistInput(raw);
-      if (parsed.length === 0) resetMarketWatchlist();
-      else setMarketWatchlistEntries(parsed);
-      this.closeWatchlistModal();
-    });
+    modal
+      .querySelector<HTMLButtonElement>("#wmMarketCancelBtn")
+      ?.addEventListener("click", () => this.closeWatchlistModal());
+    modal
+      .querySelector<HTMLButtonElement>("#wmMarketResetBtn")
+      ?.addEventListener("click", () => {
+        resetMarketWatchlist();
+        if (input) input.value = ""; // defaults are always included automatically
+        this.closeWatchlistModal();
+      });
+    modal
+      .querySelector<HTMLButtonElement>("#wmMarketSaveBtn")
+      ?.addEventListener("click", () => {
+        const raw = input?.value || "";
+        const parsed = parseMarketWatchlistInput(raw);
+        if (parsed.length === 0) resetMarketWatchlist();
+        else setMarketWatchlistEntries(parsed);
+        this.closeWatchlistModal();
+      });
   }
 
   private closeWatchlistModal(): void {
@@ -107,7 +124,11 @@ export class MarketPanel extends Panel {
 
   public renderMarkets(data: MarketData[], rateLimited?: boolean): void {
     if (data.length === 0) {
-      this.showRetrying(rateLimited ? t('common.rateLimitedMarket') : t('common.failedMarketData'));
+      this.showRetrying(
+        rateLimited
+          ? t("common.rateLimitedMarket")
+          : t("common.failedMarketData"),
+      );
       return;
     }
 
@@ -125,9 +146,9 @@ export class MarketPanel extends Panel {
           <span class="market-change ${getChangeClass(stock.change!)}">${formatChange(stock.change!)}</span>
         </div>
       </div>
-    `
+    `,
       )
-      .join('');
+      .join("");
 
     this.setContent(html);
   }
@@ -135,14 +156,16 @@ export class MarketPanel extends Panel {
 
 export class HeatmapPanel extends Panel {
   constructor() {
-    super({ id: 'heatmap', title: t('panels.heatmap') });
+    super({ id: "heatmap", title: t("panels.heatmap") });
   }
 
-  public renderHeatmap(data: Array<{ name: string; change: number | null }>): void {
+  public renderHeatmap(
+    data: Array<{ name: string; change: number | null }>,
+  ): void {
     const validData = data.filter((d) => d.change !== null);
 
     if (validData.length === 0) {
-      this.showRetrying(t('common.failedSectorData'));
+      this.showRetrying(t("common.failedSectorData"));
       return;
     }
 
@@ -155,10 +178,10 @@ export class HeatmapPanel extends Panel {
           <div class="sector-name">${escapeHtml(sector.name)}</div>
           <div class="sector-change ${getChangeClass(sector.change!)}">${formatChange(sector.change!)}</div>
         </div>
-      `
+      `,
         )
-        .join('') +
-      '</div>';
+        .join("") +
+      "</div>";
 
     this.setContent(html);
   }
@@ -166,14 +189,21 @@ export class HeatmapPanel extends Panel {
 
 export class CommoditiesPanel extends Panel {
   constructor() {
-    super({ id: 'commodities', title: t('panels.commodities') });
+    super({ id: "commodities", title: t("panels.commodities") });
   }
 
-  public renderCommodities(data: Array<{ display: string; price: number | null; change: number | null; sparkline?: number[] }>): void {
+  public renderCommodities(
+    data: Array<{
+      display: string;
+      price: number | null;
+      change: number | null;
+      sparkline?: number[];
+    }>,
+  ): void {
     const validData = data.filter((d) => d.price !== null);
 
     if (validData.length === 0) {
-      this.showRetrying(t('common.failedCommodities'));
+      this.showRetrying(t("common.failedCommodities"));
       return;
     }
 
@@ -188,10 +218,10 @@ export class CommoditiesPanel extends Panel {
           <div class="commodity-price">${formatPrice(c.price!)}</div>
           <div class="commodity-change ${getChangeClass(c.change!)}">${formatChange(c.change!)}</div>
         </div>
-      `
+      `,
         )
-        .join('') +
-      '</div>';
+        .join("") +
+      "</div>";
 
     this.setContent(html);
   }
@@ -199,12 +229,12 @@ export class CommoditiesPanel extends Panel {
 
 export class CryptoPanel extends Panel {
   constructor() {
-    super({ id: 'crypto', title: t('panels.crypto') });
+    super({ id: "crypto", title: t("panels.crypto") });
   }
 
   public renderCrypto(data: CryptoData[]): void {
     if (data.length === 0) {
-      this.showRetrying(t('common.failedCryptoData'));
+      this.showRetrying(t("common.failedCryptoData"));
       return;
     }
 
@@ -222,9 +252,9 @@ export class CryptoPanel extends Panel {
           <span class="market-change ${getChangeClass(coin.change)}">${formatChange(coin.change)}</span>
         </div>
       </div>
-    `
+    `,
       )
-      .join('');
+      .join("");
 
     this.setContent(html);
   }

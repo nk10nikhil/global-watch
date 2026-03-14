@@ -3,28 +3,33 @@ import type {
   GetChokepointStatusRequest,
   GetChokepointStatusResponse,
   ChokepointInfo,
-} from '../../../../src/generated/server/worldmonitor/supply_chain/v1/service_server';
+} from "../../../../src/generated/server/worldmonitor/supply_chain/v1/service_server";
 
 import type {
   ListNavigationalWarningsResponse,
   GetVesselSnapshotResponse,
   NavigationalWarning,
   AisDisruption,
-} from '../../../../src/generated/server/worldmonitor/maritime/v1/service_server';
+} from "../../../../src/generated/server/worldmonitor/maritime/v1/service_server";
 
-import { cachedFetchJson } from '../../../_shared/redis';
-import { listNavigationalWarnings } from '../../maritime/v1/list-navigational-warnings';
-import { getVesselSnapshot } from '../../maritime/v1/get-vessel-snapshot';
+import { cachedFetchJson } from "../../../_shared/redis";
+import { listNavigationalWarnings } from "../../maritime/v1/list-navigational-warnings";
+import { getVesselSnapshot } from "../../maritime/v1/get-vessel-snapshot";
 // @ts-expect-error — .mjs module, no declaration file
-import { computeDisruptionScore, scoreToStatus, SEVERITY_SCORE, THREAT_LEVEL } from './_scoring.mjs';
+import {
+  computeDisruptionScore,
+  scoreToStatus,
+  SEVERITY_SCORE,
+  THREAT_LEVEL,
+} from "./_scoring.mjs";
 
-const REDIS_CACHE_KEY = 'supply_chain:chokepoints:v2';
+const REDIS_CACHE_KEY = "supply_chain:chokepoints:v2";
 const REDIS_CACHE_TTL = 300; // 5 min
 const THREAT_CONFIG_MAX_AGE_DAYS = 120;
 const NEARBY_CHOKEPOINT_RADIUS_KM = 300;
 const THREAT_CONFIG_STALE_NOTE = `Threat baseline last reviewed > ${THREAT_CONFIG_MAX_AGE_DAYS} days ago — review recommended`;
 
-type ThreatLevel = 'war_zone' | 'critical' | 'high' | 'elevated' | 'normal';
+type ThreatLevel = "war_zone" | "critical" | "high" | "elevated" | "normal";
 type GeoCoordinates = { latitude: number; longitude: number };
 
 interface ChokepointConfig {
@@ -63,22 +68,114 @@ interface ChokepointConfig {
  * Review quarterly or whenever a major geopolitical shift occurs.
  * Source: Lloyd's Joint War Committee Listed Areas + OSINT.
  */
-export const THREAT_CONFIG_LAST_REVIEWED = '2026-03-04';
+export const THREAT_CONFIG_LAST_REVIEWED = "2026-03-04";
 
 export const CHOKEPOINTS: ChokepointConfig[] = [
-  { id: 'suez', name: 'Suez Canal', lat: 30.45, lon: 32.35, primaryKeywords: ['suez canal', 'suez'], areaKeywords: ['suez canal', 'suez', 'gulf of suez', 'red sea'], routes: ['China-Europe (Suez)', 'Gulf-Europe Oil', 'Qatar LNG-Europe'], threatLevel: 'high', threatDescription: 'JWC Listed Area — adjacent to active Red Sea conflict and Iran-Israel war spillover' },
-  { id: 'malacca', name: 'Strait of Malacca', lat: 1.43, lon: 103.5, primaryKeywords: ['strait of malacca', 'malacca'], areaKeywords: ['strait of malacca', 'malacca', 'singapore strait'], routes: ['China-Middle East Oil', 'China-Europe (via Suez)', 'Japan-Middle East Oil'], threatLevel: 'normal', threatDescription: '' },
-  { id: 'hormuz', name: 'Strait of Hormuz', lat: 26.56, lon: 56.25, primaryKeywords: ['strait of hormuz', 'hormuz'], areaKeywords: ['strait of hormuz', 'hormuz', 'persian gulf', 'arabian gulf', 'gulf of oman', 'iran naval', 'iran military'], routes: ['Gulf Oil Exports', 'Qatar LNG', 'Iran Exports'], threatLevel: 'war_zone', threatDescription: 'Active conflict — Iran-Israel war; Iranian naval blockade risk and mines reported in Persian Gulf' },
-  { id: 'bab_el_mandeb', name: 'Bab el-Mandeb', lat: 12.58, lon: 43.33, primaryKeywords: ['bab el-mandeb', 'bab al-mandab'], areaKeywords: ['bab el-mandeb', 'bab al-mandab', 'mandeb', 'aden', 'houthi', 'yemen', 'gulf of aden', 'red sea'], routes: ['Suez-Indian Ocean', 'Gulf-Europe Oil', 'Red Sea Transit'], threatLevel: 'critical', threatDescription: 'JWC Listed Area — active Houthi attacks on commercial shipping' },
-  { id: 'panama', name: 'Panama Canal', lat: 9.08, lon: -79.68, primaryKeywords: ['panama canal'], areaKeywords: ['panama canal', 'panama'], routes: ['US East Coast-Asia', 'US East Coast-South America', 'Atlantic-Pacific Bulk'], threatLevel: 'normal', threatDescription: '' },
-  { id: 'taiwan', name: 'Taiwan Strait', lat: 24.0, lon: 119.5, primaryKeywords: ['taiwan strait', 'formosa'], areaKeywords: ['taiwan strait', 'formosa', 'taiwan', 'south china sea'], routes: ['China-Japan Trade', 'Korea-Southeast Asia', 'Pacific Semiconductor'], threatLevel: 'elevated', threatDescription: 'Cross-strait military tensions and PLA exercises' },
+  {
+    id: "suez",
+    name: "Suez Canal",
+    lat: 30.45,
+    lon: 32.35,
+    primaryKeywords: ["suez canal", "suez"],
+    areaKeywords: ["suez canal", "suez", "gulf of suez", "red sea"],
+    routes: ["China-Europe (Suez)", "Gulf-Europe Oil", "Qatar LNG-Europe"],
+    threatLevel: "high",
+    threatDescription:
+      "JWC Listed Area — adjacent to active Red Sea conflict and Iran-Israel war spillover",
+  },
+  {
+    id: "malacca",
+    name: "Strait of Malacca",
+    lat: 1.43,
+    lon: 103.5,
+    primaryKeywords: ["strait of malacca", "malacca"],
+    areaKeywords: ["strait of malacca", "malacca", "singapore strait"],
+    routes: [
+      "China-Middle East Oil",
+      "China-Europe (via Suez)",
+      "Japan-Middle East Oil",
+    ],
+    threatLevel: "normal",
+    threatDescription: "",
+  },
+  {
+    id: "hormuz",
+    name: "Strait of Hormuz",
+    lat: 26.56,
+    lon: 56.25,
+    primaryKeywords: ["strait of hormuz", "hormuz"],
+    areaKeywords: [
+      "strait of hormuz",
+      "hormuz",
+      "persian gulf",
+      "arabian gulf",
+      "gulf of oman",
+      "iran naval",
+      "iran military",
+    ],
+    routes: ["Gulf Oil Exports", "Qatar LNG", "Iran Exports"],
+    threatLevel: "war_zone",
+    threatDescription:
+      "Active conflict — Iran-Israel war; Iranian naval blockade risk and mines reported in Persian Gulf",
+  },
+  {
+    id: "bab_el_mandeb",
+    name: "Bab el-Mandeb",
+    lat: 12.58,
+    lon: 43.33,
+    primaryKeywords: ["bab el-mandeb", "bab al-mandab"],
+    areaKeywords: [
+      "bab el-mandeb",
+      "bab al-mandab",
+      "mandeb",
+      "aden",
+      "houthi",
+      "yemen",
+      "gulf of aden",
+      "red sea",
+    ],
+    routes: ["Suez-Indian Ocean", "Gulf-Europe Oil", "Red Sea Transit"],
+    threatLevel: "critical",
+    threatDescription:
+      "JWC Listed Area — active Houthi attacks on commercial shipping",
+  },
+  {
+    id: "panama",
+    name: "Panama Canal",
+    lat: 9.08,
+    lon: -79.68,
+    primaryKeywords: ["panama canal"],
+    areaKeywords: ["panama canal", "panama"],
+    routes: [
+      "US East Coast-Asia",
+      "US East Coast-South America",
+      "Atlantic-Pacific Bulk",
+    ],
+    threatLevel: "normal",
+    threatDescription: "",
+  },
+  {
+    id: "taiwan",
+    name: "Taiwan Strait",
+    lat: 24.0,
+    lon: 119.5,
+    primaryKeywords: ["taiwan strait", "formosa"],
+    areaKeywords: ["taiwan strait", "formosa", "taiwan", "south china sea"],
+    routes: [
+      "China-Japan Trade",
+      "Korea-Southeast Asia",
+      "Pacific Semiconductor",
+    ],
+    threatLevel: "elevated",
+    threatDescription: "Cross-strait military tensions and PLA exercises",
+  },
 ];
 
 function normalizeText(input: string): string {
   return input
     .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, ' ')
-    .replace(/\s+/g, ' ')
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
@@ -88,21 +185,34 @@ function containsPhrase(normalizedHaystack: string, keyword: string): boolean {
   return ` ${normalizedHaystack} `.includes(` ${normalizedKeyword} `);
 }
 
-function haversineKm(aLat: number, aLon: number, bLat: number, bLon: number): number {
+function haversineKm(
+  aLat: number,
+  aLon: number,
+  bLat: number,
+  bLon: number,
+): number {
   const toRad = (deg: number) => (deg * Math.PI) / 180;
   const dLat = toRad(bLat - aLat);
   const dLon = toRad(bLon - aLon);
-  const x = Math.sin(dLat / 2) ** 2
-    + Math.cos(toRad(aLat)) * Math.cos(toRad(bLat)) * Math.sin(dLon / 2) ** 2;
+  const x =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(aLat)) * Math.cos(toRad(bLat)) * Math.sin(dLon / 2) ** 2;
   return 6371 * (2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x)));
 }
 
-function nearestChokepoint(location?: GeoCoordinates): { id: string; distanceKm: number } | null {
+function nearestChokepoint(
+  location?: GeoCoordinates,
+): { id: string; distanceKm: number } | null {
   if (!location) return null;
 
   let closest: { id: string; distanceKm: number } | null = null;
   for (const cp of CHOKEPOINTS) {
-    const distanceKm = haversineKm(location.latitude, location.longitude, cp.lat, cp.lon);
+    const distanceKm = haversineKm(
+      location.latitude,
+      location.longitude,
+      cp.lat,
+      cp.lon,
+    );
     if (!closest || distanceKm < closest.distanceKm) {
       closest = { id: cp.id, distanceKm };
     }
@@ -113,7 +223,9 @@ function nearestChokepoint(location?: GeoCoordinates): { id: string; distanceKm:
 function keywordScore(cp: ChokepointConfig, normalizedText: string): number {
   if (!normalizedText) return 0;
 
-  const primaryMatches = cp.primaryKeywords.filter((kw) => containsPhrase(normalizedText, kw));
+  const primaryMatches = cp.primaryKeywords.filter((kw) =>
+    containsPhrase(normalizedText, kw),
+  );
   const primarySet = new Set(primaryMatches.map(normalizeText));
   const areaMatches = cp.areaKeywords.filter((kw) => {
     const normalizedKw = normalizeText(kw);
@@ -126,7 +238,10 @@ function keywordScore(cp: ChokepointConfig, normalizedText: string): number {
   return primaryMatches.length * 3 + areaMatches.length;
 }
 
-export function resolveChokepointId(input: { text: string; location?: GeoCoordinates }): string | null {
+export function resolveChokepointId(input: {
+  text: string;
+  location?: GeoCoordinates;
+}): string | null {
   const normalizedText = normalizeText(input.text);
   let best: { id: string; score: number; distanceKm: number } | null = null;
 
@@ -135,10 +250,19 @@ export function resolveChokepointId(input: { text: string; location?: GeoCoordin
     if (score <= 0) continue;
 
     const distanceKm = input.location
-      ? haversineKm(input.location.latitude, input.location.longitude, cp.lat, cp.lon)
+      ? haversineKm(
+          input.location.latitude,
+          input.location.longitude,
+          cp.lat,
+          cp.lon,
+        )
       : Number.POSITIVE_INFINITY;
 
-    if (!best || score > best.score || (score === best.score && distanceKm < best.distanceKm)) {
+    if (
+      !best ||
+      score > best.score ||
+      (score === best.score && distanceKm < best.distanceKm)
+    ) {
       best = { id: cp.id, score, distanceKm };
     }
   }
@@ -153,7 +277,9 @@ export function resolveChokepointId(input: { text: string; location?: GeoCoordin
   return null;
 }
 
-function groupWarningsByChokepoint(warnings: NavigationalWarning[]): Map<string, NavigationalWarning[]> {
+function groupWarningsByChokepoint(
+  warnings: NavigationalWarning[],
+): Map<string, NavigationalWarning[]> {
   const grouped = new Map<string, NavigationalWarning[]>();
   for (const cp of CHOKEPOINTS) grouped.set(cp.id, []);
 
@@ -169,12 +295,15 @@ function groupWarningsByChokepoint(warnings: NavigationalWarning[]): Map<string,
   return grouped;
 }
 
-function groupDisruptionsByChokepoint(disruptions: AisDisruption[]): Map<string, AisDisruption[]> {
+function groupDisruptionsByChokepoint(
+  disruptions: AisDisruption[],
+): Map<string, AisDisruption[]> {
   const grouped = new Map<string, AisDisruption[]>();
   for (const cp of CHOKEPOINTS) grouped.set(cp.id, []);
 
   for (const disruption of disruptions) {
-    if (disruption.type !== 'AIS_DISRUPTION_TYPE_CHOKEPOINT_CONGESTION') continue;
+    if (disruption.type !== "AIS_DISRUPTION_TYPE_CHOKEPOINT_CONGESTION")
+      continue;
 
     const id = resolveChokepointId({
       text: `${disruption.name} ${disruption.region} ${disruption.description}`,
@@ -194,8 +323,16 @@ export function isThreatConfigFresh(asOfMs = Date.now()): boolean {
   return asOfMs - reviewedAtMs <= maxAgeMs;
 }
 
-function makeInternalCtx(): { request: Request; pathParams: Record<string, string>; headers: Record<string, string> } {
-  return { request: new Request('http://internal'), pathParams: {}, headers: {} };
+function makeInternalCtx(): {
+  request: Request;
+  pathParams: Record<string, string>;
+  headers: Record<string, string>;
+} {
+  return {
+    request: new Request("http://internal"),
+    pathParams: {},
+    headers: {},
+  };
 }
 
 interface ChokepointFetchResult {
@@ -210,13 +347,29 @@ async function fetchChokepointData(): Promise<ChokepointFetchResult> {
   let vesselFailed = false;
 
   const [navResult, vesselResult] = await Promise.all([
-    listNavigationalWarnings(ctx, { area: '', pageSize: 0, cursor: '' }).catch((): ListNavigationalWarningsResponse => { navFailed = true; return { warnings: [], pagination: undefined }; }),
-    getVesselSnapshot(ctx, { neLat: 90, neLon: 180, swLat: -90, swLon: -180 }).catch((): GetVesselSnapshotResponse => { vesselFailed = true; return { snapshot: undefined }; }),
+    listNavigationalWarnings(ctx, { area: "", pageSize: 0, cursor: "" }).catch(
+      (): ListNavigationalWarningsResponse => {
+        navFailed = true;
+        return { warnings: [], pagination: undefined };
+      },
+    ),
+    getVesselSnapshot(ctx, {
+      neLat: 90,
+      neLon: 180,
+      swLat: -90,
+      swLon: -180,
+    }).catch((): GetVesselSnapshotResponse => {
+      vesselFailed = true;
+      return { snapshot: undefined };
+    }),
   ]);
 
   const warnings = navResult.warnings || [];
   const disruptions: AisDisruption[] = vesselResult.snapshot?.disruptions || [];
-  const upstreamUnavailable = (navFailed && vesselFailed) || (navFailed && disruptions.length === 0) || (vesselFailed && warnings.length === 0);
+  const upstreamUnavailable =
+    (navFailed && vesselFailed) ||
+    (navFailed && disruptions.length === 0) ||
+    (vesselFailed && warnings.length === 0);
   const warningsByChokepoint = groupWarningsByChokepoint(warnings);
   const disruptionsByChokepoint = groupDisruptionsByChokepoint(disruptions);
   const threatConfigFresh = isThreatConfigFresh();
@@ -230,11 +383,23 @@ async function fetchChokepointData(): Promise<ChokepointFetchResult> {
       return Math.max(max, score);
     }, 0);
 
-    const threatScore = (THREAT_LEVEL as Record<string, number>)[cp.threatLevel] ?? 0;
-    const disruptionScore = computeDisruptionScore(threatScore, matchedWarnings.length, maxSeverity);
+    const threatScore =
+      (THREAT_LEVEL as Record<string, number>)[cp.threatLevel] ?? 0;
+    const disruptionScore = computeDisruptionScore(
+      threatScore,
+      matchedWarnings.length,
+      maxSeverity,
+    );
     const status = scoreToStatus(disruptionScore);
 
-    const congestionLevel = maxSeverity >= 3 ? 'high' : maxSeverity >= 2 ? 'elevated' : maxSeverity >= 1 ? 'low' : 'normal';
+    const congestionLevel =
+      maxSeverity >= 3
+        ? "high"
+        : maxSeverity >= 2
+          ? "elevated"
+          : maxSeverity >= 1
+            ? "low"
+            : "normal";
 
     const descriptions: string[] = [];
     if (cp.threatDescription) {
@@ -247,7 +412,7 @@ async function fetchChokepointData(): Promise<ChokepointFetchResult> {
       descriptions.push(`Navigational warnings: ${matchedWarnings.length}`);
       descriptions.push(`AIS vessel disruptions: ${matchedDisruptions.length}`);
     } else if (!cp.threatDescription) {
-      descriptions.push('No active disruptions');
+      descriptions.push("No active disruptions");
     }
 
     return {
@@ -261,7 +426,7 @@ async function fetchChokepointData(): Promise<ChokepointFetchResult> {
       aisDisruptions: matchedDisruptions.length,
       congestionLevel,
       affectedRoutes: cp.routes,
-      description: descriptions.join('; '),
+      description: descriptions.join("; "),
     };
   });
 
@@ -277,14 +442,29 @@ export async function getChokepointStatus(
       REDIS_CACHE_KEY,
       REDIS_CACHE_TTL,
       async () => {
-        const { chokepoints, upstreamUnavailable } = await fetchChokepointData();
+        const { chokepoints, upstreamUnavailable } =
+          await fetchChokepointData();
         if (upstreamUnavailable) return null;
-        return { chokepoints, fetchedAt: new Date().toISOString(), upstreamUnavailable };
+        return {
+          chokepoints,
+          fetchedAt: new Date().toISOString(),
+          upstreamUnavailable,
+        };
       },
     );
 
-    return result ?? { chokepoints: [], fetchedAt: new Date().toISOString(), upstreamUnavailable: true };
+    return (
+      result ?? {
+        chokepoints: [],
+        fetchedAt: new Date().toISOString(),
+        upstreamUnavailable: true,
+      }
+    );
   } catch {
-    return { chokepoints: [], fetchedAt: new Date().toISOString(), upstreamUnavailable: true };
+    return {
+      chokepoints: [],
+      fetchedAt: new Date().toISOString(),
+      upstreamUnavailable: true,
+    };
   }
 }

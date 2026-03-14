@@ -2,27 +2,28 @@
 title: "Country Instability Index"
 description: "Real-time stability scoring for 24 strategically significant countries, combining unrest, security, and information signals into a dynamic instability metric."
 ---
+
 The Country Instability Index maintains a real-time instability score for strategically significant countries. Rather than relying on static risk ratings, the CII dynamically reflects current conditions based on multiple input streams.
 
 ## Monitored Countries (Tier 1)
 
-| Region | Countries |
-|--------|-----------|
-| **Americas** | United States, Venezuela, Brazil, Mexico, Cuba |
-| **Europe** | Germany, France, United Kingdom, Poland |
-| **Eastern Europe** | Russia, Ukraine |
-| **Middle East** | Iran, Israel, Saudi Arabia, United Arab Emirates, Turkey, Syria, Yemen |
-| **Asia-Pacific** | China, Taiwan, North Korea, India, Pakistan, Myanmar |
+| Region             | Countries                                                              |
+| ------------------ | ---------------------------------------------------------------------- |
+| **Americas**       | United States, Venezuela, Brazil, Mexico, Cuba                         |
+| **Europe**         | Germany, France, United Kingdom, Poland                                |
+| **Eastern Europe** | Russia, Ukraine                                                        |
+| **Middle East**    | Iran, Israel, Saudi Arabia, United Arab Emirates, Turkey, Syria, Yemen |
+| **Asia-Pacific**   | China, Taiwan, North Korea, India, Pakistan, Myanmar                   |
 
 ## Three Component Scores
 
 Each country's CII is computed from three weighted components:
 
-| Component | Weight | Data Sources | What It Measures |
-|-----------|--------|--------------|------------------|
-| **Unrest** | 40% | ACLED protests, GDELT events | Civil unrest intensity, fatalities, event severity |
-| **Security** | 30% | Military flights, naval vessels | Unusual military activity patterns |
-| **Information** | 30% | News velocity, alert clusters | Media attention intensity and acceleration |
+| Component       | Weight | Data Sources                    | What It Measures                                   |
+| --------------- | ------ | ------------------------------- | -------------------------------------------------- |
+| **Unrest**      | 40%    | ACLED protests, GDELT events    | Civil unrest intensity, fatalities, event severity |
+| **Security**    | 30%    | Military flights, naval vessels | Unusual military activity patterns                 |
+| **Information** | 30%    | News velocity, alert clusters   | Media attention intensity and acceleration         |
 
 ## Scoring Algorithm
 
@@ -67,25 +68,25 @@ This ensures the US receiving 50 news mentions about routine political activity 
 
 Active conflict zones have minimum score floors that prevent them from appearing stable during data gaps or low-coverage periods:
 
-| Country | Floor | Rationale |
-|---------|-------|-----------|
-| Ukraine | 55 | Active war with Russia |
-| Syria | 50 | Ongoing civil war |
-| Yemen | 50 | Ongoing civil war |
-| Myanmar | 45 | Military coup, civil conflict |
-| Israel | 45 | Active Gaza conflict |
+| Country | Floor | Rationale                     |
+| ------- | ----- | ----------------------------- |
+| Ukraine | 55    | Active war with Russia        |
+| Syria   | 50    | Ongoing civil war             |
+| Yemen   | 50    | Ongoing civil war             |
+| Myanmar | 45    | Military coup, civil conflict |
+| Israel  | 45    | Active Gaza conflict          |
 
-The floor applies *after* the standard calculation. If the computed score exceeds the floor, the computed score is used. This prevents false "all clear" signals while preserving sensitivity to actual escalations.
+The floor applies _after_ the standard calculation. If the computed score exceeds the floor, the computed score is used. This prevents false "all clear" signals while preserving sensitivity to actual escalations.
 
 ## Instability Levels
 
-| Level | Score Range | Visual | Meaning |
-|-------|-------------|--------|---------|
-| **Critical** | 81-100 | Red | Active crisis or major escalation |
-| **High** | 66-80 | Orange | Significant instability requiring close monitoring |
-| **Elevated** | 51-65 | Yellow | Above-normal activity patterns |
-| **Normal** | 31-50 | Gray | Baseline geopolitical activity |
-| **Low** | 0-30 | Green | Unusually quiet period |
+| Level        | Score Range | Visual | Meaning                                            |
+| ------------ | ----------- | ------ | -------------------------------------------------- |
+| **Critical** | 81-100      | Red    | Active crisis or major escalation                  |
+| **High**     | 66-80       | Orange | Significant instability requiring close monitoring |
+| **Elevated** | 51-65       | Yellow | Above-normal activity patterns                     |
+| **Normal**   | 31-50       | Gray   | Baseline geopolitical activity                     |
+| **Low**      | 0-30        | Green  | Unusually quiet period                             |
 
 ## Trend Detection
 
@@ -99,11 +100,11 @@ The CII tracks 24-hour changes to identify trajectory:
 
 Beyond the base component scores, several contextual factors can boost a country's CII score (up to a combined maximum of 23 additional points):
 
-| Boost Type | Max Points | Condition | Purpose |
-|------------|------------|-----------|---------|
-| **Hotspot Activity** | 10 | Events near defined hotspots | Captures localized escalation |
-| **News Urgency** | 5 | Information component ≥50 | High media attention indicator |
-| **Focal Point** | 8 | AI focal point detection on country | Multi-source convergence indicator |
+| Boost Type           | Max Points | Condition                           | Purpose                            |
+| -------------------- | ---------- | ----------------------------------- | ---------------------------------- |
+| **Hotspot Activity** | 10         | Events near defined hotspots        | Captures localized escalation      |
+| **News Urgency**     | 5          | Information component ≥50           | High media attention indicator     |
+| **Focal Point**      | 8          | AI focal point detection on country | Multi-source convergence indicator |
 
 **Hotspot Boost Calculation**:
 
@@ -146,11 +147,11 @@ On dashboard startup, the CII system enters **Learning Mode**, a 15-minute calib
 
 During Learning Mode, the dashboard provides clear visual feedback:
 
-| Location | Indicator |
-|----------|-----------|
-| **CII Panel** | Yellow banner with progress bar and countdown timer |
-| **Strategic Risk Overview** | "Learning Mode - Xm until reliable" status |
-| **Score Display** | Scores shown at 60% opacity (dimmed) |
+| Location                    | Indicator                                           |
+| --------------------------- | --------------------------------------------------- |
+| **CII Panel**               | Yellow banner with progress bar and countdown timer |
+| **Strategic Risk Overview** | "Learning Mode - Xm until reliable" status          |
+| **Score Display**           | Scores shown at 60% opacity (dimmed)                |
 
 ### Behavior
 

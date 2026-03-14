@@ -1,16 +1,16 @@
-import type { AppContext, AppModule } from '@/app/app-context';
-import type { AirlineIntelPanel } from '@/components/AirlineIntelPanel';
-import type { PanelConfig, MapLayers } from '@/types';
-import type { MapView } from '@/components';
-import type { ClusteredEvent } from '@/types';
-import type { DashboardSnapshot } from '@/services/storage';
+import type { AppContext, AppModule } from "@/app/app-context";
+import type { AirlineIntelPanel } from "@/components/AirlineIntelPanel";
+import type { PanelConfig, MapLayers } from "@/types";
+import type { MapView } from "@/components";
+import type { ClusteredEvent } from "@/types";
+import type { DashboardSnapshot } from "@/services/storage";
 import {
   PlaybackControl,
   StatusPanel,
   PizzIntIndicator,
   CIIPanel,
   PredictionPanel,
-} from '@/components';
+} from "@/components";
 import {
   buildMapUrl,
   debounce,
@@ -18,7 +18,7 @@ import {
   ExportPanel,
   getCurrentTheme,
   setTheme,
-} from '@/utils';
+} from "@/utils";
 import {
   IDLE_PAUSE_MS,
   STORAGE_KEYS,
@@ -27,13 +27,9 @@ import {
   FEEDS,
   INTEL_SOURCES,
   DEFAULT_PANELS,
-} from '@/config';
-import { VARIANT_META } from '@/config/variant-meta';
-import {
-  saveSnapshot,
-  initAisStream,
-  disconnectAisStream,
-} from '@/services';
+} from "@/config";
+import { VARIANT_META } from "@/config/variant-meta";
+import { saveSnapshot, initAisStream, disconnectAisStream } from "@/services";
 import {
   trackPanelView,
   trackVariantSwitch,
@@ -42,15 +38,19 @@ import {
   trackMapLayerToggle,
   trackPanelToggled,
   trackDownloadClicked,
-} from '@/services/analytics';
-import { detectPlatform, allButtons, buttonsForPlatform } from '@/components/DownloadBanner';
-import type { Platform } from '@/components/DownloadBanner';
-import { invokeTauri } from '@/services/tauri-bridge';
-import { dataFreshness } from '@/services/data-freshness';
-import { mlWorker } from '@/services/ml-worker';
-import { UnifiedSettings } from '@/components/UnifiedSettings';
-import { t } from '@/services/i18n';
-import { TvModeController } from '@/services/tv-mode';
+} from "@/services/analytics";
+import {
+  detectPlatform,
+  allButtons,
+  buttonsForPlatform,
+} from "@/components/DownloadBanner";
+import type { Platform } from "@/components/DownloadBanner";
+import { invokeTauri } from "@/services/tauri-bridge";
+import { dataFreshness } from "@/services/data-freshness";
+import { mlWorker } from "@/services/ml-worker";
+import { UnifiedSettings } from "@/components/UnifiedSettings";
+import { t } from "@/services/i18n";
+import { TvModeController } from "@/services/tv-mode";
 
 export interface EventHandlerCallbacks {
   updateSearchIndex: () => void;
@@ -72,18 +72,21 @@ export class EventHandlerManager implements AppModule {
   private boundFullscreenHandler: (() => void) | null = null;
   private boundResizeHandler: (() => void) | null = null;
   private boundVisibilityHandler: (() => void) | null = null;
-  private boundDesktopExternalLinkHandler: ((e: MouseEvent) => void) | null = null;
+  private boundDesktopExternalLinkHandler: ((e: MouseEvent) => void) | null =
+    null;
   private boundIdleResetHandler: (() => void) | null = null;
   private boundStorageHandler: ((e: StorageEvent) => void) | null = null;
   private boundTvKeydownHandler: ((e: KeyboardEvent) => void) | null = null;
   private boundFocalPointsReadyHandler: (() => void) | null = null;
   private boundThemeChangedHandler: (() => void) | null = null;
   private boundDropdownClickHandler: ((e: MouseEvent) => void) | null = null;
-  private boundDropdownKeydownHandler: ((e: KeyboardEvent) => void) | null = null;
+  private boundDropdownKeydownHandler: ((e: KeyboardEvent) => void) | null =
+    null;
   private boundMapResizeMoveHandler: ((e: MouseEvent) => void) | null = null;
   private boundMapEndResizeHandler: (() => void) | null = null;
   private boundMapResizeVisChangeHandler: (() => void) | null = null;
-  private boundMapFullscreenEscHandler: ((e: KeyboardEvent) => void) | null = null;
+  private boundMapFullscreenEscHandler: ((e: KeyboardEvent) => void) | null =
+    null;
   private boundMobileMenuKeyHandler: ((e: KeyboardEvent) => void) | null = null;
   private boundPanelCloseHandler: ((e: Event) => void) | null = null;
   private idleTimeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -94,7 +97,9 @@ export class EventHandlerManager implements AppModule {
   private readonly debouncedUrlSync = debounce(() => {
     const shareUrl = this.getShareUrl();
     if (!shareUrl) return;
-    try { history.replaceState(null, '', shareUrl); } catch { }
+    try {
+      history.replaceState(null, "", shareUrl);
+    } catch {}
   }, 250);
 
   constructor(ctx: AppContext, callbacks: EventHandlerCallbacks) {
@@ -109,63 +114,83 @@ export class EventHandlerManager implements AppModule {
   }
 
   private setupTvMode(): void {
-    if (SITE_VARIANT !== 'happy') return;
+    if (SITE_VARIANT !== "happy") return;
 
-    const tvBtn = document.getElementById('tvModeBtn');
-    const tvExitBtn = document.getElementById('tvExitBtn');
+    const tvBtn = document.getElementById("tvModeBtn");
+    const tvExitBtn = document.getElementById("tvExitBtn");
     if (tvBtn) {
-      tvBtn.addEventListener('click', () => this.toggleTvMode());
+      tvBtn.addEventListener("click", () => this.toggleTvMode());
     }
     if (tvExitBtn) {
-      tvExitBtn.addEventListener('click', () => this.toggleTvMode());
+      tvExitBtn.addEventListener("click", () => this.toggleTvMode());
     }
     // Keyboard shortcut: Shift+T
     this.boundTvKeydownHandler = (e: KeyboardEvent) => {
-      if (e.shiftKey && e.key === 'T' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      if (
+        e.shiftKey &&
+        e.key === "T" &&
+        !e.ctrlKey &&
+        !e.metaKey &&
+        !e.altKey
+      ) {
         const active = document.activeElement;
-        if (active?.tagName !== 'INPUT' && active?.tagName !== 'TEXTAREA') {
+        if (active?.tagName !== "INPUT" && active?.tagName !== "TEXTAREA") {
           e.preventDefault();
           this.toggleTvMode();
         }
       }
     };
-    document.addEventListener('keydown', this.boundTvKeydownHandler);
+    document.addEventListener("keydown", this.boundTvKeydownHandler);
   }
 
   private toggleTvMode(): void {
     const panelKeys = Object.keys(DEFAULT_PANELS).filter(
-      key => this.ctx.panelSettings[key]?.enabled !== false
+      (key) => this.ctx.panelSettings[key]?.enabled !== false,
     );
     if (!this.ctx.tvMode) {
       this.ctx.tvMode = new TvModeController({
         panelKeys,
         onPanelChange: () => {
-          document.getElementById('tvModeBtn')?.classList.toggle('active', this.ctx.tvMode?.active ?? false);
-        }
+          document
+            .getElementById("tvModeBtn")
+            ?.classList.toggle("active", this.ctx.tvMode?.active ?? false);
+        },
       });
     } else {
       this.ctx.tvMode.updatePanelKeys(panelKeys);
     }
     this.ctx.tvMode.toggle();
-    document.getElementById('tvModeBtn')?.classList.toggle('active', this.ctx.tvMode.active);
+    document
+      .getElementById("tvModeBtn")
+      ?.classList.toggle("active", this.ctx.tvMode.active);
   }
 
   destroy(): void {
     this.debouncedUrlSync.cancel();
     if (this.boundFullscreenHandler) {
-      document.removeEventListener('fullscreenchange', this.boundFullscreenHandler);
+      document.removeEventListener(
+        "fullscreenchange",
+        this.boundFullscreenHandler,
+      );
       this.boundFullscreenHandler = null;
     }
     if (this.boundResizeHandler) {
-      window.removeEventListener('resize', this.boundResizeHandler);
+      window.removeEventListener("resize", this.boundResizeHandler);
       this.boundResizeHandler = null;
     }
     if (this.boundVisibilityHandler) {
-      document.removeEventListener('visibilitychange', this.boundVisibilityHandler);
+      document.removeEventListener(
+        "visibilitychange",
+        this.boundVisibilityHandler,
+      );
       this.boundVisibilityHandler = null;
     }
     if (this.boundDesktopExternalLinkHandler) {
-      document.removeEventListener('click', this.boundDesktopExternalLinkHandler, true);
+      document.removeEventListener(
+        "click",
+        this.boundDesktopExternalLinkHandler,
+        true,
+      );
       this.boundDesktopExternalLinkHandler = null;
     }
     if (this.idleTimeoutId) {
@@ -173,9 +198,11 @@ export class EventHandlerManager implements AppModule {
       this.idleTimeoutId = null;
     }
     if (this.boundIdleResetHandler) {
-      ['mousedown', 'keydown', 'scroll', 'touchstart', 'mousemove'].forEach(event => {
-        document.removeEventListener(event, this.boundIdleResetHandler!);
-      });
+      ["mousedown", "keydown", "scroll", "touchstart", "mousemove"].forEach(
+        (event) => {
+          document.removeEventListener(event, this.boundIdleResetHandler!);
+        },
+      );
       this.boundIdleResetHandler = null;
     }
     if (this.snapshotIntervalId) {
@@ -187,52 +214,67 @@ export class EventHandlerManager implements AppModule {
       this.clockIntervalId = null;
     }
     if (this.boundStorageHandler) {
-      window.removeEventListener('storage', this.boundStorageHandler);
+      window.removeEventListener("storage", this.boundStorageHandler);
       this.boundStorageHandler = null;
     }
     if (this.boundTvKeydownHandler) {
-      document.removeEventListener('keydown', this.boundTvKeydownHandler);
+      document.removeEventListener("keydown", this.boundTvKeydownHandler);
       this.boundTvKeydownHandler = null;
     }
     if (this.boundFocalPointsReadyHandler) {
-      window.removeEventListener('focal-points-ready', this.boundFocalPointsReadyHandler);
+      window.removeEventListener(
+        "focal-points-ready",
+        this.boundFocalPointsReadyHandler,
+      );
       this.boundFocalPointsReadyHandler = null;
     }
     if (this.boundThemeChangedHandler) {
-      window.removeEventListener('theme-changed', this.boundThemeChangedHandler);
+      window.removeEventListener(
+        "theme-changed",
+        this.boundThemeChangedHandler,
+      );
       this.boundThemeChangedHandler = null;
     }
     if (this.boundDropdownClickHandler) {
-      document.removeEventListener('click', this.boundDropdownClickHandler);
+      document.removeEventListener("click", this.boundDropdownClickHandler);
       this.boundDropdownClickHandler = null;
     }
     if (this.boundDropdownKeydownHandler) {
-      document.removeEventListener('keydown', this.boundDropdownKeydownHandler);
+      document.removeEventListener("keydown", this.boundDropdownKeydownHandler);
       this.boundDropdownKeydownHandler = null;
     }
     if (this.boundMapResizeMoveHandler) {
-      document.removeEventListener('mousemove', this.boundMapResizeMoveHandler);
+      document.removeEventListener("mousemove", this.boundMapResizeMoveHandler);
       this.boundMapResizeMoveHandler = null;
     }
     if (this.boundMapEndResizeHandler) {
-      document.removeEventListener('mouseup', this.boundMapEndResizeHandler);
-      window.removeEventListener('blur', this.boundMapEndResizeHandler);
+      document.removeEventListener("mouseup", this.boundMapEndResizeHandler);
+      window.removeEventListener("blur", this.boundMapEndResizeHandler);
       this.boundMapEndResizeHandler = null;
     }
     if (this.boundMapResizeVisChangeHandler) {
-      document.removeEventListener('visibilitychange', this.boundMapResizeVisChangeHandler);
+      document.removeEventListener(
+        "visibilitychange",
+        this.boundMapResizeVisChangeHandler,
+      );
       this.boundMapResizeVisChangeHandler = null;
     }
     if (this.boundMapFullscreenEscHandler) {
-      document.removeEventListener('keydown', this.boundMapFullscreenEscHandler);
+      document.removeEventListener(
+        "keydown",
+        this.boundMapFullscreenEscHandler,
+      );
       this.boundMapFullscreenEscHandler = null;
     }
     if (this.boundMobileMenuKeyHandler) {
-      document.removeEventListener('keydown', this.boundMobileMenuKeyHandler);
+      document.removeEventListener("keydown", this.boundMobileMenuKeyHandler);
       this.boundMobileMenuKeyHandler = null;
     }
     if (this.boundPanelCloseHandler) {
-      this.ctx.container.removeEventListener('wm:panel-close', this.boundPanelCloseHandler);
+      this.ctx.container.removeEventListener(
+        "wm:panel-close",
+        this.boundPanelCloseHandler,
+      );
       this.boundPanelCloseHandler = null;
     }
     this.ctx.tvMode?.destroy();
@@ -246,41 +288,57 @@ export class EventHandlerManager implements AppModule {
       this.callbacks.updateSearchIndex();
       this.ctx.searchModal?.open();
     };
-    document.getElementById('searchBtn')?.addEventListener('click', openSearch);
-    document.getElementById('mobileSearchBtn')?.addEventListener('click', openSearch);
-    document.getElementById('searchMobileFab')?.addEventListener('click', openSearch);
+    document.getElementById("searchBtn")?.addEventListener("click", openSearch);
+    document
+      .getElementById("mobileSearchBtn")
+      ?.addEventListener("click", openSearch);
+    document
+      .getElementById("searchMobileFab")
+      ?.addEventListener("click", openSearch);
 
-    document.getElementById('copyLinkBtn')?.addEventListener('click', async () => {
-      const shareUrl = this.getShareUrl();
-      if (!shareUrl) return;
-      const button = document.getElementById('copyLinkBtn');
-      try {
-        await this.copyToClipboard(shareUrl);
-        this.setCopyLinkFeedback(button, 'Copied!');
-      } catch (error) {
-        console.warn('Failed to copy share link:', error);
-        this.setCopyLinkFeedback(button, 'Copy failed');
-      }
-    });
+    document
+      .getElementById("copyLinkBtn")
+      ?.addEventListener("click", async () => {
+        const shareUrl = this.getShareUrl();
+        if (!shareUrl) return;
+        const button = document.getElementById("copyLinkBtn");
+        try {
+          await this.copyToClipboard(shareUrl);
+          this.setCopyLinkFeedback(button, "Copied!");
+        } catch (error) {
+          console.warn("Failed to copy share link:", error);
+          this.setCopyLinkFeedback(button, "Copy failed");
+        }
+      });
 
     this.initDownloadDropdown();
 
     this.boundStorageHandler = (e: StorageEvent) => {
       if (e.key === STORAGE_KEYS.panels && e.newValue) {
         try {
-          this.ctx.panelSettings = JSON.parse(e.newValue) as Record<string, PanelConfig>;
+          this.ctx.panelSettings = JSON.parse(e.newValue) as Record<
+            string,
+            PanelConfig
+          >;
           this.applyPanelSettings();
           this.ctx.unifiedSettings?.refreshPanelToggles();
-        } catch (_) { }
+        } catch (_) {}
       }
       if (e.key === STORAGE_KEYS.liveChannels && e.newValue) {
-        const panel = this.ctx.panels['live-news'];
-        if (panel && typeof (panel as unknown as { refreshChannelsFromStorage?: () => void }).refreshChannelsFromStorage === 'function') {
-          (panel as unknown as { refreshChannelsFromStorage: () => void }).refreshChannelsFromStorage();
+        const panel = this.ctx.panels["live-news"];
+        if (
+          panel &&
+          typeof (
+            panel as unknown as { refreshChannelsFromStorage?: () => void }
+          ).refreshChannelsFromStorage === "function"
+        ) {
+          (
+            panel as unknown as { refreshChannelsFromStorage: () => void }
+          ).refreshChannelsFromStorage();
         }
       }
     };
-    window.addEventListener('storage', this.boundStorageHandler);
+    window.addEventListener("storage", this.boundStorageHandler);
 
     // Handle panel close (X) button clicks
     this.boundPanelCloseHandler = ((e: CustomEvent<{ panelId: string }>) => {
@@ -293,33 +351,46 @@ export class EventHandlerManager implements AppModule {
       this.applyPanelSettings();
       this.ctx.unifiedSettings?.refreshPanelToggles();
     }) as EventListener;
-    this.ctx.container.addEventListener('wm:panel-close', this.boundPanelCloseHandler);
+    this.ctx.container.addEventListener(
+      "wm:panel-close",
+      this.boundPanelCloseHandler,
+    );
 
-    const isLocalDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-    this.ctx.container.querySelectorAll<HTMLAnchorElement>('.variant-option').forEach(link => {
-      link.addEventListener('click', (e) => {
-        const variant = link.dataset.variant;
-        if (!variant || variant === SITE_VARIANT) return;
-        e.preventDefault();
-        void this.navigateToVariant(variant, {
-          href: link.href,
-          isLocalDev,
+    const isLocalDev =
+      location.hostname === "localhost" || location.hostname === "127.0.0.1";
+    this.ctx.container
+      .querySelectorAll<HTMLAnchorElement>(".variant-option")
+      .forEach((link) => {
+        link.addEventListener("click", (e) => {
+          const variant = link.dataset.variant;
+          if (!variant || variant === SITE_VARIANT) return;
+          e.preventDefault();
+          void this.navigateToVariant(variant, {
+            href: link.href,
+            isLocalDev,
+          });
         });
       });
-    });
 
-    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    const fullscreenBtn = document.getElementById("fullscreenBtn");
     if (!this.ctx.isDesktopApp && fullscreenBtn) {
-      fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
+      fullscreenBtn.addEventListener("click", () => this.toggleFullscreen());
       this.boundFullscreenHandler = () => {
-        fullscreenBtn.textContent = document.fullscreenElement ? '\u26F6' : '\u26F6';
-        fullscreenBtn.classList.toggle('active', !!document.fullscreenElement);
+        fullscreenBtn.textContent = document.fullscreenElement
+          ? "\u26F6"
+          : "\u26F6";
+        fullscreenBtn.classList.toggle("active", !!document.fullscreenElement);
       };
-      document.addEventListener('fullscreenchange', this.boundFullscreenHandler);
+      document.addEventListener(
+        "fullscreenchange",
+        this.boundFullscreenHandler,
+      );
     }
 
-    const regionSelect = document.getElementById('regionSelect') as HTMLSelectElement;
-    regionSelect?.addEventListener('change', () => {
+    const regionSelect = document.getElementById(
+      "regionSelect",
+    ) as HTMLSelectElement;
+    regionSelect?.addEventListener("change", () => {
       this.ctx.map?.setView(regionSelect.value as MapView);
       trackMapViewChange(regionSelect.value);
     });
@@ -328,13 +399,13 @@ export class EventHandlerManager implements AppModule {
       this.ctx.map?.setIsResizing(false);
       this.ctx.map?.render();
     }, 150);
-    window.addEventListener('resize', this.boundResizeHandler);
+    window.addEventListener("resize", this.boundResizeHandler);
 
     this.setupMapResize();
     this.setupMapPin();
 
     this.boundVisibilityHandler = () => {
-      document.body?.classList.toggle('animations-paused', document.hidden);
+      document.body?.classList.toggle("animations-paused", document.hidden);
       if (this.ctx.isDesktopApp) {
         this.ctx.map?.setRenderPaused(document.hidden);
       }
@@ -346,32 +417,45 @@ export class EventHandlerManager implements AppModule {
         this.callbacks.flushStaleRefreshes();
       }
     };
-    document.addEventListener('visibilitychange', this.boundVisibilityHandler);
+    document.addEventListener("visibilitychange", this.boundVisibilityHandler);
 
     this.boundFocalPointsReadyHandler = () => {
-      (this.ctx.panels['cii'] as CIIPanel)?.refresh(true);
+      (this.ctx.panels["cii"] as CIIPanel)?.refresh(true);
       this.callbacks.refreshOpenCountryBrief?.();
     };
-    window.addEventListener('focal-points-ready', this.boundFocalPointsReadyHandler);
+    window.addEventListener(
+      "focal-points-ready",
+      this.boundFocalPointsReadyHandler,
+    );
 
     this.boundThemeChangedHandler = () => {
       this.ctx.map?.render();
       this.updateMobileMenuThemeItem();
     };
-    window.addEventListener('theme-changed', this.boundThemeChangedHandler);
+    window.addEventListener("theme-changed", this.boundThemeChangedHandler);
 
     this.setupMobileMenu();
 
     if (this.ctx.isDesktopApp) {
       if (this.boundDesktopExternalLinkHandler) {
-        document.removeEventListener('click', this.boundDesktopExternalLinkHandler, true);
+        document.removeEventListener(
+          "click",
+          this.boundDesktopExternalLinkHandler,
+          true,
+        );
       }
       this.boundDesktopExternalLinkHandler = (e: MouseEvent) => {
         if (!(e.target instanceof Element)) return;
-        const anchor = e.target.closest('a[href]') as HTMLAnchorElement | null;
+        const anchor = e.target.closest("a[href]") as HTMLAnchorElement | null;
         if (!anchor) return;
         const href = anchor.href;
-        if (!href || href.startsWith('javascript:') || href === '#' || href.startsWith('#')) return;
+        if (
+          !href ||
+          href.startsWith("javascript:") ||
+          href === "#" ||
+          href.startsWith("#")
+        )
+          return;
         // Only handle valid http(s) URLs
         let url: URL;
         try {
@@ -384,135 +468,164 @@ export class EventHandlerManager implements AppModule {
         if (!/^https?:$/.test(url.protocol)) return; // Only allow http(s) links
         e.preventDefault();
         e.stopPropagation();
-        void invokeTauri<void>('open_url', { url: url.toString() }).catch(() => {
-          window.open(url.toString(), '_blank');
-        });
+        void invokeTauri<void>("open_url", { url: url.toString() }).catch(
+          () => {
+            window.open(url.toString(), "_blank");
+          },
+        );
       };
-      document.addEventListener('click', this.boundDesktopExternalLinkHandler, true);
+      document.addEventListener(
+        "click",
+        this.boundDesktopExternalLinkHandler,
+        true,
+      );
     }
   }
 
   private setupMobileMenu(): void {
-    const hamburger = document.getElementById('hamburgerBtn');
-    const overlay = document.getElementById('mobileMenuOverlay');
-    const menu = document.getElementById('mobileMenu');
-    const closeBtn = document.getElementById('mobileMenuClose');
+    const hamburger = document.getElementById("hamburgerBtn");
+    const overlay = document.getElementById("mobileMenuOverlay");
+    const menu = document.getElementById("mobileMenu");
+    const closeBtn = document.getElementById("mobileMenuClose");
     if (!hamburger || !overlay || !menu || !closeBtn) return;
 
-    hamburger.addEventListener('click', () => this.openMobileMenu());
-    overlay.addEventListener('click', () => this.closeMobileMenu());
-    closeBtn.addEventListener('click', () => this.closeMobileMenu());
+    hamburger.addEventListener("click", () => this.openMobileMenu());
+    overlay.addEventListener("click", () => this.closeMobileMenu());
+    closeBtn.addEventListener("click", () => this.closeMobileMenu());
 
-    const isLocalDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-    menu.querySelectorAll<HTMLButtonElement>('.mobile-menu-variant').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const variant = btn.dataset.variant;
-        if (!variant || variant === SITE_VARIANT) return;
-        void this.navigateToVariant(variant, { isLocalDev });
-      });
-    });
-
-    document.getElementById('mobileMenuRegion')?.addEventListener('click', () => {
-      this.closeMobileMenu();
-      this.openRegionSheet();
-    });
-
-    document.getElementById('mobileMenuSettings')?.addEventListener('click', () => {
-      this.closeMobileMenu();
-      this.ctx.unifiedSettings?.open();
-    });
-
-    document.getElementById('mobileMenuTheme')?.addEventListener('click', () => {
-      this.closeMobileMenu();
-      const next = getCurrentTheme() === 'dark' ? 'light' : 'dark';
-      setTheme(next);
-      trackThemeChanged(next);
-    });
-
-    const sheetBackdrop = document.getElementById('regionSheetBackdrop');
-    sheetBackdrop?.addEventListener('click', () => this.closeRegionSheet());
-
-    const sheet = document.getElementById('regionBottomSheet');
-    sheet?.querySelectorAll<HTMLButtonElement>('.region-sheet-option').forEach(opt => {
-      opt.addEventListener('click', () => {
-        const region = opt.dataset.region;
-        if (!region) return;
-        this.ctx.map?.setView(region as MapView);
-        trackMapViewChange(region);
-        const regionSelect = document.getElementById('regionSelect') as HTMLSelectElement;
-        if (regionSelect) regionSelect.value = region;
-        sheet.querySelectorAll('.region-sheet-option').forEach(o => {
-          o.classList.toggle('active', o === opt);
-          const check = o.querySelector('.region-sheet-check');
-          if (check) check.textContent = o === opt ? '✓' : '';
+    const isLocalDev =
+      location.hostname === "localhost" || location.hostname === "127.0.0.1";
+    menu
+      .querySelectorAll<HTMLButtonElement>(".mobile-menu-variant")
+      .forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const variant = btn.dataset.variant;
+          if (!variant || variant === SITE_VARIANT) return;
+          void this.navigateToVariant(variant, { isLocalDev });
         });
-        const menuRegionLabel = document.getElementById('mobileMenuRegion')?.querySelector('.mobile-menu-item-label');
-        if (menuRegionLabel) menuRegionLabel.textContent = opt.querySelector('span')?.textContent ?? '';
-        this.closeRegionSheet();
       });
-    });
+
+    document
+      .getElementById("mobileMenuRegion")
+      ?.addEventListener("click", () => {
+        this.closeMobileMenu();
+        this.openRegionSheet();
+      });
+
+    document
+      .getElementById("mobileMenuSettings")
+      ?.addEventListener("click", () => {
+        this.closeMobileMenu();
+        this.ctx.unifiedSettings?.open();
+      });
+
+    document
+      .getElementById("mobileMenuTheme")
+      ?.addEventListener("click", () => {
+        this.closeMobileMenu();
+        const next = getCurrentTheme() === "dark" ? "light" : "dark";
+        setTheme(next);
+        trackThemeChanged(next);
+      });
+
+    const sheetBackdrop = document.getElementById("regionSheetBackdrop");
+    sheetBackdrop?.addEventListener("click", () => this.closeRegionSheet());
+
+    const sheet = document.getElementById("regionBottomSheet");
+    sheet
+      ?.querySelectorAll<HTMLButtonElement>(".region-sheet-option")
+      .forEach((opt) => {
+        opt.addEventListener("click", () => {
+          const region = opt.dataset.region;
+          if (!region) return;
+          this.ctx.map?.setView(region as MapView);
+          trackMapViewChange(region);
+          const regionSelect = document.getElementById(
+            "regionSelect",
+          ) as HTMLSelectElement;
+          if (regionSelect) regionSelect.value = region;
+          sheet.querySelectorAll(".region-sheet-option").forEach((o) => {
+            o.classList.toggle("active", o === opt);
+            const check = o.querySelector(".region-sheet-check");
+            if (check) check.textContent = o === opt ? "✓" : "";
+          });
+          const menuRegionLabel = document
+            .getElementById("mobileMenuRegion")
+            ?.querySelector(".mobile-menu-item-label");
+          if (menuRegionLabel)
+            menuRegionLabel.textContent =
+              opt.querySelector("span")?.textContent ?? "";
+          this.closeRegionSheet();
+        });
+      });
 
     this.boundMobileMenuKeyHandler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (sheet?.classList.contains('open')) {
+      if (e.key === "Escape") {
+        if (sheet?.classList.contains("open")) {
           this.closeRegionSheet();
-        } else if (menu.classList.contains('open')) {
+        } else if (menu.classList.contains("open")) {
           this.closeMobileMenu();
         }
       }
     };
-    document.addEventListener('keydown', this.boundMobileMenuKeyHandler);
+    document.addEventListener("keydown", this.boundMobileMenuKeyHandler);
   }
 
   private openMobileMenu(): void {
-    const overlay = document.getElementById('mobileMenuOverlay');
-    const menu = document.getElementById('mobileMenu');
+    const overlay = document.getElementById("mobileMenuOverlay");
+    const menu = document.getElementById("mobileMenu");
     if (!overlay || !menu) return;
-    overlay.classList.add('open');
-    requestAnimationFrame(() => menu.classList.add('open'));
-    document.body.style.overflow = 'hidden';
+    overlay.classList.add("open");
+    requestAnimationFrame(() => menu.classList.add("open"));
+    document.body.style.overflow = "hidden";
   }
 
   private closeMobileMenu(): void {
-    const overlay = document.getElementById('mobileMenuOverlay');
-    const menu = document.getElementById('mobileMenu');
+    const overlay = document.getElementById("mobileMenuOverlay");
+    const menu = document.getElementById("mobileMenu");
     if (!overlay || !menu) return;
-    menu.classList.remove('open');
-    overlay.classList.remove('open');
-    const sheetOpen = document.getElementById('regionBottomSheet')?.classList.contains('open');
-    if (!sheetOpen) document.body.style.overflow = '';
+    menu.classList.remove("open");
+    overlay.classList.remove("open");
+    const sheetOpen = document
+      .getElementById("regionBottomSheet")
+      ?.classList.contains("open");
+    if (!sheetOpen) document.body.style.overflow = "";
   }
 
   private openRegionSheet(): void {
-    const backdrop = document.getElementById('regionSheetBackdrop');
-    const sheet = document.getElementById('regionBottomSheet');
+    const backdrop = document.getElementById("regionSheetBackdrop");
+    const sheet = document.getElementById("regionBottomSheet");
     if (!backdrop || !sheet) return;
-    backdrop.classList.add('open');
-    requestAnimationFrame(() => sheet.classList.add('open'));
-    document.body.style.overflow = 'hidden';
+    backdrop.classList.add("open");
+    requestAnimationFrame(() => sheet.classList.add("open"));
+    document.body.style.overflow = "hidden";
   }
 
   private closeRegionSheet(): void {
-    const backdrop = document.getElementById('regionSheetBackdrop');
-    const sheet = document.getElementById('regionBottomSheet');
+    const backdrop = document.getElementById("regionSheetBackdrop");
+    const sheet = document.getElementById("regionBottomSheet");
     if (!backdrop || !sheet) return;
-    sheet.classList.remove('open');
-    backdrop.classList.remove('open');
-    document.body.style.overflow = '';
+    sheet.classList.remove("open");
+    backdrop.classList.remove("open");
+    document.body.style.overflow = "";
   }
 
   private setupIdleDetection(): void {
     this.boundIdleResetHandler = () => {
       if (this.ctx.isIdle) {
         this.ctx.isIdle = false;
-        document.body?.classList.remove('animations-paused');
+        document.body?.classList.remove("animations-paused");
       }
       this.resetIdleTimer();
     };
 
-    ['mousedown', 'keydown', 'scroll', 'touchstart', 'mousemove'].forEach(event => {
-      document.addEventListener(event, this.boundIdleResetHandler!, { passive: true });
-    });
+    ["mousedown", "keydown", "scroll", "touchstart", "mousemove"].forEach(
+      (event) => {
+        document.addEventListener(event, this.boundIdleResetHandler!, {
+          passive: true,
+        });
+      },
+    );
 
     this.resetIdleTimer();
   }
@@ -524,8 +637,8 @@ export class EventHandlerManager implements AppModule {
     this.idleTimeoutId = setTimeout(() => {
       if (!document.hidden) {
         this.ctx.isIdle = true;
-        document.body?.classList.add('animations-paused');
-        console.log('[App] User idle - pausing animations to save resources');
+        document.body?.classList.add("animations-paused");
+        console.log("[App] User idle - pausing animations to save resources");
       }
     }, this.idlePauseMs);
   }
@@ -535,7 +648,9 @@ export class EventHandlerManager implements AppModule {
 
     this.ctx.map.onStateChanged(() => {
       this.debouncedUrlSync();
-      const regionSelect = document.getElementById('regionSelect') as HTMLSelectElement;
+      const regionSelect = document.getElementById(
+        "regionSelect",
+      ) as HTMLSelectElement;
       if (regionSelect && this.ctx.map) {
         const state = this.ctx.map.getState();
         if (regionSelect.value !== state.view) {
@@ -563,8 +678,11 @@ export class EventHandlerManager implements AppModule {
       center,
       timeRange: state.timeRange,
       layers: state.layers,
-      country: isCountryVisible ? (briefPage?.getCode() ?? undefined) : undefined,
-      expanded: isCountryVisible && briefPage?.getIsMaximized?.() ? true : undefined,
+      country: isCountryVisible
+        ? (briefPage?.getCode() ?? undefined)
+        : undefined,
+      expanded:
+        isCountryVisible && briefPage?.getIsMaximized?.() ? true : undefined,
     });
   }
 
@@ -573,31 +691,37 @@ export class EventHandlerManager implements AppModule {
       await navigator.clipboard.writeText(text);
       return;
     }
-    const textarea = document.createElement('textarea');
+    const textarea = document.createElement("textarea");
     textarea.value = text;
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
     document.body.appendChild(textarea);
     textarea.select();
-    document.execCommand('copy');
+    document.execCommand("copy");
     document.body.removeChild(textarea);
   }
 
   private platformLabel(p: Platform): string {
     switch (p) {
-      case 'macos-arm64': return '\uF8FF Silicon';
-      case 'macos-x64': return '\uF8FF Intel';
-      case 'macos': return '\uF8FF macOS';
-      case 'windows': return 'Windows';
-      case 'linux': return 'Linux';
-      default: return t('header.downloadApp');
+      case "macos-arm64":
+        return "\uF8FF Silicon";
+      case "macos-x64":
+        return "\uF8FF Intel";
+      case "macos":
+        return "\uF8FF macOS";
+      case "windows":
+        return "Windows";
+      case "linux":
+        return "Linux";
+      default:
+        return t("header.downloadApp");
     }
   }
 
   private initDownloadDropdown(): void {
-    const btn = document.getElementById('downloadBtn');
-    const dropdown = document.getElementById('downloadDropdown');
-    const label = document.getElementById('downloadBtnLabel');
+    const btn = document.getElementById("downloadBtn");
+    const dropdown = document.getElementById("downloadDropdown");
+    const label = document.getElementById("downloadBtnLabel");
     if (!btn || !dropdown) return;
 
     const platform = detectPlatform();
@@ -605,73 +729,95 @@ export class EventHandlerManager implements AppModule {
 
     const primary = buttonsForPlatform(platform);
     const all = allButtons();
-    const others = all.filter(b => !primary.some(p => p.href === b.href));
+    const others = all.filter((b) => !primary.some((p) => p.href === b.href));
 
     const renderDropdown = () => {
-      const primaryHtml = primary.map(b =>
-        `<a class="dl-dd-btn ${b.cls} primary" href="${b.href}">${b.label}</a>`
-      ).join('');
-      const othersHtml = others.map(b =>
-        `<a class="dl-dd-btn ${b.cls}" href="${b.href}">${b.label}</a>`
-      ).join('');
+      const primaryHtml = primary
+        .map(
+          (b) =>
+            `<a class="dl-dd-btn ${b.cls} primary" href="${b.href}">${b.label}</a>`,
+        )
+        .join("");
+      const othersHtml = others
+        .map(
+          (b) =>
+            `<a class="dl-dd-btn ${b.cls}" href="${b.href}">${b.label}</a>`,
+        )
+        .join("");
 
       dropdown.innerHTML = `
-        <div class="dl-dd-tagline">${t('modals.downloadBanner.description')}</div>
+        <div class="dl-dd-tagline">${t("modals.downloadBanner.description")}</div>
         <div class="dl-dd-buttons">${primaryHtml}</div>
-        ${others.length ? `<button class="dl-dd-toggle" id="dlDdToggle">${t('modals.downloadBanner.showAllPlatforms')}</button>
-        <div class="dl-dd-others" id="dlDdOthers">${othersHtml}</div>` : ''}
+        ${
+          others.length
+            ? `<button class="dl-dd-toggle" id="dlDdToggle">${t("modals.downloadBanner.showAllPlatforms")}</button>
+        <div class="dl-dd-others" id="dlDdOthers">${othersHtml}</div>`
+            : ""
+        }
       `;
 
-      dropdown.querySelectorAll<HTMLAnchorElement>('.dl-dd-btn').forEach(a => {
-        a.addEventListener('click', (e) => {
-          e.preventDefault();
-          const plat = new URL(a.href, location.origin).searchParams.get('platform') || 'unknown';
-          trackDownloadClicked(plat);
-          window.open(a.href, '_blank');
-          dropdown.classList.remove('open');
+      dropdown
+        .querySelectorAll<HTMLAnchorElement>(".dl-dd-btn")
+        .forEach((a) => {
+          a.addEventListener("click", (e) => {
+            e.preventDefault();
+            const plat =
+              new URL(a.href, location.origin).searchParams.get("platform") ||
+              "unknown";
+            trackDownloadClicked(plat);
+            window.open(a.href, "_blank");
+            dropdown.classList.remove("open");
+          });
         });
-      });
 
-      const toggle = dropdown.querySelector('#dlDdToggle');
-      const othersEl = dropdown.querySelector('#dlDdOthers') as HTMLElement | null;
+      const toggle = dropdown.querySelector("#dlDdToggle");
+      const othersEl = dropdown.querySelector(
+        "#dlDdOthers",
+      ) as HTMLElement | null;
       if (toggle && othersEl) {
-        toggle.addEventListener('click', () => {
-          const showing = othersEl.classList.toggle('show');
+        toggle.addEventListener("click", () => {
+          const showing = othersEl.classList.toggle("show");
           toggle.textContent = showing
-            ? t('modals.downloadBanner.showLess')
-            : t('modals.downloadBanner.showAllPlatforms');
+            ? t("modals.downloadBanner.showLess")
+            : t("modals.downloadBanner.showAllPlatforms");
         });
       }
     };
 
     renderDropdown();
 
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener("click", (e) => {
       e.stopPropagation();
-      dropdown.classList.toggle('open');
+      dropdown.classList.toggle("open");
     });
 
     this.boundDropdownClickHandler = (e: MouseEvent) => {
-      if (!dropdown.contains(e.target as Node) && !btn.contains(e.target as Node)) {
-        dropdown.classList.remove('open');
+      if (
+        !dropdown.contains(e.target as Node) &&
+        !btn.contains(e.target as Node)
+      ) {
+        dropdown.classList.remove("open");
       }
     };
-    document.addEventListener('click', this.boundDropdownClickHandler);
+    document.addEventListener("click", this.boundDropdownClickHandler);
 
     this.boundDropdownKeydownHandler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') dropdown.classList.remove('open');
+      if (e.key === "Escape") dropdown.classList.remove("open");
     };
-    document.addEventListener('keydown', this.boundDropdownKeydownHandler);
+    document.addEventListener("keydown", this.boundDropdownKeydownHandler);
   }
 
-  private setCopyLinkFeedback(button: HTMLElement | null, message: string): void {
+  private setCopyLinkFeedback(
+    button: HTMLElement | null,
+    message: string,
+  ): void {
     if (!button) return;
-    const originalText = button.textContent ?? '';
+    const originalText = button.textContent ?? "";
     button.textContent = message;
-    button.classList.add('copied');
+    button.classList.add("copied");
     window.setTimeout(() => {
       button.textContent = originalText;
-      button.classList.remove('copied');
+      button.classList.remove("copied");
     }, 1500);
   }
 
@@ -687,14 +833,20 @@ export class EventHandlerManager implements AppModule {
 
   private async exitFullscreenForNavigation(): Promise<void> {
     const fullscreenDocument = this.getFullscreenDocument();
-    if (!fullscreenDocument.fullscreenElement && !fullscreenDocument.webkitFullscreenElement) return;
+    if (
+      !fullscreenDocument.fullscreenElement &&
+      !fullscreenDocument.webkitFullscreenElement
+    )
+      return;
     try {
-      if (typeof fullscreenDocument.exitFullscreen === 'function') {
+      if (typeof fullscreenDocument.exitFullscreen === "function") {
         await fullscreenDocument.exitFullscreen();
         return;
       }
       await fullscreenDocument.webkitExitFullscreen?.();
-    } catch { /* proceed with navigation regardless */ }
+    } catch {
+      /* proceed with navigation regardless */
+    }
   }
 
   private async navigateToVariant(
@@ -705,7 +857,7 @@ export class EventHandlerManager implements AppModule {
     await this.exitFullscreenForNavigation();
 
     if (this.ctx.isDesktopApp || options.isLocalDev) {
-      localStorage.setItem('worldmonitor-variant', variant);
+      localStorage.setItem("worldmonitor-variant", variant);
       window.location.reload();
       return;
     }
@@ -716,38 +868,48 @@ export class EventHandlerManager implements AppModule {
 
   toggleFullscreen(): void {
     const fullscreenDocument = this.getFullscreenDocument();
-    if (fullscreenDocument.fullscreenElement || fullscreenDocument.webkitFullscreenElement) {
+    if (
+      fullscreenDocument.fullscreenElement ||
+      fullscreenDocument.webkitFullscreenElement
+    ) {
       try {
-        const exitResult = typeof fullscreenDocument.exitFullscreen === 'function'
-          ? fullscreenDocument.exitFullscreen()
-          : fullscreenDocument.webkitExitFullscreen?.();
-        void Promise.resolve(exitResult).catch(() => { });
-      } catch { }
+        const exitResult =
+          typeof fullscreenDocument.exitFullscreen === "function"
+            ? fullscreenDocument.exitFullscreen()
+            : fullscreenDocument.webkitExitFullscreen?.();
+        void Promise.resolve(exitResult).catch(() => {});
+      } catch {}
     } else {
-      const el = document.documentElement as HTMLElement & { webkitRequestFullscreen?: () => void };
+      const el = document.documentElement as HTMLElement & {
+        webkitRequestFullscreen?: () => void;
+      };
       if (el.requestFullscreen) {
-        try { void el.requestFullscreen()?.catch(() => { }); } catch { }
+        try {
+          void el.requestFullscreen()?.catch(() => {});
+        } catch {}
       } else if (el.webkitRequestFullscreen) {
-        try { el.webkitRequestFullscreen(); } catch { }
+        try {
+          el.webkitRequestFullscreen();
+        } catch {}
       }
     }
   }
 
   private updateMobileMenuThemeItem(): void {
-    const btn = document.getElementById('mobileMenuTheme');
+    const btn = document.getElementById("mobileMenuTheme");
     if (!btn) return;
-    const isDark = getCurrentTheme() === 'dark';
-    const icon = btn.querySelector('.mobile-menu-item-icon');
-    const label = btn.querySelector('.mobile-menu-item-label');
-    if (icon) icon.textContent = isDark ? '☀️' : '🌙';
-    if (label) label.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+    const isDark = getCurrentTheme() === "dark";
+    const icon = btn.querySelector(".mobile-menu-item-icon");
+    const label = btn.querySelector(".mobile-menu-item-label");
+    if (icon) icon.textContent = isDark ? "☀️" : "🌙";
+    if (label) label.textContent = isDark ? "Light Mode" : "Dark Mode";
   }
 
   startHeaderClock(): void {
-    const el = document.getElementById('headerClock');
+    const el = document.getElementById("headerClock");
     if (!el) return;
     const tick = () => {
-      el.textContent = new Date().toUTCString().replace('GMT', 'UTC');
+      el.textContent = new Date().toUTCString().replace("GMT", "UTC");
     };
     tick();
     this.clockIntervalId = setInterval(tick, 1000);
@@ -758,10 +920,15 @@ export class EventHandlerManager implements AppModule {
   }
 
   setupPizzIntIndicator(): void {
-    if (SITE_VARIANT === 'tech' || SITE_VARIANT === 'finance' || SITE_VARIANT === 'happy') return;
+    if (
+      SITE_VARIANT === "tech" ||
+      SITE_VARIANT === "finance" ||
+      SITE_VARIANT === "happy"
+    )
+      return;
 
     this.ctx.pizzintIndicator = new PizzIntIndicator();
-    const headerLeft = this.ctx.container.querySelector('.header-left');
+    const headerLeft = this.ctx.container.querySelector(".header-left");
     if (headerLeft) {
       headerLeft.appendChild(this.ctx.pizzintIndicator.getElement());
     }
@@ -769,15 +936,21 @@ export class EventHandlerManager implements AppModule {
 
   setupExportPanel(): void {
     this.ctx.exportPanel = new ExportPanel(() => ({
-      news: this.ctx.latestClusters.length > 0 ? this.ctx.latestClusters : this.ctx.allNews,
+      news:
+        this.ctx.latestClusters.length > 0
+          ? this.ctx.latestClusters
+          : this.ctx.allNews,
       markets: this.ctx.latestMarkets,
       predictions: this.ctx.latestPredictions,
       timestamp: Date.now(),
     }));
 
-    const headerRight = this.ctx.container.querySelector('.header-right');
+    const headerRight = this.ctx.container.querySelector(".header-right");
     if (headerRight) {
-      headerRight.insertBefore(this.ctx.exportPanel.getElement(), headerRight.firstChild);
+      headerRight.insertBefore(
+        this.ctx.exportPanel.getElement(),
+        headerRight.firstChild,
+      );
     }
   }
 
@@ -807,24 +980,31 @@ export class EventHandlerManager implements AppModule {
         } else {
           this.ctx.disabledSources.add(name);
         }
-        saveToStorage(STORAGE_KEYS.disabledFeeds, Array.from(this.ctx.disabledSources));
+        saveToStorage(
+          STORAGE_KEYS.disabledFeeds,
+          Array.from(this.ctx.disabledSources),
+        );
       },
       setSourcesEnabled: (names: string[], enabled: boolean) => {
         for (const name of names) {
           if (enabled) this.ctx.disabledSources.delete(name);
           else this.ctx.disabledSources.add(name);
         }
-        saveToStorage(STORAGE_KEYS.disabledFeeds, Array.from(this.ctx.disabledSources));
+        saveToStorage(
+          STORAGE_KEYS.disabledFeeds,
+          Array.from(this.ctx.disabledSources),
+        );
       },
       getAllSourceNames: () => this.getAllSourceNames(),
-      getLocalizedPanelName: (key: string, fallback: string) => this.getLocalizedPanelName(key, fallback),
+      getLocalizedPanelName: (key: string, fallback: string) =>
+        this.getLocalizedPanelName(key, fallback),
       resetLayout: () => {
         localStorage.removeItem(this.ctx.PANEL_SPANS_KEY);
-        localStorage.removeItem('worldmonitor-panel-col-spans');
+        localStorage.removeItem("worldmonitor-panel-col-spans");
         localStorage.removeItem(this.ctx.PANEL_ORDER_KEY);
-        localStorage.removeItem(this.ctx.PANEL_ORDER_KEY + '-bottom');
-        localStorage.removeItem(this.ctx.PANEL_ORDER_KEY + '-bottom-set');
-        localStorage.removeItem('map-height');
+        localStorage.removeItem(this.ctx.PANEL_ORDER_KEY + "-bottom");
+        localStorage.removeItem(this.ctx.PANEL_ORDER_KEY + "-bottom-set");
+        localStorage.removeItem("map-height");
         window.location.reload();
       },
       isDesktopApp: this.ctx.isDesktopApp,
@@ -833,14 +1013,16 @@ export class EventHandlerManager implements AppModule {
       },
     });
 
-    const mount = document.getElementById('unifiedSettingsMount');
+    const mount = document.getElementById("unifiedSettingsMount");
     if (mount) {
       mount.appendChild(this.ctx.unifiedSettings.getButton());
     }
 
-    const mobileBtn = document.getElementById('mobileSettingsBtn');
+    const mobileBtn = document.getElementById("mobileSettingsBtn");
     if (mobileBtn) {
-      mobileBtn.addEventListener('click', () => this.ctx.unifiedSettings?.open());
+      mobileBtn.addEventListener("click", () =>
+        this.ctx.unifiedSettings?.open(),
+      );
     }
   }
 
@@ -856,9 +1038,12 @@ export class EventHandlerManager implements AppModule {
       }
     });
 
-    const headerRight = this.ctx.container.querySelector('.header-right');
+    const headerRight = this.ctx.container.querySelector(".header-right");
     if (headerRight) {
-      headerRight.insertBefore(this.ctx.playbackControl.getElement(), headerRight.firstChild);
+      headerRight.insertBefore(
+        this.ctx.playbackControl.getElement(),
+        headerRight.firstChild,
+      );
     }
   }
 
@@ -867,7 +1052,7 @@ export class EventHandlerManager implements AppModule {
       if (this.ctx.isPlaybackMode || this.ctx.isDestroyed) return;
 
       const marketPrices: Record<string, number> = {};
-      this.ctx.latestMarkets.forEach(m => {
+      this.ctx.latestMarkets.forEach((m) => {
         if (m.price !== null) marketPrices[m.symbol] = m.price;
       });
 
@@ -875,16 +1060,24 @@ export class EventHandlerManager implements AppModule {
         timestamp: Date.now(),
         events: this.ctx.latestClusters,
         marketPrices,
-        predictions: this.ctx.latestPredictions.map(p => ({
+        predictions: this.ctx.latestPredictions.map((p) => ({
           title: p.title,
-          yesPrice: p.yesPrice
+          yesPrice: p.yesPrice,
         })),
-        hotspotLevels: this.ctx.map?.getHotspotLevels() ?? {}
+        hotspotLevels: this.ctx.map?.getHotspotLevels() ?? {},
       });
     };
 
-    void saveCurrentSnapshot().catch((e) => console.warn('[Snapshot] save failed:', e));
-    this.snapshotIntervalId = setInterval(() => void saveCurrentSnapshot().catch((e) => console.warn('[Snapshot] save failed:', e)), 15 * 60 * 1000);
+    void saveCurrentSnapshot().catch((e) =>
+      console.warn("[Snapshot] save failed:", e),
+    );
+    this.snapshotIntervalId = setInterval(
+      () =>
+        void saveCurrentSnapshot().catch((e) =>
+          console.warn("[Snapshot] save failed:", e),
+        ),
+      15 * 60 * 1000,
+    );
   }
 
   restoreSnapshot(snapshot: DashboardSnapshot): void {
@@ -904,7 +1097,9 @@ export class EventHandlerManager implements AppModule {
       liquidity: 0,
     }));
     this.ctx.latestPredictions = predictions;
-    (this.ctx.panels['polymarket'] as PredictionPanel | undefined)?.renderPredictions(predictions);
+    (
+      this.ctx.panels["polymarket"] as PredictionPanel | undefined
+    )?.renderPredictions(predictions);
 
     this.ctx.map?.setHotspotLevels(snapshot.hotspotLevels);
   }
@@ -924,9 +1119,9 @@ export class EventHandlerManager implements AppModule {
         }
       }
 
-      if (layer === 'ais') {
+      if (layer === "ais") {
         if (enabled) {
-          this.ctx.map?.setLayerLoading('ais', true);
+          this.ctx.map?.setLayerLoading("ais", true);
           initAisStream();
           this.callbacks.waitForAisData();
         } else {
@@ -935,8 +1130,10 @@ export class EventHandlerManager implements AppModule {
         return;
       }
 
-      if (layer === 'flights') {
-        const airlineIntel = this.ctx.panels['airline-intel'] as AirlineIntelPanel | undefined;
+      if (layer === "flights") {
+        const airlineIntel = this.ctx.panels["airline-intel"] as
+          | AirlineIntelPanel
+          | undefined;
         airlineIntel?.setLiveMode(enabled);
       }
 
@@ -950,26 +1147,31 @@ export class EventHandlerManager implements AppModule {
     // Forward live aircraft positions from map to AirlineIntelPanel + cache
     this.ctx.map?.setOnAircraftPositionsUpdate((positions) => {
       this.ctx.intelligenceCache.aircraftPositions = positions;
-      const airlineIntel = this.ctx.panels['airline-intel'] as AirlineIntelPanel | undefined;
+      const airlineIntel = this.ctx.panels["airline-intel"] as
+        | AirlineIntelPanel
+        | undefined;
       airlineIntel?.updateLivePositions(positions);
     });
   }
 
   setupPanelViewTracking(): void {
     const viewedPanels = new Set<string>();
-    const observer = new IntersectionObserver((entries) => {
-      for (const entry of entries) {
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.3) {
-          const id = (entry.target as HTMLElement).dataset.panel;
-          if (id && !viewedPanels.has(id)) {
-            viewedPanels.add(id);
-            trackPanelView(id);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.3) {
+            const id = (entry.target as HTMLElement).dataset.panel;
+            if (id && !viewedPanels.has(id)) {
+              viewedPanels.add(id);
+              trackPanelView(id);
+            }
           }
         }
-      }
-    }, { threshold: 0.3 });
+      },
+      { threshold: 0.3 },
+    );
 
-    const grid = document.getElementById('panelsGrid');
+    const grid = document.getElementById("panelsGrid");
     if (grid) {
       for (const child of Array.from(grid.children)) {
         if ((child as HTMLElement).dataset.panel) {
@@ -980,13 +1182,16 @@ export class EventHandlerManager implements AppModule {
   }
 
   showToast(msg: string): void {
-    document.querySelector('.toast-notification')?.remove();
-    const el = document.createElement('div');
-    el.className = 'toast-notification';
+    document.querySelector(".toast-notification")?.remove();
+    const el = document.createElement("div");
+    el.className = "toast-notification";
     el.textContent = msg;
     document.body.appendChild(el);
-    requestAnimationFrame(() => el.classList.add('visible'));
-    setTimeout(() => { el.classList.remove('visible'); setTimeout(() => el.remove(), 300); }, 3000);
+    requestAnimationFrame(() => el.classList.add("visible"));
+    setTimeout(() => {
+      el.classList.remove("visible");
+      setTimeout(() => el.remove(), 300);
+    }, 3000);
   }
 
   shouldShowIntelligenceNotifications(): boolean {
@@ -994,16 +1199,17 @@ export class EventHandlerManager implements AppModule {
   }
 
   setupMapResize(): void {
-    const mapSection = document.getElementById('mapSection');
-    const mapContainer = document.getElementById('mapContainer');
-    const resizeHandle = document.getElementById('mapResizeHandle');
+    const mapSection = document.getElementById("mapSection");
+    const mapContainer = document.getElementById("mapContainer");
+    const resizeHandle = document.getElementById("mapResizeHandle");
     if (!mapSection || !resizeHandle || !mapContainer) return;
 
     const getMinHeight = () => (window.innerWidth >= 1600 ? 280 : 350);
     const getMaxHeight = () => {
-      if (window.innerWidth < 1600) return Math.max(getMinHeight(), window.innerHeight - 150);
+      if (window.innerWidth < 1600)
+        return Math.max(getMinHeight(), window.innerHeight - 150);
 
-      const bottomGrid = document.getElementById('mapBottomGrid');
+      const bottomGrid = document.getElementById("mapBottomGrid");
       const isEmpty = !bottomGrid || bottomGrid.children.length === 0;
       const headerHeight = 60;
       const totalAvailable = window.innerHeight - headerHeight;
@@ -1015,22 +1221,25 @@ export class EventHandlerManager implements AppModule {
       }
     };
 
-    const savedHeight = localStorage.getItem('map-height');
+    const savedHeight = localStorage.getItem("map-height");
     if (savedHeight) {
       const numeric = Number.parseInt(savedHeight, 10);
       if (Number.isFinite(numeric)) {
-        const clamped = Math.max(getMinHeight(), Math.min(numeric, getMaxHeight()));
+        const clamped = Math.max(
+          getMinHeight(),
+          Math.min(numeric, getMaxHeight()),
+        );
         if (window.innerWidth >= 1600) {
-          mapContainer.style.flex = 'none';
+          mapContainer.style.flex = "none";
           mapContainer.style.height = `${clamped}px`;
         } else {
           mapSection.style.height = `${clamped}px`;
         }
         if (clamped !== numeric) {
-          localStorage.setItem('map-height', `${clamped}px`);
+          localStorage.setItem("map-height", `${clamped}px`);
         }
       } else {
-        localStorage.removeItem('map-height');
+        localStorage.removeItem("map-height");
       }
     }
 
@@ -1038,41 +1247,45 @@ export class EventHandlerManager implements AppModule {
     let startY = 0;
     let startHeight = 0;
 
-    const getTarget = () => (window.innerWidth >= 1600 ? mapContainer : mapSection);
+    const getTarget = () =>
+      window.innerWidth >= 1600 ? mapContainer : mapSection;
 
     this.boundMapEndResizeHandler = () => {
       if (!isResizing) return;
       isResizing = false;
       this.ctx.map?.setIsResizing(false);
       this.ctx.map?.resize();
-      mapSection.classList.remove('resizing');
-      document.body.style.cursor = '';
-      localStorage.setItem('map-height', getTarget().style.height);
+      mapSection.classList.remove("resizing");
+      document.body.style.cursor = "";
+      localStorage.setItem("map-height", getTarget().style.height);
     };
     const endResize = this.boundMapEndResizeHandler;
 
-    resizeHandle.addEventListener('mousedown', (e) => {
+    resizeHandle.addEventListener("mousedown", (e) => {
       isResizing = true;
       startY = e.clientY;
       const target = getTarget();
       startHeight = target.offsetHeight;
       this.ctx.map?.setIsResizing(true);
-      mapSection.classList.add('resizing');
-      document.body.style.cursor = 'ns-resize';
+      mapSection.classList.add("resizing");
+      document.body.style.cursor = "ns-resize";
       e.preventDefault();
     });
 
-    resizeHandle.addEventListener('dblclick', () => {
+    resizeHandle.addEventListener("dblclick", () => {
       const isWide = window.innerWidth >= 1600;
       const target = isWide ? mapContainer : mapSection;
 
       const targetHeight = window.innerHeight * 0.5;
-      const finalHeight = Math.max(getMinHeight(), Math.min(targetHeight, getMaxHeight()));
+      const finalHeight = Math.max(
+        getMinHeight(),
+        Math.min(targetHeight, getMaxHeight()),
+      );
 
       this.ctx.map?.setIsResizing(true);
-      target.classList.add('map-section-smooth');
+      target.classList.add("map-section-smooth");
 
-      if (isWide) target.style.flex = 'none';
+      if (isWide) target.style.flex = "none";
       target.style.height = `${finalHeight}px`;
 
       let fired = false;
@@ -1080,14 +1293,14 @@ export class EventHandlerManager implements AppModule {
         if (fired) return;
         fired = true;
 
-        target.classList.remove('map-section-smooth');
-        target.removeEventListener('transitionend', onEnd);
-        localStorage.setItem('map-height', `${finalHeight}px`);
+        target.classList.remove("map-section-smooth");
+        target.removeEventListener("transitionend", onEnd);
+        localStorage.setItem("map-height", `${finalHeight}px`);
         this.ctx.map?.setIsResizing(false);
         this.ctx.map?.resize();
       };
 
-      target.addEventListener('transitionend', onEnd);
+      target.addEventListener("transitionend", onEnd);
       this.ctx.map?.resize();
       setTimeout(onEnd, 500);
     });
@@ -1098,38 +1311,44 @@ export class EventHandlerManager implements AppModule {
       const target = isWide ? mapContainer : mapSection;
 
       const deltaY = e.clientY - startY;
-      const newHeight = Math.max(getMinHeight(), Math.min(startHeight + deltaY, getMaxHeight()));
+      const newHeight = Math.max(
+        getMinHeight(),
+        Math.min(startHeight + deltaY, getMaxHeight()),
+      );
 
-      if (isWide) target.style.flex = 'none';
+      if (isWide) target.style.flex = "none";
       target.style.height = `${newHeight}px`;
 
       this.ctx.map?.resize();
     };
-    document.addEventListener('mousemove', this.boundMapResizeMoveHandler);
+    document.addEventListener("mousemove", this.boundMapResizeMoveHandler);
 
-    document.addEventListener('mouseup', endResize);
-    window.addEventListener('blur', endResize);
+    document.addEventListener("mouseup", endResize);
+    window.addEventListener("blur", endResize);
     this.boundMapResizeVisChangeHandler = () => {
       if (document.hidden) endResize();
     };
-    document.addEventListener('visibilitychange', this.boundMapResizeVisChangeHandler);
+    document.addEventListener(
+      "visibilitychange",
+      this.boundMapResizeVisChangeHandler,
+    );
   }
 
   setupMapPin(): void {
-    const mapSection = document.getElementById('mapSection');
-    const pinBtn = document.getElementById('mapPinBtn');
+    const mapSection = document.getElementById("mapSection");
+    const pinBtn = document.getElementById("mapPinBtn");
     if (!mapSection || !pinBtn) return;
 
-    const isPinned = localStorage.getItem('map-pinned') === 'true';
+    const isPinned = localStorage.getItem("map-pinned") === "true";
     if (isPinned) {
-      mapSection.classList.add('pinned');
-      pinBtn.classList.add('active');
+      mapSection.classList.add("pinned");
+      pinBtn.classList.add("active");
     }
 
-    pinBtn.addEventListener('click', () => {
-      const nowPinned = mapSection.classList.toggle('pinned');
-      pinBtn.classList.toggle('active', nowPinned);
-      localStorage.setItem('map-pinned', String(nowPinned));
+    pinBtn.addEventListener("click", () => {
+      const nowPinned = mapSection.classList.toggle("pinned");
+      pinBtn.classList.toggle("active", nowPinned);
+      localStorage.setItem("map-pinned", String(nowPinned));
     });
 
     this.setupMapFullscreen(mapSection);
@@ -1137,56 +1356,67 @@ export class EventHandlerManager implements AppModule {
   }
 
   private setupMapDimensionToggle(): void {
-    const toggle = document.getElementById('mapDimensionToggle');
+    const toggle = document.getElementById("mapDimensionToggle");
     if (!toggle) return;
-    toggle.querySelectorAll<HTMLButtonElement>('.map-dim-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const mode = btn.dataset.mode;
-        if (!mode) return;
-        const isGlobe = mode === 'globe';
-        const alreadyGlobe = this.ctx.map?.isGlobeMode() ?? false;
-        if (isGlobe === alreadyGlobe) return;
-        toggle.querySelectorAll('.map-dim-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        saveToStorage(STORAGE_KEYS.mapMode, isGlobe ? 'globe' : 'flat');
-        if (isGlobe) {
-          this.ctx.map?.switchToGlobe();
-        } else {
-          this.ctx.map?.switchToFlat();
-        }
+    toggle
+      .querySelectorAll<HTMLButtonElement>(".map-dim-btn")
+      .forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const mode = btn.dataset.mode;
+          if (!mode) return;
+          const isGlobe = mode === "globe";
+          const alreadyGlobe = this.ctx.map?.isGlobeMode() ?? false;
+          if (isGlobe === alreadyGlobe) return;
+          toggle
+            .querySelectorAll(".map-dim-btn")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          saveToStorage(STORAGE_KEYS.mapMode, isGlobe ? "globe" : "flat");
+          if (isGlobe) {
+            this.ctx.map?.switchToGlobe();
+          } else {
+            this.ctx.map?.switchToFlat();
+          }
+        });
       });
-    });
   }
 
   private setupMapFullscreen(mapSection: HTMLElement): void {
-    const btn = document.getElementById('mapFullscreenBtn');
+    const btn = document.getElementById("mapFullscreenBtn");
     if (!btn) return;
-    const expandSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>';
-    const shrinkSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6"/><path d="M20 10h-6V4"/><path d="M14 10l7-7"/><path d="M3 21l7-7"/></svg>';
+    const expandSvg =
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>';
+    const shrinkSvg =
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6"/><path d="M20 10h-6V4"/><path d="M14 10l7-7"/><path d="M3 21l7-7"/></svg>';
     let isFullscreen = false;
 
     const toggle = () => {
       isFullscreen = !isFullscreen;
-      mapSection.classList.toggle('live-news-fullscreen', isFullscreen);
-      document.body.classList.toggle('live-news-fullscreen-active', isFullscreen);
+      mapSection.classList.toggle("live-news-fullscreen", isFullscreen);
+      document.body.classList.toggle(
+        "live-news-fullscreen-active",
+        isFullscreen,
+      );
       btn.innerHTML = isFullscreen ? shrinkSvg : expandSvg;
-      btn.title = isFullscreen ? 'Exit fullscreen' : 'Fullscreen';
+      btn.title = isFullscreen ? "Exit fullscreen" : "Fullscreen";
       // Notify map so globe (and deck.gl) can resize after CSS transition completes
       setTimeout(() => this.ctx.map?.setIsResizing(false), 320);
     };
 
-    btn.addEventListener('click', toggle);
+    btn.addEventListener("click", toggle);
     this.boundMapFullscreenEscHandler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isFullscreen) toggle();
+      if (e.key === "Escape" && isFullscreen) toggle();
     };
-    document.addEventListener('keydown', this.boundMapFullscreenEscHandler);
+    document.addEventListener("keydown", this.boundMapFullscreenEscHandler);
   }
 
   getLocalizedPanelName(panelKey: string, fallback: string): string {
-    if (panelKey === 'runtime-config') {
-      return t('modals.runtimeConfig.title');
+    if (panelKey === "runtime-config") {
+      return t("modals.runtimeConfig.title");
     }
-    const key = panelKey.replace(/-([a-z])/g, (_match, group: string) => group.toUpperCase());
+    const key = panelKey.replace(/-([a-z])/g, (_match, group: string) =>
+      group.toUpperCase(),
+    );
     const lookup = `panels.${key}`;
     const localized = t(lookup);
     return localized === lookup ? fallback : localized;
@@ -1194,22 +1424,22 @@ export class EventHandlerManager implements AppModule {
 
   getAllSourceNames(): string[] {
     const sources = new Set<string>();
-    Object.values(FEEDS).forEach(feeds => {
-      if (feeds) feeds.forEach(f => sources.add(f.name));
+    Object.values(FEEDS).forEach((feeds) => {
+      if (feeds) feeds.forEach((f) => sources.add(f.name));
     });
-    INTEL_SOURCES.forEach(f => sources.add(f.name));
+    INTEL_SOURCES.forEach((f) => sources.add(f.name));
     return Array.from(sources).sort((a, b) => a.localeCompare(b));
   }
 
   applyPanelSettings(): void {
     Object.entries(this.ctx.panelSettings).forEach(([key, config]) => {
-      if (key === 'map') {
-        const mapSection = document.getElementById('mapSection');
+      if (key === "map") {
+        const mapSection = document.getElementById("mapSection");
         if (mapSection) {
-          mapSection.classList.toggle('hidden', !config.enabled);
-          const mainContent = document.querySelector('.main-content');
+          mapSection.classList.toggle("hidden", !config.enabled);
+          const mainContent = document.querySelector(".main-content");
           if (mainContent) {
-            mainContent.classList.toggle('map-hidden', !config.enabled);
+            mainContent.classList.toggle("map-hidden", !config.enabled);
           }
           this.callbacks.ensureCorrectZones();
         }

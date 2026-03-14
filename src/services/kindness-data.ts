@@ -1,15 +1,15 @@
 // Kindness data pipeline: real kindness events from curated news
 // Green labeled dots on the happy map from actual humanity-kindness articles
 
-import { inferGeoHubsFromTitle } from './geo-hub-index';
+import { inferGeoHubsFromTitle } from "./geo-hub-index";
 
 export interface KindnessPoint {
   lat: number;
   lon: number;
   name: string;
   description: string;
-  intensity: number;      // 0-1, higher = more prominent on map
-  type: 'baseline' | 'real';
+  intensity: number; // 0-1, higher = more prominent on map
+  type: "baseline" | "real";
   timestamp: number;
 }
 
@@ -21,7 +21,7 @@ function extractKindnessEvents(
   newsItems: Array<{ title: string; happyCategory?: string }>,
 ): KindnessPoint[] {
   const kindnessItems = newsItems.filter(
-    item => item.happyCategory === 'humanity-kindness',
+    (item) => item.happyCategory === "humanity-kindness",
   );
 
   const events: KindnessPoint[] = [];
@@ -35,7 +35,7 @@ function extractKindnessEvents(
         name: item.title,
         description: item.title,
         intensity: 0.8,
-        type: 'real',
+        type: "real",
         timestamp: Date.now(),
       });
     }

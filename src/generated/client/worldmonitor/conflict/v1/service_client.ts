@@ -94,8 +94,7 @@ export interface GetHumanitarianSummaryBatchResponse {
   requested: number;
 }
 
-export interface ListIranEventsRequest {
-}
+export interface ListIranEventsRequest {}
 
 export interface ListIranEventsResponse {
   events: IranEvent[];
@@ -114,7 +113,11 @@ export interface IranEvent {
   severity: string;
 }
 
-export type UcdpViolenceType = "UCDP_VIOLENCE_TYPE_UNSPECIFIED" | "UCDP_VIOLENCE_TYPE_STATE_BASED" | "UCDP_VIOLENCE_TYPE_NON_STATE" | "UCDP_VIOLENCE_TYPE_ONE_SIDED";
+export type UcdpViolenceType =
+  | "UCDP_VIOLENCE_TYPE_UNSPECIFIED"
+  | "UCDP_VIOLENCE_TYPE_STATE_BASED"
+  | "UCDP_VIOLENCE_TYPE_NON_STATE"
+  | "UCDP_VIOLENCE_TYPE_ONE_SIDED";
 
 export interface FieldViolation {
   field: string;
@@ -164,15 +167,23 @@ export class ConflictServiceClient {
     this.defaultHeaders = { ...options?.defaultHeaders };
   }
 
-  async listAcledEvents(req: ListAcledEventsRequest, options?: ConflictServiceCallOptions): Promise<ListAcledEventsResponse> {
+  async listAcledEvents(
+    req: ListAcledEventsRequest,
+    options?: ConflictServiceCallOptions,
+  ): Promise<ListAcledEventsResponse> {
     let path = "/api/conflict/v1/list-acled-events";
     const params = new URLSearchParams();
-    if (req.start != null && req.start !== 0) params.set("start", String(req.start));
+    if (req.start != null && req.start !== 0)
+      params.set("start", String(req.start));
     if (req.end != null && req.end !== 0) params.set("end", String(req.end));
-    if (req.pageSize != null && req.pageSize !== 0) params.set("page_size", String(req.pageSize));
-    if (req.cursor != null && req.cursor !== "") params.set("cursor", String(req.cursor));
-    if (req.country != null && req.country !== "") params.set("country", String(req.country));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.pageSize != null && req.pageSize !== 0)
+      params.set("page_size", String(req.pageSize));
+    if (req.cursor != null && req.cursor !== "")
+      params.set("cursor", String(req.cursor));
+    if (req.country != null && req.country !== "")
+      params.set("country", String(req.country));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -190,18 +201,26 @@ export class ConflictServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as ListAcledEventsResponse;
+    return (await resp.json()) as ListAcledEventsResponse;
   }
 
-  async listUcdpEvents(req: ListUcdpEventsRequest, options?: ConflictServiceCallOptions): Promise<ListUcdpEventsResponse> {
+  async listUcdpEvents(
+    req: ListUcdpEventsRequest,
+    options?: ConflictServiceCallOptions,
+  ): Promise<ListUcdpEventsResponse> {
     let path = "/api/conflict/v1/list-ucdp-events";
     const params = new URLSearchParams();
-    if (req.start != null && req.start !== 0) params.set("start", String(req.start));
+    if (req.start != null && req.start !== 0)
+      params.set("start", String(req.start));
     if (req.end != null && req.end !== 0) params.set("end", String(req.end));
-    if (req.pageSize != null && req.pageSize !== 0) params.set("page_size", String(req.pageSize));
-    if (req.cursor != null && req.cursor !== "") params.set("cursor", String(req.cursor));
-    if (req.country != null && req.country !== "") params.set("country", String(req.country));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.pageSize != null && req.pageSize !== 0)
+      params.set("page_size", String(req.pageSize));
+    if (req.cursor != null && req.cursor !== "")
+      params.set("cursor", String(req.cursor));
+    if (req.country != null && req.country !== "")
+      params.set("country", String(req.country));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -219,14 +238,19 @@ export class ConflictServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as ListUcdpEventsResponse;
+    return (await resp.json()) as ListUcdpEventsResponse;
   }
 
-  async getHumanitarianSummary(req: GetHumanitarianSummaryRequest, options?: ConflictServiceCallOptions): Promise<GetHumanitarianSummaryResponse> {
+  async getHumanitarianSummary(
+    req: GetHumanitarianSummaryRequest,
+    options?: ConflictServiceCallOptions,
+  ): Promise<GetHumanitarianSummaryResponse> {
     let path = "/api/conflict/v1/get-humanitarian-summary";
     const params = new URLSearchParams();
-    if (req.countryCode != null && req.countryCode !== "") params.set("country_code", String(req.countryCode));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.countryCode != null && req.countryCode !== "")
+      params.set("country_code", String(req.countryCode));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -244,10 +268,13 @@ export class ConflictServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as GetHumanitarianSummaryResponse;
+    return (await resp.json()) as GetHumanitarianSummaryResponse;
   }
 
-  async getHumanitarianSummaryBatch(req: GetHumanitarianSummaryBatchRequest, options?: ConflictServiceCallOptions): Promise<GetHumanitarianSummaryBatchResponse> {
+  async getHumanitarianSummaryBatch(
+    req: GetHumanitarianSummaryBatchRequest,
+    options?: ConflictServiceCallOptions,
+  ): Promise<GetHumanitarianSummaryBatchResponse> {
     let path = "/api/conflict/v1/get-humanitarian-summary-batch";
     const url = this.baseURL + path;
 
@@ -268,10 +295,13 @@ export class ConflictServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as GetHumanitarianSummaryBatchResponse;
+    return (await resp.json()) as GetHumanitarianSummaryBatchResponse;
   }
 
-  async listIranEvents(req: ListIranEventsRequest, options?: ConflictServiceCallOptions): Promise<ListIranEventsResponse> {
+  async listIranEvents(
+    req: ListIranEventsRequest,
+    options?: ConflictServiceCallOptions,
+  ): Promise<ListIranEventsResponse> {
     let path = "/api/conflict/v1/list-iran-events";
     const url = this.baseURL + path;
 
@@ -291,7 +321,7 @@ export class ConflictServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as ListIranEventsResponse;
+    return (await resp.json()) as ListIranEventsResponse;
   }
 
   private async handleError(resp: Response): Promise<never> {
@@ -306,7 +336,10 @@ export class ConflictServiceClient {
         if (e instanceof ValidationError) throw e;
       }
     }
-    throw new ApiError(resp.status, `Request failed with status ${resp.status}`, body);
+    throw new ApiError(
+      resp.status,
+      `Request failed with status ${resp.status}`,
+      body,
+    );
   }
 }
-

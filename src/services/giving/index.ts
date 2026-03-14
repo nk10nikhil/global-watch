@@ -1,4 +1,4 @@
-import { getRpcBaseUrl } from '@/services/rpc-client';
+import { getRpcBaseUrl } from "@/services/rpc-client";
 import {
   GivingServiceClient,
   type GetGivingSummaryResponse as ProtoResponse,
@@ -6,9 +6,9 @@ import {
   type CategoryBreakdown as ProtoCategory,
   type CryptoGivingSummary as ProtoCrypto,
   type InstitutionalGiving as ProtoInstitutional,
-} from '@/generated/client/worldmonitor/giving/v1/service_client';
-import { createCircuitBreaker } from '@/utils';
-import { getHydratedData } from '@/services/bootstrap';
+} from "@/generated/client/worldmonitor/giving/v1/service_client";
+import { createCircuitBreaker } from "@/utils";
+import { getHydratedData } from "@/services/bootstrap";
 
 // ─── Consumer-friendly types ───
 
@@ -50,7 +50,7 @@ export interface InstitutionalGiving {
 export interface GivingSummary {
   generatedAt: string;
   activityIndex: number;
-  trend: 'rising' | 'stable' | 'falling';
+  trend: "rising" | "stable" | "falling";
   estimatedDailyFlowUsd: number;
   platforms: PlatformGiving[];
   categories: CategoryBreakdown[];
@@ -71,7 +71,7 @@ function toDisplaySummary(proto: ProtoResponse): GivingSummary {
   return {
     generatedAt: s.generatedAt,
     activityIndex: s.activityIndex,
-    trend: s.trend as 'rising' | 'stable' | 'falling',
+    trend: s.trend as "rising" | "stable" | "falling",
     estimatedDailyFlowUsd: s.estimatedDailyFlowUsd,
     platforms: s.platforms.map(toDisplayPlatform),
     categories: s.categories.map(toDisplayCategory),
@@ -112,36 +112,53 @@ function toDisplayCrypto(proto?: ProtoCrypto): CryptoGivingSummary {
   };
 }
 
-function toDisplayInstitutional(proto?: ProtoInstitutional): InstitutionalGiving {
+function toDisplayInstitutional(
+  proto?: ProtoInstitutional,
+): InstitutionalGiving {
   return {
     oecdOdaAnnualUsdBn: proto?.oecdOdaAnnualUsdBn ?? 0,
     oecdDataYear: proto?.oecdDataYear ?? 0,
     cafWorldGivingIndex: proto?.cafWorldGivingIndex ?? 0,
     cafDataYear: proto?.cafDataYear ?? 0,
     candidGrantsTracked: proto?.candidGrantsTracked ?? 0,
-    dataLag: proto?.dataLag ?? 'Unknown',
+    dataLag: proto?.dataLag ?? "Unknown",
   };
 }
 
 // ─── Client + circuit breaker + caching ───
 
-const client = new GivingServiceClient(getRpcBaseUrl(), { fetch: (...args) => globalThis.fetch(...args) });
+const client = new GivingServiceClient(getRpcBaseUrl(), {
+  fetch: (...args) => globalThis.fetch(...args),
+});
 
 const emptyResult: GivingSummary = {
   generatedAt: new Date().toISOString(),
   activityIndex: 0,
-  trend: 'stable',
+  trend: "stable",
   estimatedDailyFlowUsd: 0,
   platforms: [],
   categories: [],
-  crypto: { dailyInflowUsd: 0, trackedWallets: 0, transactions24h: 0, topReceivers: [], pctOfTotal: 0 },
-  institutional: { oecdOdaAnnualUsdBn: 0, oecdDataYear: 0, cafWorldGivingIndex: 0, cafDataYear: 0, candidGrantsTracked: 0, dataLag: 'Unknown' },
+  crypto: {
+    dailyInflowUsd: 0,
+    trackedWallets: 0,
+    transactions24h: 0,
+    topReceivers: [],
+    pctOfTotal: 0,
+  },
+  institutional: {
+    oecdOdaAnnualUsdBn: 0,
+    oecdDataYear: 0,
+    cafWorldGivingIndex: 0,
+    cafDataYear: 0,
+    candidGrantsTracked: 0,
+    dataLag: "Unknown",
+  },
 };
 
 const breaker = createCircuitBreaker<GivingSummary>({
-  name: 'Global Giving',
+  name: "Global Giving",
   cacheTtlMs: 30 * 60 * 1000, // 30 min -- data is mostly static baselines
-  persistCache: true,          // survive page reloads
+  persistCache: true, // survive page reloads
 });
 
 // In-memory cache + request deduplication
@@ -154,7 +171,7 @@ const REFETCH_INTERVAL_MS = 30 * 60 * 1000; // 30 min
 
 export async function fetchGivingSummary(): Promise<GivingFetchResult> {
   // Check bootstrap hydration first
-  const hydrated = getHydratedData('giving') as ProtoResponse | undefined;
+  const hydrated = getHydratedData("giving") as ProtoResponse | undefined;
   if (hydrated?.summary?.platforms?.length) {
     const data = toDisplaySummary(hydrated);
     cachedData = data;
@@ -165,7 +182,11 @@ export async function fetchGivingSummary(): Promise<GivingFetchResult> {
   // Return in-memory cache if fresh
   const now = Date.now();
   if (cachedData && now - cachedAt < REFETCH_INTERVAL_MS) {
-    return { ok: true, data: cachedData, cachedAt: new Date(cachedAt).toISOString() };
+    return {
+      ok: true,
+      data: cachedData,
+      cachedAt: new Date(cachedAt).toISOString(),
+    };
   }
 
   // Deduplicate concurrent requests
@@ -187,11 +208,19 @@ export async function fetchGivingSummary(): Promise<GivingFetchResult> {
         cachedAt = Date.now();
       }
 
-      return { ok, data, cachedAt: ok ? new Date(cachedAt).toISOString() : undefined };
+      return {
+        ok,
+        data,
+        cachedAt: ok ? new Date(cachedAt).toISOString() : undefined,
+      };
     } catch {
       // Return stale cache if available
       if (cachedData) {
-        return { ok: true, data: cachedData, cachedAt: new Date(cachedAt).toISOString() };
+        return {
+          ok: true,
+          data: cachedData,
+          cachedAt: new Date(cachedAt).toISOString(),
+        };
       }
       return { ok: false, data: emptyResult };
     } finally {
@@ -216,20 +245,20 @@ export function formatPercent(n: number): string {
 }
 
 export function getActivityColor(index: number): string {
-  if (index >= 70) return 'var(--semantic-positive)';
-  if (index >= 50) return 'var(--accent)';
-  if (index >= 30) return 'var(--semantic-elevated)';
-  return 'var(--semantic-critical)';
+  if (index >= 70) return "var(--semantic-positive)";
+  if (index >= 50) return "var(--accent)";
+  if (index >= 30) return "var(--semantic-elevated)";
+  return "var(--semantic-critical)";
 }
 
 export function getTrendIcon(trend: string): string {
-  if (trend === 'rising') return '\u25B2'; // ▲
-  if (trend === 'falling') return '\u25BC'; // ▼
-  return '\u25CF'; // ●
+  if (trend === "rising") return "\u25B2"; // ▲
+  if (trend === "falling") return "\u25BC"; // ▼
+  return "\u25CF"; // ●
 }
 
 export function getTrendColor(trend: string): string {
-  if (trend === 'rising') return 'var(--semantic-positive)';
-  if (trend === 'falling') return 'var(--semantic-critical)';
-  return 'var(--text-muted)';
+  if (trend === "rising") return "var(--semantic-positive)";
+  if (trend === "falling") return "var(--semantic-critical)";
+  return "var(--text-muted)";
 }

@@ -1,4 +1,4 @@
-import { CHROME_UA } from './constants';
+import { CHROME_UA } from "./constants";
 
 export interface ProviderCredentials {
   apiUrl: string;
@@ -8,16 +8,24 @@ export interface ProviderCredentials {
 }
 
 const OLLAMA_HOST_ALLOWLIST = new Set([
-  'localhost', '127.0.0.1', '::1', '[::1]', 'host.docker.internal',
+  "localhost",
+  "127.0.0.1",
+  "::1",
+  "[::1]",
+  "host.docker.internal",
 ]);
 
 function isSidecar(): boolean {
-  return typeof process !== 'undefined' &&
-    (process.env?.LOCAL_API_MODE || '').includes('sidecar');
+  return (
+    typeof process !== "undefined" &&
+    (process.env?.LOCAL_API_MODE || "").includes("sidecar")
+  );
 }
 
-export function getProviderCredentials(provider: string): ProviderCredentials | null {
-  if (provider === 'ollama') {
+export function getProviderCredentials(
+  provider: string,
+): ProviderCredentials | null {
+  if (provider === "ollama") {
     const baseUrl = process.env.OLLAMA_API_URL;
     if (!baseUrl) return null;
 
@@ -25,7 +33,9 @@ export function getProviderCredentials(provider: string): ProviderCredentials | 
       try {
         const hostname = new URL(baseUrl).hostname;
         if (!OLLAMA_HOST_ALLOWLIST.has(hostname)) {
-          console.warn(`[llm] Ollama blocked: hostname "${hostname}" not in allowlist`);
+          console.warn(
+            `[llm] Ollama blocked: hostname "${hostname}" not in allowlist`,
+          );
           return null;
         }
       } catch {
@@ -33,42 +43,44 @@ export function getProviderCredentials(provider: string): ProviderCredentials | 
       }
     }
 
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
     const apiKey = process.env.OLLAMA_API_KEY;
-    if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
+    if (apiKey) headers["Authorization"] = `Bearer ${apiKey}`;
 
     return {
-      apiUrl: new URL('/v1/chat/completions', baseUrl).toString(),
-      model: process.env.OLLAMA_MODEL || 'llama3.1:8b',
+      apiUrl: new URL("/v1/chat/completions", baseUrl).toString(),
+      model: process.env.OLLAMA_MODEL || "llama3.1:8b",
       headers,
       extraBody: { think: false },
     };
   }
 
-  if (provider === 'groq') {
+  if (provider === "groq") {
     const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) return null;
     return {
-      apiUrl: 'https://api.groq.com/openai/v1/chat/completions',
-      model: 'llama-3.1-8b-instant',
+      apiUrl: "https://api.groq.com/openai/v1/chat/completions",
+      model: "llama-3.1-8b-instant",
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
       },
     };
   }
 
-  if (provider === 'openrouter') {
+  if (provider === "openrouter") {
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) return null;
     return {
-      apiUrl: 'https://openrouter.ai/api/v1/chat/completions',
-      model: 'openrouter/free',
+      apiUrl: "https://openrouter.ai/api/v1/chat/completions",
+      model: "openrouter/free",
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://worldmonitor.app',
-        'X-Title': 'World Monitor',
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://worldmonitor.app",
+        "X-Title": "World Monitor",
       },
     };
   }
@@ -78,25 +90,25 @@ export function getProviderCredentials(provider: string): ProviderCredentials | 
 
 export function stripThinkingTags(text: string): string {
   let s = text
-    .replace(/<think>[\s\S]*?<\/think>/gi, '')
-    .replace(/<\|thinking\|>[\s\S]*?<\|\/thinking\|>/gi, '')
-    .replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, '')
-    .replace(/<reflection>[\s\S]*?<\/reflection>/gi, '')
-    .replace(/<\|begin_of_thought\|>[\s\S]*?<\|end_of_thought\|>/gi, '')
+    .replace(/<think>[\s\S]*?<\/think>/gi, "")
+    .replace(/<\|thinking\|>[\s\S]*?<\|\/thinking\|>/gi, "")
+    .replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, "")
+    .replace(/<reflection>[\s\S]*?<\/reflection>/gi, "")
+    .replace(/<\|begin_of_thought\|>[\s\S]*?<\|end_of_thought\|>/gi, "")
     .trim();
 
   s = s
-    .replace(/<think>[\s\S]*/gi, '')
-    .replace(/<\|thinking\|>[\s\S]*/gi, '')
-    .replace(/<reasoning>[\s\S]*/gi, '')
-    .replace(/<reflection>[\s\S]*/gi, '')
-    .replace(/<\|begin_of_thought\|>[\s\S]*/gi, '')
+    .replace(/<think>[\s\S]*/gi, "")
+    .replace(/<\|thinking\|>[\s\S]*/gi, "")
+    .replace(/<reasoning>[\s\S]*/gi, "")
+    .replace(/<reflection>[\s\S]*/gi, "")
+    .replace(/<\|begin_of_thought\|>[\s\S]*/gi, "")
     .trim();
 
   return s;
 }
 
-const PROVIDER_CHAIN = ['ollama', 'groq', 'openrouter'] as const;
+const PROVIDER_CHAIN = ["ollama", "groq", "openrouter"] as const;
 
 export interface LlmCallOptions {
   messages: Array<{ role: string; content: string }>;
@@ -115,7 +127,9 @@ export interface LlmCallResult {
   tokens: number;
 }
 
-export async function callLlm(opts: LlmCallOptions): Promise<LlmCallResult | null> {
+export async function callLlm(
+  opts: LlmCallOptions,
+): Promise<LlmCallResult | null> {
   const {
     messages,
     temperature = 0.3,
@@ -137,8 +151,8 @@ export async function callLlm(opts: LlmCallOptions): Promise<LlmCallResult | nul
 
     try {
       const resp = await fetch(creds.apiUrl, {
-        method: 'POST',
-        headers: { ...creds.headers, 'User-Agent': CHROME_UA },
+        method: "POST",
+        headers: { ...creds.headers, "User-Agent": CHROME_UA },
         body: JSON.stringify({
           ...creds.extraBody,
           model: creds.model,
@@ -160,7 +174,7 @@ export async function callLlm(opts: LlmCallOptions): Promise<LlmCallResult | nul
         usage?: { total_tokens?: number };
       };
 
-      let content = data.choices?.[0]?.message?.content?.trim() || '';
+      let content = data.choices?.[0]?.message?.content?.trim() || "";
       if (!content) {
         if (forcedProvider) return null;
         continue;
@@ -177,7 +191,9 @@ export async function callLlm(opts: LlmCallOptions): Promise<LlmCallResult | nul
       }
 
       if (validate && !validate(content)) {
-        console.warn(`[llm:${providerName}] validate() rejected response, trying next`);
+        console.warn(
+          `[llm:${providerName}] validate() rejected response, trying next`,
+        );
         if (forcedProvider) return null;
         continue;
       }

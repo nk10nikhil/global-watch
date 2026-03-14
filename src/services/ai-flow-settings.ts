@@ -6,14 +6,14 @@
  *       settings hub once the UI is extended with additional sections.
  */
 
-const STORAGE_KEY_BROWSER_MODEL = 'wm-ai-flow-browser-model';
-const STORAGE_KEY_CLOUD_LLM = 'wm-ai-flow-cloud-llm';
-const STORAGE_KEY_MAP_NEWS_FLASH = 'wm-map-news-flash';
-const STORAGE_KEY_HEADLINE_MEMORY = 'wm-headline-memory';
-const STORAGE_KEY_BADGE_ANIMATION = 'wm-badge-animation';
-const STORAGE_KEY_STREAM_QUALITY = 'wm-stream-quality';
-const EVENT_NAME = 'ai-flow-changed';
-const STREAM_QUALITY_EVENT = 'stream-quality-changed';
+const STORAGE_KEY_BROWSER_MODEL = "wm-ai-flow-browser-model";
+const STORAGE_KEY_CLOUD_LLM = "wm-ai-flow-cloud-llm";
+const STORAGE_KEY_MAP_NEWS_FLASH = "wm-map-news-flash";
+const STORAGE_KEY_HEADLINE_MEMORY = "wm-headline-memory";
+const STORAGE_KEY_BADGE_ANIMATION = "wm-badge-animation";
+const STORAGE_KEY_STREAM_QUALITY = "wm-stream-quality";
+const EVENT_NAME = "ai-flow-changed";
+const STREAM_QUALITY_EVENT = "stream-quality-changed";
 
 export interface AiFlowSettings {
   browserModel: boolean;
@@ -27,7 +27,7 @@ function readBool(key: string, defaultValue: boolean): boolean {
   try {
     const raw = localStorage.getItem(key);
     if (raw === null) return defaultValue;
-    return raw === 'true';
+    return raw === "true";
   } catch {
     return defaultValue;
   }
@@ -62,8 +62,14 @@ export function getAiFlowSettings(): AiFlowSettings {
     browserModel: readBool(STORAGE_KEY_BROWSER_MODEL, DEFAULTS.browserModel),
     cloudLlm: readBool(STORAGE_KEY_CLOUD_LLM, DEFAULTS.cloudLlm),
     mapNewsFlash: readBool(STORAGE_KEY_MAP_NEWS_FLASH, DEFAULTS.mapNewsFlash),
-    headlineMemory: readBool(STORAGE_KEY_HEADLINE_MEMORY, DEFAULTS.headlineMemory),
-    badgeAnimation: readBool(STORAGE_KEY_BADGE_ANIMATION, DEFAULTS.badgeAnimation),
+    headlineMemory: readBool(
+      STORAGE_KEY_HEADLINE_MEMORY,
+      DEFAULTS.headlineMemory,
+    ),
+    badgeAnimation: readBool(
+      STORAGE_KEY_BADGE_ANIMATION,
+      DEFAULTS.badgeAnimation,
+    ),
   };
 }
 
@@ -71,7 +77,10 @@ export function isHeadlineMemoryEnabled(): boolean {
   return readBool(STORAGE_KEY_HEADLINE_MEMORY, DEFAULTS.headlineMemory);
 }
 
-export function setAiFlowSetting(key: keyof AiFlowSettings, value: boolean): void {
+export function setAiFlowSetting(
+  key: keyof AiFlowSettings,
+  value: boolean,
+): void {
   writeBool(STORAGE_KEY_MAP[key], value);
   window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: { key } }));
 }
@@ -81,9 +90,13 @@ export function isAnyAiProviderEnabled(): boolean {
   return s.cloudLlm || s.browserModel;
 }
 
-export function subscribeAiFlowChange(cb: (changedKey?: keyof AiFlowSettings) => void): () => void {
+export function subscribeAiFlowChange(
+  cb: (changedKey?: keyof AiFlowSettings) => void,
+): () => void {
   const handler = (e: Event) => {
-    const detail = (e as CustomEvent).detail as { key?: keyof AiFlowSettings } | undefined;
+    const detail = (e as CustomEvent).detail as
+      | { key?: keyof AiFlowSettings }
+      | undefined;
     cb(detail?.key);
   };
   window.addEventListener(EVENT_NAME, handler);
@@ -92,32 +105,42 @@ export function subscribeAiFlowChange(cb: (changedKey?: keyof AiFlowSettings) =>
 
 // ── Stream Quality ──
 
-export type StreamQuality = 'auto' | 'small' | 'medium' | 'large' | 'hd720';
+export type StreamQuality = "auto" | "small" | "medium" | "large" | "hd720";
 
-export const STREAM_QUALITY_OPTIONS: { value: StreamQuality; label: string }[] = [
-  { value: 'auto', label: 'Auto' },
-  { value: 'small', label: 'Low (360p)' },
-  { value: 'medium', label: 'Medium (480p)' },
-  { value: 'large', label: 'High (480p+)' },
-  { value: 'hd720', label: 'HD (720p)' },
-];
+export const STREAM_QUALITY_OPTIONS: { value: StreamQuality; label: string }[] =
+  [
+    { value: "auto", label: "Auto" },
+    { value: "small", label: "Low (360p)" },
+    { value: "medium", label: "Medium (480p)" },
+    { value: "large", label: "High (480p+)" },
+    { value: "hd720", label: "HD (720p)" },
+  ];
 
 export function getStreamQuality(): StreamQuality {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_STREAM_QUALITY);
-    if (raw && ['auto', 'small', 'medium', 'large', 'hd720'].includes(raw)) return raw as StreamQuality;
-  } catch { /* ignore */ }
-  return 'auto';
+    if (raw && ["auto", "small", "medium", "large", "hd720"].includes(raw))
+      return raw as StreamQuality;
+  } catch {
+    /* ignore */
+  }
+  return "auto";
 }
 
 export function setStreamQuality(quality: StreamQuality): void {
   try {
     localStorage.setItem(STORAGE_KEY_STREAM_QUALITY, quality);
-  } catch { /* ignore */ }
-  window.dispatchEvent(new CustomEvent(STREAM_QUALITY_EVENT, { detail: { quality } }));
+  } catch {
+    /* ignore */
+  }
+  window.dispatchEvent(
+    new CustomEvent(STREAM_QUALITY_EVENT, { detail: { quality } }),
+  );
 }
 
-export function subscribeStreamQualityChange(cb: (quality: StreamQuality) => void): () => void {
+export function subscribeStreamQualityChange(
+  cb: (quality: StreamQuality) => void,
+): () => void {
   const handler = (e: Event) => {
     const detail = (e as CustomEvent).detail as { quality: StreamQuality };
     cb(detail.quality);

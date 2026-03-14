@@ -1,9 +1,14 @@
-import type { CableAdvisory, RepairShip, UnderseaCable } from '@/types';
-import { getRpcBaseUrl } from '@/services/rpc-client';
-import { UNDERSEA_CABLES } from '@/config';
-import { MaritimeServiceClient, type NavigationalWarning } from '@/generated/client/worldmonitor/maritime/v1/service_client';
+import type { CableAdvisory, RepairShip, UnderseaCable } from "@/types";
+import { getRpcBaseUrl } from "@/services/rpc-client";
+import { UNDERSEA_CABLES } from "@/config";
+import {
+  MaritimeServiceClient,
+  type NavigationalWarning,
+} from "@/generated/client/worldmonitor/maritime/v1/service_client";
 
-const maritimeClient = new MaritimeServiceClient(getRpcBaseUrl(), { fetch: (...args) => globalThis.fetch(...args) });
+const maritimeClient = new MaritimeServiceClient(getRpcBaseUrl(), {
+  fetch: (...args) => globalThis.fetch(...args),
+});
 
 interface CableActivity {
   advisories: CableAdvisory[];
@@ -22,15 +27,15 @@ interface NgaWarning {
 }
 
 const CABLE_KEYWORDS = [
-  'CABLE',
-  'CABLESHIP',
-  'CABLE SHIP',
-  'CABLE LAYING',
-  'CABLE OPERATIONS',
-  'SUBMARINE CABLE',
-  'UNDERSEA CABLE',
-  'FIBER OPTIC',
-  'TELECOMMUNICATIONS CABLE',
+  "CABLE",
+  "CABLESHIP",
+  "CABLE SHIP",
+  "CABLE LAYING",
+  "CABLE OPERATIONS",
+  "SUBMARINE CABLE",
+  "UNDERSEA CABLE",
+  "FIBER OPTIC",
+  "TELECOMMUNICATIONS CABLE",
 ];
 
 const CABLESHIP_PATTERNS = [
@@ -43,18 +48,27 @@ const CABLESHIP_PATTERNS = [
 
 function isCableRelated(text: string): boolean {
   const upper = text.toUpperCase();
-  return CABLE_KEYWORDS.some(kw => upper.includes(kw));
+  return CABLE_KEYWORDS.some((kw) => upper.includes(kw));
 }
 
 function parseCoordinates(text: string): { lat: number; lon: number }[] {
   const coords: { lat: number; lon: number }[] = [];
 
   // Pattern: 26-32N 056-40E or 26-32.5N 056-40.5E
-  const dmsPattern = /(\d{1,3})-(\d{1,2}(?:\.\d+)?)\s*([NS])\s+(\d{1,3})-(\d{1,2}(?:\.\d+)?)\s*([EW])/gi;
+  const dmsPattern =
+    /(\d{1,3})-(\d{1,2}(?:\.\d+)?)\s*([NS])\s+(\d{1,3})-(\d{1,2}(?:\.\d+)?)\s*([EW])/gi;
   let match;
 
   while ((match = dmsPattern.exec(text)) !== null) {
-    if (!match[1] || !match[2] || !match[3] || !match[4] || !match[5] || !match[6]) continue;
+    if (
+      !match[1] ||
+      !match[2] ||
+      !match[3] ||
+      !match[4] ||
+      !match[5] ||
+      !match[6]
+    )
+      continue;
 
     const latDeg = parseInt(match[1], 10);
     const latMin = parseFloat(match[2]);
@@ -66,8 +80,8 @@ function parseCoordinates(text: string): { lat: number; lon: number }[] {
     let lat = latDeg + latMin / 60;
     let lon = lonDeg + lonMin / 60;
 
-    if (latDir === 'S') lat = -lat;
-    if (lonDir === 'W') lon = -lon;
+    if (latDir === "S") lat = -lat;
+    if (lonDir === "W") lon = -lon;
 
     if (lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
       coords.push({ lat, lon });
@@ -82,8 +96,8 @@ function parseCoordinates(text: string): { lat: number; lon: number }[] {
     let lat = parseFloat(match[1]);
     let lon = parseFloat(match[3]);
 
-    if (match[2].toUpperCase() === 'S') lat = -lat;
-    if (match[4].toUpperCase() === 'W') lon = -lon;
+    if (match[2].toUpperCase() === "S") lat = -lat;
+    if (match[4].toUpperCase() === "W") lon = -lon;
 
     if (lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
       coords.push({ lat, lon });
@@ -97,7 +111,7 @@ function extractCableshipName(text: string): string | null {
   for (const pattern of CABLESHIP_PATTERNS) {
     const match = text.match(pattern);
     if (match?.[1]) {
-      const name = match[1].trim().replace(/\s+/g, ' ');
+      const name = match[1].trim().replace(/\s+/g, " ");
       // Skip if it's just a generic word
       if (name.length > 2 && !/^(THE|AND|FOR|WITH)$/i.test(name)) {
         return name;
@@ -114,8 +128,11 @@ function findNearestCable(lat: number, lon: number): UnderseaCable | null {
   for (const cable of UNDERSEA_CABLES) {
     for (const point of cable.points) {
       const [cableLon, cableLat] = point;
-      const dist = Math.sqrt(Math.pow(lat - cableLat, 2) + Math.pow(lon - cableLon, 2));
-      if (dist < minDist && dist < 5) { // Within 5 degrees
+      const dist = Math.sqrt(
+        Math.pow(lat - cableLat, 2) + Math.pow(lon - cableLon, 2),
+      );
+      if (dist < minDist && dist < 5) {
+        // Within 5 degrees
         minDist = dist;
         nearest = cable;
       }
@@ -135,8 +152,18 @@ function parseIssueDate(dateStr: string): Date {
     const year = parseInt(match[4], 10);
 
     const months: Record<string, number> = {
-      JAN: 0, FEB: 1, MAR: 2, APR: 3, MAY: 4, JUN: 5,
-      JUL: 6, AUG: 7, SEP: 8, OCT: 9, NOV: 10, DEC: 11,
+      JAN: 0,
+      FEB: 1,
+      MAR: 2,
+      APR: 3,
+      MAY: 4,
+      JUN: 5,
+      JUL: 6,
+      AUG: 7,
+      SEP: 8,
+      OCT: 9,
+      NOV: 10,
+      DEC: 11,
     };
 
     const month = months[monthStr] ?? 0;
@@ -148,21 +175,23 @@ function parseIssueDate(dateStr: string): Date {
   return new Date();
 }
 
-function determineSeverity(text: string): 'fault' | 'degraded' {
-  const faultKeywords = /FAULT|BREAK|CUT|DAMAGE|SEVERED|RUPTURE|OUTAGE|FAILURE/i;
-  return faultKeywords.test(text) ? 'fault' : 'degraded';
+function determineSeverity(text: string): "fault" | "degraded" {
+  const faultKeywords =
+    /FAULT|BREAK|CUT|DAMAGE|SEVERED|RUPTURE|OUTAGE|FAILURE/i;
+  return faultKeywords.test(text) ? "fault" : "degraded";
 }
 
-function determineShipStatus(text: string): 'enroute' | 'on-station' {
-  const onStationKeywords = /ON STATION|OPERATIONS IN PROGRESS|LAYING|REPAIRING|WORKING|COMMENCED/i;
-  return onStationKeywords.test(text) ? 'on-station' : 'enroute';
+function determineShipStatus(text: string): "enroute" | "on-station" {
+  const onStationKeywords =
+    /ON STATION|OPERATIONS IN PROGRESS|LAYING|REPAIRING|WORKING|COMMENCED/i;
+  return onStationKeywords.test(text) ? "on-station" : "enroute";
 }
 
 function slugify(text: string): string {
   return text
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)+/g, '')
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "")
     .slice(0, 40);
 }
 
@@ -171,7 +200,7 @@ function processWarnings(warnings: NgaWarning[]): CableActivity {
   const repairShips: RepairShip[] = [];
   const seenIds = new Set<string>();
 
-  const cableWarnings = warnings.filter(w => isCableRelated(w.text));
+  const cableWarnings = warnings.filter((w) => isCableRelated(w.text));
 
   for (const warning of cableWarnings) {
     const coords = parseCoordinates(warning.text);
@@ -203,13 +232,18 @@ function processWarnings(warnings: NgaWarning[]): CableActivity {
         repairShips.push({
           id: shipId,
           name: shipName,
-          cableId: matchedCable?.id || 'unknown',
+          cableId: matchedCable?.id || "unknown",
           status: determineShipStatus(warning.text),
           lat,
           lon,
-          eta: determineShipStatus(warning.text) === 'on-station' ? 'On station' : 'TBD',
+          eta:
+            determineShipStatus(warning.text) === "on-station"
+              ? "On station"
+              : "TBD",
           operator: warning.authority || undefined,
-          note: warning.text.slice(0, 200) + (warning.text.length > 200 ? '...' : ''),
+          note:
+            warning.text.slice(0, 200) +
+            (warning.text.length > 200 ? "..." : ""),
         });
       }
     }
@@ -221,23 +255,24 @@ function processWarnings(warnings: NgaWarning[]): CableActivity {
 
       const isOperation = /OPERATIONS|LAYING|REPAIR|SURVEY/i.test(warning.text);
       const title = shipName
-        ? `${isOperation ? 'Cable Operations' : 'Cable Activity'}: ${shipName}`
+        ? `${isOperation ? "Cable Operations" : "Cable Activity"}: ${shipName}`
         : `NAVAREA ${warning.navArea} Cable Warning`;
 
       advisories.push({
         id: advisoryId,
-        cableId: matchedCable?.id || 'unknown',
+        cableId: matchedCable?.id || "unknown",
         title,
         severity: determineSeverity(warning.text),
-        description: warning.text.slice(0, 300) + (warning.text.length > 300 ? '...' : ''),
+        description:
+          warning.text.slice(0, 300) + (warning.text.length > 300 ? "..." : ""),
         reported: issueDate,
         lat,
         lon,
         impact: isOperation
-          ? 'Cable operations in progress. Vessels requested to give wide berth.'
+          ? "Cable operations in progress. Vessels requested to give wide berth."
           : matchedCable
             ? `Potential impact to ${matchedCable.name} cable route.`
-            : 'Navigation warning in effect for cable infrastructure.',
+            : "Navigation warning in effect for cable infrastructure.",
         repairEta: undefined,
       });
     }
@@ -248,14 +283,17 @@ function processWarnings(warnings: NgaWarning[]): CableActivity {
 
 function protoToNgaWarning(w: NavigationalWarning): NgaWarning {
   // Parse id format: "navArea-msgYear-msgNumber" (e.g., "IV-2024-42")
-  const idParts = w.id.split('-');
-  const navArea = idParts.length >= 3 ? idParts.slice(0, -2).join('-') : (idParts[0] || '');
-  const msgYear = idParts.length >= 2 ? Number(idParts[idParts.length - 2]) || 0 : 0;
-  const msgNumber = idParts.length >= 1 ? Number(idParts[idParts.length - 1]) || 0 : 0;
+  const idParts = w.id.split("-");
+  const navArea =
+    idParts.length >= 3 ? idParts.slice(0, -2).join("-") : idParts[0] || "";
+  const msgYear =
+    idParts.length >= 2 ? Number(idParts[idParts.length - 2]) || 0 : 0;
+  const msgNumber =
+    idParts.length >= 1 ? Number(idParts[idParts.length - 1]) || 0 : 0;
 
   // Parse area format: "navArea subregion" (e.g., "IV 21")
-  const areaParts = w.area.split(' ');
-  const subregion = areaParts.length > 1 ? areaParts.slice(1).join(' ') : '';
+  const areaParts = w.area.split(" ");
+  const subregion = areaParts.length > 1 ? areaParts.slice(1).join(" ") : "";
 
   return {
     msgYear,
@@ -263,34 +301,51 @@ function protoToNgaWarning(w: NavigationalWarning): NgaWarning {
     navArea,
     subregion,
     text: w.text,
-    status: 'A', // All warnings from the active endpoint have status A
-    issueDate: w.issuedAt ? formatNgaDate(w.issuedAt) : '',
+    status: "A", // All warnings from the active endpoint have status A
+    issueDate: w.issuedAt ? formatNgaDate(w.issuedAt) : "",
     authority: w.authority,
   };
 }
 
 function formatNgaDate(epochMs: number): string {
-  if (!epochMs) return '';
+  if (!epochMs) return "";
   const d = new Date(epochMs);
-  const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-  const day = String(d.getUTCDate()).padStart(2, '0');
-  const hours = String(d.getUTCHours()).padStart(2, '0');
-  const minutes = String(d.getUTCMinutes()).padStart(2, '0');
-  const month = months[d.getUTCMonth()] || 'JAN';
+  const months = [
+    "JAN",
+    "FEB",
+    "MAR",
+    "APR",
+    "MAY",
+    "JUN",
+    "JUL",
+    "AUG",
+    "SEP",
+    "OCT",
+    "NOV",
+    "DEC",
+  ];
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  const hours = String(d.getUTCHours()).padStart(2, "0");
+  const minutes = String(d.getUTCMinutes()).padStart(2, "0");
+  const month = months[d.getUTCMonth()] || "JAN";
   const year = d.getUTCFullYear();
   return `${day}${hours}${minutes}Z ${month} ${year}`;
 }
 
 export async function fetchCableActivity(): Promise<CableActivity> {
   try {
-    const response = await maritimeClient.listNavigationalWarnings({ area: '', pageSize: 0, cursor: '' });
+    const response = await maritimeClient.listNavigationalWarnings({
+      area: "",
+      pageSize: 0,
+      cursor: "",
+    });
     const warnings: NgaWarning[] = response.warnings.map(protoToNgaWarning);
 
     const activity = processWarnings(warnings);
 
     return activity;
   } catch (error) {
-    console.error('[CableActivity] Failed to fetch NGA warnings:', error);
+    console.error("[CableActivity] Failed to fetch NGA warnings:", error);
     return { advisories: [], repairShips: [] };
   }
 }

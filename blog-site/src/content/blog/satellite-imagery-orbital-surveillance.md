@@ -64,14 +64,14 @@ World Monitor maps nuclear facilities worldwide. Satellite imagery adds visual v
 
 The orbital layer becomes most powerful when combined with World Monitor's other 44 data layers:
 
-| Situation | Intelligence Layers | + Satellite Adds |
-|-----------|-------------------|------------------|
-| Military buildup | ADS-B + bases + news | Visual confirmation of troop/vehicle concentrations |
-| Pipeline attack | Infrastructure + conflict | Damage extent and repair activity |
-| Port blockade | AIS + maritime + news | Ship congestion visualization |
-| Nuclear activity | Nuclear facilities + CII | Construction changes, thermal signatures |
-| Protest camp | Conflict + Telegram OSINT | Crowd size estimation, barricade placement |
-| Natural disaster | USGS + NASA FIRMS | Damage footprint, flood extent |
+| Situation        | Intelligence Layers       | + Satellite Adds                                    |
+| ---------------- | ------------------------- | --------------------------------------------------- |
+| Military buildup | ADS-B + bases + news      | Visual confirmation of troop/vehicle concentrations |
+| Pipeline attack  | Infrastructure + conflict | Damage extent and repair activity                   |
+| Port blockade    | AIS + maritime + news     | Ship congestion visualization                       |
+| Nuclear activity | Nuclear facilities + CII  | Construction changes, thermal signatures            |
+| Protest camp     | Conflict + Telegram OSINT | Crowd size estimation, barricade placement          |
+| Natural disaster | USGS + NASA FIRMS         | Damage footprint, flood extent                      |
 
 No other free dashboard lets you overlay satellite imagery on top of real-time conflict data, military tracking, and AI-scored intelligence, in the same view.
 

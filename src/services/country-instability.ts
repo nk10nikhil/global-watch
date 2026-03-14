@@ -1,23 +1,52 @@
-import type { SocialUnrestEvent, MilitaryFlight, MilitaryVessel, ClusteredEvent, InternetOutage, AisDisruptionEvent, CyberThreat } from '@/types';
-import type { AirportDelayAlert } from '@/services/aviation';
-import type { SecurityAdvisory } from '@/services/security-advisories';
-import type { TemporalAnomaly } from '@/services/temporal-baseline';
-import { tokenizeForMatch, matchKeyword } from '@/utils/keyword-match';
-import { INTEL_HOTSPOTS, CONFLICT_ZONES, STRATEGIC_WATERWAYS } from '@/config/geo';
-import { CURATED_COUNTRIES, DEFAULT_BASELINE_RISK, DEFAULT_EVENT_MULTIPLIER, getHotspotCountries } from '@/config/countries';
-import { focalPointDetector } from './focal-point-detector';
-import type { ConflictEvent, UcdpConflictStatus, HapiConflictSummary } from './conflict';
-import type { CountryDisplacement } from '@/services/displacement';
-import type { ClimateAnomaly } from '@/services/climate';
-import type { GpsJamHex } from '@/services/gps-interference';
-import { getCountryAtCoordinates, iso3ToIso2Code, nameToCountryCode, getCountryNameByCode, matchCountryNamesInText, ME_STRIKE_BOUNDS, resolveCountryFromBounds } from './country-geometry';
+import type {
+  SocialUnrestEvent,
+  MilitaryFlight,
+  MilitaryVessel,
+  ClusteredEvent,
+  InternetOutage,
+  AisDisruptionEvent,
+  CyberThreat,
+} from "@/types";
+import type { AirportDelayAlert } from "@/services/aviation";
+import type { SecurityAdvisory } from "@/services/security-advisories";
+import type { TemporalAnomaly } from "@/services/temporal-baseline";
+import { tokenizeForMatch, matchKeyword } from "@/utils/keyword-match";
+import {
+  INTEL_HOTSPOTS,
+  CONFLICT_ZONES,
+  STRATEGIC_WATERWAYS,
+} from "@/config/geo";
+import {
+  CURATED_COUNTRIES,
+  DEFAULT_BASELINE_RISK,
+  DEFAULT_EVENT_MULTIPLIER,
+  getHotspotCountries,
+} from "@/config/countries";
+import { focalPointDetector } from "./focal-point-detector";
+import type {
+  ConflictEvent,
+  UcdpConflictStatus,
+  HapiConflictSummary,
+} from "./conflict";
+import type { CountryDisplacement } from "@/services/displacement";
+import type { ClimateAnomaly } from "@/services/climate";
+import type { GpsJamHex } from "@/services/gps-interference";
+import {
+  getCountryAtCoordinates,
+  iso3ToIso2Code,
+  nameToCountryCode,
+  getCountryNameByCode,
+  matchCountryNamesInText,
+  ME_STRIKE_BOUNDS,
+  resolveCountryFromBounds,
+} from "./country-geometry";
 
 export interface CountryScore {
   code: string;
   name: string;
   score: number;
-  level: 'low' | 'normal' | 'elevated' | 'high' | 'critical';
-  trend: 'rising' | 'stable' | 'falling';
+  level: "low" | "normal" | "elevated" | "high" | "critical";
+  trend: "rising" | "stable" | "falling";
   change24h: number;
   components: ComponentScores;
   lastUpdated: Date;
@@ -39,13 +68,20 @@ interface CountryData {
   militaryVessels: MilitaryVessel[];
   newsEvents: ClusteredEvent[];
   outages: InternetOutage[];
-  strikes: Array<{ severity: string; timestamp: number; lat: number; lon: number; title: string; id: string }>;
+  strikes: Array<{
+    severity: string;
+    timestamp: number;
+    lat: number;
+    lon: number;
+    title: string;
+    id: string;
+  }>;
   aviationDisruptions: AirportDelayAlert[];
   displacementOutflow: number;
   climateStress: number;
   orefAlertCount: number;
   orefHistoryCount24h: number;
-  advisoryMaxLevel: SecurityAdvisory['level'] | null;
+  advisoryMaxLevel: SecurityAdvisory["level"] | null;
   advisoryCount: number;
   advisorySources: Set<string>;
   gpsJammingHighCount: number;
@@ -62,7 +98,7 @@ interface CountryData {
   temporalAnomalyCriticalCount: number;
 }
 
-export { TIER1_COUNTRIES } from '@/config/countries';
+export { TIER1_COUNTRIES } from "@/config/countries";
 
 const LEARNING_DURATION_MS = 15 * 60 * 1000;
 let learningStartTime: number | null = null;
@@ -128,7 +164,11 @@ export function isInLearningMode(): boolean {
   return true;
 }
 
-export function getLearningProgress(): { inLearning: boolean; remainingMinutes: number; progress: number } {
+export function getLearningProgress(): {
+  inLearning: boolean;
+  remainingMinutes: number;
+  progress: number;
+} {
   if (hasCachedScoresAvailable || isLearningComplete) {
     return { inLearning: false, remainingMinutes: 0, progress: 100 };
   }
@@ -150,7 +190,11 @@ export function getLearningProgress(): { inLearning: boolean; remainingMinutes: 
 let processedCount = 0;
 let unmappedCount = 0;
 
-export function getIngestStats(): { processed: number; unmapped: number; rate: number } {
+export function getIngestStats(): {
+  processed: number;
+  unmapped: number;
+  rate: number;
+} {
   const rate = processedCount > 0 ? unmappedCount / processedCount : 0;
   return { processed: processedCount, unmapped: unmappedCount, rate };
 }
@@ -229,7 +273,7 @@ export type { CountryData };
 function normalizeCountryName(name: string): string | null {
   const tokens = tokenizeForMatch(name);
   for (const [code, cfg] of Object.entries(CURATED_COUNTRIES)) {
-    if (cfg.scoringKeywords.some(kw => matchKeyword(tokens, kw))) return code;
+    if (cfg.scoringKeywords.some((kw) => matchKeyword(tokens, kw))) return code;
   }
   return nameToCountryCode(name.toLowerCase());
 }
@@ -239,10 +283,13 @@ export function ingestProtestsForCII(events: SocialUnrestEvent[]): void {
   for (const e of events) {
     processedCount++;
     const code = normalizeCountryName(e.country);
-    if (!code) { unmappedCount++; continue; }
+    if (!code) {
+      unmappedCount++;
+      continue;
+    }
     if (!countryDataMap.has(code)) countryDataMap.set(code, initCountryData());
     countryDataMap.get(code)!.protests.push(e);
-    trackHotspotActivity(e.lat, e.lon, e.severity === 'high' ? 2 : 1);
+    trackHotspotActivity(e.lat, e.lon, e.severity === "high" ? 2 : 1);
   }
 }
 
@@ -251,34 +298,49 @@ export function ingestConflictsForCII(events: ConflictEvent[]): void {
   for (const e of events) {
     processedCount++;
     const code = normalizeCountryName(e.country);
-    if (!code) { unmappedCount++; continue; }
+    if (!code) {
+      unmappedCount++;
+      continue;
+    }
     if (!countryDataMap.has(code)) countryDataMap.set(code, initCountryData());
     countryDataMap.get(code)!.conflicts.push(e);
     trackHotspotActivity(e.lat, e.lon, e.fatalities > 0 ? 3 : 2);
   }
 }
 
-export function ingestUcdpForCII(classifications: Map<string, UcdpConflictStatus>): void {
+export function ingestUcdpForCII(
+  classifications: Map<string, UcdpConflictStatus>,
+): void {
   for (const [code, status] of classifications) {
     processedCount++;
     const iso2 = ensureISO2(code);
-    if (!iso2) { unmappedCount++; continue; }
+    if (!iso2) {
+      unmappedCount++;
+      continue;
+    }
     if (!countryDataMap.has(iso2)) countryDataMap.set(iso2, initCountryData());
     countryDataMap.get(iso2)!.ucdpStatus = status;
   }
 }
 
-export function ingestHapiForCII(summaries: Map<string, HapiConflictSummary>): void {
+export function ingestHapiForCII(
+  summaries: Map<string, HapiConflictSummary>,
+): void {
   for (const [code, summary] of summaries) {
     processedCount++;
     const iso2 = ensureISO2(code);
-    if (!iso2) { unmappedCount++; continue; }
+    if (!iso2) {
+      unmappedCount++;
+      continue;
+    }
     if (!countryDataMap.has(iso2)) countryDataMap.set(iso2, initCountryData());
     countryDataMap.get(iso2)!.hapiSummary = summary;
   }
 }
 
-export function ingestDisplacementForCII(countries: CountryDisplacement[]): void {
+export function ingestDisplacementForCII(
+  countries: CountryDisplacement[],
+): void {
   for (const data of countryDataMap.values()) {
     data.displacementOutflow = 0;
   }
@@ -294,7 +356,10 @@ export function ingestDisplacementForCII(countries: CountryDisplacement[]): void
     if (!code) {
       code = nameToCountryCode(c.name);
     }
-    if (!code) { unmappedCount++; continue; }
+    if (!code) {
+      unmappedCount++;
+      continue;
+    }
     if (!countryDataMap.has(code)) countryDataMap.set(code, initCountryData());
     const outflow = c.refugees + c.asylumSeekers;
     countryDataMap.get(code)!.displacementOutflow = outflow;
@@ -302,8 +367,10 @@ export function ingestDisplacementForCII(countries: CountryDisplacement[]): void
 }
 
 const ZONE_COUNTRY_MAP: Record<string, string[]> = {
-  'Ukraine': ['UA'], 'Middle East': ['IR', 'IL', 'SA', 'SY', 'YE'],
-  'South Asia': ['PK', 'IN'], 'Myanmar': ['MM'],
+  Ukraine: ["UA"],
+  "Middle East": ["IR", "IL", "SA", "SY", "YE"],
+  "South Asia": ["PK", "IN"],
+  Myanmar: ["MM"],
 };
 
 export function ingestClimateForCII(anomalies: ClimateAnomaly[]): void {
@@ -312,12 +379,16 @@ export function ingestClimateForCII(anomalies: ClimateAnomaly[]): void {
   }
 
   for (const a of anomalies) {
-    if (a.severity === 'normal') continue;
+    if (a.severity === "normal") continue;
     const codes = ZONE_COUNTRY_MAP[a.zone] || [];
     for (const code of codes) {
-      if (!countryDataMap.has(code)) countryDataMap.set(code, initCountryData());
-      const stress = a.severity === 'extreme' ? 15 : 8;
-      countryDataMap.get(code)!.climateStress = Math.max(countryDataMap.get(code)!.climateStress, stress);
+      if (!countryDataMap.has(code))
+        countryDataMap.set(code, initCountryData());
+      const stress = a.severity === "extreme" ? 15 : 8;
+      countryDataMap.get(code)!.climateStress = Math.max(
+        countryDataMap.get(code)!.climateStress,
+        stress,
+      );
     }
   }
 }
@@ -327,11 +398,20 @@ function getCountryFromLocation(lat: number, lon: number): string | null {
   return precise?.code ?? null;
 }
 
-function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+function haversineKm(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+): number {
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
@@ -341,7 +421,11 @@ export function resetHotspotActivity(): void {
   hotspotActivityMap.clear();
 }
 
-function trackHotspotActivity(lat: number, lon: number, weight: number = 1): void {
+function trackHotspotActivity(
+  lat: number,
+  lon: number,
+  weight: number = 1,
+): void {
   for (const hotspot of INTEL_HOTSPOTS) {
     const dist = haversineKm(lat, lon, hotspot.lat, hotspot.lon);
     if (dist < 150) {
@@ -357,7 +441,10 @@ function trackHotspotActivity(lat: number, lon: number, weight: number = 1): voi
     const dist = haversineKm(lat, lon, zoneLat, zoneLon);
     if (dist < 300) {
       const zoneCountries: Record<string, string[]> = {
-        ukraine: ['UA', 'RU'], gaza: ['IL', 'IR'], sudan: ['SA'], myanmar: ['MM'],
+        ukraine: ["UA", "RU"],
+        gaza: ["IL", "IR"],
+        sudan: ["SA"],
+        myanmar: ["MM"],
       };
       const countries = zoneCountries[zone.id] || [];
       for (const code of countries) {
@@ -370,8 +457,11 @@ function trackHotspotActivity(lat: number, lon: number, weight: number = 1): voi
     const dist = haversineKm(lat, lon, waterway.lat, waterway.lon);
     if (dist < 200) {
       const waterwayCountries: Record<string, string[]> = {
-        taiwan_strait: ['TW', 'CN'], hormuz_strait: ['IR', 'SA'],
-        bab_el_mandeb: ['YE', 'SA'], suez: ['IL'], bosphorus: ['TR'],
+        taiwan_strait: ["TW", "CN"],
+        hormuz_strait: ["IR", "SA"],
+        bab_el_mandeb: ["YE", "SA"],
+        suez: ["IL"],
+        bosphorus: ["TR"],
       };
       const countries = waterwayCountries[waterway.id] || [];
       for (const code of countries) {
@@ -387,15 +477,25 @@ function getHotspotBoost(countryCode: string): number {
   return Math.min(10, activity * 1.5);
 }
 
-export function ingestMilitaryForCII(flights: MilitaryFlight[], vessels: MilitaryVessel[]): void {
-  for (const [, data] of countryDataMap) { data.militaryFlights = []; data.militaryVessels = []; }
-  const foreignMilitaryByCountry = new Map<string, { flights: number; vessels: number }>();
+export function ingestMilitaryForCII(
+  flights: MilitaryFlight[],
+  vessels: MilitaryVessel[],
+): void {
+  for (const [, data] of countryDataMap) {
+    data.militaryFlights = [];
+    data.militaryVessels = [];
+  }
+  const foreignMilitaryByCountry = new Map<
+    string,
+    { flights: number; vessels: number }
+  >();
 
   for (const f of flights) {
     processedCount++;
     const operatorCode = normalizeCountryName(f.operatorCountry);
     if (operatorCode) {
-      if (!countryDataMap.has(operatorCode)) countryDataMap.set(operatorCode, initCountryData());
+      if (!countryDataMap.has(operatorCode))
+        countryDataMap.set(operatorCode, initCountryData());
       countryDataMap.get(operatorCode)!.militaryFlights.push(f);
     } else {
       unmappedCount++;
@@ -415,7 +515,8 @@ export function ingestMilitaryForCII(flights: MilitaryFlight[], vessels: Militar
     processedCount++;
     const operatorCode = normalizeCountryName(v.operatorCountry);
     if (operatorCode) {
-      if (!countryDataMap.has(operatorCode)) countryDataMap.set(operatorCode, initCountryData());
+      if (!countryDataMap.has(operatorCode))
+        countryDataMap.set(operatorCode, initCountryData());
       countryDataMap.get(operatorCode)!.militaryVessels.push(v);
     } else {
       unmappedCount++;
@@ -449,7 +550,7 @@ export function ingestNewsForCII(events: ClusteredEvent[]): void {
     const matched = new Set<string>();
 
     for (const [code, cfg] of Object.entries(CURATED_COUNTRIES)) {
-      if (cfg.scoringKeywords.some(kw => matchKeyword(tokens, kw))) {
+      if (cfg.scoringKeywords.some((kw) => matchKeyword(tokens, kw))) {
         matched.add(code);
       }
     }
@@ -459,7 +560,8 @@ export function ingestNewsForCII(events: ClusteredEvent[]): void {
     }
 
     for (const code of matched) {
-      if (!countryDataMap.has(code)) countryDataMap.set(code, initCountryData());
+      if (!countryDataMap.has(code))
+        countryDataMap.set(code, initCountryData());
       const cd = countryDataMap.get(code)!;
       if (!newsEventIndexMap.has(code)) newsEventIndexMap.set(code, new Map());
       const idx = newsEventIndexMap.get(code)!;
@@ -478,26 +580,36 @@ function coordsToBoundsCountry(lat: number, lon: number): string | null {
   return resolveCountryFromBounds(lat, lon, ME_STRIKE_BOUNDS);
 }
 
-export function ingestStrikesForCII(events: Array<{
-  id: string; category: string; severity: string;
-  latitude: number; longitude: number; timestamp: number;
-  title: string; locationName: string;
-}>): void {
+export function ingestStrikesForCII(
+  events: Array<{
+    id: string;
+    category: string;
+    severity: string;
+    latitude: number;
+    longitude: number;
+    timestamp: number;
+    title: string;
+    locationName: string;
+  }>,
+): void {
   for (const [, data] of countryDataMap) data.strikes = [];
 
   const seen = new Set<string>();
   for (const e of events) {
     if (seen.has(e.id)) continue;
     seen.add(e.id);
-    const code = getCountryAtCoordinates(e.latitude, e.longitude)?.code
-      ?? coordsToBoundsCountry(e.latitude, e.longitude);
-    if (!code || code === 'XX') continue;
+    const code =
+      getCountryAtCoordinates(e.latitude, e.longitude)?.code ??
+      coordsToBoundsCountry(e.latitude, e.longitude);
+    if (!code || code === "XX") continue;
     if (!countryDataMap.has(code)) countryDataMap.set(code, initCountryData());
     countryDataMap.get(code)!.strikes.push({
       severity: e.severity,
       timestamp: e.timestamp < 1e12 ? e.timestamp * 1000 : e.timestamp,
-      lat: e.latitude, lon: e.longitude,
-      title: e.title || e.locationName, id: e.id,
+      lat: e.latitude,
+      lon: e.longitude,
+      title: e.title || e.locationName,
+      id: e.id,
     });
   }
 }
@@ -507,22 +619,35 @@ export function ingestOutagesForCII(outages: InternetOutage[]): void {
   for (const o of outages) {
     processedCount++;
     const code = normalizeCountryName(o.country);
-    if (!code) { unmappedCount++; continue; }
+    if (!code) {
+      unmappedCount++;
+      continue;
+    }
     if (!countryDataMap.has(code)) countryDataMap.set(code, initCountryData());
     countryDataMap.get(code)!.outages.push(o);
   }
 }
 
-export function ingestOrefForCII(alertCount: number, historyCount24h: number): void {
-  if (!countryDataMap.has('IL')) countryDataMap.set('IL', initCountryData());
-  const data = countryDataMap.get('IL')!;
+export function ingestOrefForCII(
+  alertCount: number,
+  historyCount24h: number,
+): void {
+  if (!countryDataMap.has("IL")) countryDataMap.set("IL", initCountryData());
+  const data = countryDataMap.get("IL")!;
   data.orefAlertCount = alertCount;
   data.orefHistoryCount24h = historyCount24h;
 }
 
 function getOrefBlendBoost(code: string, data: CountryData): number {
-  if (code !== 'IL') return 0;
-  return (data.orefAlertCount > 0 ? 15 : 0) + (data.orefHistoryCount24h >= 10 ? 10 : data.orefHistoryCount24h >= 3 ? 5 : 0);
+  if (code !== "IL") return 0;
+  return (
+    (data.orefAlertCount > 0 ? 15 : 0) +
+    (data.orefHistoryCount24h >= 10
+      ? 10
+      : data.orefHistoryCount24h >= 3
+        ? 5
+        : 0)
+  );
 }
 
 export function ingestAviationForCII(alerts: AirportDelayAlert[]): void {
@@ -530,14 +655,23 @@ export function ingestAviationForCII(alerts: AirportDelayAlert[]): void {
   for (const a of alerts) {
     processedCount++;
     const code = normalizeCountryName(a.country);
-    if (!code) { unmappedCount++; continue; }
+    if (!code) {
+      unmappedCount++;
+      continue;
+    }
     if (!countryDataMap.has(code)) countryDataMap.set(code, initCountryData());
     countryDataMap.get(code)!.aviationDisruptions.push(a);
   }
 }
 
-const TRAVEL_ADVISORY_SOURCES = new Set(['US', 'AU', 'UK', 'NZ']);
-const ADVISORY_LEVEL_RANK: Record<string, number> = { 'do-not-travel': 4, 'reconsider': 3, 'caution': 2, 'normal': 1, 'info': 0 };
+const TRAVEL_ADVISORY_SOURCES = new Set(["US", "AU", "UK", "NZ"]);
+const ADVISORY_LEVEL_RANK: Record<string, number> = {
+  "do-not-travel": 4,
+  reconsider: 3,
+  caution: 2,
+  normal: 1,
+  info: 0,
+};
 
 export function ingestAdvisoriesForCII(advisories: SecurityAdvisory[]): void {
   for (const data of countryDataMap.values()) {
@@ -546,8 +680,12 @@ export function ingestAdvisoriesForCII(advisories: SecurityAdvisory[]): void {
     data.advisorySources = new Set();
   }
 
-  const travelAdvisories = advisories.filter(a =>
-    a.country && TRAVEL_ADVISORY_SOURCES.has(a.sourceCountry) && a.level && a.level !== 'info'
+  const travelAdvisories = advisories.filter(
+    (a) =>
+      a.country &&
+      TRAVEL_ADVISORY_SOURCES.has(a.sourceCountry) &&
+      a.level &&
+      a.level !== "info",
   );
 
   for (const a of travelAdvisories) {
@@ -556,7 +694,7 @@ export function ingestAdvisoriesForCII(advisories: SecurityAdvisory[]): void {
     const data = countryDataMap.get(code)!;
     data.advisoryCount++;
     data.advisorySources.add(a.sourceCountry);
-    const currentRank = ADVISORY_LEVEL_RANK[data.advisoryMaxLevel || ''] || 0;
+    const currentRank = ADVISORY_LEVEL_RANK[data.advisoryMaxLevel || ""] || 0;
     const newRank = ADVISORY_LEVEL_RANK[a.level!] || 0;
     if (newRank > currentRank) data.advisoryMaxLevel = a.level!;
   }
@@ -566,10 +704,17 @@ function getAdvisoryBoost(data: CountryData): number {
   if (!data.advisoryMaxLevel) return 0;
   let boost = 0;
   switch (data.advisoryMaxLevel) {
-    case 'do-not-travel': boost = 15; break;
-    case 'reconsider': boost = 10; break;
-    case 'caution': boost = 5; break;
-    default: return 0;
+    case "do-not-travel":
+      boost = 15;
+      break;
+    case "reconsider":
+      boost = 10;
+      break;
+    case "caution":
+      boost = 5;
+      break;
+    default:
+      return 0;
   }
   if (data.advisorySources.size >= 3) boost += 5;
   else if (data.advisorySources.size >= 2) boost += 3;
@@ -577,23 +722,28 @@ function getAdvisoryBoost(data: CountryData): number {
 }
 
 function getAdvisoryFloor(data: CountryData): number {
-  if (data.advisoryMaxLevel === 'do-not-travel') return 60;
-  if (data.advisoryMaxLevel === 'reconsider') return 50;
+  if (data.advisoryMaxLevel === "do-not-travel") return 60;
+  if (data.advisoryMaxLevel === "reconsider") return 50;
   return 0;
 }
 
 function getSupplementalSignalBoost(data: CountryData): number {
   const aisBoost = Math.min(
     10,
-    data.aisDisruptionHighCount * 2.5 + data.aisDisruptionElevatedCount * 1.5 + data.aisDisruptionLowCount * 0.5,
+    data.aisDisruptionHighCount * 2.5 +
+      data.aisDisruptionElevatedCount * 1.5 +
+      data.aisDisruptionLowCount * 0.5,
   );
   const fireBoost = Math.min(
     8,
-    data.satelliteFireHighCount * 1.5 + Math.min(20, data.satelliteFireCount) * 0.25,
+    data.satelliteFireHighCount * 1.5 +
+      Math.min(20, data.satelliteFireCount) * 0.25,
   );
   const cyberBoost = Math.min(
     12,
-    data.cyberThreatCriticalCount * 3 + data.cyberThreatHighCount * 1.8 + data.cyberThreatMediumCount * 0.9,
+    data.cyberThreatCriticalCount * 3 +
+      data.cyberThreatHighCount * 1.8 +
+      data.cyberThreatMediumCount * 0.9,
   );
   const temporalBoost = Math.min(
     6,
@@ -624,20 +774,25 @@ export function ingestGpsJammingForCII(hexes: GpsJamHex[]): void {
 
     if (!countryDataMap.has(code)) countryDataMap.set(code, initCountryData());
     const data = countryDataMap.get(code)!;
-    if (hex.level === 'high') data.gpsJammingHighCount++;
+    if (hex.level === "high") data.gpsJammingHighCount++;
     else data.gpsJammingMediumCount++;
   }
 }
 
-function resolveCountryForSignal(countryHint: string | undefined, lat: number, lon: number): string | null {
+function resolveCountryForSignal(
+  countryHint: string | undefined,
+  lat: number,
+  lon: number,
+): string | null {
   if (countryHint) {
     const iso2 = ensureISO2(countryHint);
     if (iso2) return iso2;
     const fromName = normalizeCountryName(countryHint);
     if (fromName) return fromName;
   }
-  return getCountryAtCoordinates(lat, lon)?.code
-    ?? coordsToBoundsCountry(lat, lon);
+  return (
+    getCountryAtCoordinates(lat, lon)?.code ?? coordsToBoundsCountry(lat, lon)
+  );
 }
 
 export function ingestAisDisruptionsForCII(events: AisDisruptionEvent[]): void {
@@ -650,22 +805,27 @@ export function ingestAisDisruptionsForCII(events: AisDisruptionEvent[]): void {
   for (const e of events) {
     processedCount++;
     const code = resolveCountryForSignal(e.region, e.lat, e.lon);
-    if (!code) { unmappedCount++; continue; }
+    if (!code) {
+      unmappedCount++;
+      continue;
+    }
     if (!countryDataMap.has(code)) countryDataMap.set(code, initCountryData());
     const data = countryDataMap.get(code)!;
-    if (e.severity === 'high') data.aisDisruptionHighCount++;
-    else if (e.severity === 'elevated') data.aisDisruptionElevatedCount++;
+    if (e.severity === "high") data.aisDisruptionHighCount++;
+    else if (e.severity === "elevated") data.aisDisruptionElevatedCount++;
     else data.aisDisruptionLowCount++;
   }
 }
 
-export function ingestSatelliteFiresForCII(fires: Array<{
-  lat: number;
-  lon: number;
-  brightness: number;
-  frp: number;
-  region?: string;
-}>): void {
+export function ingestSatelliteFiresForCII(
+  fires: Array<{
+    lat: number;
+    lon: number;
+    brightness: number;
+    frp: number;
+    region?: string;
+  }>,
+): void {
   for (const [, data] of countryDataMap) {
     data.satelliteFireCount = 0;
     data.satelliteFireHighCount = 0;
@@ -674,7 +834,10 @@ export function ingestSatelliteFiresForCII(fires: Array<{
   for (const fire of fires) {
     processedCount++;
     const code = resolveCountryForSignal(fire.region, fire.lat, fire.lon);
-    if (!code) { unmappedCount++; continue; }
+    if (!code) {
+      unmappedCount++;
+      continue;
+    }
     if (!countryDataMap.has(code)) countryDataMap.set(code, initCountryData());
     const data = countryDataMap.get(code)!;
     data.satelliteFireCount++;
@@ -693,17 +856,26 @@ export function ingestCyberThreatsForCII(threats: CyberThreat[]): void {
 
   for (const threat of threats) {
     processedCount++;
-    const code = resolveCountryForSignal(threat.country, threat.lat, threat.lon);
-    if (!code) { unmappedCount++; continue; }
+    const code = resolveCountryForSignal(
+      threat.country,
+      threat.lat,
+      threat.lon,
+    );
+    if (!code) {
+      unmappedCount++;
+      continue;
+    }
     if (!countryDataMap.has(code)) countryDataMap.set(code, initCountryData());
     const data = countryDataMap.get(code)!;
-    if (threat.severity === 'critical') data.cyberThreatCriticalCount++;
-    else if (threat.severity === 'high') data.cyberThreatHighCount++;
-    else if (threat.severity === 'medium') data.cyberThreatMediumCount++;
+    if (threat.severity === "critical") data.cyberThreatCriticalCount++;
+    else if (threat.severity === "high") data.cyberThreatHighCount++;
+    else if (threat.severity === "medium") data.cyberThreatMediumCount++;
   }
 }
 
-export function ingestTemporalAnomaliesForCII(anomalies: TemporalAnomaly[]): void {
+export function ingestTemporalAnomaliesForCII(
+  anomalies: TemporalAnomaly[],
+): void {
   for (const [, data] of countryDataMap) {
     data.temporalAnomalyCount = 0;
     data.temporalAnomalyCriticalCount = 0;
@@ -711,29 +883,38 @@ export function ingestTemporalAnomaliesForCII(anomalies: TemporalAnomaly[]): voi
 
   for (const anomaly of anomalies) {
     const region = anomaly.region.trim();
-    if (!region || region.toLowerCase() === 'global') continue;
+    if (!region || region.toLowerCase() === "global") continue;
     processedCount++;
 
     const code = ensureISO2(region) || normalizeCountryName(region);
-    if (!code) { unmappedCount++; continue; }
+    if (!code) {
+      unmappedCount++;
+      continue;
+    }
     if (!countryDataMap.has(code)) countryDataMap.set(code, initCountryData());
     const data = countryDataMap.get(code)!;
     data.temporalAnomalyCount++;
-    if (anomaly.severity === 'critical') data.temporalAnomalyCriticalCount++;
+    if (anomaly.severity === "critical") data.temporalAnomalyCriticalCount++;
   }
 }
 
 function calcUnrestScore(data: CountryData, countryCode: string): number {
   const protestCount = data.protests.length;
-  const multiplier = CURATED_COUNTRIES[countryCode]?.eventMultiplier ?? DEFAULT_EVENT_MULTIPLIER;
+  const multiplier =
+    CURATED_COUNTRIES[countryCode]?.eventMultiplier ?? DEFAULT_EVENT_MULTIPLIER;
 
   let baseScore = 0;
   let fatalityBoost = 0;
   let severityBoost = 0;
 
   if (protestCount > 0) {
-    const fatalities = data.protests.reduce((sum, p) => sum + (p.fatalities || 0), 0);
-    const highSeverity = data.protests.filter(p => p.severity === 'high').length;
+    const fatalities = data.protests.reduce(
+      (sum, p) => sum + (p.fatalities || 0),
+      0,
+    );
+    const highSeverity = data.protests.filter(
+      (p) => p.severity === "high",
+    ).length;
 
     const isHighVolume = multiplier < 0.7;
     const adjustedCount = isHighVolume
@@ -748,25 +929,39 @@ function calcUnrestScore(data: CountryData, countryCode: string): number {
 
   let outageBoost = 0;
   if (data.outages.length > 0) {
-    const totalOutages = data.outages.filter(o => o.severity === 'total').length;
-    const majorOutages = data.outages.filter(o => o.severity === 'major').length;
-    const partialOutages = data.outages.filter(o => o.severity === 'partial').length;
+    const totalOutages = data.outages.filter(
+      (o) => o.severity === "total",
+    ).length;
+    const majorOutages = data.outages.filter(
+      (o) => o.severity === "major",
+    ).length;
+    const partialOutages = data.outages.filter(
+      (o) => o.severity === "partial",
+    ).length;
 
-    outageBoost = Math.min(50, totalOutages * 30 + majorOutages * 15 + partialOutages * 5);
+    outageBoost = Math.min(
+      50,
+      totalOutages * 30 + majorOutages * 15 + partialOutages * 5,
+    );
   }
 
   return Math.min(100, baseScore + fatalityBoost + severityBoost + outageBoost);
 }
 
-function calcNewsConflictFloor(data: CountryData, multiplier: number, now = Date.now()): number {
+function calcNewsConflictFloor(
+  data: CountryData,
+  multiplier: number,
+  now = Date.now(),
+): number {
   const SIX_HOURS = 6 * 60 * 60 * 1000;
   const cutoff = now - SIX_HOURS;
 
-  const recentConflictNews = data.newsEvents.filter(e =>
-    e.isAlert &&
-    e.threat &&
-    (e.threat.category === 'conflict' || e.threat.category === 'military') &&
-    e.firstSeen.getTime() >= cutoff
+  const recentConflictNews = data.newsEvents.filter(
+    (e) =>
+      e.isAlert &&
+      e.threat &&
+      (e.threat.category === "conflict" || e.threat.category === "military") &&
+      e.firstSeen.getTime() >= cutoff,
   );
 
   if (recentConflictNews.length < 2) return 0;
@@ -789,18 +984,30 @@ function calcNewsConflictFloor(data: CountryData, multiplier: number, now = Date
 
 function calcConflictScore(data: CountryData, countryCode: string): number {
   const events = data.conflicts;
-  const multiplier = CURATED_COUNTRIES[countryCode]?.eventMultiplier ?? DEFAULT_EVENT_MULTIPLIER;
+  const multiplier =
+    CURATED_COUNTRIES[countryCode]?.eventMultiplier ?? DEFAULT_EVENT_MULTIPLIER;
 
   let acledScore = 0;
   if (events.length > 0) {
-    const battleCount = events.filter(e => e.eventType === 'battle').length;
-    const explosionCount = events.filter(e => e.eventType === 'explosion' || e.eventType === 'remote_violence').length;
-    const civilianCount = events.filter(e => e.eventType === 'violence_against_civilians').length;
+    const battleCount = events.filter((e) => e.eventType === "battle").length;
+    const explosionCount = events.filter(
+      (e) => e.eventType === "explosion" || e.eventType === "remote_violence",
+    ).length;
+    const civilianCount = events.filter(
+      (e) => e.eventType === "violence_against_civilians",
+    ).length;
     const totalFatalities = events.reduce((sum, e) => sum + e.fatalities, 0);
 
-    const eventScore = Math.min(50, (battleCount * 3 + explosionCount * 4 + civilianCount * 5) * multiplier);
-    const fatalityScore = Math.min(40, Math.sqrt(totalFatalities) * 5 * multiplier);
-    const civilianBoost = civilianCount > 0 ? Math.min(10, civilianCount * 3) : 0;
+    const eventScore = Math.min(
+      50,
+      (battleCount * 3 + explosionCount * 4 + civilianCount * 5) * multiplier,
+    );
+    const fatalityScore = Math.min(
+      40,
+      Math.sqrt(totalFatalities) * 5 * multiplier,
+    );
+    const civilianBoost =
+      civilianCount > 0 ? Math.min(10, civilianCount * 3) : 0;
     acledScore = eventScore + fatalityScore + civilianBoost;
   }
 
@@ -817,29 +1024,37 @@ function calcConflictScore(data: CountryData, countryCode: string): number {
 
   let strikeBoost = 0;
   const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-  const recentStrikes = data.strikes.filter(s => s.timestamp >= sevenDaysAgo);
+  const recentStrikes = data.strikes.filter((s) => s.timestamp >= sevenDaysAgo);
   if (recentStrikes.length > 0) {
-    const highCount = recentStrikes.filter(s =>
-      s.severity.toLowerCase() === 'high' || s.severity.toLowerCase() === 'critical'
+    const highCount = recentStrikes.filter(
+      (s) =>
+        s.severity.toLowerCase() === "high" ||
+        s.severity.toLowerCase() === "critical",
     ).length;
     strikeBoost = Math.min(50, recentStrikes.length * 3 + highCount * 5);
   }
 
   let orefBoost = 0;
-  if (countryCode === 'IL' && data.orefAlertCount > 0) {
+  if (countryCode === "IL" && data.orefAlertCount > 0) {
     orefBoost = 25 + Math.min(25, data.orefAlertCount * 5);
   }
 
-  return Math.min(100, Math.max(acledScore, hapiFallback, newsFloor) + strikeBoost + orefBoost);
+  return Math.min(
+    100,
+    Math.max(acledScore, hapiFallback, newsFloor) + strikeBoost + orefBoost,
+  );
 }
 
 function getUcdpFloor(data: CountryData): number {
   const status = data.ucdpStatus;
   if (!status) return 0;
   switch (status.intensity) {
-    case 'war': return 70;
-    case 'minor': return 50;
-    case 'none': return 0;
+    case "war":
+      return 70;
+    case "minor":
+      return 50;
+    case "none":
+      return 0;
   }
 }
 
@@ -851,24 +1066,34 @@ function calcSecurityScore(data: CountryData): number {
 
   let aviationScore = 0;
   for (const a of data.aviationDisruptions) {
-    if (a.delayType === 'closure') aviationScore += 20;
-    else if (a.severity === 'severe') aviationScore += 15;
-    else if (a.severity === 'major') aviationScore += 10;
-    else if (a.severity === 'moderate') aviationScore += 5;
+    if (a.delayType === "closure") aviationScore += 20;
+    else if (a.severity === "severe") aviationScore += 15;
+    else if (a.severity === "major") aviationScore += 10;
+    else if (a.severity === "moderate") aviationScore += 5;
   }
   aviationScore = Math.min(40, aviationScore);
 
-  const gpsJammingScore = Math.min(35, data.gpsJammingHighCount * 5 + data.gpsJammingMediumCount * 2);
+  const gpsJammingScore = Math.min(
+    35,
+    data.gpsJammingHighCount * 5 + data.gpsJammingMediumCount * 2,
+  );
 
-  return Math.min(100, flightScore + vesselScore + aviationScore + gpsJammingScore);
+  return Math.min(
+    100,
+    flightScore + vesselScore + aviationScore + gpsJammingScore,
+  );
 }
 
 function calcInformationScore(data: CountryData, countryCode: string): number {
   const count = data.newsEvents.length;
   if (count === 0) return 0;
 
-  const multiplier = CURATED_COUNTRIES[countryCode]?.eventMultiplier ?? DEFAULT_EVENT_MULTIPLIER;
-  const velocitySum = data.newsEvents.reduce((sum, e) => sum + (e.velocity?.sourcesPerHour || 0), 0);
+  const multiplier =
+    CURATED_COUNTRIES[countryCode]?.eventMultiplier ?? DEFAULT_EVENT_MULTIPLIER;
+  const velocitySum = data.newsEvents.reduce(
+    (sum, e) => sum + (e.velocity?.sourcesPerHour || 0),
+    0,
+  );
   const avgVelocity = velocitySum / count;
 
   const isHighVolume = multiplier < 0.7;
@@ -879,30 +1104,33 @@ function calcInformationScore(data: CountryData, countryCode: string): number {
   const baseScore = Math.min(40, adjustedCount * 5);
 
   const velocityThreshold = isHighVolume ? 5 : 2;
-  const velocityBoost = avgVelocity > velocityThreshold
-    ? Math.min(40, (avgVelocity - velocityThreshold) * 10 * multiplier)
-    : 0;
+  const velocityBoost =
+    avgVelocity > velocityThreshold
+      ? Math.min(40, (avgVelocity - velocityThreshold) * 10 * multiplier)
+      : 0;
 
-  const alertBoost = data.newsEvents.some(e => e.isAlert) ? 20 * multiplier : 0;
+  const alertBoost = data.newsEvents.some((e) => e.isAlert)
+    ? 20 * multiplier
+    : 0;
 
   return Math.min(100, baseScore + velocityBoost + alertBoost);
 }
 
-function getLevel(score: number): CountryScore['level'] {
-  if (score >= 81) return 'critical';
-  if (score >= 66) return 'high';
-  if (score >= 51) return 'elevated';
-  if (score >= 31) return 'normal';
-  return 'low';
+function getLevel(score: number): CountryScore["level"] {
+  if (score >= 81) return "critical";
+  if (score >= 66) return "high";
+  if (score >= 51) return "elevated";
+  if (score >= 31) return "normal";
+  return "low";
 }
 
-function getTrend(code: string, current: number): CountryScore['trend'] {
+function getTrend(code: string, current: number): CountryScore["trend"] {
   const prev = previousScores.get(code);
-  if (prev === undefined) return 'stable';
+  if (prev === undefined) return "stable";
   const diff = current - prev;
-  if (diff >= 5) return 'rising';
-  if (diff <= -5) return 'falling';
-  return 'stable';
+  if (diff >= 5) return "rising";
+  if (diff <= -5) return "falling";
+  return "stable";
 }
 
 export function calculateCII(): CountryScore[] {
@@ -915,9 +1143,11 @@ export function calculateCII(): CountryScore[] {
   ]);
 
   for (const code of countryCodes) {
-    const name = CURATED_COUNTRIES[code]?.name || getCountryNameByCode(code) || code;
+    const name =
+      CURATED_COUNTRIES[code]?.name || getCountryNameByCode(code) || code;
     const data = countryDataMap.get(code) || initCountryData();
-    const baselineRisk = CURATED_COUNTRIES[code]?.baselineRisk ?? DEFAULT_BASELINE_RISK;
+    const baselineRisk =
+      CURATED_COUNTRIES[code]?.baselineRisk ?? DEFAULT_BASELINE_RISK;
 
     const components: ComponentScores = {
       unrest: Math.round(calcUnrestScore(data, code)),
@@ -926,25 +1156,40 @@ export function calculateCII(): CountryScore[] {
       information: Math.round(calcInformationScore(data, code)),
     };
 
-    const eventScore = components.unrest * 0.25 + components.conflict * 0.30 + components.security * 0.20 + components.information * 0.25;
+    const eventScore =
+      components.unrest * 0.25 +
+      components.conflict * 0.3 +
+      components.security * 0.2 +
+      components.information * 0.25;
 
     const hotspotBoost = getHotspotBoost(code);
-    const newsUrgencyBoost = components.information >= 70 ? 5
-      : components.information >= 50 ? 3
-      : 0;
+    const newsUrgencyBoost =
+      components.information >= 70 ? 5 : components.information >= 50 ? 3 : 0;
     const focalUrgency = focalUrgencies.get(code);
-    const focalBoost = focalUrgency === 'critical' ? 8
-      : focalUrgency === 'elevated' ? 4
-      : 0;
+    const focalBoost =
+      focalUrgency === "critical" ? 8 : focalUrgency === "elevated" ? 4 : 0;
 
-    const displacementBoost = data.displacementOutflow >= 1_000_000 ? 8
-      : data.displacementOutflow >= 100_000 ? 4
-      : 0;
+    const displacementBoost =
+      data.displacementOutflow >= 1_000_000
+        ? 8
+        : data.displacementOutflow >= 100_000
+          ? 4
+          : 0;
     const climateBoost = data.climateStress;
 
     const advisoryBoost = getAdvisoryBoost(data);
     const supplementalSignalBoost = getSupplementalSignalBoost(data);
-    const blendedScore = baselineRisk * 0.4 + eventScore * 0.6 + hotspotBoost + newsUrgencyBoost + focalBoost + displacementBoost + climateBoost + getOrefBlendBoost(code, data) + advisoryBoost + supplementalSignalBoost;
+    const blendedScore =
+      baselineRisk * 0.4 +
+      eventScore * 0.6 +
+      hotspotBoost +
+      newsUrgencyBoost +
+      focalBoost +
+      displacementBoost +
+      climateBoost +
+      getOrefBlendBoost(code, data) +
+      advisoryBoost +
+      supplementalSignalBoost;
 
     const floor = Math.max(getUcdpFloor(data), getAdvisoryFloor(data));
     const score = Math.round(Math.min(100, Math.max(floor, blendedScore)));
@@ -976,7 +1221,8 @@ export function getCountryScore(code: string): number | null {
   const data = countryDataMap.get(code);
   if (!data) return null;
 
-  const baselineRisk = CURATED_COUNTRIES[code]?.baselineRisk ?? DEFAULT_BASELINE_RISK;
+  const baselineRisk =
+    CURATED_COUNTRIES[code]?.baselineRisk ?? DEFAULT_BASELINE_RISK;
   const components: ComponentScores = {
     unrest: calcUnrestScore(data, code),
     conflict: calcConflictScore(data, code),
@@ -984,22 +1230,37 @@ export function getCountryScore(code: string): number | null {
     information: calcInformationScore(data, code),
   };
 
-  const eventScore = components.unrest * 0.25 + components.conflict * 0.30 + components.security * 0.20 + components.information * 0.25;
+  const eventScore =
+    components.unrest * 0.25 +
+    components.conflict * 0.3 +
+    components.security * 0.2 +
+    components.information * 0.25;
   const hotspotBoost = getHotspotBoost(code);
-  const newsUrgencyBoost = components.information >= 70 ? 5
-    : components.information >= 50 ? 3
-    : 0;
+  const newsUrgencyBoost =
+    components.information >= 70 ? 5 : components.information >= 50 ? 3 : 0;
   const focalUrgency = focalPointDetector.getCountryUrgency(code);
-  const focalBoost = focalUrgency === 'critical' ? 8
-    : focalUrgency === 'elevated' ? 4
-    : 0;
-  const displacementBoost = data.displacementOutflow >= 1_000_000 ? 8
-    : data.displacementOutflow >= 100_000 ? 4
-    : 0;
+  const focalBoost =
+    focalUrgency === "critical" ? 8 : focalUrgency === "elevated" ? 4 : 0;
+  const displacementBoost =
+    data.displacementOutflow >= 1_000_000
+      ? 8
+      : data.displacementOutflow >= 100_000
+        ? 4
+        : 0;
   const climateBoost = data.climateStress;
   const advisoryBoost = getAdvisoryBoost(data);
   const supplementalSignalBoost = getSupplementalSignalBoost(data);
-  const blendedScore = baselineRisk * 0.4 + eventScore * 0.6 + hotspotBoost + newsUrgencyBoost + focalBoost + displacementBoost + climateBoost + getOrefBlendBoost(code, data) + advisoryBoost + supplementalSignalBoost;
+  const blendedScore =
+    baselineRisk * 0.4 +
+    eventScore * 0.6 +
+    hotspotBoost +
+    newsUrgencyBoost +
+    focalBoost +
+    displacementBoost +
+    climateBoost +
+    getOrefBlendBoost(code, data) +
+    advisoryBoost +
+    supplementalSignalBoost;
 
   const floor = Math.max(getUcdpFloor(data), getAdvisoryFloor(data));
   return Math.round(Math.min(100, Math.max(floor, blendedScore)));

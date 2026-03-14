@@ -1,61 +1,61 @@
-import { getApiBaseUrl, isDesktopRuntime } from './runtime';
-import { invokeTauri } from './tauri-bridge';
+import { getApiBaseUrl, isDesktopRuntime } from "./runtime";
+import { invokeTauri } from "./tauri-bridge";
 
 export type RuntimeSecretKey =
-  | 'GROQ_API_KEY'
-  | 'OPENROUTER_API_KEY'
-  | 'TAVILY_API_KEYS'
-  | 'BRAVE_API_KEYS'
-  | 'SERPAPI_API_KEYS'
-  | 'FRED_API_KEY'
-  | 'EIA_API_KEY'
-  | 'CLOUDFLARE_API_TOKEN'
-  | 'ACLED_ACCESS_TOKEN'
-  | 'URLHAUS_AUTH_KEY'
-  | 'OTX_API_KEY'
-  | 'ABUSEIPDB_API_KEY'
-  | 'WINGBITS_API_KEY'
-  | 'WS_RELAY_URL'
-  | 'VITE_OPENSKY_RELAY_URL'
-  | 'OPENSKY_CLIENT_ID'
-  | 'OPENSKY_CLIENT_SECRET'
-  | 'AISSTREAM_API_KEY'
-  | 'FINNHUB_API_KEY'
-  | 'NASA_FIRMS_API_KEY'
-  | 'UCDP_ACCESS_TOKEN'
-  | 'OLLAMA_API_URL'
-  | 'OLLAMA_MODEL'
-  | 'WORLDMONITOR_API_KEY'
-  | 'WTO_API_KEY'
-  | 'AVIATIONSTACK_API'
-  | 'ICAO_API_KEY';
+  | "GROQ_API_KEY"
+  | "OPENROUTER_API_KEY"
+  | "TAVILY_API_KEYS"
+  | "BRAVE_API_KEYS"
+  | "SERPAPI_API_KEYS"
+  | "FRED_API_KEY"
+  | "EIA_API_KEY"
+  | "CLOUDFLARE_API_TOKEN"
+  | "ACLED_ACCESS_TOKEN"
+  | "URLHAUS_AUTH_KEY"
+  | "OTX_API_KEY"
+  | "ABUSEIPDB_API_KEY"
+  | "WINGBITS_API_KEY"
+  | "WS_RELAY_URL"
+  | "VITE_OPENSKY_RELAY_URL"
+  | "OPENSKY_CLIENT_ID"
+  | "OPENSKY_CLIENT_SECRET"
+  | "AISSTREAM_API_KEY"
+  | "FINNHUB_API_KEY"
+  | "NASA_FIRMS_API_KEY"
+  | "UCDP_ACCESS_TOKEN"
+  | "OLLAMA_API_URL"
+  | "OLLAMA_MODEL"
+  | "WORLDMONITOR_API_KEY"
+  | "WTO_API_KEY"
+  | "AVIATIONSTACK_API"
+  | "ICAO_API_KEY";
 
 export type RuntimeFeatureId =
-  | 'aiGroq'
-  | 'aiOpenRouter'
-  | 'stockNewsSearchTavily'
-  | 'stockNewsSearchBrave'
-  | 'stockNewsSearchSerpApi'
-  | 'economicFred'
-  | 'energyEia'
-  | 'internetOutages'
-  | 'acledConflicts'
-  | 'abuseChThreatIntel'
-  | 'alienvaultOtxThreatIntel'
-  | 'abuseIpdbThreatIntel'
-  | 'wingbitsEnrichment'
-  | 'aisRelay'
-  | 'openskyRelay'
-  | 'militaryFlights'
-  | 'finnhubMarkets'
-  | 'nasaFirms'
-  | 'aiOllama'
-  | 'wtoTrade'
-  | 'supplyChain'
-  | 'newsPerFeedFallback'
-  | 'aviationStack'
-  | 'ucdpConflicts'
-  | 'icaoNotams';
+  | "aiGroq"
+  | "aiOpenRouter"
+  | "stockNewsSearchTavily"
+  | "stockNewsSearchBrave"
+  | "stockNewsSearchSerpApi"
+  | "economicFred"
+  | "energyEia"
+  | "internetOutages"
+  | "acledConflicts"
+  | "abuseChThreatIntel"
+  | "alienvaultOtxThreatIntel"
+  | "abuseIpdbThreatIntel"
+  | "wingbitsEnrichment"
+  | "aisRelay"
+  | "openskyRelay"
+  | "militaryFlights"
+  | "finnhubMarkets"
+  | "nasaFirms"
+  | "aiOllama"
+  | "wtoTrade"
+  | "supplyChain"
+  | "newsPerFeedFallback"
+  | "aviationStack"
+  | "ucdpConflicts"
+  | "icaoNotams";
 
 export interface RuntimeFeatureDefinition {
   id: RuntimeFeatureId;
@@ -68,7 +68,7 @@ export interface RuntimeFeatureDefinition {
 
 export interface RuntimeSecretState {
   value: string;
-  source: 'env' | 'vault';
+  source: "env" | "vault";
 }
 
 export interface RuntimeConfig {
@@ -76,7 +76,7 @@ export interface RuntimeConfig {
   secrets: Partial<Record<RuntimeSecretKey, RuntimeSecretState>>;
 }
 
-const TOGGLES_STORAGE_KEY = 'worldmonitor-runtime-feature-toggles';
+const TOGGLES_STORAGE_KEY = "worldmonitor-runtime-feature-toggles";
 function getSidecarEnvUpdateUrl(): string {
   return `${getApiBaseUrl()}/api/local-env-update`;
 }
@@ -117,194 +117,220 @@ const defaultToggles: Record<RuntimeFeatureId, boolean> = {
 
 export const RUNTIME_FEATURES: RuntimeFeatureDefinition[] = [
   {
-    id: 'aiOllama',
-    name: 'Ollama local summarization',
-    description: 'Local LLM provider via OpenAI-compatible endpoint (Ollama or LM Studio, desktop-first).',
-    requiredSecrets: ['OLLAMA_API_URL', 'OLLAMA_MODEL'],
-    fallback: 'Falls back to Groq, then OpenRouter, then local browser model.',
+    id: "aiOllama",
+    name: "Ollama local summarization",
+    description:
+      "Local LLM provider via OpenAI-compatible endpoint (Ollama or LM Studio, desktop-first).",
+    requiredSecrets: ["OLLAMA_API_URL", "OLLAMA_MODEL"],
+    fallback: "Falls back to Groq, then OpenRouter, then local browser model.",
   },
   {
-    id: 'aiGroq',
-    name: 'Groq summarization',
-    description: 'Primary fast LLM provider used for AI summary generation.',
-    requiredSecrets: ['GROQ_API_KEY'],
-    fallback: 'Falls back to OpenRouter, then local browser model.',
+    id: "aiGroq",
+    name: "Groq summarization",
+    description: "Primary fast LLM provider used for AI summary generation.",
+    requiredSecrets: ["GROQ_API_KEY"],
+    fallback: "Falls back to OpenRouter, then local browser model.",
   },
   {
-    id: 'aiOpenRouter',
-    name: 'OpenRouter summarization',
-    description: 'Secondary LLM provider for AI summary fallback.',
-    requiredSecrets: ['OPENROUTER_API_KEY'],
-    fallback: 'Falls back to local browser model only.',
+    id: "aiOpenRouter",
+    name: "OpenRouter summarization",
+    description: "Secondary LLM provider for AI summary fallback.",
+    requiredSecrets: ["OPENROUTER_API_KEY"],
+    fallback: "Falls back to local browser model only.",
   },
   {
-    id: 'stockNewsSearchTavily',
-    name: 'Tavily stock-news search',
-    description: 'Primary targeted stock-news search provider for premium analysis enrichment.',
-    requiredSecrets: ['TAVILY_API_KEYS'],
-    fallback: 'Falls back to Brave, then SerpAPI, then Google News RSS.',
+    id: "stockNewsSearchTavily",
+    name: "Tavily stock-news search",
+    description:
+      "Primary targeted stock-news search provider for premium analysis enrichment.",
+    requiredSecrets: ["TAVILY_API_KEYS"],
+    fallback: "Falls back to Brave, then SerpAPI, then Google News RSS.",
   },
   {
-    id: 'stockNewsSearchBrave',
-    name: 'Brave stock-news search',
-    description: 'Fallback targeted stock-news provider for premium analysis enrichment.',
-    requiredSecrets: ['BRAVE_API_KEYS'],
-    fallback: 'Falls back to SerpAPI, then Google News RSS.',
+    id: "stockNewsSearchBrave",
+    name: "Brave stock-news search",
+    description:
+      "Fallback targeted stock-news provider for premium analysis enrichment.",
+    requiredSecrets: ["BRAVE_API_KEYS"],
+    fallback: "Falls back to SerpAPI, then Google News RSS.",
   },
   {
-    id: 'stockNewsSearchSerpApi',
-    name: 'SerpAPI stock-news search',
-    description: 'Additional targeted stock-news provider for premium analysis enrichment.',
-    requiredSecrets: ['SERPAPI_API_KEYS'],
-    fallback: 'Falls back to Google News RSS.',
+    id: "stockNewsSearchSerpApi",
+    name: "SerpAPI stock-news search",
+    description:
+      "Additional targeted stock-news provider for premium analysis enrichment.",
+    requiredSecrets: ["SERPAPI_API_KEYS"],
+    fallback: "Falls back to Google News RSS.",
   },
   {
-    id: 'economicFred',
-    name: 'FRED economic indicators',
-    description: 'Macro indicators from Federal Reserve Economic Data.',
-    requiredSecrets: ['FRED_API_KEY'],
-    fallback: 'Economic panel remains available with non-FRED metrics.',
+    id: "economicFred",
+    name: "FRED economic indicators",
+    description: "Macro indicators from Federal Reserve Economic Data.",
+    requiredSecrets: ["FRED_API_KEY"],
+    fallback: "Economic panel remains available with non-FRED metrics.",
   },
   {
-    id: 'energyEia',
-    name: 'EIA oil analytics',
-    description: 'US Energy Information Administration oil metrics.',
-    requiredSecrets: ['EIA_API_KEY'],
-    fallback: 'Oil analytics cards show disabled state.',
+    id: "energyEia",
+    name: "EIA oil analytics",
+    description: "US Energy Information Administration oil metrics.",
+    requiredSecrets: ["EIA_API_KEY"],
+    fallback: "Oil analytics cards show disabled state.",
   },
   {
-    id: 'internetOutages',
-    name: 'Cloudflare outage radar',
-    description: 'Internet outages from Cloudflare Radar annotations API.',
-    requiredSecrets: ['CLOUDFLARE_API_TOKEN'],
-    fallback: 'Outage layer is disabled and map continues with other feeds.',
+    id: "internetOutages",
+    name: "Cloudflare outage radar",
+    description: "Internet outages from Cloudflare Radar annotations API.",
+    requiredSecrets: ["CLOUDFLARE_API_TOKEN"],
+    fallback: "Outage layer is disabled and map continues with other feeds.",
   },
   {
-    id: 'acledConflicts',
-    name: 'ACLED conflicts & protests',
-    description: 'Conflict and protest event feeds from ACLED.',
-    requiredSecrets: ['ACLED_ACCESS_TOKEN'],
-    fallback: 'Conflict/protest overlays are hidden.',
+    id: "acledConflicts",
+    name: "ACLED conflicts & protests",
+    description: "Conflict and protest event feeds from ACLED.",
+    requiredSecrets: ["ACLED_ACCESS_TOKEN"],
+    fallback: "Conflict/protest overlays are hidden.",
   },
   {
-    id: 'ucdpConflicts',
-    name: 'UCDP conflict events',
-    description: 'Armed conflict georeferenced event data from Uppsala Conflict Data Program.',
-    requiredSecrets: ['UCDP_ACCESS_TOKEN'],
-    fallback: 'UCDP conflict layer is disabled.',
+    id: "ucdpConflicts",
+    name: "UCDP conflict events",
+    description:
+      "Armed conflict georeferenced event data from Uppsala Conflict Data Program.",
+    requiredSecrets: ["UCDP_ACCESS_TOKEN"],
+    fallback: "UCDP conflict layer is disabled.",
   },
   {
-    id: 'abuseChThreatIntel',
-    name: 'abuse.ch cyber IOC feeds',
-    description: 'URLhaus and ThreatFox IOC ingestion for the cyber threat layer.',
-    requiredSecrets: ['URLHAUS_AUTH_KEY'],
-    fallback: 'URLhaus/ThreatFox IOC ingestion is disabled.',
+    id: "abuseChThreatIntel",
+    name: "abuse.ch cyber IOC feeds",
+    description:
+      "URLhaus and ThreatFox IOC ingestion for the cyber threat layer.",
+    requiredSecrets: ["URLHAUS_AUTH_KEY"],
+    fallback: "URLhaus/ThreatFox IOC ingestion is disabled.",
   },
   {
-    id: 'alienvaultOtxThreatIntel',
-    name: 'AlienVault OTX threat intel',
-    description: 'Optional OTX IOC ingestion for cyber threat enrichment.',
-    requiredSecrets: ['OTX_API_KEY'],
-    fallback: 'OTX IOC enrichment is disabled.',
+    id: "alienvaultOtxThreatIntel",
+    name: "AlienVault OTX threat intel",
+    description: "Optional OTX IOC ingestion for cyber threat enrichment.",
+    requiredSecrets: ["OTX_API_KEY"],
+    fallback: "OTX IOC enrichment is disabled.",
   },
   {
-    id: 'abuseIpdbThreatIntel',
-    name: 'AbuseIPDB threat intel',
-    description: 'Optional AbuseIPDB IOC/reputation enrichment for the cyber threat layer.',
-    requiredSecrets: ['ABUSEIPDB_API_KEY'],
-    fallback: 'AbuseIPDB enrichment is disabled.',
+    id: "abuseIpdbThreatIntel",
+    name: "AbuseIPDB threat intel",
+    description:
+      "Optional AbuseIPDB IOC/reputation enrichment for the cyber threat layer.",
+    requiredSecrets: ["ABUSEIPDB_API_KEY"],
+    fallback: "AbuseIPDB enrichment is disabled.",
   },
   {
-    id: 'wingbitsEnrichment',
-    name: 'Wingbits aircraft enrichment',
-    description: 'Military flight operator/aircraft enrichment metadata.',
-    requiredSecrets: ['WINGBITS_API_KEY'],
-    fallback: 'Flight map still renders with heuristic-only classification.',
+    id: "wingbitsEnrichment",
+    name: "Wingbits aircraft enrichment",
+    description: "Military flight operator/aircraft enrichment metadata.",
+    requiredSecrets: ["WINGBITS_API_KEY"],
+    fallback: "Flight map still renders with heuristic-only classification.",
   },
   {
-    id: 'aisRelay',
-    name: 'AIS vessel tracking',
-    description: 'Live vessel ingestion via AISStream WebSocket.',
-    requiredSecrets: ['WS_RELAY_URL', 'AISSTREAM_API_KEY'],
-    desktopRequiredSecrets: ['AISSTREAM_API_KEY'],
-    fallback: 'AIS layer is disabled.',
+    id: "aisRelay",
+    name: "AIS vessel tracking",
+    description: "Live vessel ingestion via AISStream WebSocket.",
+    requiredSecrets: ["WS_RELAY_URL", "AISSTREAM_API_KEY"],
+    desktopRequiredSecrets: ["AISSTREAM_API_KEY"],
+    fallback: "AIS layer is disabled.",
   },
   {
-    id: 'openskyRelay',
-    name: 'OpenSky military flights (legacy)',
-    description: 'OpenSky OAuth credentials for military flight data (legacy direct proxy).',
-    requiredSecrets: ['VITE_OPENSKY_RELAY_URL', 'OPENSKY_CLIENT_ID', 'OPENSKY_CLIENT_SECRET'],
-    desktopRequiredSecrets: ['OPENSKY_CLIENT_ID', 'OPENSKY_CLIENT_SECRET'],
-    fallback: 'Military flights fall back to limited/no data.',
+    id: "openskyRelay",
+    name: "OpenSky military flights (legacy)",
+    description:
+      "OpenSky OAuth credentials for military flight data (legacy direct proxy).",
+    requiredSecrets: [
+      "VITE_OPENSKY_RELAY_URL",
+      "OPENSKY_CLIENT_ID",
+      "OPENSKY_CLIENT_SECRET",
+    ],
+    desktopRequiredSecrets: ["OPENSKY_CLIENT_ID", "OPENSKY_CLIENT_SECRET"],
+    fallback: "Military flights fall back to limited/no data.",
   },
   {
-    id: 'militaryFlights',
-    name: 'Military flight tracking',
-    description: 'Military flight data via Redis-backed edge handler (no credentials needed).',
+    id: "militaryFlights",
+    name: "Military flight tracking",
+    description:
+      "Military flight data via Redis-backed edge handler (no credentials needed).",
     requiredSecrets: [],
-    fallback: 'Military flights panel is disabled.',
+    fallback: "Military flights panel is disabled.",
   },
   {
-    id: 'finnhubMarkets',
-    name: 'Finnhub market data',
-    description: 'Real-time stock quotes and market data from Finnhub.',
-    requiredSecrets: ['FINNHUB_API_KEY'],
-    fallback: 'Stock ticker uses limited free data.',
+    id: "finnhubMarkets",
+    name: "Finnhub market data",
+    description: "Real-time stock quotes and market data from Finnhub.",
+    requiredSecrets: ["FINNHUB_API_KEY"],
+    fallback: "Stock ticker uses limited free data.",
   },
   {
-    id: 'nasaFirms',
-    name: 'NASA FIRMS fire data',
-    description: 'Fire Information for Resource Management System satellite data.',
-    requiredSecrets: ['NASA_FIRMS_API_KEY'],
-    fallback: 'FIRMS fire layer uses public VIIRS feed.',
+    id: "nasaFirms",
+    name: "NASA FIRMS fire data",
+    description:
+      "Fire Information for Resource Management System satellite data.",
+    requiredSecrets: ["NASA_FIRMS_API_KEY"],
+    fallback: "FIRMS fire layer uses public VIIRS feed.",
   },
   {
-    id: 'wtoTrade',
-    name: 'WTO trade policy data',
-    description: 'Trade restrictions, tariff trends, barriers, and flows from WTO.',
-    requiredSecrets: ['WTO_API_KEY'],
-    fallback: 'Trade policy panel shows disabled state.',
+    id: "wtoTrade",
+    name: "WTO trade policy data",
+    description:
+      "Trade restrictions, tariff trends, barriers, and flows from WTO.",
+    requiredSecrets: ["WTO_API_KEY"],
+    fallback: "Trade policy panel shows disabled state.",
   },
   {
-    id: 'supplyChain',
-    name: 'Supply Chain Intelligence',
-    description: 'Shipping rates via FRED Baltic Dry Index. Chokepoints and minerals use public data.',
-    requiredSecrets: ['FRED_API_KEY'],
-    fallback: 'Chokepoints and minerals always available; shipping requires FRED key.',
+    id: "supplyChain",
+    name: "Supply Chain Intelligence",
+    description:
+      "Shipping rates via FRED Baltic Dry Index. Chokepoints and minerals use public data.",
+    requiredSecrets: ["FRED_API_KEY"],
+    fallback:
+      "Chokepoints and minerals always available; shipping requires FRED key.",
   },
   {
-    id: 'newsPerFeedFallback',
-    name: 'News per-feed fallback',
-    description: 'If digest aggregation is unavailable, use stale headlines first and optionally fetch a limited feed subset.',
+    id: "newsPerFeedFallback",
+    name: "News per-feed fallback",
+    description:
+      "If digest aggregation is unavailable, use stale headlines first and optionally fetch a limited feed subset.",
     requiredSecrets: [],
-    fallback: 'Stale headlines remain available; limited per-feed fallback is disabled.',
+    fallback:
+      "Stale headlines remain available; limited per-feed fallback is disabled.",
   },
   {
-    id: 'aviationStack',
-    name: 'AviationStack flight delays',
-    description: 'Real-time international airport delay data from AviationStack API.',
-    requiredSecrets: ['AVIATIONSTACK_API'],
-    fallback: 'Non-US airports use simulated delay data.',
+    id: "aviationStack",
+    name: "AviationStack flight delays",
+    description:
+      "Real-time international airport delay data from AviationStack API.",
+    requiredSecrets: ["AVIATIONSTACK_API"],
+    fallback: "Non-US airports use simulated delay data.",
   },
   {
-    id: 'icaoNotams',
-    name: 'ICAO NOTAM closures (Middle East)',
-    description: 'Airport closure detection for MENA airports from ICAO NOTAM data service.',
-    requiredSecrets: ['ICAO_API_KEY'],
-    fallback: 'Closures detected only via AviationStack flight cancellation data.',
+    id: "icaoNotams",
+    name: "ICAO NOTAM closures (Middle East)",
+    description:
+      "Airport closure detection for MENA airports from ICAO NOTAM data service.",
+    requiredSecrets: ["ICAO_API_KEY"],
+    fallback:
+      "Closures detected only via AviationStack flight cancellation data.",
   },
 ];
 
 function readEnvSecret(key: RuntimeSecretKey): string {
-  const envValue = (import.meta as { env?: Record<string, unknown> }).env?.[key];
-  return typeof envValue === 'string' ? envValue.trim() : '';
+  const envValue = (import.meta as { env?: Record<string, unknown> }).env?.[
+    key
+  ];
+  return typeof envValue === "string" ? envValue.trim() : "";
 }
 
 function readStoredToggles(): Record<RuntimeFeatureId, boolean> {
   try {
     const stored = localStorage.getItem(TOGGLES_STORAGE_KEY);
     if (!stored) return { ...defaultToggles };
-    const parsed = JSON.parse(stored) as Partial<Record<RuntimeFeatureId, boolean>>;
+    const parsed = JSON.parse(stored) as Partial<
+      Record<RuntimeFeatureId, boolean>
+    >;
     return { ...defaultToggles, ...parsed };
   } catch {
     return { ...defaultToggles };
@@ -312,9 +338,9 @@ function readStoredToggles(): Record<RuntimeFeatureId, boolean> {
 }
 
 const URL_SECRET_KEYS = new Set<RuntimeSecretKey>([
-  'WS_RELAY_URL',
-  'VITE_OPENSKY_RELAY_URL',
-  'OLLAMA_API_URL',
+  "WS_RELAY_URL",
+  "VITE_OPENSKY_RELAY_URL",
+  "OLLAMA_API_URL",
 ]);
 
 export interface SecretVerificationResult {
@@ -322,30 +348,34 @@ export interface SecretVerificationResult {
   message: string;
 }
 
-export function validateSecret(key: RuntimeSecretKey, value: string): { valid: boolean; hint?: string } {
+export function validateSecret(
+  key: RuntimeSecretKey,
+  value: string,
+): { valid: boolean; hint?: string } {
   const trimmed = value.trim();
-  if (!trimmed) return { valid: false, hint: 'Value is required' };
+  if (!trimmed) return { valid: false, hint: "Value is required" };
 
   if (URL_SECRET_KEYS.has(key)) {
     try {
       const parsed = new URL(trimmed);
-      if (key === 'OLLAMA_API_URL') {
-        if (!['http:', 'https:'].includes(parsed.protocol)) {
-          return { valid: false, hint: 'Must be an http(s) URL' };
+      if (key === "OLLAMA_API_URL") {
+        if (!["http:", "https:"].includes(parsed.protocol)) {
+          return { valid: false, hint: "Must be an http(s) URL" };
         }
         return { valid: true };
       }
-      if (!['http:', 'https:', 'ws:', 'wss:'].includes(parsed.protocol)) {
-        return { valid: false, hint: 'Must be an http(s) or ws(s) URL' };
+      if (!["http:", "https:", "ws:", "wss:"].includes(parsed.protocol)) {
+        return { valid: false, hint: "Must be an http(s) or ws(s) URL" };
       }
       return { valid: true };
     } catch {
-      return { valid: false, hint: 'Must be a valid URL' };
+      return { valid: false, hint: "Must be a valid URL" };
     }
   }
 
-  if (key === 'WORLDMONITOR_API_KEY') {
-    if (trimmed.length < 16) return { valid: false, hint: 'API key must be at least 16 characters' };
+  if (key === "WORLDMONITOR_API_KEY") {
+    if (trimmed.length < 16)
+      return { valid: false, hint: "API key must be at least 16 characters" };
     return { valid: true };
   }
 
@@ -353,7 +383,9 @@ export function validateSecret(key: RuntimeSecretKey, value: string): { valid: b
 }
 
 let secretsReadyResolve!: () => void;
-export const secretsReady = new Promise<void>(r => { secretsReadyResolve = r; });
+export const secretsReady = new Promise<void>((r) => {
+  secretsReadyResolve = r;
+});
 
 if (!isDesktopRuntime()) secretsReadyResolve();
 
@@ -373,11 +405,13 @@ function notifyConfigChanged(): void {
 function seedSecretsFromEnvironment(): void {
   if (isDesktopRuntime()) return;
 
-  const keys = new Set<RuntimeSecretKey>(RUNTIME_FEATURES.flatMap(feature => feature.requiredSecrets));
+  const keys = new Set<RuntimeSecretKey>(
+    RUNTIME_FEATURES.flatMap((feature) => feature.requiredSecrets),
+  );
   for (const key of keys) {
     const value = readEnvSecret(key);
     if (value) {
-      runtimeConfig.secrets[key] = { value, source: 'env' };
+      runtimeConfig.secrets[key] = { value, source: "env" };
     }
   }
 }
@@ -386,16 +420,20 @@ seedSecretsFromEnvironment();
 
 // Listen for cross-window state updates (settings ↔ main).
 // When one window saves secrets or toggles features, the `storage` event fires in other same-origin windows.
-if (typeof window !== 'undefined') {
-  window.addEventListener('storage', (e) => {
-    if (e.key === 'wm-secrets-updated') {
+if (typeof window !== "undefined") {
+  window.addEventListener("storage", (e) => {
+    if (e.key === "wm-secrets-updated") {
       void loadDesktopSecrets();
     } else if (e.key === TOGGLES_STORAGE_KEY && e.newValue) {
       try {
-        const parsed = JSON.parse(e.newValue) as Partial<Record<RuntimeFeatureId, boolean>>;
+        const parsed = JSON.parse(e.newValue) as Partial<
+          Record<RuntimeFeatureId, boolean>
+        >;
         Object.assign(runtimeConfig.featureToggles, parsed);
         notifyConfigChanged();
-      } catch { /* ignore malformed JSON */ }
+      } catch {
+        /* ignore malformed JSON */
+      }
     }
   });
 }
@@ -416,10 +454,18 @@ export function isFeatureEnabled(featureId: RuntimeFeatureId): boolean {
   return runtimeConfig.featureToggles[featureId] !== false;
 }
 
-export function getSecretState(key: RuntimeSecretKey): { present: boolean; valid: boolean; source: 'env' | 'vault' | 'missing' } {
+export function getSecretState(key: RuntimeSecretKey): {
+  present: boolean;
+  valid: boolean;
+  source: "env" | "vault" | "missing";
+} {
   const state = runtimeConfig.secrets[key];
-  if (!state) return { present: false, valid: false, source: 'missing' };
-  return { present: true, valid: validateSecret(key, state.value).valid, source: state.source };
+  if (!state) return { present: false, valid: false, source: "missing" };
+  return {
+    present: true,
+    valid: validateSecret(key, state.value).valid,
+    source: state.source,
+  };
 }
 
 export function isFeatureAvailable(featureId: RuntimeFeatureId): boolean {
@@ -431,41 +477,56 @@ export function isFeatureAvailable(featureId: RuntimeFeatureId): boolean {
     return true;
   }
 
-  const feature = RUNTIME_FEATURES.find(item => item.id === featureId);
+  const feature = RUNTIME_FEATURES.find((item) => item.id === featureId);
   if (!feature) return false;
   const secrets = feature.desktopRequiredSecrets ?? feature.requiredSecrets;
-  return secrets.every(secretKey => getSecretState(secretKey).valid);
+  return secrets.every((secretKey) => getSecretState(secretKey).valid);
 }
 
-export function getEffectiveSecrets(feature: RuntimeFeatureDefinition): RuntimeSecretKey[] {
-  return (isDesktopRuntime() && feature.desktopRequiredSecrets) ? feature.desktopRequiredSecrets : feature.requiredSecrets;
+export function getEffectiveSecrets(
+  feature: RuntimeFeatureDefinition,
+): RuntimeSecretKey[] {
+  return isDesktopRuntime() && feature.desktopRequiredSecrets
+    ? feature.desktopRequiredSecrets
+    : feature.requiredSecrets;
 }
 
-export function setFeatureToggle(featureId: RuntimeFeatureId, enabled: boolean): void {
+export function setFeatureToggle(
+  featureId: RuntimeFeatureId,
+  enabled: boolean,
+): void {
   runtimeConfig.featureToggles[featureId] = enabled;
-  localStorage.setItem(TOGGLES_STORAGE_KEY, JSON.stringify(runtimeConfig.featureToggles));
+  localStorage.setItem(
+    TOGGLES_STORAGE_KEY,
+    JSON.stringify(runtimeConfig.featureToggles),
+  );
   notifyConfigChanged();
 }
 
-export async function setSecretValue(key: RuntimeSecretKey, value: string): Promise<void> {
+export async function setSecretValue(
+  key: RuntimeSecretKey,
+  value: string,
+): Promise<void> {
   if (!isDesktopRuntime()) {
-    console.warn('[runtime-config] Ignoring secret write outside desktop runtime');
+    console.warn(
+      "[runtime-config] Ignoring secret write outside desktop runtime",
+    );
     return;
   }
 
   const sanitized = value.trim();
   if (sanitized) {
-    await invokeTauri<void>('set_secret', { key, value: sanitized });
-    runtimeConfig.secrets[key] = { value: sanitized, source: 'vault' };
+    await invokeTauri<void>("set_secret", { key, value: sanitized });
+    runtimeConfig.secrets[key] = { value: sanitized, source: "vault" };
   } else {
-    await invokeTauri<void>('delete_secret', { key });
+    await invokeTauri<void>("delete_secret", { key });
     delete runtimeConfig.secrets[key];
   }
 
   // Push to sidecar so handlers pick it up immediately.
   // This is best-effort: keyring persistence is the source of truth.
   try {
-    await pushSecretToSidecar(key, sanitized || '');
+    await pushSecretToSidecar(key, sanitized || "");
   } catch (error) {
     console.warn(`[runtime-config] Failed to sync ${key} to sidecar`, error);
   }
@@ -473,15 +534,17 @@ export async function setSecretValue(key: RuntimeSecretKey, value: string): Prom
   // Signal other windows (main ↔ settings) to reload secrets from keychain.
   // The `storage` event fires in all same-origin windows except the one that wrote.
   try {
-    localStorage.setItem('wm-secrets-updated', String(Date.now()));
-  } catch { /* localStorage may be unavailable */ }
+    localStorage.setItem("wm-secrets-updated", String(Date.now()));
+  } catch {
+    /* localStorage may be unavailable */
+  }
 
   notifyConfigChanged();
 }
 
 async function getLocalApiToken(): Promise<string | null> {
   if (!localApiTokenPromise) {
-    localApiTokenPromise = invokeTauri<string>('get_local_api_token')
+    localApiTokenPromise = invokeTauri<string>("get_local_api_token")
       .then((token) => token.trim() || null)
       .catch((error) => {
         // Allow retries on subsequent calls if bridge/token is temporarily unavailable.
@@ -493,32 +556,39 @@ async function getLocalApiToken(): Promise<string | null> {
 }
 
 async function pushSecretToSidecar(key: string, value: string): Promise<void> {
-  const headers = new Headers({ 'Content-Type': 'application/json' });
+  const headers = new Headers({ "Content-Type": "application/json" });
   const token = await getLocalApiToken();
   if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
+    headers.set("Authorization", `Bearer ${token}`);
   }
 
   const response = await fetch(getSidecarEnvUpdateUrl(), {
-    method: 'POST',
+    method: "POST",
     headers,
     body: JSON.stringify({ key, value: value || null }),
   });
 
   if (!response.ok) {
-    let detail = '';
+    let detail = "";
     try {
       detail = await response.text();
-    } catch { /* ignore non-readable body */ }
-    throw new Error(`Sidecar secret sync failed (${response.status})${detail ? `: ${detail.slice(0, 200)}` : ''}`);
+    } catch {
+      /* ignore non-readable body */
+    }
+    throw new Error(
+      `Sidecar secret sync failed (${response.status})${detail ? `: ${detail.slice(0, 200)}` : ""}`,
+    );
   }
 }
 
-async function callSidecarWithAuth(url: string, init: RequestInit): Promise<Response> {
+async function callSidecarWithAuth(
+  url: string,
+  init: RequestInit,
+): Promise<Response> {
   const headers = new Headers(init.headers ?? {});
   const token = await getLocalApiToken();
   if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
+    headers.set("Authorization", `Bearer ${token}`);
   }
   return fetch(url, { ...init, headers });
 }
@@ -530,47 +600,57 @@ export async function verifySecretWithApi(
 ): Promise<SecretVerificationResult> {
   const localValidation = validateSecret(key, value);
   if (!localValidation.valid) {
-    return { valid: false, message: localValidation.hint || 'Invalid value' };
+    return { valid: false, message: localValidation.hint || "Invalid value" };
   }
 
   if (!isDesktopRuntime()) {
-    return { valid: true, message: 'Saved' };
+    return { valid: true, message: "Saved" };
   }
 
   try {
     const response = await callSidecarWithAuth(getSidecarSecretValidateUrl(), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ key, value: value.trim(), context }),
     });
 
     let payload: unknown = null;
     try {
       payload = await response.json();
-    } catch { /* non-JSON response */ }
+    } catch {
+      /* non-JSON response */
+    }
 
     if (!response.ok) {
-      const message = payload && typeof payload === 'object'
-        ? String(
-          (payload as Record<string, unknown>).message
-          || (payload as Record<string, unknown>).error
-          || 'Secret validation failed'
-        )
-        : `Secret validation failed (${response.status})`;
+      const message =
+        payload && typeof payload === "object"
+          ? String(
+              (payload as Record<string, unknown>).message ||
+                (payload as Record<string, unknown>).error ||
+                "Secret validation failed",
+            )
+          : `Secret validation failed (${response.status})`;
       return { valid: false, message };
     }
 
-    if (!payload || typeof payload !== 'object') {
-      return { valid: false, message: 'Secret validation returned an invalid response' };
+    if (!payload || typeof payload !== "object") {
+      return {
+        valid: false,
+        message: "Secret validation returned an invalid response",
+      };
     }
 
     const valid = Boolean((payload as Record<string, unknown>).valid);
-    const message = String((payload as Record<string, unknown>).message || (valid ? 'Verified' : 'Verification failed'));
+    const message = String(
+      (payload as Record<string, unknown>).message ||
+        (valid ? "Verified" : "Verification failed"),
+    );
     return { valid, message };
   } catch (error) {
     // Network errors reaching the sidecar should NOT block saving.
     // Only explicit 401/403 from the provider means the key is invalid.
-    const message = error instanceof Error ? error.message : 'Secret validation failed';
+    const message =
+      error instanceof Error ? error.message : "Secret validation failed";
     return { valid: true, message: `Saved (could not verify – ${message})` };
   }
 }
@@ -579,12 +659,16 @@ export async function loadDesktopSecrets(): Promise<void> {
   if (!isDesktopRuntime()) return;
 
   try {
-    const allSecrets = await invokeTauri<Record<string, string>>('get_all_secrets');
+    const allSecrets =
+      await invokeTauri<Record<string, string>>("get_all_secrets");
 
     const entries: { key: string; value: string }[] = [];
     for (const [key, value] of Object.entries(allSecrets)) {
       if (value && value.trim().length > 0) {
-        runtimeConfig.secrets[key as RuntimeSecretKey] = { value, source: 'vault' };
+        runtimeConfig.secrets[key as RuntimeSecretKey] = {
+          value,
+          source: "vault",
+        };
         entries.push({ key, value });
       }
     }
@@ -593,34 +677,47 @@ export async function loadDesktopSecrets(): Promise<void> {
       try {
         await pushSecretBatchToSidecar(entries);
       } catch (batchErr) {
-        console.warn('[runtime-config] Batch env update failed, falling back to individual pushes', batchErr);
+        console.warn(
+          "[runtime-config] Batch env update failed, falling back to individual pushes",
+          batchErr,
+        );
         await Promise.allSettled(
           entries.map(({ key, value }) =>
-            pushSecretToSidecar(key as RuntimeSecretKey, value).catch((error) => {
-              console.warn(`[runtime-config] Failed to sync ${key} to sidecar`, error);
-            })
-          )
+            pushSecretToSidecar(key as RuntimeSecretKey, value).catch(
+              (error) => {
+                console.warn(
+                  `[runtime-config] Failed to sync ${key} to sidecar`,
+                  error,
+                );
+              },
+            ),
+          ),
         );
       }
     }
 
     notifyConfigChanged();
   } catch (error) {
-    console.warn('[runtime-config] Failed to load desktop secrets from vault', error);
+    console.warn(
+      "[runtime-config] Failed to load desktop secrets from vault",
+      error,
+    );
   } finally {
     secretsReadyResolve();
   }
 }
 
-async function pushSecretBatchToSidecar(entries: { key: string; value: string }[]): Promise<void> {
-  const headers = new Headers({ 'Content-Type': 'application/json' });
+async function pushSecretBatchToSidecar(
+  entries: { key: string; value: string }[],
+): Promise<void> {
+  const headers = new Headers({ "Content-Type": "application/json" });
   const token = await getLocalApiToken();
   if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
+    headers.set("Authorization", `Bearer ${token}`);
   }
 
   const response = await fetch(getSidecarEnvUpdateBatchUrl(), {
-    method: 'POST',
+    method: "POST",
     headers,
     body: JSON.stringify({ entries }),
   });

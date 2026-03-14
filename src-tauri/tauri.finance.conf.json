@@ -13,13 +13,7 @@
   "bundle": {
     "shortDescription": "Finance Monitor desktop app",
     "longDescription": "Finance Monitor desktop app for real-time markets and trading intelligence.",
-    "targets": [
-      "app",
-      "dmg",
-      "nsis",
-      "msi",
-      "appimage"
-    ],
+    "targets": ["app", "dmg", "nsis", "msi", "appimage"],
     "macOS": {
       "hardenedRuntime": true
     },

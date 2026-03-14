@@ -7,8 +7,8 @@
  * contract holds at runtime — any mutation to caller-owned objects must
  * NOT affect internal state, and vice versa.
  */
-import { describe, it } from 'node:test';
-import assert from 'node:assert/strict';
+import { describe, it } from "node:test";
+import assert from "node:assert/strict";
 
 // ---------- helpers replicating DeckGLMap logic ----------
 
@@ -38,31 +38,31 @@ function makeState() {
   return {
     zoom: 3,
     pan: { x: 10, y: 20 },
-    view: 'global',
+    view: "global",
     layers: { hotspots: true, flights: false, conflicts: true },
-    timeRange: '24h',
+    timeRange: "24h",
   };
 }
 
 // ---------- tests ----------
 
-describe('DeckGLMap state isolation (behavioral)', () => {
-  describe('constructor isolation', () => {
-    it('mutating the original layers object does not affect internal state', () => {
+describe("DeckGLMap state isolation (behavioral)", () => {
+  describe("constructor isolation", () => {
+    it("mutating the original layers object does not affect internal state", () => {
       const original = makeState();
       const internal = copyInitialState(original);
       original.layers.hotspots = false;
       assert.equal(internal.layers.hotspots, true);
     });
 
-    it('mutating the original pan object does not affect internal state', () => {
+    it("mutating the original pan object does not affect internal state", () => {
       const original = makeState();
       const internal = copyInitialState(original);
       original.pan.x = 999;
       assert.equal(internal.pan.x, 10);
     });
 
-    it('mutating internal state does not affect the original', () => {
+    it("mutating internal state does not affect the original", () => {
       const original = makeState();
       const internal = copyInitialState(original);
       internal.layers.flights = true;
@@ -70,15 +70,15 @@ describe('DeckGLMap state isolation (behavioral)', () => {
     });
   });
 
-  describe('setLayers isolation', () => {
-    it('mutating the input layers after setLayers does not affect stored layers', () => {
+  describe("setLayers isolation", () => {
+    it("mutating the input layers after setLayers does not affect stored layers", () => {
       const input = { hotspots: true, flights: false, conflicts: true };
       const stored = copyLayers(input);
       input.hotspots = false;
       assert.equal(stored.hotspots, true);
     });
 
-    it('mutating stored layers does not affect the caller object', () => {
+    it("mutating stored layers does not affect the caller object", () => {
       const input = { hotspots: true, flights: false, conflicts: true };
       const stored = copyLayers(input);
       stored.flights = true;
@@ -86,27 +86,27 @@ describe('DeckGLMap state isolation (behavioral)', () => {
     });
   });
 
-  describe('getState isolation', () => {
-    it('returned state.layers is a separate object from internal layers', () => {
+  describe("getState isolation", () => {
+    it("returned state.layers is a separate object from internal layers", () => {
       const internal = { state: makeState() };
       const exported = copyStateForExport(internal.state);
       assert.notEqual(exported.layers, internal.state.layers);
     });
 
-    it('mutating returned layers does not affect internal state', () => {
+    it("mutating returned layers does not affect internal state", () => {
       const internal = { state: makeState() };
       const exported = copyStateForExport(internal.state);
       exported.layers.hotspots = false;
       assert.equal(internal.state.layers.hotspots, true);
     });
 
-    it('returned state.pan is a separate object from internal pan', () => {
+    it("returned state.pan is a separate object from internal pan", () => {
       const internal = { state: makeState() };
       const exported = copyStateForExport(internal.state);
       assert.notEqual(exported.pan, internal.state.pan);
     });
 
-    it('mutating returned pan does not affect internal state', () => {
+    it("mutating returned pan does not affect internal state", () => {
       const internal = { state: makeState() };
       const exported = copyStateForExport(internal.state);
       exported.pan.x = 999;
@@ -114,20 +114,24 @@ describe('DeckGLMap state isolation (behavioral)', () => {
     });
   });
 
-  describe('onStateChange isolation', () => {
-    it('callback receives a copy, not the internal reference', () => {
+  describe("onStateChange isolation", () => {
+    it("callback receives a copy, not the internal reference", () => {
       const internal = { state: makeState() };
       let received = null;
-      const callback = (s) => { received = s; };
+      const callback = (s) => {
+        received = s;
+      };
       callback(copyStateForExport(internal.state));
       assert.notEqual(received.layers, internal.state.layers);
       assert.notEqual(received.pan, internal.state.pan);
     });
 
-    it('mutating the callback state does not affect internal state', () => {
+    it("mutating the callback state does not affect internal state", () => {
       const internal = { state: makeState() };
       let received = null;
-      const callback = (s) => { received = s; };
+      const callback = (s) => {
+        received = s;
+      };
       callback(copyStateForExport(internal.state));
       received.layers.hotspots = false;
       received.pan.x = 999;

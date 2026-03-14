@@ -6,56 +6,113 @@ import type {
   StrategicRisk,
   TrendDirection,
   SeverityLevel,
-} from '../../../../src/generated/server/worldmonitor/intelligence/v1/service_server';
+} from "../../../../src/generated/server/worldmonitor/intelligence/v1/service_server";
 
-import { getCachedJson, setCachedJson, cachedFetchJsonWithMeta } from '../../../_shared/redis';
-import { TIER1_COUNTRIES } from './_shared';
-import { fetchAcledCached } from '../../../_shared/acled';
+import {
+  getCachedJson,
+  setCachedJson,
+  cachedFetchJsonWithMeta,
+} from "../../../_shared/redis";
+import { TIER1_COUNTRIES } from "./_shared";
+import { fetchAcledCached } from "../../../_shared/acled";
 
 // ========================================================================
 // Country risk baselines and multipliers
 // ========================================================================
 
 const BASELINE_RISK: Record<string, number> = {
-  US: 5, RU: 35, CN: 25, UA: 50, IR: 40, IL: 45, TW: 30, KP: 45,
-  SA: 20, TR: 25, PL: 10, DE: 5, FR: 10, GB: 5, IN: 20, PK: 35,
-  SY: 50, YE: 50, MM: 45, VE: 40, CU: 45, MX: 35, BR: 15, AE: 10,
+  US: 5,
+  RU: 35,
+  CN: 25,
+  UA: 50,
+  IR: 40,
+  IL: 45,
+  TW: 30,
+  KP: 45,
+  SA: 20,
+  TR: 25,
+  PL: 10,
+  DE: 5,
+  FR: 10,
+  GB: 5,
+  IN: 20,
+  PK: 35,
+  SY: 50,
+  YE: 50,
+  MM: 45,
+  VE: 40,
+  CU: 45,
+  MX: 35,
+  BR: 15,
+  AE: 10,
 };
 
 const EVENT_MULTIPLIER: Record<string, number> = {
-  US: 0.3, RU: 2.0, CN: 2.5, UA: 0.8, IR: 2.0, IL: 0.7, TW: 1.5, KP: 3.0,
-  SA: 2.0, TR: 1.2, PL: 0.8, DE: 0.5, FR: 0.6, GB: 0.5, IN: 0.8, PK: 1.5,
-  SY: 0.7, YE: 0.7, MM: 1.8, VE: 1.8, CU: 2.0, MX: 1.0, BR: 0.6, AE: 1.5,
+  US: 0.3,
+  RU: 2.0,
+  CN: 2.5,
+  UA: 0.8,
+  IR: 2.0,
+  IL: 0.7,
+  TW: 1.5,
+  KP: 3.0,
+  SA: 2.0,
+  TR: 1.2,
+  PL: 0.8,
+  DE: 0.5,
+  FR: 0.6,
+  GB: 0.5,
+  IN: 0.8,
+  PK: 1.5,
+  SY: 0.7,
+  YE: 0.7,
+  MM: 1.8,
+  VE: 1.8,
+  CU: 2.0,
+  MX: 1.0,
+  BR: 0.6,
+  AE: 1.5,
 };
 
 const COUNTRY_KEYWORDS: Record<string, string[]> = {
-  US: ['united states', 'usa', 'america', 'washington', 'biden', 'trump', 'pentagon'],
-  RU: ['russia', 'moscow', 'kremlin', 'putin'],
-  CN: ['china', 'beijing', 'xi jinping', 'prc'],
-  UA: ['ukraine', 'kyiv', 'zelensky', 'donbas'],
-  IR: ['iran', 'tehran', 'khamenei', 'irgc'],
-  IL: ['israel', 'tel aviv', 'netanyahu', 'idf', 'gaza'],
-  TW: ['taiwan', 'taipei'],
-  KP: ['north korea', 'pyongyang', 'kim jong'],
-  SA: ['saudi arabia', 'riyadh'],
-  TR: ['turkey', 'ankara', 'erdogan'],
-  PL: ['poland', 'warsaw'],
-  DE: ['germany', 'berlin'],
-  FR: ['france', 'paris', 'macron'],
-  GB: ['britain', 'uk', 'london'],
-  IN: ['india', 'delhi', 'modi'],
-  PK: ['pakistan', 'islamabad'],
-  SY: ['syria', 'damascus'],
-  YE: ['yemen', 'sanaa', 'houthi'],
-  MM: ['myanmar', 'burma'],
-  VE: ['venezuela', 'caracas', 'maduro'],
-  CU: ['cuba', 'havana', 'diaz-canel'],
-  MX: ['mexico', 'mexican', 'sheinbaum', 'cartel', 'sinaloa'],
-  BR: ['brazil', 'brasilia', 'lula'],
-  AE: ['uae', 'emirates', 'dubai', 'abu dhabi', 'united arab emirates'],
+  US: [
+    "united states",
+    "usa",
+    "america",
+    "washington",
+    "biden",
+    "trump",
+    "pentagon",
+  ],
+  RU: ["russia", "moscow", "kremlin", "putin"],
+  CN: ["china", "beijing", "xi jinping", "prc"],
+  UA: ["ukraine", "kyiv", "zelensky", "donbas"],
+  IR: ["iran", "tehran", "khamenei", "irgc"],
+  IL: ["israel", "tel aviv", "netanyahu", "idf", "gaza"],
+  TW: ["taiwan", "taipei"],
+  KP: ["north korea", "pyongyang", "kim jong"],
+  SA: ["saudi arabia", "riyadh"],
+  TR: ["turkey", "ankara", "erdogan"],
+  PL: ["poland", "warsaw"],
+  DE: ["germany", "berlin"],
+  FR: ["france", "paris", "macron"],
+  GB: ["britain", "uk", "london"],
+  IN: ["india", "delhi", "modi"],
+  PK: ["pakistan", "islamabad"],
+  SY: ["syria", "damascus"],
+  YE: ["yemen", "sanaa", "houthi"],
+  MM: ["myanmar", "burma"],
+  VE: ["venezuela", "caracas", "maduro"],
+  CU: ["cuba", "havana", "diaz-canel"],
+  MX: ["mexico", "mexican", "sheinbaum", "cartel", "sinaloa"],
+  BR: ["brazil", "brasilia", "lula"],
+  AE: ["uae", "emirates", "dubai", "abu dhabi", "united arab emirates"],
 };
 
-const COUNTRY_BBOX: Record<string, { minLat: number; maxLat: number; minLon: number; maxLon: number }> = {
+const COUNTRY_BBOX: Record<
+  string,
+  { minLat: number; maxLat: number; minLon: number; maxLon: number }
+> = {
   US: { minLat: 24.5, maxLat: 49.4, minLon: -125.0, maxLon: -66.9 },
   RU: { minLat: 41.2, maxLat: 81.9, minLon: 19.6, maxLon: 180.0 },
   CN: { minLat: 18.2, maxLat: 53.6, minLon: 73.5, maxLon: 135.1 },
@@ -83,16 +140,31 @@ const COUNTRY_BBOX: Record<string, { minLat: number; maxLat: number; minLon: num
 };
 
 const ZONE_COUNTRY_MAP: Record<string, string[]> = {
-  'North America': ['US'], 'Europe': ['DE', 'FR', 'GB', 'PL', 'TR', 'UA'],
-  'East Asia': ['CN', 'TW', 'KP'], 'South Asia': ['IN', 'PK', 'MM'],
-  'Middle East': ['IR', 'IL', 'SA', 'SY', 'YE', 'AE'], 'Russia': ['RU'],
-  'Latin America': ['VE', 'CU', 'MX', 'BR'],
+  "North America": ["US"],
+  Europe: ["DE", "FR", "GB", "PL", "TR", "UA"],
+  "East Asia": ["CN", "TW", "KP"],
+  "South Asia": ["IN", "PK", "MM"],
+  "Middle East": ["IR", "IL", "SA", "SY", "YE", "AE"],
+  Russia: ["RU"],
+  "Latin America": ["VE", "CU", "MX", "BR"],
 };
 
-const ADVISORY_LEVELS: Record<string, 'do-not-travel' | 'reconsider' | 'caution'> = {
-  UA: 'do-not-travel', SY: 'do-not-travel', YE: 'do-not-travel', MM: 'do-not-travel',
-  IL: 'reconsider', IR: 'reconsider', PK: 'reconsider', VE: 'reconsider', CU: 'reconsider', MX: 'reconsider',
-  RU: 'caution', TR: 'caution',
+const ADVISORY_LEVELS: Record<
+  string,
+  "do-not-travel" | "reconsider" | "caution"
+> = {
+  UA: "do-not-travel",
+  SY: "do-not-travel",
+  YE: "do-not-travel",
+  MM: "do-not-travel",
+  IL: "reconsider",
+  IR: "reconsider",
+  PK: "reconsider",
+  VE: "reconsider",
+  CU: "reconsider",
+  MX: "reconsider",
+  RU: "caution",
+  TR: "caution",
 };
 
 // ========================================================================
@@ -108,13 +180,23 @@ function normalizeCountryName(text: string): string | null {
 }
 
 const BBOX_BY_AREA = Object.entries(COUNTRY_BBOX)
-  .map(([code, b]) => ({ code, ...b, area: (b.maxLat - b.minLat) * (b.maxLon - b.minLon) }))
+  .map(([code, b]) => ({
+    code,
+    ...b,
+    area: (b.maxLat - b.minLat) * (b.maxLon - b.minLon),
+  }))
   .sort((a, b) => a.area - b.area);
 
 function geoToCountry(lat: number, lon: number): string | null {
   if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
   for (const b of BBOX_BY_AREA) {
-    if (lat >= b.minLat && lat <= b.maxLat && lon >= b.minLon && lon <= b.maxLon) return b.code;
+    if (
+      lat >= b.minLat &&
+      lat <= b.maxLat &&
+      lon >= b.minLon &&
+      lon <= b.maxLon
+    )
+      return b.code;
   }
   return null;
 }
@@ -147,36 +229,55 @@ interface CountrySignals {
   highSeverityStrikes: number;
   orefAlertCount: number;
   orefHistoryCount24h: number;
-  advisoryLevel: 'do-not-travel' | 'reconsider' | 'caution' | null;
+  advisoryLevel: "do-not-travel" | "reconsider" | "caution" | null;
 }
 
 function emptySignals(): CountrySignals {
   return {
-    protests: 0, riots: 0, battles: 0, explosions: 0, civilianViolence: 0,
-    fatalities: 0, protestFatalities: 0, conflictFatalities: 0,
-    ucdpWar: false, ucdpMinor: false,
-    outageTotalCount: 0, outageMajorCount: 0, outagePartialCount: 0,
-    climateSeverity: 0, cyberCount: 0, fireCount: 0,
-    gpsHighCount: 0, gpsMediumCount: 0,
-    iranStrikes: 0, highSeverityStrikes: 0,
-    orefAlertCount: 0, orefHistoryCount24h: 0,
+    protests: 0,
+    riots: 0,
+    battles: 0,
+    explosions: 0,
+    civilianViolence: 0,
+    fatalities: 0,
+    protestFatalities: 0,
+    conflictFatalities: 0,
+    ucdpWar: false,
+    ucdpMinor: false,
+    outageTotalCount: 0,
+    outageMajorCount: 0,
+    outagePartialCount: 0,
+    climateSeverity: 0,
+    cyberCount: 0,
+    fireCount: 0,
+    gpsHighCount: 0,
+    gpsMediumCount: 0,
+    iranStrikes: 0,
+    highSeverityStrikes: 0,
+    orefAlertCount: 0,
+    orefHistoryCount24h: 0,
     advisoryLevel: null,
   };
 }
 
-async function fetchACLEDEvents(): Promise<Array<{ country: string; event_type: string; fatalities: number }>> {
-  const endDate = new Date().toISOString().split('T')[0]!;
-  const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]!;
+async function fetchACLEDEvents(): Promise<
+  Array<{ country: string; event_type: string; fatalities: number }>
+> {
+  const endDate = new Date().toISOString().split("T")[0]!;
+  const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split("T")[0]!;
   const raw = await fetchAcledCached({
-    eventTypes: 'Protests|Riots|Battles|Explosions/Remote violence|Violence against civilians',
+    eventTypes:
+      "Protests|Riots|Battles|Explosions/Remote violence|Violence against civilians",
     startDate,
     endDate,
     limit: 1000,
   });
   return raw.map((e) => ({
-    country: e.country || '',
-    event_type: e.event_type || '',
-    fatalities: parseInt(e.fatalities || '0', 10) || 0,
+    country: e.country || "",
+    event_type: e.event_type || "",
+    fatalities: parseInt(e.fatalities || "0", 10) || 0,
   }));
 }
 
@@ -192,15 +293,24 @@ interface AuxiliarySources {
 }
 
 async function fetchAuxiliarySources(): Promise<AuxiliarySources> {
-  const [ucdpRaw, outagesRaw, climateRaw, cyberRaw, firesRaw, gpsRaw, iranRaw, orefRaw] = await Promise.all([
-    getCachedJson('conflict:ucdp-events:v1', true).catch(() => null),
-    getCachedJson('infra:outages:v1', true).catch(() => null),
-    getCachedJson('climate:anomalies:v1', true).catch(() => null),
-    getCachedJson('cyber:threats-bootstrap:v2', true).catch(() => null),
-    getCachedJson('wildfire:fires:v1', true).catch(() => null),
-    getCachedJson('intelligence:gpsjam:v2', true).catch(() => null),
-    getCachedJson('conflict:iran-events:v1', true).catch(() => null),
-    getCachedJson('relay:oref:history:v1', true).catch(() => null),
+  const [
+    ucdpRaw,
+    outagesRaw,
+    climateRaw,
+    cyberRaw,
+    firesRaw,
+    gpsRaw,
+    iranRaw,
+    orefRaw,
+  ] = await Promise.all([
+    getCachedJson("conflict:ucdp-events:v1", true).catch(() => null),
+    getCachedJson("infra:outages:v1", true).catch(() => null),
+    getCachedJson("climate:anomalies:v1", true).catch(() => null),
+    getCachedJson("cyber:threats-bootstrap:v2", true).catch(() => null),
+    getCachedJson("wildfire:fires:v1", true).catch(() => null),
+    getCachedJson("intelligence:gpsjam:v2", true).catch(() => null),
+    getCachedJson("conflict:iran-events:v1", true).catch(() => null),
+    getCachedJson("relay:oref:history:v1", true).catch(() => null),
   ]);
   const arr = (v: any, field?: string, maxLen = 10000) => {
     let a: any[];
@@ -209,21 +319,23 @@ async function fetchAuxiliarySources(): Promise<AuxiliarySources> {
     return a.length > maxLen ? a.slice(0, maxLen) : a;
   };
 
-  let orefData: AuxiliarySources['orefData'] = null;
-  if (orefRaw && typeof orefRaw === 'object') {
+  let orefData: AuxiliarySources["orefData"] = null;
+  if (orefRaw && typeof orefRaw === "object") {
     const alertCount = safeNum((orefRaw as any).activeAlertCount);
     const histCount = safeNum((orefRaw as any).historyCount24h);
     orefData = { activeAlertCount: alertCount, historyCount24h: histCount };
   }
 
   return {
-    ucdpEvents: arr(ucdpRaw, 'events'),
-    outages: arr(outagesRaw, 'outages'),
-    climate: arr(climateRaw, 'anomalies'),
-    cyber: arr(cyberRaw, 'threats'),
-    fires: arr(firesRaw, 'fireDetections').length ? arr(firesRaw, 'fireDetections') : arr(firesRaw, 'fires'),
-    gpsHexes: arr(gpsRaw, 'hexes'),
-    iranEvents: arr(iranRaw, 'events'),
+    ucdpEvents: arr(ucdpRaw, "events"),
+    outages: arr(outagesRaw, "outages"),
+    climate: arr(climateRaw, "anomalies"),
+    cyber: arr(cyberRaw, "threats"),
+    fires: arr(firesRaw, "fireDetections").length
+      ? arr(firesRaw, "fireDetections")
+      : arr(firesRaw, "fires"),
+    gpsHexes: arr(gpsRaw, "hexes"),
+    iranEvents: arr(iranRaw, "events"),
     orefData,
   };
 }
@@ -244,19 +356,19 @@ export function computeCIIScores(
     if (!code || !data[code]) continue;
     const type = ev.event_type.toLowerCase();
     const fat = safeNum(ev.fatalities);
-    if (type.includes('protest')) {
+    if (type.includes("protest")) {
       data[code].protests++;
       data[code].protestFatalities += fat;
-    } else if (type.includes('riot')) {
+    } else if (type.includes("riot")) {
       data[code].riots++;
       data[code].protestFatalities += fat;
-    } else if (type.includes('battle')) {
+    } else if (type.includes("battle")) {
       data[code].battles++;
       data[code].conflictFatalities += fat;
-    } else if (type.includes('explosion') || type.includes('remote')) {
+    } else if (type.includes("explosion") || type.includes("remote")) {
       data[code].explosions++;
       data[code].conflictFatalities += fat;
-    } else if (type.includes('violence')) {
+    } else if (type.includes("violence")) {
       data[code].civilianViolence++;
       data[code].conflictFatalities += fat;
     }
@@ -265,36 +377,50 @@ export function computeCIIScores(
 
   // --- UCDP ---
   for (const ev of aux.ucdpEvents) {
-    const code = normalizeCountryName(ev.country || ev.location || '');
+    const code = normalizeCountryName(ev.country || ev.location || "");
     if (!code || !data[code]) continue;
-    const intensity = parseInt(ev.intensity_level || ev.type_of_violence || '0', 10);
+    const intensity = parseInt(
+      ev.intensity_level || ev.type_of_violence || "0",
+      10,
+    );
     if (intensity >= 2) data[code].ucdpWar = true;
     else if (intensity >= 1) data[code].ucdpMinor = true;
   }
 
   // --- Outages (string enum severity) ---
   for (const o of aux.outages) {
-    const code = (o.countryCode || o.country_code || '').toUpperCase();
+    const code = (o.countryCode || o.country_code || "").toUpperCase();
     if (!data[code]) continue;
-    const sev = String(o.severity || '').toUpperCase();
-    if (sev.includes('TOTAL') || sev === 'NATIONWIDE') data[code].outageTotalCount++;
-    else if (sev.includes('MAJOR') || sev === 'REGIONAL') data[code].outageMajorCount++;
-    else if (sev.includes('PARTIAL') || sev.includes('LOCAL') || sev.includes('MINOR')) data[code].outagePartialCount++;
+    const sev = String(o.severity || "").toUpperCase();
+    if (sev.includes("TOTAL") || sev === "NATIONWIDE")
+      data[code].outageTotalCount++;
+    else if (sev.includes("MAJOR") || sev === "REGIONAL")
+      data[code].outageMajorCount++;
+    else if (
+      sev.includes("PARTIAL") ||
+      sev.includes("LOCAL") ||
+      sev.includes("MINOR")
+    )
+      data[code].outagePartialCount++;
   }
 
   // --- Climate ---
   for (const a of aux.climate) {
-    const zone = a.zone || a.region || '';
+    const zone = a.zone || a.region || "";
     const countries = ZONE_COUNTRY_MAP[zone] || [];
     const severity = safeNum(a.severity ?? a.score);
     for (const code of countries) {
-      if (data[code]) data[code].climateSeverity = Math.max(data[code].climateSeverity, severity);
+      if (data[code])
+        data[code].climateSeverity = Math.max(
+          data[code].climateSeverity,
+          severity,
+        );
     }
   }
 
   // --- Cyber ---
   for (const t of aux.cyber) {
-    const code = (t.country || '').toUpperCase();
+    const code = (t.country || "").toUpperCase();
     if (data[code]) data[code].cyberCount++;
   }
 
@@ -312,7 +438,7 @@ export function computeCIIScores(
     const lon = safeNum(h.lon || h.longitude);
     const code = geoToCountry(lat, lon);
     if (!code || !data[code]) continue;
-    if (h.level === 'high') data[code].gpsHighCount++;
+    if (h.level === "high") data[code].gpsHighCount++;
     else data[code].gpsMediumCount++;
   }
 
@@ -320,17 +446,19 @@ export function computeCIIScores(
   for (const s of aux.iranEvents) {
     const lat = safeNum(s.lat || s.latitude);
     const lon = safeNum(s.lon || s.longitude);
-    const code = geoToCountry(lat, lon) || normalizeCountryName(s.title || s.location || '');
+    const code =
+      geoToCountry(lat, lon) ||
+      normalizeCountryName(s.title || s.location || "");
     if (!code || !data[code]) continue;
     data[code].iranStrikes++;
-    const sev = String(s.severity || '').toLowerCase();
-    if (sev === 'high' || sev === 'critical') data[code].highSeverityStrikes++;
+    const sev = String(s.severity || "").toLowerCase();
+    if (sev === "high" || sev === "critical") data[code].highSeverityStrikes++;
   }
 
   // --- OREF (IL only) ---
-  if (aux.orefData && data['IL']) {
-    data['IL'].orefAlertCount = aux.orefData.activeAlertCount;
-    data['IL'].orefHistoryCount24h = aux.orefData.historyCount24h;
+  if (aux.orefData && data["IL"]) {
+    data["IL"].orefAlertCount = aux.orefData.activeAlertCount;
+    data["IL"].orefHistoryCount24h = aux.orefData.historyCount24h;
   }
 
   // --- Scoring ---
@@ -342,58 +470,106 @@ export function computeCIIScores(
 
     // --- Unrest score (ported from frontend calcUnrestScore) ---
     const unrestCount = d.protests + d.riots;
-    const adjustedCount = multiplier < 0.7
-      ? Math.log2(unrestCount + 1) * multiplier * 5
-      : unrestCount * multiplier;
+    const adjustedCount =
+      multiplier < 0.7
+        ? Math.log2(unrestCount + 1) * multiplier * 5
+        : unrestCount * multiplier;
     const unrestBase = Math.min(50, adjustedCount * 8);
-    const unrestFatalityBoost = Math.min(30, d.protestFatalities * 5 * multiplier);
-    const outageBoost = Math.min(50, d.outageTotalCount * 30 + d.outageMajorCount * 15 + d.outagePartialCount * 5);
-    const unrest = Math.min(100, Math.round(unrestBase + unrestFatalityBoost + outageBoost));
+    const unrestFatalityBoost = Math.min(
+      30,
+      d.protestFatalities * 5 * multiplier,
+    );
+    const outageBoost = Math.min(
+      50,
+      d.outageTotalCount * 30 +
+        d.outageMajorCount * 15 +
+        d.outagePartialCount * 5,
+    );
+    const unrest = Math.min(
+      100,
+      Math.round(unrestBase + unrestFatalityBoost + outageBoost),
+    );
 
     // --- Conflict score (ported from frontend calcConflictScore) ---
-    const acledScore = Math.min(50, Math.round((d.battles * 3 + d.explosions * 4 + d.civilianViolence * 5) * multiplier));
-    const fatalityScore = Math.min(40, Math.round(Math.sqrt(d.conflictFatalities) * 5 * multiplier));
+    const acledScore = Math.min(
+      50,
+      Math.round(
+        (d.battles * 3 + d.explosions * 4 + d.civilianViolence * 5) *
+          multiplier,
+      ),
+    );
+    const fatalityScore = Math.min(
+      40,
+      Math.round(Math.sqrt(d.conflictFatalities) * 5 * multiplier),
+    );
     const civilianBoost = Math.min(10, d.civilianViolence * 3);
-    const strikeBoost = Math.min(50, d.iranStrikes * 3 + d.highSeverityStrikes * 5);
-    const orefBoost = (code === 'IL' && d.orefAlertCount > 0)
-      ? 25 + Math.min(25, d.orefAlertCount * 5)
-      : 0;
-    const conflict = Math.min(100, acledScore + fatalityScore + civilianBoost + strikeBoost + orefBoost);
+    const strikeBoost = Math.min(
+      50,
+      d.iranStrikes * 3 + d.highSeverityStrikes * 5,
+    );
+    const orefBoost =
+      code === "IL" && d.orefAlertCount > 0
+        ? 25 + Math.min(25, d.orefAlertCount * 5)
+        : 0;
+    const conflict = Math.min(
+      100,
+      acledScore + fatalityScore + civilianBoost + strikeBoost + orefBoost,
+    );
 
     // --- Security score (ported from frontend calcSecurityScore) ---
-    const gpsJammingScore = Math.min(35, d.gpsHighCount * 5 + d.gpsMediumCount * 2);
+    const gpsJammingScore = Math.min(
+      35,
+      d.gpsHighCount * 5 + d.gpsMediumCount * 2,
+    );
     const security = Math.min(100, Math.round(gpsJammingScore));
 
     const information = 0;
 
-    const eventScore = unrest * 0.25 + conflict * 0.30 + security * 0.20 + information * 0.25;
+    const eventScore =
+      unrest * 0.25 + conflict * 0.3 + security * 0.2 + information * 0.25;
 
     const climateBoost = Math.min(15, d.climateSeverity * 3);
     const cyberBoost = Math.min(10, Math.floor(d.cyberCount / 5));
     const fireBoost = Math.min(8, Math.floor(d.fireCount / 10));
 
     // --- Advisory boost ---
-    const advisoryBoost = d.advisoryLevel === 'do-not-travel' ? 15
-      : d.advisoryLevel === 'reconsider' ? 10
-      : d.advisoryLevel === 'caution' ? 5 : 0;
+    const advisoryBoost =
+      d.advisoryLevel === "do-not-travel"
+        ? 15
+        : d.advisoryLevel === "reconsider"
+          ? 10
+          : d.advisoryLevel === "caution"
+            ? 5
+            : 0;
 
     // --- OREF blend boost (IL only) ---
-    const orefBlendBoost = code === 'IL'
-      ? (d.orefAlertCount > 0 ? 15 : 0) + (d.orefHistoryCount24h >= 10 ? 10 : d.orefHistoryCount24h >= 3 ? 5 : 0)
-      : 0;
+    const orefBlendBoost =
+      code === "IL"
+        ? (d.orefAlertCount > 0 ? 15 : 0) +
+          (d.orefHistoryCount24h >= 10
+            ? 10
+            : d.orefHistoryCount24h >= 3
+              ? 5
+              : 0)
+        : 0;
 
-    const blended = baseline * 0.4
-      + eventScore * 0.6
-      + climateBoost
-      + cyberBoost
-      + fireBoost
-      + advisoryBoost
-      + orefBlendBoost;
+    const blended =
+      baseline * 0.4 +
+      eventScore * 0.6 +
+      climateBoost +
+      cyberBoost +
+      fireBoost +
+      advisoryBoost +
+      orefBlendBoost;
 
     // --- Floors ---
-    const ucdpFloor = d.ucdpWar ? 70 : (d.ucdpMinor ? 50 : 0);
-    const advisoryFloor = d.advisoryLevel === 'do-not-travel' ? 60
-      : d.advisoryLevel === 'reconsider' ? 50 : 0;
+    const ucdpFloor = d.ucdpWar ? 70 : d.ucdpMinor ? 50 : 0;
+    const advisoryFloor =
+      d.advisoryLevel === "do-not-travel"
+        ? 60
+        : d.advisoryLevel === "reconsider"
+          ? 50
+          : 0;
     const floor = Math.max(ucdpFloor, advisoryFloor);
 
     const composite = Math.min(100, Math.max(floor, Math.round(blended)));
@@ -403,7 +579,7 @@ export function computeCIIScores(
       staticBaseline: baseline,
       dynamicScore: composite - baseline,
       combinedScore: composite,
-      trend: 'TREND_DIRECTION_STABLE' as TrendDirection,
+      trend: "TREND_DIRECTION_STABLE" as TrendDirection,
       components: {
         newsActivity: information,
         ciiContribution: unrest,
@@ -422,20 +598,26 @@ function computeStrategicRisks(ciiScores: CiiScore[]): StrategicRisk[] {
   const top5 = ciiScores.slice(0, 5);
   const weights = top5.map((_, i) => 1 - i * 0.15);
   const totalWeight = weights.reduce((sum, w) => sum + w, 0);
-  const weightedSum = top5.reduce((sum, s, i) => sum + s.combinedScore * weights[i]!, 0);
-  const overallScore = Math.min(100, Math.round((weightedSum / totalWeight) * 0.7 + 15));
+  const weightedSum = top5.reduce(
+    (sum, s, i) => sum + s.combinedScore * weights[i]!,
+    0,
+  );
+  const overallScore = Math.min(
+    100,
+    Math.round((weightedSum / totalWeight) * 0.7 + 15),
+  );
 
   return [
     {
-      region: 'global',
+      region: "global",
       level: (overallScore >= 70
-        ? 'SEVERITY_LEVEL_HIGH'
+        ? "SEVERITY_LEVEL_HIGH"
         : overallScore >= 40
-          ? 'SEVERITY_LEVEL_MEDIUM'
-          : 'SEVERITY_LEVEL_LOW') as SeverityLevel,
+          ? "SEVERITY_LEVEL_MEDIUM"
+          : "SEVERITY_LEVEL_LOW") as SeverityLevel,
       score: overallScore,
       factors: top5.map((s) => s.region),
-      trend: 'TREND_DIRECTION_STABLE' as TrendDirection,
+      trend: "TREND_DIRECTION_STABLE" as TrendDirection,
     },
   ];
 }
@@ -444,8 +626,8 @@ function computeStrategicRisks(ciiScores: CiiScore[]): StrategicRisk[] {
 // Cache keys
 // ========================================================================
 
-const RISK_CACHE_KEY = 'risk:scores:sebuf:v1';
-const RISK_STALE_CACHE_KEY = 'risk:scores:sebuf:stale:v1';
+const RISK_CACHE_KEY = "risk:scores:sebuf:v1";
+const RISK_STALE_CACHE_KEY = "risk:scores:sebuf:stale:v1";
 const RISK_CACHE_TTL = 600;
 const RISK_STALE_TTL = 3600;
 
@@ -458,28 +640,44 @@ export async function getRiskScores(
   _req: GetRiskScoresRequest,
 ): Promise<GetRiskScoresResponse> {
   try {
-    const { data: result } = await cachedFetchJsonWithMeta<GetRiskScoresResponse>(
-      RISK_CACHE_KEY,
-      RISK_CACHE_TTL,
-      async () => {
-        const [acled, aux] = await Promise.all([
-          fetchACLEDEvents(),
-          fetchAuxiliarySources(),
-        ]);
-        const ciiScores = computeCIIScores(acled, aux);
-        const strategicRisks = computeStrategicRisks(ciiScores);
-        return { ciiScores, strategicRisks };
-      },
-    );
+    const { data: result } =
+      await cachedFetchJsonWithMeta<GetRiskScoresResponse>(
+        RISK_CACHE_KEY,
+        RISK_CACHE_TTL,
+        async () => {
+          const [acled, aux] = await Promise.all([
+            fetchACLEDEvents(),
+            fetchAuxiliarySources(),
+          ]);
+          const ciiScores = computeCIIScores(acled, aux);
+          const strategicRisks = computeStrategicRisks(ciiScores);
+          return { ciiScores, strategicRisks };
+        },
+      );
     if (result) {
-      await setCachedJson(RISK_STALE_CACHE_KEY, result, RISK_STALE_TTL).catch(() => {});
+      await setCachedJson(RISK_STALE_CACHE_KEY, result, RISK_STALE_TTL).catch(
+        () => {},
+      );
       return result;
     }
-  } catch { /* upstream failed, fall through to stale */ }
+  } catch {
+    /* upstream failed, fall through to stale */
+  }
 
-  const stale = (await getCachedJson(RISK_STALE_CACHE_KEY)) as GetRiskScoresResponse | null;
+  const stale = (await getCachedJson(
+    RISK_STALE_CACHE_KEY,
+  )) as GetRiskScoresResponse | null;
   if (stale) return stale;
-  const emptyAux: AuxiliarySources = { ucdpEvents: [], outages: [], climate: [], cyber: [], fires: [], gpsHexes: [], iranEvents: [], orefData: null };
+  const emptyAux: AuxiliarySources = {
+    ucdpEvents: [],
+    outages: [],
+    climate: [],
+    cyber: [],
+    fires: [],
+    gpsHexes: [],
+    iranEvents: [],
+    orefData: null,
+  };
   const ciiScores = computeCIIScores([], emptyAux);
   return { ciiScores, strategicRisks: computeStrategicRisks(ciiScores) };
 }

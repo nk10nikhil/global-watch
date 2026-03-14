@@ -5,7 +5,9 @@
  */
 export default class ChildProcessProxy {
   async start(): Promise<{}> {
-    throw new Error('ChildProcessProxy is not available in browser environments.');
+    throw new Error(
+      "ChildProcessProxy is not available in browser environments.",
+    );
   }
 
   async stop(): Promise<void> {}

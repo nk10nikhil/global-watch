@@ -4,42 +4,48 @@
  * showing misleading "all clear" when we actually have no data.
  */
 
-import { getCSSColor } from '@/utils';
+import { getCSSColor } from "@/utils";
 
 export type DataSourceId =
-  | 'acled'      // Protests/conflicts
-  | 'opensky'    // Military flights
-  | 'wingbits'   // Aircraft enrichment
-  | 'ais'        // Vessel tracking
-  | 'usgs'       // Earthquakes
-  | 'gdelt'      // News velocity
-  | 'gdelt_doc'  // GDELT Doc protest intelligence
-  | 'rss'        // RSS feeds
-  | 'polymarket' // Prediction markets
-  | 'predictions' // Predictions feed
-  | 'pizzint'    // PizzINT monitoring
-  | 'outages'    // Internet outages
-  | 'cyber_threats' // Cyber threat IOC layer
-  | 'weather'    // Weather alerts
-  | 'economic'   // Economic indicators (FRED)
-  | 'oil'        // EIA oil analytics
-  | 'spending'        // USASpending.gov
-  | 'firms'          // NASA FIRMS satellite fires
-  | 'acled_conflict' // ACLED battles/explosions/violence
-  | 'ucdp'           // UCDP conflict classification
-  | 'hapi'           // HDX HAPI aggregated conflict data
-  | 'ucdp_events'    // UCDP georeferenced conflict events
-  | 'unhcr'          // UNHCR displacement data
-  | 'climate'        // Climate anomaly data (Open-Meteo)
-  | 'worldpop'       // WorldPop population exposure
-  | 'giving'         // Global giving activity data
-  | 'bis'            // BIS central bank data
-  | 'wto_trade'      // WTO trade policy data
-  | 'supply_chain'   // Supply chain disruption intelligence
-  | 'security_advisories'  // Government travel/security advisories
-  | 'gpsjam';              // GPS/GNSS interference
+  | "acled" // Protests/conflicts
+  | "opensky" // Military flights
+  | "wingbits" // Aircraft enrichment
+  | "ais" // Vessel tracking
+  | "usgs" // Earthquakes
+  | "gdelt" // News velocity
+  | "gdelt_doc" // GDELT Doc protest intelligence
+  | "rss" // RSS feeds
+  | "polymarket" // Prediction markets
+  | "predictions" // Predictions feed
+  | "pizzint" // PizzINT monitoring
+  | "outages" // Internet outages
+  | "cyber_threats" // Cyber threat IOC layer
+  | "weather" // Weather alerts
+  | "economic" // Economic indicators (FRED)
+  | "oil" // EIA oil analytics
+  | "spending" // USASpending.gov
+  | "firms" // NASA FIRMS satellite fires
+  | "acled_conflict" // ACLED battles/explosions/violence
+  | "ucdp" // UCDP conflict classification
+  | "hapi" // HDX HAPI aggregated conflict data
+  | "ucdp_events" // UCDP georeferenced conflict events
+  | "unhcr" // UNHCR displacement data
+  | "climate" // Climate anomaly data (Open-Meteo)
+  | "worldpop" // WorldPop population exposure
+  | "giving" // Global giving activity data
+  | "bis" // BIS central bank data
+  | "wto_trade" // WTO trade policy data
+  | "supply_chain" // Supply chain disruption intelligence
+  | "security_advisories" // Government travel/security advisories
+  | "gpsjam"; // GPS/GNSS interference
 
-export type FreshnessStatus = 'fresh' | 'stale' | 'very_stale' | 'no_data' | 'disabled' | 'error';
+export type FreshnessStatus =
+  | "fresh"
+  | "stale"
+  | "very_stale"
+  | "no_data"
+  | "disabled"
+  | "error";
 
 export interface DataSourceState {
   id: DataSourceId;
@@ -58,53 +64,164 @@ export interface DataFreshnessSummary {
   staleSources: number;
   disabledSources: number;
   errorSources: number;
-  overallStatus: 'sufficient' | 'limited' | 'insufficient';
+  overallStatus: "sufficient" | "limited" | "insufficient";
   coveragePercent: number;
   oldestUpdate: Date | null;
   newestUpdate: Date | null;
 }
 
 // Thresholds in milliseconds
-const FRESH_THRESHOLD = 15 * 60 * 1000;      // 15 minutes
-const STALE_THRESHOLD = 2 * 60 * 60 * 1000;  // 2 hours
+const FRESH_THRESHOLD = 15 * 60 * 1000; // 15 minutes
+const STALE_THRESHOLD = 2 * 60 * 60 * 1000; // 2 hours
 const VERY_STALE_THRESHOLD = 6 * 60 * 60 * 1000; // 6 hours
 
 // Core sources needed for meaningful risk assessment
 // Note: ACLED is optional since GDELT provides protest data as fallback
-const CORE_SOURCES: DataSourceId[] = ['gdelt', 'rss'];
+const CORE_SOURCES: DataSourceId[] = ["gdelt", "rss"];
 
-const SOURCE_METADATA: Record<DataSourceId, { name: string; requiredForRisk: boolean; panelId?: string }> = {
-  acled: { name: 'Protests & Conflicts', requiredForRisk: false, panelId: 'protests' },
-  opensky: { name: 'Military Flights', requiredForRisk: false, panelId: 'military' },
-  wingbits: { name: 'Aircraft Enrichment', requiredForRisk: false, panelId: 'military' },
-  ais: { name: 'Vessel Tracking', requiredForRisk: false, panelId: 'shipping' },
-  usgs: { name: 'Earthquakes', requiredForRisk: false, panelId: 'natural' },
-  gdelt: { name: 'News Intelligence', requiredForRisk: true, panelId: 'intel' },
-  gdelt_doc: { name: 'GDELT Doc Intelligence', requiredForRisk: false, panelId: 'protests' },
-  rss: { name: 'Live News Feeds', requiredForRisk: true, panelId: 'live-news' },
-  polymarket: { name: 'Prediction Markets', requiredForRisk: false, panelId: 'polymarket' },
-  predictions: { name: 'Predictions Feed', requiredForRisk: false, panelId: 'polymarket' },
-  pizzint: { name: 'PizzINT Monitoring', requiredForRisk: false, panelId: 'intel' },
-  outages: { name: 'Internet Outages', requiredForRisk: false, panelId: 'outages' },
-  cyber_threats: { name: 'Cyber Threat IOCs', requiredForRisk: false, panelId: 'map' },
-  weather: { name: 'Weather Alerts', requiredForRisk: false, panelId: 'weather' },
-  economic: { name: 'Economic Data (FRED)', requiredForRisk: false, panelId: 'economic' },
-  oil: { name: 'Oil Analytics (EIA)', requiredForRisk: false, panelId: 'economic' },
-  spending: { name: 'Gov Spending', requiredForRisk: false, panelId: 'economic' },
-  firms: { name: 'FIRMS Satellite Fires', requiredForRisk: false, panelId: 'map' },
-  acled_conflict: { name: 'Armed Conflicts (ACLED)', requiredForRisk: false, panelId: 'protests' },
-  ucdp: { name: 'Conflict Classification (UCDP)', requiredForRisk: false, panelId: 'protests' },
-  hapi: { name: 'Conflict Aggregates (HDX)', requiredForRisk: false, panelId: 'protests' },
-  ucdp_events: { name: 'UCDP Conflict Events', requiredForRisk: false, panelId: 'ucdp-events' },
-  unhcr: { name: 'UNHCR Displacement', requiredForRisk: false, panelId: 'displacement' },
-  climate: { name: 'Climate Anomalies', requiredForRisk: false, panelId: 'climate' },
-  worldpop: { name: 'Population Exposure', requiredForRisk: false, panelId: 'population-exposure' },
-  giving: { name: 'Global Giving Activity', requiredForRisk: false, panelId: 'giving' },
-  bis: { name: 'BIS Central Banks', requiredForRisk: false, panelId: 'economic' },
-  wto_trade: { name: 'WTO Trade Policy', requiredForRisk: false, panelId: 'trade-policy' },
-  supply_chain: { name: 'Supply Chain Intelligence', requiredForRisk: false, panelId: 'supply-chain' },
-  security_advisories: { name: 'Security Advisories', requiredForRisk: false, panelId: 'security-advisories' },
-  gpsjam: { name: 'GPS/GNSS Interference', requiredForRisk: false, panelId: 'map' },
+const SOURCE_METADATA: Record<
+  DataSourceId,
+  { name: string; requiredForRisk: boolean; panelId?: string }
+> = {
+  acled: {
+    name: "Protests & Conflicts",
+    requiredForRisk: false,
+    panelId: "protests",
+  },
+  opensky: {
+    name: "Military Flights",
+    requiredForRisk: false,
+    panelId: "military",
+  },
+  wingbits: {
+    name: "Aircraft Enrichment",
+    requiredForRisk: false,
+    panelId: "military",
+  },
+  ais: { name: "Vessel Tracking", requiredForRisk: false, panelId: "shipping" },
+  usgs: { name: "Earthquakes", requiredForRisk: false, panelId: "natural" },
+  gdelt: { name: "News Intelligence", requiredForRisk: true, panelId: "intel" },
+  gdelt_doc: {
+    name: "GDELT Doc Intelligence",
+    requiredForRisk: false,
+    panelId: "protests",
+  },
+  rss: { name: "Live News Feeds", requiredForRisk: true, panelId: "live-news" },
+  polymarket: {
+    name: "Prediction Markets",
+    requiredForRisk: false,
+    panelId: "polymarket",
+  },
+  predictions: {
+    name: "Predictions Feed",
+    requiredForRisk: false,
+    panelId: "polymarket",
+  },
+  pizzint: {
+    name: "PizzINT Monitoring",
+    requiredForRisk: false,
+    panelId: "intel",
+  },
+  outages: {
+    name: "Internet Outages",
+    requiredForRisk: false,
+    panelId: "outages",
+  },
+  cyber_threats: {
+    name: "Cyber Threat IOCs",
+    requiredForRisk: false,
+    panelId: "map",
+  },
+  weather: {
+    name: "Weather Alerts",
+    requiredForRisk: false,
+    panelId: "weather",
+  },
+  economic: {
+    name: "Economic Data (FRED)",
+    requiredForRisk: false,
+    panelId: "economic",
+  },
+  oil: {
+    name: "Oil Analytics (EIA)",
+    requiredForRisk: false,
+    panelId: "economic",
+  },
+  spending: {
+    name: "Gov Spending",
+    requiredForRisk: false,
+    panelId: "economic",
+  },
+  firms: {
+    name: "FIRMS Satellite Fires",
+    requiredForRisk: false,
+    panelId: "map",
+  },
+  acled_conflict: {
+    name: "Armed Conflicts (ACLED)",
+    requiredForRisk: false,
+    panelId: "protests",
+  },
+  ucdp: {
+    name: "Conflict Classification (UCDP)",
+    requiredForRisk: false,
+    panelId: "protests",
+  },
+  hapi: {
+    name: "Conflict Aggregates (HDX)",
+    requiredForRisk: false,
+    panelId: "protests",
+  },
+  ucdp_events: {
+    name: "UCDP Conflict Events",
+    requiredForRisk: false,
+    panelId: "ucdp-events",
+  },
+  unhcr: {
+    name: "UNHCR Displacement",
+    requiredForRisk: false,
+    panelId: "displacement",
+  },
+  climate: {
+    name: "Climate Anomalies",
+    requiredForRisk: false,
+    panelId: "climate",
+  },
+  worldpop: {
+    name: "Population Exposure",
+    requiredForRisk: false,
+    panelId: "population-exposure",
+  },
+  giving: {
+    name: "Global Giving Activity",
+    requiredForRisk: false,
+    panelId: "giving",
+  },
+  bis: {
+    name: "BIS Central Banks",
+    requiredForRisk: false,
+    panelId: "economic",
+  },
+  wto_trade: {
+    name: "WTO Trade Policy",
+    requiredForRisk: false,
+    panelId: "trade-policy",
+  },
+  supply_chain: {
+    name: "Supply Chain Intelligence",
+    requiredForRisk: false,
+    panelId: "supply-chain",
+  },
+  security_advisories: {
+    name: "Security Advisories",
+    requiredForRisk: false,
+    panelId: "security-advisories",
+  },
+  gpsjam: {
+    name: "GPS/GNSS Interference",
+    requiredForRisk: false,
+    panelId: "map",
+  },
 };
 
 class DataFreshnessTracker {
@@ -121,7 +238,7 @@ class DataFreshnessTracker {
         lastError: null,
         itemCount: 0,
         enabled: true, // Assume enabled by default
-        status: 'no_data',
+        status: "no_data",
         requiredForRisk: meta.requiredForRisk,
       });
     }
@@ -148,7 +265,7 @@ class DataFreshnessTracker {
     const source = this.sources.get(sourceId);
     if (source) {
       source.lastError = error;
-      source.status = 'error';
+      source.status = "error";
       this.notifyListeners();
     }
   }
@@ -160,7 +277,7 @@ class DataFreshnessTracker {
     const source = this.sources.get(sourceId);
     if (source) {
       source.enabled = enabled;
-      source.status = enabled ? this.calculateStatus(source) : 'disabled';
+      source.status = enabled ? this.calculateStatus(source) : "disabled";
       this.notifyListeners();
     }
   }
@@ -172,7 +289,9 @@ class DataFreshnessTracker {
     const source = this.sources.get(sourceId);
     if (source) {
       // Recalculate status in case time has passed
-      source.status = source.enabled ? this.calculateStatus(source) : 'disabled';
+      source.status = source.enabled
+        ? this.calculateStatus(source)
+        : "disabled";
     }
     return source;
   }
@@ -181,9 +300,9 @@ class DataFreshnessTracker {
    * Get all source states
    */
   getAllSources(): DataSourceState[] {
-    return Array.from(this.sources.values()).map(source => ({
+    return Array.from(this.sources.values()).map((source) => ({
       ...source,
-      status: source.enabled ? this.calculateStatus(source) : 'disabled',
+      status: source.enabled ? this.calculateStatus(source) : "disabled",
     }));
   }
 
@@ -191,7 +310,7 @@ class DataFreshnessTracker {
    * Get sources required for risk assessment
    */
   getRiskSources(): DataSourceState[] {
-    return this.getAllSources().filter(s => s.requiredForRisk);
+    return this.getAllSources().filter((s) => s.requiredForRisk);
   }
 
   /**
@@ -199,31 +318,47 @@ class DataFreshnessTracker {
    */
   getSummary(): DataFreshnessSummary {
     const sources = this.getAllSources();
-    const riskSources = sources.filter(s => s.requiredForRisk);
+    const riskSources = sources.filter((s) => s.requiredForRisk);
 
-    const activeSources = sources.filter(s => s.status === 'fresh' || s.status === 'stale' || s.status === 'very_stale');
-    const activeRiskSources = riskSources.filter(s => s.status === 'fresh' || s.status === 'stale' || s.status === 'very_stale');
-    const staleSources = sources.filter(s => s.status === 'stale' || s.status === 'very_stale');
-    const disabledSources = sources.filter(s => s.status === 'disabled');
-    const errorSources = sources.filter(s => s.status === 'error');
+    const activeSources = sources.filter(
+      (s) =>
+        s.status === "fresh" ||
+        s.status === "stale" ||
+        s.status === "very_stale",
+    );
+    const activeRiskSources = riskSources.filter(
+      (s) =>
+        s.status === "fresh" ||
+        s.status === "stale" ||
+        s.status === "very_stale",
+    );
+    const staleSources = sources.filter(
+      (s) => s.status === "stale" || s.status === "very_stale",
+    );
+    const disabledSources = sources.filter((s) => s.status === "disabled");
+    const errorSources = sources.filter((s) => s.status === "error");
 
     const updates = sources
-      .filter(s => s.lastUpdate)
-      .map(s => s.lastUpdate!.getTime());
+      .filter((s) => s.lastUpdate)
+      .map((s) => s.lastUpdate!.getTime());
 
     // Coverage is based on risk-required sources
-    const coveragePercent = riskSources.length > 0
-      ? Math.round((activeRiskSources.length / riskSources.length) * 100)
-      : 0;
+    const coveragePercent =
+      riskSources.length > 0
+        ? Math.round((activeRiskSources.length / riskSources.length) * 100)
+        : 0;
 
     // Overall status
-    let overallStatus: 'sufficient' | 'limited' | 'insufficient';
-    if (activeRiskSources.length >= CORE_SOURCES.length && coveragePercent >= 66) {
-      overallStatus = 'sufficient';
+    let overallStatus: "sufficient" | "limited" | "insufficient";
+    if (
+      activeRiskSources.length >= CORE_SOURCES.length &&
+      coveragePercent >= 66
+    ) {
+      overallStatus = "sufficient";
     } else if (activeRiskSources.length >= 1) {
-      overallStatus = 'limited';
+      overallStatus = "limited";
     } else {
-      overallStatus = 'insufficient';
+      overallStatus = "insufficient";
     }
 
     return {
@@ -234,8 +369,18 @@ class DataFreshnessTracker {
       errorSources: errorSources.length,
       overallStatus,
       coveragePercent,
-      oldestUpdate: updates.length > 0 ? new Date(updates.reduce((min, d) => d < min ? d : min, updates[0]!)) : null,
-      newestUpdate: updates.length > 0 ? new Date(updates.reduce((max, d) => d > max ? d : max, updates[0]!)) : null,
+      oldestUpdate:
+        updates.length > 0
+          ? new Date(
+              updates.reduce((min, d) => (d < min ? d : min), updates[0]!),
+            )
+          : null,
+      newestUpdate:
+        updates.length > 0
+          ? new Date(
+              updates.reduce((max, d) => (d > max ? d : max), updates[0]!),
+            )
+          : null,
     };
   }
 
@@ -243,7 +388,7 @@ class DataFreshnessTracker {
    * Check if we have enough data for risk assessment
    */
   hasSufficientData(): boolean {
-    return this.getSummary().overallStatus === 'sufficient';
+    return this.getSummary().overallStatus === "sufficient";
   }
 
   /**
@@ -269,15 +414,15 @@ class DataFreshnessTracker {
   }
 
   private calculateStatus(source: DataSourceState): FreshnessStatus {
-    if (!source.enabled) return 'disabled';
-    if (source.lastError) return 'error';
-    if (!source.lastUpdate) return 'no_data';
+    if (!source.enabled) return "disabled";
+    if (source.lastError) return "error";
+    if (!source.lastUpdate) return "no_data";
 
     const age = Date.now() - source.lastUpdate.getTime();
-    if (age < FRESH_THRESHOLD) return 'fresh';
-    if (age < STALE_THRESHOLD) return 'stale';
-    if (age < VERY_STALE_THRESHOLD) return 'very_stale';
-    return 'no_data'; // Too old, treat as no data
+    if (age < FRESH_THRESHOLD) return "fresh";
+    if (age < STALE_THRESHOLD) return "stale";
+    if (age < VERY_STALE_THRESHOLD) return "very_stale";
+    return "no_data"; // Too old, treat as no data
   }
 
   private notifyListeners(): void {
@@ -285,7 +430,7 @@ class DataFreshnessTracker {
       try {
         listener();
       } catch (e) {
-        console.error('[DataFreshness] Listener error:', e);
+        console.error("[DataFreshness] Listener error:", e);
       }
     }
   }
@@ -295,10 +440,10 @@ class DataFreshnessTracker {
    */
   getTimeSince(sourceId: DataSourceId): string {
     const source = this.sources.get(sourceId);
-    if (!source?.lastUpdate) return 'never';
+    if (!source?.lastUpdate) return "never";
 
     const ms = Date.now() - source.lastUpdate.getTime();
-    if (ms < 60000) return 'just now';
+    if (ms < 60000) return "just now";
     if (ms < 3600000) return `${Math.floor(ms / 60000)}m ago`;
     if (ms < 86400000) return `${Math.floor(ms / 3600000)}h ago`;
     return `${Math.floor(ms / 86400000)}d ago`;
@@ -311,80 +456,115 @@ export const dataFreshness = new DataFreshnessTracker();
 // Helper to get status color
 export function getStatusColor(status: FreshnessStatus): string {
   switch (status) {
-    case 'fresh': return getCSSColor('--semantic-normal');
-    case 'stale': return getCSSColor('--semantic-elevated');
-    case 'very_stale': return getCSSColor('--semantic-high');
-    case 'error': return getCSSColor('--semantic-critical');
-    case 'disabled': return getCSSColor('--text-muted');
-    case 'no_data': return getCSSColor('--text-dim');
+    case "fresh":
+      return getCSSColor("--semantic-normal");
+    case "stale":
+      return getCSSColor("--semantic-elevated");
+    case "very_stale":
+      return getCSSColor("--semantic-high");
+    case "error":
+      return getCSSColor("--semantic-critical");
+    case "disabled":
+      return getCSSColor("--text-muted");
+    case "no_data":
+      return getCSSColor("--text-dim");
   }
 }
 
 // Helper to get status icon
 export function getStatusIcon(status: FreshnessStatus): string {
   switch (status) {
-    case 'fresh': return '●';
-    case 'stale': return '◐';
-    case 'very_stale': return '○';
-    case 'error': return '✕';
-    case 'disabled': return '○';
-    case 'no_data': return '○';
+    case "fresh":
+      return "●";
+    case "stale":
+      return "◐";
+    case "very_stale":
+      return "○";
+    case "error":
+      return "✕";
+    case "disabled":
+      return "○";
+    case "no_data":
+      return "○";
   }
 }
 
 // Intelligence gap messages - explains what analysts CAN'T see (Quick Win #1)
 const INTELLIGENCE_GAP_MESSAGES: Record<DataSourceId, string> = {
-  acled: 'Protest/conflict events may be missed—ACLED data unavailable',
-  opensky: 'Military aircraft positions unknown—flight tracking offline',
-  wingbits: 'Aircraft identification limited—enrichment service unavailable',
-  ais: 'Vessel positions outdated—possible dark shipping or AIS transponder-off activity undetected',
-  usgs: 'Recent earthquakes may not be shown—seismic data unavailable',
-  gdelt: 'News event velocity unknown—GDELT intelligence feed offline',
-  gdelt_doc: 'Protest intelligence degraded—GDELT Doc feed offline',
-  rss: 'Breaking news may be missed—RSS feeds not updating',
-  polymarket: 'Prediction market signals unavailable—early warning capability degraded',
-  predictions: 'Prediction feed unavailable—scenario signals may be stale',
-  pizzint: 'PizzINT monitor unavailable—location/tension tracking degraded',
-  outages: 'Internet disruptions may be unreported—outage monitoring offline',
-  cyber_threats: 'Cyber IOC map points unavailable—malicious infrastructure visibility reduced',
-  weather: 'Severe weather warnings may be missed—weather alerts unavailable',
-  economic: 'Economic indicators stale—Fed/Treasury data not updating',
-  oil: 'Oil market analytics unavailable—EIA data not updating',
-  spending: 'Government spending data unavailable',
-  firms: 'Satellite fire detection unavailable—NASA FIRMS data not updating',
-  acled_conflict: 'Armed conflict events may be missed—ACLED conflict data unavailable',
-  ucdp: 'Conflict classification unavailable—UCDP data not loading',
-  hapi: 'Aggregated conflict data unavailable—HDX HAPI not responding',
-  ucdp_events: 'UCDP event-level conflict data unavailable',
-  unhcr: 'UNHCR displacement data unavailable—refugee flows unknown',
-  climate: 'Climate anomaly data unavailable—extreme weather patterns undetected',
-  worldpop: 'Population exposure data unavailable—affected population unknown',
-  giving: 'Global giving activity data unavailable',
-  bis: 'Central bank policy data may be stale—BIS feed unavailable',
-  wto_trade: 'Trade policy intelligence unavailable—WTO data not updating',
-  supply_chain: 'Supply chain disruption status unavailable—chokepoint monitoring offline',
-  security_advisories: 'Government travel advisory data unavailable—security alerts may be missed',
-  gpsjam: 'GPS/GNSS interference data unavailable—jamming zones undetected',
+  acled: "Protest/conflict events may be missed—ACLED data unavailable",
+  opensky: "Military aircraft positions unknown—flight tracking offline",
+  wingbits: "Aircraft identification limited—enrichment service unavailable",
+  ais: "Vessel positions outdated—possible dark shipping or AIS transponder-off activity undetected",
+  usgs: "Recent earthquakes may not be shown—seismic data unavailable",
+  gdelt: "News event velocity unknown—GDELT intelligence feed offline",
+  gdelt_doc: "Protest intelligence degraded—GDELT Doc feed offline",
+  rss: "Breaking news may be missed—RSS feeds not updating",
+  polymarket:
+    "Prediction market signals unavailable—early warning capability degraded",
+  predictions: "Prediction feed unavailable—scenario signals may be stale",
+  pizzint: "PizzINT monitor unavailable—location/tension tracking degraded",
+  outages: "Internet disruptions may be unreported—outage monitoring offline",
+  cyber_threats:
+    "Cyber IOC map points unavailable—malicious infrastructure visibility reduced",
+  weather: "Severe weather warnings may be missed—weather alerts unavailable",
+  economic: "Economic indicators stale—Fed/Treasury data not updating",
+  oil: "Oil market analytics unavailable—EIA data not updating",
+  spending: "Government spending data unavailable",
+  firms: "Satellite fire detection unavailable—NASA FIRMS data not updating",
+  acled_conflict:
+    "Armed conflict events may be missed—ACLED conflict data unavailable",
+  ucdp: "Conflict classification unavailable—UCDP data not loading",
+  hapi: "Aggregated conflict data unavailable—HDX HAPI not responding",
+  ucdp_events: "UCDP event-level conflict data unavailable",
+  unhcr: "UNHCR displacement data unavailable—refugee flows unknown",
+  climate:
+    "Climate anomaly data unavailable—extreme weather patterns undetected",
+  worldpop: "Population exposure data unavailable—affected population unknown",
+  giving: "Global giving activity data unavailable",
+  bis: "Central bank policy data may be stale—BIS feed unavailable",
+  wto_trade: "Trade policy intelligence unavailable—WTO data not updating",
+  supply_chain:
+    "Supply chain disruption status unavailable—chokepoint monitoring offline",
+  security_advisories:
+    "Government travel advisory data unavailable—security alerts may be missed",
+  gpsjam: "GPS/GNSS interference data unavailable—jamming zones undetected",
 };
 
 /**
  * Get intelligence gap warnings for stale or unavailable data sources.
  * These warnings help analysts understand what they CANNOT see.
  */
-export function getIntelligenceGaps(): { source: DataSourceId; message: string; severity: 'warning' | 'critical' }[] {
-  const gaps: { source: DataSourceId; message: string; severity: 'warning' | 'critical' }[] = [];
+export function getIntelligenceGaps(): {
+  source: DataSourceId;
+  message: string;
+  severity: "warning" | "critical";
+}[] {
+  const gaps: {
+    source: DataSourceId;
+    message: string;
+    severity: "warning" | "critical";
+  }[] = [];
 
   for (const source of dataFreshness.getAllSources()) {
-    if (source.status === 'no_data' || source.status === 'very_stale' || source.status === 'error') {
-      const message = INTELLIGENCE_GAP_MESSAGES[source.id] || `${source.name} data unavailable`;
-      const severity = source.requiredForRisk || source.status === 'error' ? 'critical' : 'warning';
+    if (
+      source.status === "no_data" ||
+      source.status === "very_stale" ||
+      source.status === "error"
+    ) {
+      const message =
+        INTELLIGENCE_GAP_MESSAGES[source.id] ||
+        `${source.name} data unavailable`;
+      const severity =
+        source.requiredForRisk || source.status === "error"
+          ? "critical"
+          : "warning";
       gaps.push({ source: source.id, message, severity });
     }
   }
 
   return gaps.sort((a, b) => {
     // Critical first
-    if (a.severity !== b.severity) return a.severity === 'critical' ? -1 : 1;
+    if (a.severity !== b.severity) return a.severity === "critical" ? -1 : 1;
     return 0;
   });
 }
@@ -394,8 +574,8 @@ export function getIntelligenceGaps(): { source: DataSourceId; message: string; 
  */
 export function getIntelligenceGapSummary(): string[] {
   const gaps = getIntelligenceGaps();
-  return gaps.map(gap => {
-    const icon = gap.severity === 'critical' ? '⚠️ CRITICAL' : '⚡';
+  return gaps.map((gap) => {
+    const icon = gap.severity === "critical" ? "⚠️ CRITICAL" : "⚡";
     return `${icon}: ${gap.message}`;
   });
 }
@@ -404,5 +584,5 @@ export function getIntelligenceGapSummary(): string[] {
  * Check if there are any critical intelligence gaps.
  */
 export function hasCriticalGaps(): boolean {
-  return getIntelligenceGaps().some(gap => gap.severity === 'critical');
+  return getIntelligenceGaps().some((gap) => gap.severity === "critical");
 }

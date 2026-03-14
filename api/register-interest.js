@@ -1,7 +1,7 @@
-export const config = { runtime: 'edge' };
+export const config = { runtime: "edge" };
 
-import { ConvexHttpClient } from 'convex/browser';
-import { getCorsHeaders, isDisallowedOrigin } from './_cors.js';
+import { ConvexHttpClient } from "convex/browser";
+import { getCorsHeaders, isDisallowedOrigin } from "./_cors.js";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_EMAIL_LENGTH = 320;
@@ -26,11 +26,14 @@ async function verifyTurnstile(token, ip) {
   const secret = process.env.TURNSTILE_SECRET_KEY;
   if (!secret) return true; // skip if not configured
   try {
-    const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({ secret, response: token, remoteip: ip }),
-    });
+    const res = await fetch(
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ secret, response: token, remoteip: ip }),
+      },
+    );
     const data = await res.json();
     return data.success === true;
   } catch {
@@ -40,29 +43,31 @@ async function verifyTurnstile(token, ip) {
 
 async function sendConfirmationEmail(email, referralCode) {
   const referralLink = `https://worldmonitor.app/pro?ref=${referralCode}`;
-  const shareText = encodeURIComponent('I just joined the World Monitor Pro waitlist \u2014 real-time global intelligence powered by AI. Join me:');
+  const shareText = encodeURIComponent(
+    "I just joined the World Monitor Pro waitlist \u2014 real-time global intelligence powered by AI. Join me:",
+  );
   const shareUrl = encodeURIComponent(referralLink);
   const twitterShare = `https://x.com/intent/tweet?text=${shareText}&url=${shareUrl}`;
   const linkedinShare = `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`;
   const whatsappShare = `https://wa.me/?text=${shareText}%20${shareUrl}`;
-  const telegramShare = `https://t.me/share/url?url=${shareUrl}&text=${encodeURIComponent('Join the World Monitor Pro waitlist:')}`;
+  const telegramShare = `https://t.me/share/url?url=${shareUrl}&text=${encodeURIComponent("Join the World Monitor Pro waitlist:")}`;
 
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) {
-    console.warn('[register-interest] RESEND_API_KEY not set — skipping email');
+    console.warn("[register-interest] RESEND_API_KEY not set — skipping email");
     return;
   }
   try {
-    const resendRes = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
+    const resendRes = await fetch("https://api.resend.com/emails", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${resendKey}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${resendKey}`,
       },
       body: JSON.stringify({
-        from: 'World Monitor <noreply@worldmonitor.app>',
+        from: "World Monitor <noreply@worldmonitor.app>",
         to: [email],
-        subject: 'You\u2019re on the World Monitor Pro waitlist',
+        subject: "You\u2019re on the World Monitor Pro waitlist",
         html: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a; color: #e0e0e0;">
             <div style="background: #4ade80; height: 4px;"></div>
@@ -187,42 +192,42 @@ async function sendConfirmationEmail(email, referralCode) {
       console.log(`[register-interest] Email sent to ${email}`);
     }
   } catch (err) {
-    console.error('[register-interest] Resend error:', err);
+    console.error("[register-interest] Resend error:", err);
   }
 }
 
 export default async function handler(req) {
   if (isDisallowedOrigin(req)) {
-    return new Response(JSON.stringify({ error: 'Origin not allowed' }), {
+    return new Response(JSON.stringify({ error: "Origin not allowed" }), {
       status: 403,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   }
 
-  const cors = getCorsHeaders(req, 'POST, OPTIONS');
+  const cors = getCorsHeaders(req, "POST, OPTIONS");
 
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: cors });
   }
 
-  if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
       status: 405,
-      headers: { 'Content-Type': 'application/json', ...cors },
+      headers: { "Content-Type": "application/json", ...cors },
     });
   }
 
   // x-real-ip is injected by Vercel from the TCP connection and cannot be spoofed.
   // x-forwarded-for is client-settable — only use as last resort.
   const ip =
-    req.headers.get('cf-connecting-ip') ||
-    req.headers.get('x-real-ip') ||
-    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-    'unknown';
+    req.headers.get("cf-connecting-ip") ||
+    req.headers.get("x-real-ip") ||
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    "unknown";
   if (isRateLimited(ip)) {
-    return new Response(JSON.stringify({ error: 'Too many requests' }), {
+    return new Response(JSON.stringify({ error: "Too many requests" }), {
       status: 429,
-      headers: { 'Content-Type': 'application/json', ...cors },
+      headers: { "Content-Type": "application/json", ...cors },
     });
   }
 
@@ -230,71 +235,82 @@ export default async function handler(req) {
   try {
     body = await req.json();
   } catch {
-    return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
+    return new Response(JSON.stringify({ error: "Invalid JSON" }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json', ...cors },
+      headers: { "Content-Type": "application/json", ...cors },
     });
   }
 
   // Honeypot — bots auto-fill this hidden field; real users leave it empty
   if (body.website) {
-    return new Response(JSON.stringify({ status: 'registered' }), {
+    return new Response(JSON.stringify({ status: "registered" }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json', ...cors },
+      headers: { "Content-Type": "application/json", ...cors },
     });
   }
 
   // Cloudflare Turnstile verification — skip for desktop app (no browser captcha available).
   // Desktop bypasses captcha, so enforce stricter rate limit (2/hr vs 5/hr).
-  const DESKTOP_SOURCES = new Set(['desktop-settings']);
-  const isDesktopSource = typeof body.source === 'string' && DESKTOP_SOURCES.has(body.source);
+  const DESKTOP_SOURCES = new Set(["desktop-settings"]);
+  const isDesktopSource =
+    typeof body.source === "string" && DESKTOP_SOURCES.has(body.source);
   if (isDesktopSource) {
     const entry = rateLimitMap.get(ip);
     if (entry && entry.count > 2) {
-      return new Response(JSON.stringify({ error: 'Rate limit exceeded' }), {
+      return new Response(JSON.stringify({ error: "Rate limit exceeded" }), {
         status: 429,
-        headers: { 'Content-Type': 'application/json', ...cors },
+        headers: { "Content-Type": "application/json", ...cors },
       });
     }
   } else {
-    const turnstileOk = await verifyTurnstile(body.turnstileToken || '', ip);
+    const turnstileOk = await verifyTurnstile(body.turnstileToken || "", ip);
     if (!turnstileOk) {
-      return new Response(JSON.stringify({ error: 'Bot verification failed' }), {
-        status: 403,
-        headers: { 'Content-Type': 'application/json', ...cors },
-      });
+      return new Response(
+        JSON.stringify({ error: "Bot verification failed" }),
+        {
+          status: 403,
+          headers: { "Content-Type": "application/json", ...cors },
+        },
+      );
     }
   }
 
   const { email, source, appVersion, referredBy } = body;
-  if (!email || typeof email !== 'string' || email.length > MAX_EMAIL_LENGTH || !EMAIL_RE.test(email)) {
-    return new Response(JSON.stringify({ error: 'Invalid email address' }), {
+  if (
+    !email ||
+    typeof email !== "string" ||
+    email.length > MAX_EMAIL_LENGTH ||
+    !EMAIL_RE.test(email)
+  ) {
+    return new Response(JSON.stringify({ error: "Invalid email address" }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json', ...cors },
+      headers: { "Content-Type": "application/json", ...cors },
     });
   }
 
-  const safeSource = typeof source === 'string'
-    ? source.slice(0, MAX_META_LENGTH)
-    : 'unknown';
-  const safeAppVersion = typeof appVersion === 'string'
-    ? appVersion.slice(0, MAX_META_LENGTH)
-    : 'unknown';
-  const safeReferredBy = typeof referredBy === 'string'
-    ? referredBy.slice(0, 20)
-    : undefined;
+  const safeSource =
+    typeof source === "string" ? source.slice(0, MAX_META_LENGTH) : "unknown";
+  const safeAppVersion =
+    typeof appVersion === "string"
+      ? appVersion.slice(0, MAX_META_LENGTH)
+      : "unknown";
+  const safeReferredBy =
+    typeof referredBy === "string" ? referredBy.slice(0, 20) : undefined;
 
   const convexUrl = process.env.CONVEX_URL;
   if (!convexUrl) {
-    return new Response(JSON.stringify({ error: 'Registration service unavailable' }), {
-      status: 503,
-      headers: { 'Content-Type': 'application/json', ...cors },
-    });
+    return new Response(
+      JSON.stringify({ error: "Registration service unavailable" }),
+      {
+        status: 503,
+        headers: { "Content-Type": "application/json", ...cors },
+      },
+    );
   }
 
   try {
     const client = new ConvexHttpClient(convexUrl);
-    const result = await client.mutation('registerInterest:register', {
+    const result = await client.mutation("registerInterest:register", {
       email,
       source: safeSource,
       appVersion: safeAppVersion,
@@ -302,19 +318,19 @@ export default async function handler(req) {
     });
 
     // Send confirmation email for new registrations (awaited to avoid Edge isolate termination)
-    if (result.status === 'registered' && result.referralCode) {
+    if (result.status === "registered" && result.referralCode) {
       await sendConfirmationEmail(email, result.referralCode);
     }
 
     return new Response(JSON.stringify(result), {
       status: 200,
-      headers: { 'Content-Type': 'application/json', ...cors },
+      headers: { "Content-Type": "application/json", ...cors },
     });
   } catch (err) {
-    console.error('[register-interest] Convex error:', err);
-    return new Response(JSON.stringify({ error: 'Registration failed' }), {
+    console.error("[register-interest] Convex error:", err);
+    return new Response(JSON.stringify({ error: "Registration failed" }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json', ...cors },
+      headers: { "Content-Type": "application/json", ...cors },
     });
   }
 }

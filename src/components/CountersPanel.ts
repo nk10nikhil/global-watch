@@ -1,11 +1,11 @@
-import { Panel } from './Panel';
+import { Panel } from "./Panel";
 import {
   COUNTER_METRICS,
   getCounterValue,
   formatCounterValue,
   type CounterMetric,
-} from '@/services/humanity-counters';
-import { isDesktopRuntime } from '@/services/runtime';
+} from "@/services/humanity-counters";
+import { isDesktopRuntime } from "@/services/runtime";
 
 /**
  * CountersPanel -- Worldometer-style ticking counters showing positive global metrics.
@@ -26,7 +26,7 @@ export class CountersPanel extends Panel {
   private readonly desktopUpdateIntervalMs = 250;
 
   constructor() {
-    super({ id: 'counters', title: 'Live Counters', trackActivity: false });
+    super({ id: "counters", title: "Live Counters", trackActivity: false });
     this.createCounterGrid();
     if (this.desktopMode) {
       this.visibilityHandler = () => {
@@ -37,7 +37,7 @@ export class CountersPanel extends Panel {
         this.lastDesktopUpdateAt = 0;
         this.startTicking();
       };
-      document.addEventListener('visibilitychange', this.visibilityHandler);
+      document.addEventListener("visibilitychange", this.visibilityHandler);
     }
     this.startTicking();
   }
@@ -46,8 +46,8 @@ export class CountersPanel extends Panel {
    * Build the 6 counter cards and insert them into the panel content area.
    */
   private createCounterGrid(): void {
-    const grid = document.createElement('div');
-    grid.className = 'counters-grid';
+    const grid = document.createElement("div");
+    grid.className = "counters-grid";
 
     for (const metric of COUNTER_METRICS) {
       const card = this.createCounterCard(metric);
@@ -55,7 +55,7 @@ export class CountersPanel extends Panel {
     }
 
     // Clear loading state and append the grid
-    this.content.innerHTML = '';
+    this.content.innerHTML = "";
     this.content.appendChild(grid);
   }
 
@@ -63,15 +63,15 @@ export class CountersPanel extends Panel {
    * Create a single counter card with icon, value, label, and source.
    */
   private createCounterCard(metric: CounterMetric): HTMLElement {
-    const card = document.createElement('div');
-    card.className = 'counter-card';
+    const card = document.createElement("div");
+    card.className = "counter-card";
 
-    const icon = document.createElement('div');
-    icon.className = 'counter-icon';
+    const icon = document.createElement("div");
+    icon.className = "counter-icon";
     icon.textContent = metric.icon;
 
-    const value = document.createElement('div');
-    value.className = 'counter-value';
+    const value = document.createElement("div");
+    value.className = "counter-value";
     value.dataset.counter = metric.id;
     // Set initial value from absolute time
     value.textContent = formatCounterValue(
@@ -79,12 +79,12 @@ export class CountersPanel extends Panel {
       metric.formatPrecision,
     );
 
-    const label = document.createElement('div');
-    label.className = 'counter-label';
+    const label = document.createElement("div");
+    label.className = "counter-label";
     label.textContent = metric.label;
 
-    const source = document.createElement('div');
-    source.className = 'counter-source';
+    const source = document.createElement("div");
+    source.className = "counter-source";
     source.textContent = metric.source;
 
     card.appendChild(icon);
@@ -123,7 +123,7 @@ export class CountersPanel extends Panel {
   private tick = (): void => {
     if (this.desktopMode) {
       const now = performance.now();
-      if ((now - this.lastDesktopUpdateAt) < this.desktopUpdateIntervalMs) {
+      if (now - this.lastDesktopUpdateAt < this.desktopUpdateIntervalMs) {
         this.animFrameId = requestAnimationFrame(this.tick);
         return;
       }
@@ -146,7 +146,7 @@ export class CountersPanel extends Panel {
   public destroy(): void {
     this.stopTicking();
     if (this.visibilityHandler) {
-      document.removeEventListener('visibilitychange', this.visibilityHandler);
+      document.removeEventListener("visibilitychange", this.visibilityHandler);
       this.visibilityHandler = null;
     }
     this.valueElements.clear();

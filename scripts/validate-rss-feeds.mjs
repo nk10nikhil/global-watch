@@ -1,20 +1,21 @@
 #!/usr/bin/env node
 
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
-import { XMLParser } from 'fast-xml-parser';
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+import { XMLParser } from "fast-xml-parser";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const FEEDS_PATH = join(__dirname, '..', 'src', 'config', 'feeds.ts');
+const FEEDS_PATH = join(__dirname, "..", "src", "config", "feeds.ts");
 
-const CHROME_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+const CHROME_UA =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 const FETCH_TIMEOUT = 15_000;
 const CONCURRENCY = 10;
 const STALE_DAYS = 30;
 
 function extractFeeds() {
-  const src = readFileSync(FEEDS_PATH, 'utf8');
+  const src = readFileSync(FEEDS_PATH, "utf8");
   const feeds = [];
   const seen = new Set();
 
@@ -25,7 +26,7 @@ function extractFeeds() {
   // Match lang key like `en: rss(`, `fr: rss(` — find all on a line with positions
   const langKeyAllRe = /(?:^|[\s{,])([a-z]{2}):\s*(?:rss|railwayRss)\(/g;
 
-  const lines = src.split('\n');
+  const lines = src.split("\n");
   let currentName = null;
 
   for (let i = 0; i < lines.length; i++) {
@@ -51,7 +52,10 @@ function extractFeeds() {
       // Find the closest preceding lang key for this rss() call
       let lang = null;
       for (let k = langMap.length - 1; k >= 0; k--) {
-        if (langMap[k].pos < rssPos) { lang = langMap[k].lang; break; }
+        if (langMap[k].pos < rssPos) {
+          lang = langMap[k].lang;
+          break;
+        }
       }
 
       const label = lang ? `${currentName} [${lang}]` : currentName;
@@ -59,7 +63,7 @@ function extractFeeds() {
 
       if (!seen.has(key)) {
         seen.add(key);
-        feeds.push({ name: label || 'Unknown', url: rawUrl });
+        feeds.push({ name: label || "Unknown", url: rawUrl });
       }
     }
   }
@@ -84,8 +88,11 @@ async function fetchFeed(url) {
   try {
     const resp = await fetch(url, {
       signal: controller.signal,
-      headers: { 'User-Agent': CHROME_UA, 'Accept': 'application/rss+xml, application/xml, text/xml, */*' },
-      redirect: 'follow',
+      headers: {
+        "User-Agent": CHROME_UA,
+        Accept: "application/rss+xml, application/xml, text/xml, */*",
+      },
+      redirect: "follow",
     });
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     return await resp.text();
@@ -103,7 +110,11 @@ function parseNewestDate(xml) {
   // RSS 2.0
   const channel = doc?.rss?.channel;
   if (channel) {
-    const items = Array.isArray(channel.item) ? channel.item : channel.item ? [channel.item] : [];
+    const items = Array.isArray(channel.item)
+      ? channel.item
+      : channel.item
+        ? [channel.item]
+        : [];
     for (const item of items) {
       if (item.pubDate) dates.push(new Date(item.pubDate));
     }
@@ -112,7 +123,11 @@ function parseNewestDate(xml) {
   // Atom
   const atomFeed = doc?.feed;
   if (atomFeed) {
-    const entries = Array.isArray(atomFeed.entry) ? atomFeed.entry : atomFeed.entry ? [atomFeed.entry] : [];
+    const entries = Array.isArray(atomFeed.entry)
+      ? atomFeed.entry
+      : atomFeed.entry
+        ? [atomFeed.entry]
+        : [];
     for (const entry of entries) {
       const d = entry.updated || entry.published;
       if (d) dates.push(new Date(d));
@@ -120,23 +135,27 @@ function parseNewestDate(xml) {
   }
 
   // RDF (RSS 1.0)
-  const rdf = doc?.['rdf:RDF'];
+  const rdf = doc?.["rdf:RDF"];
   if (rdf) {
-    const items = Array.isArray(rdf.item) ? rdf.item : rdf.item ? [rdf.item] : [];
+    const items = Array.isArray(rdf.item)
+      ? rdf.item
+      : rdf.item
+        ? [rdf.item]
+        : [];
     for (const item of items) {
-      const d = item['dc:date'] || item.pubDate;
+      const d = item["dc:date"] || item.pubDate;
       if (d) dates.push(new Date(d));
     }
   }
 
-  const valid = dates.filter(d => !isNaN(d.getTime()));
+  const valid = dates.filter((d) => !isNaN(d.getTime()));
   if (valid.length === 0) return null;
-  return new Date(Math.max(...valid.map(d => d.getTime())));
+  return new Date(Math.max(...valid.map((d) => d.getTime())));
 }
 
 async function validateFeed(feed) {
   if (feed.isLocal) {
-    return { ...feed, status: 'SKIP', detail: 'Local API endpoint' };
+    return { ...feed, status: "SKIP", detail: "Local API endpoint" };
   }
 
   try {
@@ -144,20 +163,25 @@ async function validateFeed(feed) {
     const newest = parseNewestDate(xml);
 
     if (!newest) {
-      return { ...feed, status: 'EMPTY', detail: 'No parseable dates' };
+      return { ...feed, status: "EMPTY", detail: "No parseable dates" };
     }
 
     const age = Date.now() - newest.getTime();
     const staleCutoff = STALE_DAYS * 24 * 60 * 60 * 1000;
 
     if (age > staleCutoff) {
-      return { ...feed, status: 'STALE', detail: newest.toISOString().slice(0, 10), newest };
+      return {
+        ...feed,
+        status: "STALE",
+        detail: newest.toISOString().slice(0, 10),
+        newest,
+      };
     }
 
-    return { ...feed, status: 'OK', newest };
+    return { ...feed, status: "OK", newest };
   } catch (err) {
-    const msg = err.name === 'AbortError' ? 'Timeout (15s)' : err.message;
-    return { ...feed, status: 'DEAD', detail: msg };
+    const msg = err.name === "AbortError" ? "Timeout (15s)" : err.message;
+    return { ...feed, status: "DEAD", detail: msg };
   }
 }
 
@@ -172,32 +196,37 @@ async function runBatch(items, fn, concurrency) {
     }
   }
 
-  const workers = Array.from({ length: Math.min(concurrency, items.length) }, () => worker());
+  const workers = Array.from(
+    { length: Math.min(concurrency, items.length) },
+    () => worker(),
+  );
   await Promise.all(workers);
   return results;
 }
 
 function pad(str, len) {
-  return str.length > len ? str.slice(0, len - 1) + '…' : str.padEnd(len);
+  return str.length > len ? str.slice(0, len - 1) + "…" : str.padEnd(len);
 }
 
 async function main() {
   const feeds = extractFeeds();
-  console.log(`Validating ${feeds.length} RSS feeds (${CONCURRENCY} concurrent, ${FETCH_TIMEOUT / 1000}s timeout)...\n`);
+  console.log(
+    `Validating ${feeds.length} RSS feeds (${CONCURRENCY} concurrent, ${FETCH_TIMEOUT / 1000}s timeout)...\n`,
+  );
 
   const results = await runBatch(feeds, validateFeed, CONCURRENCY);
 
-  const ok = results.filter(r => r.status === 'OK');
-  const stale = results.filter(r => r.status === 'STALE');
-  const dead = results.filter(r => r.status === 'DEAD');
-  const empty = results.filter(r => r.status === 'EMPTY');
-  const skipped = results.filter(r => r.status === 'SKIP');
+  const ok = results.filter((r) => r.status === "OK");
+  const stale = results.filter((r) => r.status === "STALE");
+  const dead = results.filter((r) => r.status === "DEAD");
+  const empty = results.filter((r) => r.status === "EMPTY");
+  const skipped = results.filter((r) => r.status === "SKIP");
 
   if (stale.length) {
     stale.sort((a, b) => a.newest - b.newest);
     console.log(`STALE (newest item > ${STALE_DAYS} days):`);
-    console.log(`  ${pad('Feed Name', 35)} | ${pad('Newest Item', 12)} | URL`);
-    console.log(`  ${'-'.repeat(35)} | ${'-'.repeat(12)} | ---`);
+    console.log(`  ${pad("Feed Name", 35)} | ${pad("Newest Item", 12)} | URL`);
+    console.log(`  ${"-".repeat(35)} | ${"-".repeat(12)} | ---`);
     for (const r of stale) {
       console.log(`  ${pad(r.name, 35)} | ${pad(r.detail, 12)} | ${r.url}`);
     }
@@ -205,9 +234,9 @@ async function main() {
   }
 
   if (dead.length) {
-    console.log('DEAD (fetch/parse failed):');
-    console.log(`  ${pad('Feed Name', 35)} | ${pad('Error', 20)} | URL`);
-    console.log(`  ${'-'.repeat(35)} | ${'-'.repeat(20)} | ---`);
+    console.log("DEAD (fetch/parse failed):");
+    console.log(`  ${pad("Feed Name", 35)} | ${pad("Error", 20)} | URL`);
+    console.log(`  ${"-".repeat(35)} | ${"-".repeat(20)} | ---`);
     for (const r of dead) {
       console.log(`  ${pad(r.name, 35)} | ${pad(r.detail, 20)} | ${r.url}`);
     }
@@ -215,22 +244,24 @@ async function main() {
   }
 
   if (empty.length) {
-    console.log('EMPTY (no items/dates found):');
-    console.log(`  ${pad('Feed Name', 35)} | URL`);
-    console.log(`  ${'-'.repeat(35)} | ---`);
+    console.log("EMPTY (no items/dates found):");
+    console.log(`  ${pad("Feed Name", 35)} | URL`);
+    console.log(`  ${"-".repeat(35)} | ---`);
     for (const r of empty) {
       console.log(`  ${pad(r.name, 35)} | ${r.url}`);
     }
     console.log();
   }
 
-  console.log(`Summary: ${ok.length} OK, ${stale.length} stale, ${dead.length} dead, ${empty.length} empty` +
-    (skipped.length ? `, ${skipped.length} skipped` : ''));
+  console.log(
+    `Summary: ${ok.length} OK, ${stale.length} stale, ${dead.length} dead, ${empty.length} empty` +
+      (skipped.length ? `, ${skipped.length} skipped` : ""),
+  );
 
   if (stale.length || dead.length) process.exit(1);
 }
 
-main().catch(err => {
-  console.error('Fatal:', err);
+main().catch((err) => {
+  console.error("Fatal:", err);
   process.exit(2);
 });

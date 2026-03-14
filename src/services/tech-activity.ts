@@ -1,6 +1,10 @@
-import type { ClusteredEvent } from '@/types';
-import { inferHubsFromTitle, type TechHubLocation } from './tech-hub-index';
-import { deriveHubActivityLevel, deriveHubTrend, normalizeHubScore } from './hub-activity-scoring';
+import type { ClusteredEvent } from "@/types";
+import { inferHubsFromTitle, type TechHubLocation } from "./tech-hub-index";
+import {
+  deriveHubActivityLevel,
+  deriveHubTrend,
+  normalizeHubScore,
+} from "./hub-activity-scoring";
 
 export interface TechHubActivity {
   hubId: string;
@@ -9,13 +13,13 @@ export interface TechHubActivity {
   country: string;
   lat: number;
   lon: number;
-  tier: 'mega' | 'major' | 'emerging';
-  activityLevel: 'high' | 'elevated' | 'low';
+  tier: "mega" | "major" | "emerging";
+  activityLevel: "high" | "elevated" | "low";
   score: number;
   newsCount: number;
   hasBreaking: boolean;
   topStories: Array<{ title: string; link: string }>;
-  trend: 'rising' | 'stable' | 'falling';
+  trend: "rising" | "stable" | "falling";
   matchedKeywords: string[];
 }
 
@@ -33,7 +37,9 @@ const TIER_BONUS: Record<string, number> = {
   emerging: 0,
 };
 
-export function aggregateTechActivity(clusters: ClusteredEvent[]): TechHubActivity[] {
+export function aggregateTechActivity(
+  clusters: ClusteredEvent[],
+): TechHubActivity[] {
   const hubAccumulators = new Map<string, HubAccumulator>();
 
   // Match each cluster to potential tech hubs
@@ -70,7 +76,11 @@ export function aggregateTechActivity(clusters: ClusteredEvent[]): TechHubActivi
   }
 
   // First pass: calculate raw scores to find max
-  const rawScores: Array<{ hubId: string; acc: HubAccumulator; rawScore: number }> = [];
+  const rawScores: Array<{
+    hubId: string;
+    acc: HubAccumulator;
+    rawScore: number;
+  }> = [];
   let maxRawScore = 0;
 
   for (const [hubId, acc] of hubAccumulators) {
@@ -101,7 +111,7 @@ export function aggregateTechActivity(clusters: ClusteredEvent[]): TechHubActivi
     // Get top stories (up to 3)
     const topStories = acc.clusters
       .slice(0, 3)
-      .map(c => ({ title: c.primaryTitle, link: c.primaryLink }));
+      .map((c) => ({ title: c.primaryTitle, link: c.primaryLink }));
 
     // Determine trend based on velocity
     const trend = deriveHubTrend(acc.totalVelocity, newsCount);
@@ -130,11 +140,17 @@ export function aggregateTechActivity(clusters: ClusteredEvent[]): TechHubActivi
   return activities;
 }
 
-export function getTopActiveHubs(clusters: ClusteredEvent[], limit = 10): TechHubActivity[] {
+export function getTopActiveHubs(
+  clusters: ClusteredEvent[],
+  limit = 10,
+): TechHubActivity[] {
   return aggregateTechActivity(clusters).slice(0, limit);
 }
 
-export function getHubActivity(hubId: string, clusters: ClusteredEvent[]): TechHubActivity | undefined {
+export function getHubActivity(
+  hubId: string,
+  clusters: ClusteredEvent[],
+): TechHubActivity | undefined {
   const activities = aggregateTechActivity(clusters);
-  return activities.find(a => a.hubId === hubId);
+  return activities.find((a) => a.hubId === hubId);
 }

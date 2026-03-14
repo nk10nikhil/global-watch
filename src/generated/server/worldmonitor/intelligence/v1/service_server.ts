@@ -167,11 +167,22 @@ export interface GetCountryFactsResponse {
   countryName: string;
 }
 
-export type SeverityLevel = "SEVERITY_LEVEL_UNSPECIFIED" | "SEVERITY_LEVEL_LOW" | "SEVERITY_LEVEL_MEDIUM" | "SEVERITY_LEVEL_HIGH";
+export type SeverityLevel =
+  | "SEVERITY_LEVEL_UNSPECIFIED"
+  | "SEVERITY_LEVEL_LOW"
+  | "SEVERITY_LEVEL_MEDIUM"
+  | "SEVERITY_LEVEL_HIGH";
 
-export type TrendDirection = "TREND_DIRECTION_UNSPECIFIED" | "TREND_DIRECTION_RISING" | "TREND_DIRECTION_STABLE" | "TREND_DIRECTION_FALLING";
+export type TrendDirection =
+  | "TREND_DIRECTION_UNSPECIFIED"
+  | "TREND_DIRECTION_RISING"
+  | "TREND_DIRECTION_STABLE"
+  | "TREND_DIRECTION_FALLING";
 
-export type DataFreshness = "DATA_FRESHNESS_UNSPECIFIED" | "DATA_FRESHNESS_FRESH" | "DATA_FRESHNESS_STALE";
+export type DataFreshness =
+  | "DATA_FRESHNESS_UNSPECIFIED"
+  | "DATA_FRESHNESS_FRESH"
+  | "DATA_FRESHNESS_STALE";
 
 export interface FieldViolation {
   field: string;
@@ -208,7 +219,10 @@ export interface ServerContext {
 
 export interface ServerOptions {
   onError?: (error: unknown, req: Request) => Response | Promise<Response>;
-  validateRequest?: (methodName: string, body: unknown) => FieldViolation[] | undefined;
+  validateRequest?: (
+    methodName: string,
+    body: unknown,
+  ) => FieldViolation[] | undefined;
 }
 
 export interface RouteDescriptor {
@@ -218,13 +232,34 @@ export interface RouteDescriptor {
 }
 
 export interface IntelligenceServiceHandler {
-  getRiskScores(ctx: ServerContext, req: GetRiskScoresRequest): Promise<GetRiskScoresResponse>;
-  getPizzintStatus(ctx: ServerContext, req: GetPizzintStatusRequest): Promise<GetPizzintStatusResponse>;
-  classifyEvent(ctx: ServerContext, req: ClassifyEventRequest): Promise<ClassifyEventResponse>;
-  getCountryIntelBrief(ctx: ServerContext, req: GetCountryIntelBriefRequest): Promise<GetCountryIntelBriefResponse>;
-  searchGdeltDocuments(ctx: ServerContext, req: SearchGdeltDocumentsRequest): Promise<SearchGdeltDocumentsResponse>;
-  deductSituation(ctx: ServerContext, req: DeductSituationRequest): Promise<DeductSituationResponse>;
-  getCountryFacts(ctx: ServerContext, req: GetCountryFactsRequest): Promise<GetCountryFactsResponse>;
+  getRiskScores(
+    ctx: ServerContext,
+    req: GetRiskScoresRequest,
+  ): Promise<GetRiskScoresResponse>;
+  getPizzintStatus(
+    ctx: ServerContext,
+    req: GetPizzintStatusRequest,
+  ): Promise<GetPizzintStatusResponse>;
+  classifyEvent(
+    ctx: ServerContext,
+    req: ClassifyEventRequest,
+  ): Promise<ClassifyEventResponse>;
+  getCountryIntelBrief(
+    ctx: ServerContext,
+    req: GetCountryIntelBriefRequest,
+  ): Promise<GetCountryIntelBriefResponse>;
+  searchGdeltDocuments(
+    ctx: ServerContext,
+    req: SearchGdeltDocumentsRequest,
+  ): Promise<SearchGdeltDocumentsResponse>;
+  deductSituation(
+    ctx: ServerContext,
+    req: DeductSituationRequest,
+  ): Promise<DeductSituationResponse>;
+  getCountryFacts(
+    ctx: ServerContext,
+    req: GetCountryFactsRequest,
+  ): Promise<GetCountryFactsResponse>;
 }
 
 export function createIntelligenceServiceRoutes(
@@ -244,7 +279,10 @@ export function createIntelligenceServiceRoutes(
             region: params.get("region") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getRiskScores", body);
+            const bodyViolations = options.validateRequest(
+              "getRiskScores",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -263,10 +301,13 @@ export function createIntelligenceServiceRoutes(
           });
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -291,7 +332,10 @@ export function createIntelligenceServiceRoutes(
             includeGdelt: params.get("include_gdelt") === "true",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getPizzintStatus", body);
+            const bodyViolations = options.validateRequest(
+              "getPizzintStatus",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -304,16 +348,22 @@ export function createIntelligenceServiceRoutes(
           };
 
           const result = await handler.getPizzintStatus(ctx, body);
-          return new Response(JSON.stringify(result as GetPizzintStatusResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetPizzintStatusResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -341,7 +391,10 @@ export function createIntelligenceServiceRoutes(
             country: params.get("country") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("classifyEvent", body);
+            const bodyViolations = options.validateRequest(
+              "classifyEvent",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -360,10 +413,13 @@ export function createIntelligenceServiceRoutes(
           });
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -388,7 +444,10 @@ export function createIntelligenceServiceRoutes(
             countryCode: params.get("country_code") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getCountryIntelBrief", body);
+            const bodyViolations = options.validateRequest(
+              "getCountryIntelBrief",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -401,16 +460,22 @@ export function createIntelligenceServiceRoutes(
           };
 
           const result = await handler.getCountryIntelBrief(ctx, body);
-          return new Response(JSON.stringify(result as GetCountryIntelBriefResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetCountryIntelBriefResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -439,7 +504,10 @@ export function createIntelligenceServiceRoutes(
             sort: params.get("sort") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("searchGdeltDocuments", body);
+            const bodyViolations = options.validateRequest(
+              "searchGdeltDocuments",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -452,16 +520,22 @@ export function createIntelligenceServiceRoutes(
           };
 
           const result = await handler.searchGdeltDocuments(ctx, body);
-          return new Response(JSON.stringify(result as SearchGdeltDocumentsResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as SearchGdeltDocumentsResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -480,9 +554,12 @@ export function createIntelligenceServiceRoutes(
       handler: async (req: Request): Promise<Response> => {
         try {
           const pathParams: Record<string, string> = {};
-          const body = await req.json() as DeductSituationRequest;
+          const body = (await req.json()) as DeductSituationRequest;
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("deductSituation", body);
+            const bodyViolations = options.validateRequest(
+              "deductSituation",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -495,16 +572,22 @@ export function createIntelligenceServiceRoutes(
           };
 
           const result = await handler.deductSituation(ctx, body);
-          return new Response(JSON.stringify(result as DeductSituationResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as DeductSituationResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -529,7 +612,10 @@ export function createIntelligenceServiceRoutes(
             countryCode: params.get("country_code") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getCountryFacts", body);
+            const bodyViolations = options.validateRequest(
+              "getCountryFacts",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -542,16 +628,22 @@ export function createIntelligenceServiceRoutes(
           };
 
           const result = await handler.getCountryFacts(ctx, body);
-          return new Response(JSON.stringify(result as GetCountryFactsResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetCountryFactsResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -566,4 +658,3 @@ export function createIntelligenceServiceRoutes(
     },
   ];
 }
-

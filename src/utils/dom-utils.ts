@@ -20,7 +20,7 @@ export function h(
 
   if (
     propsOrChild != null &&
-    typeof propsOrChild === 'object' &&
+    typeof propsOrChild === "object" &&
     !(propsOrChild instanceof Node)
   ) {
     applyProps(el, propsOrChild as DomProps);
@@ -55,19 +55,30 @@ export function replaceChildren(el: Element, ...children: DomChild[]): void {
 }
 
 export function rawHtml(html: string): DocumentFragment {
-  const tpl = document.createElement('template');
+  const tpl = document.createElement("template");
   tpl.innerHTML = html;
   return tpl.content;
 }
 
 const SAFE_TAGS = new Set([
-  'strong', 'em', 'b', 'i', 'br', 'p', 'ul', 'ol', 'li', 'span', 'div', 'a',
+  "strong",
+  "em",
+  "b",
+  "i",
+  "br",
+  "p",
+  "ul",
+  "ol",
+  "li",
+  "span",
+  "div",
+  "a",
 ]);
-const SAFE_ATTRS = new Set(['style', 'class', 'href', 'target', 'rel']);
+const SAFE_ATTRS = new Set(["style", "class", "href", "target", "rel"]);
 
 /** Like rawHtml() but strips tags and attributes not in the allowlist. */
 export function safeHtml(html: string): DocumentFragment {
-  const tpl = document.createElement('template');
+  const tpl = document.createElement("template");
   tpl.innerHTML = html;
   const walk = (parent: Element | DocumentFragment) => {
     const children = Array.from(parent.childNodes);
@@ -87,10 +98,14 @@ export function safeHtml(html: string): DocumentFragment {
           }
         }
         // Sanitize href to prevent javascript: URIs
-        if (el.hasAttribute('href')) {
-          const href = el.getAttribute('href') || '';
-          if (!/^https?:\/\//i.test(href) && !href.startsWith('/') && !href.startsWith('#')) {
-            el.removeAttribute('href');
+        if (el.hasAttribute("href")) {
+          const href = el.getAttribute("href") || "";
+          if (
+            !/^https?:\/\//i.test(href) &&
+            !href.startsWith("/") &&
+            !href.startsWith("#")
+          ) {
+            el.removeAttribute("href");
           }
         }
         walk(el);
@@ -106,26 +121,23 @@ function applyProps(el: HTMLElement, props: DomProps): void {
     const value = props[key];
     if (value == null || value === false) continue;
 
-    if (key === 'className') {
+    if (key === "className") {
       el.className = value as string;
-    } else if (key === 'style') {
-      if (typeof value === 'string') {
+    } else if (key === "style") {
+      if (typeof value === "string") {
         el.style.cssText = value;
-      } else if (typeof value === 'object') {
+      } else if (typeof value === "object") {
         Object.assign(el.style, value);
       }
-    } else if (key === 'dataset') {
+    } else if (key === "dataset") {
       const ds = value as Record<string, string>;
       for (const k in ds) {
         el.dataset[k] = ds[k]!;
       }
-    } else if (key.startsWith('on') && typeof value === 'function') {
-      el.addEventListener(
-        key.slice(2).toLowerCase(),
-        value as EventListener,
-      );
+    } else if (key.startsWith("on") && typeof value === "function") {
+      el.addEventListener(key.slice(2).toLowerCase(), value as EventListener);
     } else if (value === true) {
-      el.setAttribute(key, '');
+      el.setAttribute(key, "");
     } else {
       el.setAttribute(key, String(value));
     }

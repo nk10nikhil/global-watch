@@ -145,7 +145,10 @@ export interface ServerContext {
 
 export interface ServerOptions {
   onError?: (error: unknown, req: Request) => Response | Promise<Response>;
-  validateRequest?: (methodName: string, body: unknown) => FieldViolation[] | undefined;
+  validateRequest?: (
+    methodName: string,
+    body: unknown,
+  ) => FieldViolation[] | undefined;
 }
 
 export interface RouteDescriptor {
@@ -155,10 +158,22 @@ export interface RouteDescriptor {
 }
 
 export interface ResearchServiceHandler {
-  listArxivPapers(ctx: ServerContext, req: ListArxivPapersRequest): Promise<ListArxivPapersResponse>;
-  listTrendingRepos(ctx: ServerContext, req: ListTrendingReposRequest): Promise<ListTrendingReposResponse>;
-  listHackernewsItems(ctx: ServerContext, req: ListHackernewsItemsRequest): Promise<ListHackernewsItemsResponse>;
-  listTechEvents(ctx: ServerContext, req: ListTechEventsRequest): Promise<ListTechEventsResponse>;
+  listArxivPapers(
+    ctx: ServerContext,
+    req: ListArxivPapersRequest,
+  ): Promise<ListArxivPapersResponse>;
+  listTrendingRepos(
+    ctx: ServerContext,
+    req: ListTrendingReposRequest,
+  ): Promise<ListTrendingReposResponse>;
+  listHackernewsItems(
+    ctx: ServerContext,
+    req: ListHackernewsItemsRequest,
+  ): Promise<ListHackernewsItemsResponse>;
+  listTechEvents(
+    ctx: ServerContext,
+    req: ListTechEventsRequest,
+  ): Promise<ListTechEventsResponse>;
 }
 
 export function createResearchServiceRoutes(
@@ -181,7 +196,10 @@ export function createResearchServiceRoutes(
             query: params.get("query") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("listArxivPapers", body);
+            const bodyViolations = options.validateRequest(
+              "listArxivPapers",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -194,16 +212,22 @@ export function createResearchServiceRoutes(
           };
 
           const result = await handler.listArxivPapers(ctx, body);
-          return new Response(JSON.stringify(result as ListArxivPapersResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as ListArxivPapersResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -231,7 +255,10 @@ export function createResearchServiceRoutes(
             period: params.get("period") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("listTrendingRepos", body);
+            const bodyViolations = options.validateRequest(
+              "listTrendingRepos",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -244,16 +271,22 @@ export function createResearchServiceRoutes(
           };
 
           const result = await handler.listTrendingRepos(ctx, body);
-          return new Response(JSON.stringify(result as ListTrendingReposResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as ListTrendingReposResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -280,7 +313,10 @@ export function createResearchServiceRoutes(
             feedType: params.get("feed_type") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("listHackernewsItems", body);
+            const bodyViolations = options.validateRequest(
+              "listHackernewsItems",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -293,16 +329,22 @@ export function createResearchServiceRoutes(
           };
 
           const result = await handler.listHackernewsItems(ctx, body);
-          return new Response(JSON.stringify(result as ListHackernewsItemsResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as ListHackernewsItemsResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -330,7 +372,10 @@ export function createResearchServiceRoutes(
             days: Number(params.get("days") ?? "0"),
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("listTechEvents", body);
+            const bodyViolations = options.validateRequest(
+              "listTechEvents",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -343,16 +388,22 @@ export function createResearchServiceRoutes(
           };
 
           const result = await handler.listTechEvents(ctx, body);
-          return new Response(JSON.stringify(result as ListTechEventsResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as ListTechEventsResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -367,4 +418,3 @@ export function createResearchServiceRoutes(
     },
   ];
 }
-

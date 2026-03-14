@@ -7,9 +7,9 @@ description: "Static map assets, country geometry, geocoding services, and bound
 
 All large static map files are served from Cloudflare R2, **not** from Vercel. The R2 bucket `worldmonitor-maps` is fronted by a CF-proxied custom domain:
 
-| URL | Use |
-|-----|-----|
-| `https://maps.worldmonitor.app/<file>` | Production URL (CF-proxied, cached, CORS headers) |
+| URL                                                          | Use                                                     |
+| ------------------------------------------------------------ | ------------------------------------------------------- |
+| `https://maps.worldmonitor.app/<file>`                       | Production URL (CF-proxied, cached, CORS headers)       |
 | `https://pub-8ace9f6a86d74cb2bd5eb1de5590dd9e.r2.dev/<file>` | Raw R2 — **never use in code** (no CF caching, no CORS) |
 
 ### Why R2 instead of Vercel?
@@ -20,11 +20,11 @@ All large static map files are served from Cloudflare R2, **not** from Vercel. T
 
 ### Files on R2
 
-| File | Size | Purpose |
-|------|------|---------|
-| `countries.geojson` | ~210 KB | Base country polygons (ISO 3166-1 Alpha-2 coded) |
-| `country-boundary-overrides.geojson` | ~600 KB | Higher-resolution Natural Earth boundary overrides |
-| `*.pmtiles` | ~80 GB | Self-hosted vector map tiles (when `VITE_PMTILES_URL` is set) |
+| File                                 | Size    | Purpose                                                       |
+| ------------------------------------ | ------- | ------------------------------------------------------------- |
+| `countries.geojson`                  | ~210 KB | Base country polygons (ISO 3166-1 Alpha-2 coded)              |
+| `country-boundary-overrides.geojson` | ~600 KB | Higher-resolution Natural Earth boundary overrides            |
+| `*.pmtiles`                          | ~80 GB  | Self-hosted vector map tiles (when `VITE_PMTILES_URL` is set) |
 
 ### Uploading to R2
 
@@ -60,27 +60,27 @@ country-boundary-overrides.geojson      │
 
 ### Indexed Data Structures
 
-| Structure | Key | Purpose |
-|-----------|-----|---------|
-| `countryIndex` | ISO-2 code | Full geometry + bbox for point-in-polygon |
-| `iso3ToIso2` | ISO-3 code | Alpha-3 → Alpha-2 conversion |
-| `nameToIso2` | lowercase name | Country name → Alpha-2 lookup |
-| `codeToName` | ISO-2 code | Code → display name |
-| `sortedCountryNames` | — | Regex matchers sorted by name length (longest first) for text extraction |
+| Structure            | Key            | Purpose                                                                  |
+| -------------------- | -------------- | ------------------------------------------------------------------------ |
+| `countryIndex`       | ISO-2 code     | Full geometry + bbox for point-in-polygon                                |
+| `iso3ToIso2`         | ISO-3 code     | Alpha-3 → Alpha-2 conversion                                             |
+| `nameToIso2`         | lowercase name | Country name → Alpha-2 lookup                                            |
+| `codeToName`         | ISO-2 code     | Code → display name                                                      |
+| `sortedCountryNames` | —              | Regex matchers sorted by name length (longest first) for text extraction |
 
 ### Key Exports
 
-| Function | Purpose |
-|----------|---------|
-| `preloadCountryGeometry()` | Trigger early loading (call at app startup) |
-| `getCountryAtCoordinates(lat, lon)` | Point-in-polygon → country code + name |
-| `isCoordinateInCountry(lat, lon, code)` | Check if point is inside a specific country |
-| `getCountryNameByCode(code)` | ISO-2 → display name |
-| `iso3ToIso2Code(iso3)` | ISO-3 → ISO-2 |
-| `nameToCountryCode(text)` | Exact name match → ISO-2 |
-| `matchCountryNamesInText(text)` | Extract all country names from free text |
-| `getCountryBbox(code)` | Bounding box `[minLon, minLat, maxLon, maxLat]` |
-| `getCountryCentroid(code)` | Bbox center, with optional fallback bounds |
+| Function                                     | Purpose                                                 |
+| -------------------------------------------- | ------------------------------------------------------- |
+| `preloadCountryGeometry()`                   | Trigger early loading (call at app startup)             |
+| `getCountryAtCoordinates(lat, lon)`          | Point-in-polygon → country code + name                  |
+| `isCoordinateInCountry(lat, lon, code)`      | Check if point is inside a specific country             |
+| `getCountryNameByCode(code)`                 | ISO-2 → display name                                    |
+| `iso3ToIso2Code(iso3)`                       | ISO-3 → ISO-2                                           |
+| `nameToCountryCode(text)`                    | Exact name match → ISO-2                                |
+| `matchCountryNamesInText(text)`              | Extract all country names from free text                |
+| `getCountryBbox(code)`                       | Bounding box `[minLon, minLat, maxLon, maxLat]`         |
+| `getCountryCentroid(code)`                   | Bbox center, with optional fallback bounds              |
 | `resolveCountryFromBounds(lat, lon, bounds)` | Resolve overlapping bounding-box regions using geometry |
 
 ### Name Aliases
@@ -138,11 +138,11 @@ PMTiles are also served from R2 via `maps.worldmonitor.app`, configured through 
 
 ## Common Mistakes
 
-| Mistake | Fix |
-|---------|-----|
-| Using `pub-*.r2.dev` URLs in code | Always use `maps.worldmonitor.app` (CF-proxied) |
-| Serving large GeoJSON from Vercel | Upload to R2 — Vercel bandwidth is expensive at scale |
-| Fetching overrides without a timeout | Always use `AbortSignal.timeout` — override CDN may be slow or down |
-| Forgetting `POLITICAL_OVERRIDES` | Check if the country code needs mapping (e.g., `CN-TW → TW`) |
-| Adding aliases without checking existing | Check `NAME_ALIASES` and `nameToIso2` map first |
+| Mistake                                          | Fix                                                                                     |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| Using `pub-*.r2.dev` URLs in code                | Always use `maps.worldmonitor.app` (CF-proxied)                                         |
+| Serving large GeoJSON from Vercel                | Upload to R2 — Vercel bandwidth is expensive at scale                                   |
+| Fetching overrides without a timeout             | Always use `AbortSignal.timeout` — override CDN may be slow or down                     |
+| Forgetting `POLITICAL_OVERRIDES`                 | Check if the country code needs mapping (e.g., `CN-TW → TW`)                            |
+| Adding aliases without checking existing         | Check `NAME_ALIASES` and `nameToIso2` map first                                         |
 | Using `projection([lon, lat])` without NaN guard | d3 projections can return `[NaN, NaN]` (truthy) — always check with `Number.isFinite()` |

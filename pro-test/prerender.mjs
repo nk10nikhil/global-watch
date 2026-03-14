@@ -7,14 +7,16 @@
  * (headings, descriptions, FAQ answers) directly into the HTML body
  * as a hidden div that gets replaced when React hydrates.
  */
-import { readFileSync, writeFileSync } from 'node:fs';
-import { resolve, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { readFileSync, writeFileSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const htmlPath = resolve(__dirname, '../public/pro/index.html');
+const htmlPath = resolve(__dirname, "../public/pro/index.html");
 
-const en = JSON.parse(readFileSync(resolve(__dirname, 'src/locales/en.json'), 'utf-8'));
+const en = JSON.parse(
+  readFileSync(resolve(__dirname, "src/locales/en.json"), "utf-8"),
+);
 
 const seoContent = `
 <div id="seo-prerender" style="position:absolute;left:-9999px;top:-9999px;overflow:hidden;width:1px;height:1px;">
@@ -83,7 +85,10 @@ const seoContent = `
   <p>${en.finalCta.subtitle}</p>
 </div>`;
 
-let html = readFileSync(htmlPath, 'utf-8');
-html = html.replace('<div id="root"></div>', `<div id="root">${seoContent}</div>`);
-writeFileSync(htmlPath, html, 'utf-8');
-console.log('[prerender] Injected SEO content into public/pro/index.html');
+let html = readFileSync(htmlPath, "utf-8");
+html = html.replace(
+  '<div id="root"></div>',
+  `<div id="root">${seoContent}</div>`,
+);
+writeFileSync(htmlPath, html, "utf-8");
+console.log("[prerender] Injected SEO content into public/pro/index.html");

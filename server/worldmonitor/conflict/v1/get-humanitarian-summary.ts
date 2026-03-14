@@ -11,13 +11,13 @@ import type {
   GetHumanitarianSummaryRequest,
   GetHumanitarianSummaryResponse,
   HumanitarianCountrySummary,
-} from '../../../../src/generated/server/worldmonitor/conflict/v1/service_server';
+} from "../../../../src/generated/server/worldmonitor/conflict/v1/service_server";
 
-import { CHROME_UA } from '../../../_shared/constants';
-import { cachedFetchJson } from '../../../_shared/redis';
-import { ISO2_TO_ISO3 } from './_shared';
+import { CHROME_UA } from "../../../_shared/constants";
+import { cachedFetchJson } from "../../../_shared/redis";
+import { ISO2_TO_ISO3 } from "./_shared";
 
-const REDIS_CACHE_KEY = 'conflict:humanitarian:v1';
+const REDIS_CACHE_KEY = "conflict:humanitarian:v1";
 const REDIS_CACHE_TTL = 21600; // 6 hr — monthly humanitarian data
 
 interface HapiCountryAgg {
@@ -32,9 +32,11 @@ interface HapiCountryAgg {
   fatalitiesTotalCivilianTargeting: number;
 }
 
-async function fetchHapiSummary(countryCode: string): Promise<HumanitarianCountrySummary | undefined> {
+async function fetchHapiSummary(
+  countryCode: string,
+): Promise<HumanitarianCountrySummary | undefined> {
   try {
-    const appId = btoa('worldmonitor:monitor@worldmonitor.app');
+    const appId = btoa("worldmonitor:monitor@worldmonitor.app");
     let url = `https://hapi.humdata.org/api/v2/coordination-context/conflict-events?output_format=json&limit=1000&offset=0&app_identifier=${appId}`;
 
     // Filter by country — if a specific country was requested but has no ISO3 mapping,
@@ -46,7 +48,7 @@ async function fetchHapiSummary(countryCode: string): Promise<HumanitarianCountr
     }
 
     const response = await fetch(url, {
-      headers: { Accept: 'application/json', 'User-Agent': CHROME_UA },
+      headers: { Accept: "application/json", "User-Agent": CHROME_UA },
       signal: AbortSignal.timeout(15000),
     });
 
@@ -58,18 +60,18 @@ async function fetchHapiSummary(countryCode: string): Promise<HumanitarianCountr
     // Aggregate per country -- port exactly from api/hapi.js lines 82-108
     const byCountry: Record<string, HapiCountryAgg> = {};
     for (const r of records) {
-      const iso3 = r.location_code || '';
+      const iso3 = r.location_code || "";
       if (!iso3) continue;
 
-      const month = r.reference_period_start || '';
-      const eventType = (r.event_type || '').toLowerCase();
+      const month = r.reference_period_start || "";
+      const eventType = (r.event_type || "").toLowerCase();
       const events = r.events || 0;
       const fatalities = r.fatalities || 0;
 
       if (!byCountry[iso3]) {
         byCountry[iso3] = {
           iso3,
-          locationName: r.location_name || '',
+          locationName: r.location_name || "",
           month,
           eventsTotal: 0,
           eventsPoliticalViolence: 0,
@@ -93,15 +95,15 @@ async function fetchHapiSummary(countryCode: string): Promise<HumanitarianCountr
       }
       if (month === c.month) {
         c.eventsTotal += events;
-        if (eventType.includes('political_violence')) {
+        if (eventType.includes("political_violence")) {
           c.eventsPoliticalViolence += events;
           c.fatalitiesTotalPoliticalViolence += fatalities;
         }
-        if (eventType.includes('civilian_targeting')) {
+        if (eventType.includes("civilian_targeting")) {
           c.eventsCivilianTargeting += events;
           c.fatalitiesTotalCivilianTargeting += fatalities;
         }
-        if (eventType.includes('demonstration')) {
+        if (eventType.includes("demonstration")) {
           c.eventsDemonstrations += events;
         }
       }
@@ -121,11 +123,14 @@ async function fetchHapiSummary(countryCode: string): Promise<HumanitarianCountr
     if (!entry) return undefined;
 
     return {
-      countryCode: countryCode ? countryCode.toUpperCase() : '',
+      countryCode: countryCode ? countryCode.toUpperCase() : "",
       countryName: entry.locationName,
       conflictEventsTotal: entry.eventsTotal,
-      conflictPoliticalViolenceEvents: entry.eventsPoliticalViolence + entry.eventsCivilianTargeting,
-      conflictFatalities: entry.fatalitiesTotalPoliticalViolence + entry.fatalitiesTotalCivilianTargeting,
+      conflictPoliticalViolenceEvents:
+        entry.eventsPoliticalViolence + entry.eventsCivilianTargeting,
+      conflictFatalities:
+        entry.fatalitiesTotalPoliticalViolence +
+        entry.fatalitiesTotalCivilianTargeting,
       referencePeriod: entry.month,
       conflictDemonstrations: entry.eventsDemonstrations,
       updatedAt: Date.now(),
@@ -141,12 +146,16 @@ export async function getHumanitarianSummary(
 ): Promise<GetHumanitarianSummaryResponse> {
   if (!req.countryCode) return { summary: undefined };
   try {
-    const cacheKey = `${REDIS_CACHE_KEY}:${req.countryCode || 'all'}`;
+    const cacheKey = `${REDIS_CACHE_KEY}:${req.countryCode || "all"}`;
 
-    const result = await cachedFetchJson<GetHumanitarianSummaryResponse>(cacheKey, REDIS_CACHE_TTL, async () => {
-      const summary = await fetchHapiSummary(req.countryCode);
-      return summary ? { summary } : null;
-    });
+    const result = await cachedFetchJson<GetHumanitarianSummaryResponse>(
+      cacheKey,
+      REDIS_CACHE_TTL,
+      async () => {
+        const summary = await fetchHapiSummary(req.countryCode);
+        return summary ? { summary } : null;
+      },
+    );
 
     return result || { summary: undefined };
   } catch {

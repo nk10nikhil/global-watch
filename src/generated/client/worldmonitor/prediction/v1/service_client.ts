@@ -84,14 +84,22 @@ export class PredictionServiceClient {
     this.defaultHeaders = { ...options?.defaultHeaders };
   }
 
-  async listPredictionMarkets(req: ListPredictionMarketsRequest, options?: PredictionServiceCallOptions): Promise<ListPredictionMarketsResponse> {
+  async listPredictionMarkets(
+    req: ListPredictionMarketsRequest,
+    options?: PredictionServiceCallOptions,
+  ): Promise<ListPredictionMarketsResponse> {
     let path = "/api/prediction/v1/list-prediction-markets";
     const params = new URLSearchParams();
-    if (req.pageSize != null && req.pageSize !== 0) params.set("page_size", String(req.pageSize));
-    if (req.cursor != null && req.cursor !== "") params.set("cursor", String(req.cursor));
-    if (req.category != null && req.category !== "") params.set("category", String(req.category));
-    if (req.query != null && req.query !== "") params.set("query", String(req.query));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.pageSize != null && req.pageSize !== 0)
+      params.set("page_size", String(req.pageSize));
+    if (req.cursor != null && req.cursor !== "")
+      params.set("cursor", String(req.cursor));
+    if (req.category != null && req.category !== "")
+      params.set("category", String(req.category));
+    if (req.query != null && req.query !== "")
+      params.set("query", String(req.query));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -109,7 +117,7 @@ export class PredictionServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as ListPredictionMarketsResponse;
+    return (await resp.json()) as ListPredictionMarketsResponse;
   }
 
   private async handleError(resp: Response): Promise<never> {
@@ -124,7 +132,10 @@ export class PredictionServiceClient {
         if (e instanceof ValidationError) throw e;
       }
     }
-    throw new ApiError(resp.status, `Request failed with status ${resp.status}`, body);
+    throw new ApiError(
+      resp.status,
+      `Request failed with status ${resp.status}`,
+      body,
+    );
   }
 }
-

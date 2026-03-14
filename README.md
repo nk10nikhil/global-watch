@@ -35,32 +35,32 @@
 
 ## Why World Monitor?
 
-| Problem                            | Solution                                                                                                   |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| News scattered across 100+ sources | **Single unified dashboard** with 435+ curated feeds across 15 categories                                  |
-| No geospatial context for events   | **Interactive map** with 45 toggleable data layers and CII country risk heatmap                             |
-| Information overload               | **AI-synthesized briefs** with focal point detection and local LLM support                                 |
-| Crypto/macro signal noise          | **7-signal market radar** with composite BUY/CASH verdict                                                  |
-| Expensive OSINT tools ($$$)        | **100% free & open source**                                                                                |
-| Static news feeds                  | **Real-time updates** with live video streams and AI-powered deductions                                    |
+| Problem                            | Solution                                                                                                                                                                                |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| News scattered across 100+ sources | **Single unified dashboard** with 435+ curated feeds across 15 categories                                                                                                               |
+| No geospatial context for events   | **Interactive map** with 45 toggleable data layers and CII country risk heatmap                                                                                                         |
+| Information overload               | **AI-synthesized briefs** with focal point detection and local LLM support                                                                                                              |
+| Crypto/macro signal noise          | **7-signal market radar** with composite BUY/CASH verdict                                                                                                                               |
+| Expensive OSINT tools ($$$)        | **100% free & open source**                                                                                                                                                             |
+| Static news feeds                  | **Real-time updates** with live video streams and AI-powered deductions                                                                                                                 |
 | Cloud-dependent AI tools           | **Run AI locally** with Ollama/LM Studio — no API keys, no data leaves your machine. Opt-in **Headline Memory** builds a local semantic index of every headline for RAG-powered queries |
-| Web-only dashboards                | **Native desktop app** (Tauri) for macOS, Windows, and Linux + installable PWA with offline map support    |
-| Flat 2D maps                       | **Dual map engine** — photorealistic 3D globe (globe.gl + Three.js) and WebGL flat map (deck.gl) with 45 toggleable data layers, runtime-switchable |
-| English-only OSINT tools           | **21 languages** with native-language RSS feeds, AI-translated summaries, and RTL support for Arabic       |
-| Siloed financial data              | **Finance variant** with 92 stock exchanges, 19 financial centers, 13 central banks, BIS data, WTO trade policy, and Gulf FDI tracking |
-| Undocumented, fragile APIs         | **Proto-first API contracts** — 22 typed services with auto-generated clients, servers, and OpenAPI docs   |
+| Web-only dashboards                | **Native desktop app** (Tauri) for macOS, Windows, and Linux + installable PWA with offline map support                                                                                 |
+| Flat 2D maps                       | **Dual map engine** — photorealistic 3D globe (globe.gl + Three.js) and WebGL flat map (deck.gl) with 45 toggleable data layers, runtime-switchable                                     |
+| English-only OSINT tools           | **21 languages** with native-language RSS feeds, AI-translated summaries, and RTL support for Arabic                                                                                    |
+| Siloed financial data              | **Finance variant** with 92 stock exchanges, 19 financial centers, 13 central banks, BIS data, WTO trade policy, and Gulf FDI tracking                                                  |
+| Undocumented, fragile APIs         | **Proto-first API contracts** — 22 typed services with auto-generated clients, servers, and OpenAPI docs                                                                                |
 
 ---
 
 ## Live Demos
 
-| Variant             | URL                                                          | Focus                                            |
-| ------------------- | ------------------------------------------------------------ | ------------------------------------------------ |
-| **World Monitor**   | [worldmonitor.app](https://worldmonitor.app)                 | Geopolitics, military, conflicts, infrastructure |
-| **Tech Monitor**    | [tech.worldmonitor.app](https://tech.worldmonitor.app)       | Startups, AI/ML, cloud, cybersecurity            |
-| **Finance Monitor** | [finance.worldmonitor.app](https://finance.worldmonitor.app) | Global markets, trading, central banks, Gulf FDI |
+| Variant               | URL                                                              | Focus                                                 |
+| --------------------- | ---------------------------------------------------------------- | ----------------------------------------------------- |
+| **World Monitor**     | [worldmonitor.app](https://worldmonitor.app)                     | Geopolitics, military, conflicts, infrastructure      |
+| **Tech Monitor**      | [tech.worldmonitor.app](https://tech.worldmonitor.app)           | Startups, AI/ML, cloud, cybersecurity                 |
+| **Finance Monitor**   | [finance.worldmonitor.app](https://finance.worldmonitor.app)     | Global markets, trading, central banks, Gulf FDI      |
 | **Commodity Monitor** | [commodity.worldmonitor.app](https://commodity.worldmonitor.app) | Mining, metals, energy commodities, critical minerals |
-| **Happy Monitor**   | [happy.worldmonitor.app](https://happy.worldmonitor.app)     | Good news, positive trends, uplifting stories    |
+| **Happy Monitor**     | [happy.worldmonitor.app](https://happy.worldmonitor.app)         | Good news, positive trends, uplifting stories         |
 
 All five variants run from a single codebase — switch between them with one click via the header bar.
 
@@ -90,36 +90,42 @@ All five variants run from a single codebase — switch between them with one cl
 <summary><strong>Geopolitical</strong> — conflicts, hotspots, protests, disasters, sanctions, cyber IOCs, GPS jamming, Iran events</summary>
 
 [Full details →](./docs/DATA_SOURCES.md#data-layers)
+
 </details>
 
 <details>
 <summary><strong>Military & Strategic</strong> — 210+ bases, live flights (ADS-B), naval vessels (AIS), nuclear facilities, spaceports, orbital surveillance</summary>
 
 [Full details →](./docs/DATA_SOURCES.md#data-layers) · [Orbital Surveillance →](./docs/ORBITAL_SURVEILLANCE.md)
+
 </details>
 
 <details>
 <summary><strong>Infrastructure</strong> — undersea cables, pipelines, 111 AI datacenters, 83 strategic ports, 107 airports, trade routes</summary>
 
 [Full details →](./docs/DATA_SOURCES.md#data-layers)
+
 </details>
 
 <details>
 <summary><strong>Market & Crypto</strong> — 7-signal macro radar, market watchlist, Gulf economies, crypto, prediction markets, stablecoins, ETF flows</summary>
 
 [Full details →](./docs/DATA_SOURCES.md#data-layers)
+
 </details>
 
 <details>
 <summary><strong>Tech Ecosystem</strong> — company HQs, startup hubs, cloud regions, accelerators, conferences</summary>
 
 [Full details →](./docs/DATA_SOURCES.md#data-layers)
+
 </details>
 
 <details>
 <summary><strong>Finance & Markets</strong> — 92 stock exchanges, 19 financial centers, 13 central banks, BIS data, WTO trade policy, Gulf FDI</summary>
 
 [Full details →](./docs/FINANCE_DATA.md)
+
 </details>
 
 ### Live News & Video
@@ -221,14 +227,14 @@ All five variants run from a single codebase — switch between them with one cl
 
 A single codebase produces five specialized dashboards, each with distinct feeds, panels, map layers, and branding:
 
-| Aspect                | World Monitor                                        | Tech Monitor                                    | Finance Monitor                                  | Commodity Monitor                                         | Happy Monitor                                         |
-| --------------------- | ---------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------ | --------------------------------------------------------- | ----------------------------------------------------- |
-| **Domain**            | worldmonitor.app                                     | tech.worldmonitor.app                           | finance.worldmonitor.app                         | commodity.worldmonitor.app                                | happy.worldmonitor.app                                |
-| **Focus**             | Geopolitics, military, conflicts                     | AI/ML, startups, cybersecurity                  | Markets, trading, central banks                  | Mining, metals, energy commodities, critical minerals     | Good news, conservation, human progress               |
-| **RSS Feeds**         | 15 categories, 200+ feeds (politics, MENA, Africa, think tanks) | 21 categories, 152 feeds (AI, VC blogs, startups, GitHub) | 14 categories, 55 feeds (forex, bonds, commodities, IPOs) | 10 categories, 50+ feeds (gold/silver, energy, mining, critical minerals, base metals) | 5 categories, 21 positive-news sources (GNN, Positive.News, Upworthy) |
-| **Panels**            | 45 (strategic posture, CII, cascade, trade policy, airline intel, predictions) | 28 (AI labs, unicorns, accelerators, tech readiness) | 27 (forex, bonds, derivatives, trade policy, gulf economies) | 16 (live prices, sector heatmap, gold/silver, energy, mining, critical minerals, base metals, supply chain) | 10 (good news, breakthroughs, conservation, renewables, giving) |
-| **Unique Map Layers** | Military bases, nuclear facilities, hotspots         | Tech HQs, cloud regions, startup hubs           | Stock exchanges, central banks, Gulf investments | Mine sites, processing plants, commodity ports, commodity hubs, pipelines, trade routes | Positive events, kindness, species recovery, renewables |
-| **Desktop App**       | World Monitor.app / .exe / .AppImage                 | Tech Monitor.app / .exe / .AppImage             | Finance Monitor.app / .exe / .AppImage           | (web-only)                                                | (web-only)                                            |
+| Aspect                | World Monitor                                                                  | Tech Monitor                                              | Finance Monitor                                              | Commodity Monitor                                                                                           | Happy Monitor                                                         |
+| --------------------- | ------------------------------------------------------------------------------ | --------------------------------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| **Domain**            | worldmonitor.app                                                               | tech.worldmonitor.app                                     | finance.worldmonitor.app                                     | commodity.worldmonitor.app                                                                                  | happy.worldmonitor.app                                                |
+| **Focus**             | Geopolitics, military, conflicts                                               | AI/ML, startups, cybersecurity                            | Markets, trading, central banks                              | Mining, metals, energy commodities, critical minerals                                                       | Good news, conservation, human progress                               |
+| **RSS Feeds**         | 15 categories, 200+ feeds (politics, MENA, Africa, think tanks)                | 21 categories, 152 feeds (AI, VC blogs, startups, GitHub) | 14 categories, 55 feeds (forex, bonds, commodities, IPOs)    | 10 categories, 50+ feeds (gold/silver, energy, mining, critical minerals, base metals)                      | 5 categories, 21 positive-news sources (GNN, Positive.News, Upworthy) |
+| **Panels**            | 45 (strategic posture, CII, cascade, trade policy, airline intel, predictions) | 28 (AI labs, unicorns, accelerators, tech readiness)      | 27 (forex, bonds, derivatives, trade policy, gulf economies) | 16 (live prices, sector heatmap, gold/silver, energy, mining, critical minerals, base metals, supply chain) | 10 (good news, breakthroughs, conservation, renewables, giving)       |
+| **Unique Map Layers** | Military bases, nuclear facilities, hotspots                                   | Tech HQs, cloud regions, startup hubs                     | Stock exchanges, central banks, Gulf investments             | Mine sites, processing plants, commodity ports, commodity hubs, pipelines, trade routes                     | Positive events, kindness, species recovery, renewables               |
+| **Desktop App**       | World Monitor.app / .exe / .AppImage                                           | Tech Monitor.app / .exe / .AppImage                       | Finance Monitor.app / .exe / .AppImage                       | (web-only)                                                                                                  | (web-only)                                                            |
 
 Single-deployment consolidation — all five variants serve from one Vercel deployment, determined by hostname. Build-time `VITE_VARIANT` tree-shakes unused data. Runtime variant selector in the header bar.
 
@@ -277,7 +283,7 @@ All 22 service domains are available as REST endpoints following the pattern `PO
 | **IP rate limiting**           | AI endpoints use Upstash Redis-backed rate limiting to prevent abuse of Groq/OpenRouter quotas.                                                                                                                                                    |
 | **Desktop sidecar auth**       | The local API sidecar requires a per-session `Bearer` token generated at launch. The token is stored in Rust state and injected into the sidecar environment — only the Tauri frontend can retrieve it via IPC. Health check endpoints are exempt. |
 | **OS keychain storage**        | Desktop API keys are stored in the operating system's credential manager (macOS Keychain, Windows Credential Manager), never in plaintext files or environment variables on disk.                                                                  |
-| **SSRF protection**            | Two-phase URL validation: protocol allowlist, private IP rejection, DNS rebinding detection, and TOCTOU-safe address pinning.                                                                                                                     |
+| **SSRF protection**            | Two-phase URL validation: protocol allowlist, private IP rejection, DNS rebinding detection, and TOCTOU-safe address pinning.                                                                                                                      |
 | **IPC window hardening**       | All sensitive Tauri IPC commands gate on `require_trusted_window()` with a `TRUSTED_WINDOWS` allowlist.                                                                                                                                            |
 | **Bot protection middleware**  | Edge Middleware blocks crawlers from `/api/*` routes. Social preview bots are selectively allowed on `/api/story` and `/api/og-story`.                                                                                                             |
 
@@ -289,16 +295,16 @@ The test suite includes **30 test files** with **554 individual test cases** acr
 
 **Unit & integration tests** (`npm test`) validate:
 
-| Area | Test Files | Coverage |
-| --- | --- | --- |
-| **Server handlers** | `server-handlers`, `supply-chain-handlers`, `supply-chain-v2` | All 22 proto service handler imports, route registration, response schemas |
-| **Caching** | `redis-caching`, `route-cache-tier`, `flush-stale-refreshes` | Cache key construction, TTL tiers, stale refresh coalescing, stampede prevention |
-| **Data integrity** | `bootstrap`, `deploy-config`, `edge-functions` | Bootstrap key sync between `cache-keys.ts` and `bootstrap.js`, all 57 edge function self-containment (no `../server/` imports), version sync across package.json/tauri.conf.json/Cargo.toml |
-| **Intelligence** | `military-classification`, `clustering`, `insights-loader`, `summarize-reasoning` | Military confidence scoring, news clustering algorithms, AI brief generation, LLM reasoning chain parsing |
-| **Map & geo** | `countries-geojson`, `globe-2d-3d-parity`, `map-locale`, `geo-keyword-matching` | GeoJSON polygon validity, flat/globe layer parity, locale-aware map labels, 217-hub keyword matching |
-| **Protocols** | `oref-proxy`, `oref-locations`, `oref-breaking`, `live-news-hls` | OREF alert parsing, 1480 Hebrew→English location translations, HLS stream detection |
-| **Circuit breakers** | `hapi-gdelt-circuit-breakers`, `tech-readiness-circuit-breakers`, `smart-poll-loop` | Per-source failure isolation, adaptive backoff, hidden-tab throttling |
-| **Data sources** | `gulf-fdi-data`, `ttl-acled-ais-guards`, `urlState` | Gulf FDI coordinate validation, ACLED/AIS TTL guards, URL state encoding/decoding |
+| Area                 | Test Files                                                                          | Coverage                                                                                                                                                                                    |
+| -------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Server handlers**  | `server-handlers`, `supply-chain-handlers`, `supply-chain-v2`                       | All 22 proto service handler imports, route registration, response schemas                                                                                                                  |
+| **Caching**          | `redis-caching`, `route-cache-tier`, `flush-stale-refreshes`                        | Cache key construction, TTL tiers, stale refresh coalescing, stampede prevention                                                                                                            |
+| **Data integrity**   | `bootstrap`, `deploy-config`, `edge-functions`                                      | Bootstrap key sync between `cache-keys.ts` and `bootstrap.js`, all 57 edge function self-containment (no `../server/` imports), version sync across package.json/tauri.conf.json/Cargo.toml |
+| **Intelligence**     | `military-classification`, `clustering`, `insights-loader`, `summarize-reasoning`   | Military confidence scoring, news clustering algorithms, AI brief generation, LLM reasoning chain parsing                                                                                   |
+| **Map & geo**        | `countries-geojson`, `globe-2d-3d-parity`, `map-locale`, `geo-keyword-matching`     | GeoJSON polygon validity, flat/globe layer parity, locale-aware map labels, 217-hub keyword matching                                                                                        |
+| **Protocols**        | `oref-proxy`, `oref-locations`, `oref-breaking`, `live-news-hls`                    | OREF alert parsing, 1480 Hebrew→English location translations, HLS stream detection                                                                                                         |
+| **Circuit breakers** | `hapi-gdelt-circuit-breakers`, `tech-readiness-circuit-breakers`, `smart-poll-loop` | Per-source failure isolation, adaptive backoff, hidden-tab throttling                                                                                                                       |
+| **Data sources**     | `gulf-fdi-data`, `ttl-acled-ais-guards`, `urlState`                                 | Gulf FDI coordinate validation, ACLED/AIS TTL guards, URL state encoding/decoding                                                                                                           |
 
 **E2E map tests** use Playwright with the map harness (`/tests/map-harness.html`) for overlay behavior validation.
 
@@ -383,13 +389,13 @@ This runs the frontend without the API layer. Panels that require server-side pr
 
 ### Platform Notes
 
-| Platform               | Status                  | Notes                                                                                                                          |
-| ---------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| **Vercel**             | Full support            | Recommended deployment target                                                                                                  |
+| Platform               | Status                  | Notes                                                                                                                                                                                                                                                                |
+| ---------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Vercel**             | Full support            | Recommended deployment target                                                                                                                                                                                                                                        |
 | **Linux x86_64**       | Full support            | Works with `vercel dev` for local development. Desktop .AppImage available for x86_64. WebKitGTK rendering uses DMA-BUF with fallback to SHM for GPU compatibility. Font stack includes DejaVu Sans Mono and Liberation Mono for consistent rendering across distros |
-| **macOS**              | Works with `vercel dev` | Full local development                                                                                                         |
-| **Raspberry Pi / ARM** | Partial                 | `vercel dev` edge runtime emulation may not work on ARM. Use Option 1 (deploy to Vercel) or Option 3 (static frontend) instead |
-| **Docker**             | Official image         | See [Docker image](#docker-image-official) ([#1260](https://github.com/koala73/worldmonitor/issues/1260))                    |
+| **macOS**              | Works with `vercel dev` | Full local development                                                                                                                                                                                                                                               |
+| **Raspberry Pi / ARM** | Partial                 | `vercel dev` edge runtime emulation may not work on ARM. Use Option 1 (deploy to Vercel) or Option 3 (static frontend) instead                                                                                                                                       |
+| **Docker**             | Official image          | See [Docker image](#docker-image-official) ([#1260](https://github.com/koala73/worldmonitor/issues/1260))                                                                                                                                                            |
 
 ### Docker image (official)
 
@@ -417,9 +423,9 @@ Then open [http://localhost:3000](http://localhost:3000).
 
 **Environment variables:**
 
-| Variable        | Default                        | Description                                      |
-| --------------- | ------------------------------ | ------------------------------------------------ |
-| `API_UPSTREAM`  | `https://api.worldmonitor.app` | Backend URL for `/api/*` proxy (set at runtime)  |
+| Variable       | Default                        | Description                                     |
+| -------------- | ------------------------------ | ----------------------------------------------- |
+| `API_UPSTREAM` | `https://api.worldmonitor.app` | Backend URL for `/api/*` proxy (set at runtime) |
 
 The proxy forwards the upstream host (`Host: <API_UPSTREAM host>`) so the default API receives the correct Host. If your backend expects a different Host, configure it accordingly.
 
@@ -440,14 +446,14 @@ The Railway relay is a multi-protocol gateway that handles data sources requirin
 node scripts/ais-relay.cjs
 ```
 
-| Service                 | Protocol        | Purpose                                                              |
-| ----------------------- | --------------- | -------------------------------------------------------------------- |
-| **AIS Vessel Tracking** | WebSocket       | Live AIS maritime data with chokepoint detection and density grids   |
-| **OpenSky Aircraft**    | REST (polling)  | Military flight tracking across merged query regions                 |
-| **Telegram OSINT**      | MTProto (GramJS)| 26 OSINT channels polled on 60s cycle with FLOOD_WAIT handling       |
-| **OREF Rocket Alerts**  | curl + proxy    | Israel Home Front Command sirens via residential proxy (Akamai WAF)  |
-| **Polymarket Proxy**    | HTTPS           | JA3 fingerprint bypass with request queuing and cache deduplication   |
-| **ICAO NOTAM**          | REST            | Airport/airspace closure detection for 46 MENA airports              |
+| Service                 | Protocol         | Purpose                                                             |
+| ----------------------- | ---------------- | ------------------------------------------------------------------- |
+| **AIS Vessel Tracking** | WebSocket        | Live AIS maritime data with chokepoint detection and density grids  |
+| **OpenSky Aircraft**    | REST (polling)   | Military flight tracking across merged query regions                |
+| **Telegram OSINT**      | MTProto (GramJS) | 26 OSINT channels polled on 60s cycle with FLOOD_WAIT handling      |
+| **OREF Rocket Alerts**  | curl + proxy     | Israel Home Front Command sirens via residential proxy (Akamai WAF) |
+| **Polymarket Proxy**    | HTTPS            | JA3 fingerprint bypass with request queuing and cache deduplication |
+| **ICAO NOTAM**          | REST             | Airport/airspace closure detection for 46 MENA airports             |
 
 Set `WS_RELAY_URL` (server-side, HTTPS) and `VITE_WS_RELAY_URL` (client-side, WSS) in your environment. Without the relay, AIS, OpenSky, Telegram, and OREF layers won't show live data, but all other features work normally.
 
@@ -455,22 +461,22 @@ Set `WS_RELAY_URL` (server-side, HTTPS) and `VITE_WS_RELAY_URL` (client-side, WS
 
 ## Tech Stack
 
-| Category              | Technologies                                                                                                                                   |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Frontend**          | Vanilla TypeScript (no framework), Vite, globe.gl + Three.js (3D globe), deck.gl + MapLibre GL (flat map), vite-plugin-pwa (service worker + manifest) |
-| **Desktop**           | Tauri 2 (Rust) with Node.js sidecar, OS keychain integration (keyring crate), native TLS (reqwest)                                             |
-| **AI/ML**             | Ollama / LM Studio (local, OpenAI-compatible), Groq (Llama 3.1 8B), OpenRouter (fallback), Transformers.js (browser-side T5, NER, embeddings), IndexedDB vector store (5K headline RAG) |
-| **Caching**           | Redis (Upstash) — 3-tier cache with in-memory + Redis + upstream, cross-user AI deduplication. Vercel CDN (s-maxage). Service worker (Workbox) |
-| **Geopolitical APIs** | OpenSky, GDELT, ACLED, UCDP, HAPI, USGS, GDACS, NASA EONET, NASA FIRMS, Polymarket, Cloudflare Radar, WorldPop, OREF (Israel sirens), gpsjam.org (GPS interference), Telegram MTProto (26 OSINT channels) |
-| **Market APIs**       | Yahoo Finance (equities, forex, crypto), CoinGecko (stablecoins), mempool.space (BTC hashrate), alternative.me (Fear & Greed)                  |
-| **Threat Intel APIs** | abuse.ch (Feodo Tracker, URLhaus), AlienVault OTX, AbuseIPDB, C2IntelFeeds                                                                     |
-| **Economic APIs**     | FRED (Federal Reserve), EIA (Energy), Finnhub (stock quotes)                                                                                   |
+| Category              | Technologies                                                                                                                                                                                                  |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Frontend**          | Vanilla TypeScript (no framework), Vite, globe.gl + Three.js (3D globe), deck.gl + MapLibre GL (flat map), vite-plugin-pwa (service worker + manifest)                                                        |
+| **Desktop**           | Tauri 2 (Rust) with Node.js sidecar, OS keychain integration (keyring crate), native TLS (reqwest)                                                                                                            |
+| **AI/ML**             | Ollama / LM Studio (local, OpenAI-compatible), Groq (Llama 3.1 8B), OpenRouter (fallback), Transformers.js (browser-side T5, NER, embeddings), IndexedDB vector store (5K headline RAG)                       |
+| **Caching**           | Redis (Upstash) — 3-tier cache with in-memory + Redis + upstream, cross-user AI deduplication. Vercel CDN (s-maxage). Service worker (Workbox)                                                                |
+| **Geopolitical APIs** | OpenSky, GDELT, ACLED, UCDP, HAPI, USGS, GDACS, NASA EONET, NASA FIRMS, Polymarket, Cloudflare Radar, WorldPop, OREF (Israel sirens), gpsjam.org (GPS interference), Telegram MTProto (26 OSINT channels)     |
+| **Market APIs**       | Yahoo Finance (equities, forex, crypto), CoinGecko (stablecoins), mempool.space (BTC hashrate), alternative.me (Fear & Greed)                                                                                 |
+| **Threat Intel APIs** | abuse.ch (Feodo Tracker, URLhaus), AlienVault OTX, AbuseIPDB, C2IntelFeeds                                                                                                                                    |
+| **Economic APIs**     | FRED (Federal Reserve), EIA (Energy), Finnhub (stock quotes)                                                                                                                                                  |
 | **Localization**      | i18next (21 languages: en, bg, ro, fr, de, es, it, pl, pt, nl, sv, ru, ar, zh, ja, tr, th, vi, cs, el, ko), RTL support, lazy-loaded bundles, native-language feeds for 21 locales with one-time locale boost |
-| **API Contracts**     | Protocol Buffers (92 proto files, 22 services), sebuf HTTP annotations, buf CLI (lint + breaking checks), auto-generated TypeScript clients/servers + OpenAPI 3.1.0 docs |
-| **Analytics**         | Vercel Analytics (privacy-first, lightweight web vitals and page view tracking)                                                                 |
-| **Deployment**        | Vercel Edge Functions (60+ endpoints) + Railway (WebSocket relay + Telegram + OREF + Polymarket proxy + NOTAM) + Tauri (macOS/Windows/Linux) + PWA (installable) |
-| **Finance Data**      | 92 stock exchanges, 19 financial centers, 13 central banks, 10 commodity hubs, 64 Gulf FDI investments                                         |
-| **Data**              | 435+ RSS feeds across all 4 variants, ADS-B transponders, AIS maritime data, VIIRS satellite imagery, 30+ live video channels (8+ default YouTube + 18+ HLS native), 26 Telegram OSINT channels |
+| **API Contracts**     | Protocol Buffers (92 proto files, 22 services), sebuf HTTP annotations, buf CLI (lint + breaking checks), auto-generated TypeScript clients/servers + OpenAPI 3.1.0 docs                                      |
+| **Analytics**         | Vercel Analytics (privacy-first, lightweight web vitals and page view tracking)                                                                                                                               |
+| **Deployment**        | Vercel Edge Functions (60+ endpoints) + Railway (WebSocket relay + Telegram + OREF + Polymarket proxy + NOTAM) + Tauri (macOS/Windows/Linux) + PWA (installable)                                              |
+| **Finance Data**      | 92 stock exchanges, 19 financial centers, 13 central banks, 10 commodity hubs, 64 Gulf FDI investments                                                                                                        |
+| **Data**              | 435+ RSS feeds across all 4 variants, ADS-B transponders, AIS maritime data, VIIRS satellite imagery, 30+ live video channels (8+ default YouTube + 18+ HLS native), 26 Telegram OSINT channels               |
 
 ---
 
@@ -578,15 +584,15 @@ This project is dual-licensed:
 
 **In plain terms:**
 
-| Use Case | Allowed? | Condition |
-|----------|----------|-----------|
-| Personal / research use | Yes | No conditions |
-| Self-hosted deployment (non-commercial) | Yes | Must retain attribution |
-| Forking and modifying (non-commercial) | Yes | Must share source under AGPL-3.0, retain attribution |
-| Rebranding / renaming as your own product | No | Requires commercial license |
-| Commercial use of any kind | No | Requires commercial license |
-| Running as a SaaS / paid web service | No | Requires commercial license |
-| Bundling into a proprietary product | No | Requires commercial license |
+| Use Case                                  | Allowed? | Condition                                            |
+| ----------------------------------------- | -------- | ---------------------------------------------------- |
+| Personal / research use                   | Yes      | No conditions                                        |
+| Self-hosted deployment (non-commercial)   | Yes      | Must retain attribution                              |
+| Forking and modifying (non-commercial)    | Yes      | Must share source under AGPL-3.0, retain attribution |
+| Rebranding / renaming as your own product | No       | Requires commercial license                          |
+| Commercial use of any kind                | No       | Requires commercial license                          |
+| Running as a SaaS / paid web service      | No       | Requires commercial license                          |
+| Bundling into a proprietary product       | No       | Requires commercial license                          |
 
 For commercial licensing, contact the maintainer at the [GitHub repository](https://github.com/koala73/worldmonitor).
 

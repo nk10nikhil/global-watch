@@ -130,7 +130,10 @@ export interface ServerContext {
 
 export interface ServerOptions {
   onError?: (error: unknown, req: Request) => Response | Promise<Response>;
-  validateRequest?: (methodName: string, body: unknown) => FieldViolation[] | undefined;
+  validateRequest?: (
+    methodName: string,
+    body: unknown,
+  ) => FieldViolation[] | undefined;
 }
 
 export interface RouteDescriptor {
@@ -140,10 +143,22 @@ export interface RouteDescriptor {
 }
 
 export interface TradeServiceHandler {
-  getTradeRestrictions(ctx: ServerContext, req: GetTradeRestrictionsRequest): Promise<GetTradeRestrictionsResponse>;
-  getTariffTrends(ctx: ServerContext, req: GetTariffTrendsRequest): Promise<GetTariffTrendsResponse>;
-  getTradeFlows(ctx: ServerContext, req: GetTradeFlowsRequest): Promise<GetTradeFlowsResponse>;
-  getTradeBarriers(ctx: ServerContext, req: GetTradeBarriersRequest): Promise<GetTradeBarriersResponse>;
+  getTradeRestrictions(
+    ctx: ServerContext,
+    req: GetTradeRestrictionsRequest,
+  ): Promise<GetTradeRestrictionsResponse>;
+  getTariffTrends(
+    ctx: ServerContext,
+    req: GetTariffTrendsRequest,
+  ): Promise<GetTariffTrendsResponse>;
+  getTradeFlows(
+    ctx: ServerContext,
+    req: GetTradeFlowsRequest,
+  ): Promise<GetTradeFlowsResponse>;
+  getTradeBarriers(
+    ctx: ServerContext,
+    req: GetTradeBarriersRequest,
+  ): Promise<GetTradeBarriersResponse>;
 }
 
 export function createTradeServiceRoutes(
@@ -164,7 +179,10 @@ export function createTradeServiceRoutes(
             limit: Number(params.get("limit") ?? "0"),
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getTradeRestrictions", body);
+            const bodyViolations = options.validateRequest(
+              "getTradeRestrictions",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -177,16 +195,22 @@ export function createTradeServiceRoutes(
           };
 
           const result = await handler.getTradeRestrictions(ctx, body);
-          return new Response(JSON.stringify(result as GetTradeRestrictionsResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetTradeRestrictionsResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -214,7 +238,10 @@ export function createTradeServiceRoutes(
             years: Number(params.get("years") ?? "0"),
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getTariffTrends", body);
+            const bodyViolations = options.validateRequest(
+              "getTariffTrends",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -227,16 +254,22 @@ export function createTradeServiceRoutes(
           };
 
           const result = await handler.getTariffTrends(ctx, body);
-          return new Response(JSON.stringify(result as GetTariffTrendsResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetTariffTrendsResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -263,7 +296,10 @@ export function createTradeServiceRoutes(
             years: Number(params.get("years") ?? "0"),
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getTradeFlows", body);
+            const bodyViolations = options.validateRequest(
+              "getTradeFlows",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -282,10 +318,13 @@ export function createTradeServiceRoutes(
           });
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -312,7 +351,10 @@ export function createTradeServiceRoutes(
             limit: Number(params.get("limit") ?? "0"),
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getTradeBarriers", body);
+            const bodyViolations = options.validateRequest(
+              "getTradeBarriers",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -325,16 +367,22 @@ export function createTradeServiceRoutes(
           };
 
           const result = await handler.getTradeBarriers(ctx, body);
-          return new Response(JSON.stringify(result as GetTradeBarriersResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetTradeBarriersResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -349,4 +397,3 @@ export function createTradeServiceRoutes(
     },
   ];
 }
-

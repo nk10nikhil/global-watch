@@ -43,18 +43,18 @@ Phase 0 (Decisions)
 
 ## Summary
 
-| Phase | P0 | P1 | P2 | P3 | Total |
-|-------|----|----|----|----|-------|
-| 0: Decisions | 3 | — | — | — | 3 |
-| 1: Auth | 2 | 2 | — | — | 4 |
-| 2: Schema | 2 | 1 | 1 | — | 4 |
-| 3: Payments | 3 | 2 | 1 | — | 6 |
-| 4: Gating | 2 | 2 | — | — | 4 |
-| 5: Dashboard | — | 2 | 3 | — | 5 |
-| 6: Pro Features | — | 5 | 3 | — | 8 |
-| 7: API Tier | — | 2 | 2 | — | 4 |
-| 8: Enterprise | — | — | — | 10 | 10 |
-| **Total** | **12** | **16** | **10** | **10** | **48** |
+| Phase           | P0     | P1     | P2     | P3     | Total  |
+| --------------- | ------ | ------ | ------ | ------ | ------ |
+| 0: Decisions    | 3      | —      | —      | —      | 3      |
+| 1: Auth         | 2      | 2      | —      | —      | 4      |
+| 2: Schema       | 2      | 1      | 1      | —      | 4      |
+| 3: Payments     | 3      | 2      | 1      | —      | 6      |
+| 4: Gating       | 2      | 2      | —      | —      | 4      |
+| 5: Dashboard    | —      | 2      | 3      | —      | 5      |
+| 6: Pro Features | —      | 5      | 3      | —      | 8      |
+| 7: API Tier     | —      | 2      | 2      | —      | 4      |
+| 8: Enterprise   | —      | —      | —      | 10     | 10     |
+| **Total**       | **12** | **16** | **10** | **10** | **48** |
 
 ---
 
@@ -672,14 +672,14 @@ Add entitlement-aware middleware to the server gateway so pro-only endpoints are
 
 **Entitlement matrix**:
 
-| Endpoint Category | free_anon | free_authed | pro | api_starter | api_business |
-|---|---|---|---|---|---|
-| Public data (seismology, news, weather) | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Market quotes, crypto, commodities | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Equity research (financials, targets) | — | — | ✓ | — | ✓ |
-| AI briefs, flash alerts | — | — | ✓ | — | — |
-| Economy analytics (correlations) | — | — | ✓ | — | ✓ |
-| Risk scoring, scenario analysis | — | — | ✓ | — | ✓ |
+| Endpoint Category                       | free_anon | free_authed | pro | api_starter | api_business |
+| --------------------------------------- | --------- | ----------- | --- | ----------- | ------------ |
+| Public data (seismology, news, weather) | ✓         | ✓           | ✓   | ✓           | ✓            |
+| Market quotes, crypto, commodities      | ✓         | ✓           | ✓   | ✓           | ✓            |
+| Equity research (financials, targets)   | —         | —           | ✓   | —           | ✓            |
+| AI briefs, flash alerts                 | —         | —           | ✓   | —           | —            |
+| Economy analytics (correlations)        | —         | —           | ✓   | —           | ✓            |
+| Risk scoring, scenario analysis         | —         | —           | ✓   | —           | ✓            |
 
 **API key migration (dual-read rollout)**:
 
@@ -775,13 +775,13 @@ Implement tiered rate limiting based on user plan.
 
 **Rate limits**:
 
-| Tier | Requests/day | Requests/min |
-|------|-------------|-------------|
-| Free (no auth) | 100 | 5 |
-| Free (authenticated) | 500 | 10 |
-| Pro | 10,000 | 60 |
-| API Starter | 1,000 | 30 |
-| API Business | 50,000 | 300 |
+| Tier                 | Requests/day | Requests/min |
+| -------------------- | ------------ | ------------ |
+| Free (no auth)       | 100          | 5            |
+| Free (authenticated) | 500          | 10           |
+| Pro                  | 10,000       | 60           |
+| API Starter          | 1,000        | 30           |
+| API Business         | 50,000       | 300          |
 
 **Unauthenticated identity**:
 

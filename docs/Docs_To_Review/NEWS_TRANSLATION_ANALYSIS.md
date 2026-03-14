@@ -19,7 +19,7 @@ Legacy RSS feeds are static XML files in their original language. There is no bu
 
 ### Option 1: Localized Feed Discovery (Recommended for "Major" Support)
 
-Instead of forcing translation, we switch the *source* based on the selected language.
+Instead of forcing translation, we switch the _source_ based on the selected language.
 
 - **Implementation**:
   - In `src/config/feeds.ts`, change the simple URL string to an object: `url: { en: '...', fr: '...' }` or separate constant lists `FEEDS_EN`, `FEEDS_FR`.

@@ -5,8 +5,8 @@
  * Logs analysis to console for comparison & improvement
  */
 
-import { mlWorker } from './ml-worker';
-import type { ClusteredEvent } from '@/types';
+import { mlWorker } from "./ml-worker";
+import type { ClusteredEvent } from "@/types";
 
 interface NEREntity {
   text: string;
@@ -44,32 +44,110 @@ export interface AnalysisReport {
 }
 
 const VIOLENCE_KEYWORDS = [
-  'killed', 'dead', 'death', 'shot', 'blood', 'massacre', 'slaughter',
-  'fatalities', 'casualties', 'wounded', 'injured', 'murdered', 'execution',
-  'crackdown', 'violent', 'clashes', 'gunfire', 'shooting',
+  "killed",
+  "dead",
+  "death",
+  "shot",
+  "blood",
+  "massacre",
+  "slaughter",
+  "fatalities",
+  "casualties",
+  "wounded",
+  "injured",
+  "murdered",
+  "execution",
+  "crackdown",
+  "violent",
+  "clashes",
+  "gunfire",
+  "shooting",
 ];
 
 const MILITARY_KEYWORDS = [
-  'war', 'armada', 'invasion', 'airstrike', 'strike', 'missile', 'troops',
-  'deployed', 'offensive', 'artillery', 'bomb', 'combat', 'fleet', 'warship',
-  'carrier', 'navy', 'airforce', 'deployment', 'mobilization', 'attack',
+  "war",
+  "armada",
+  "invasion",
+  "airstrike",
+  "strike",
+  "missile",
+  "troops",
+  "deployed",
+  "offensive",
+  "artillery",
+  "bomb",
+  "combat",
+  "fleet",
+  "warship",
+  "carrier",
+  "navy",
+  "airforce",
+  "deployment",
+  "mobilization",
+  "attack",
 ];
 
 const UNREST_KEYWORDS = [
-  'protest', 'protests', 'uprising', 'revolt', 'revolution', 'riot', 'riots',
-  'demonstration', 'unrest', 'dissent', 'rebellion', 'insurgent', 'overthrow',
-  'coup', 'martial law', 'curfew', 'shutdown', 'blackout',
+  "protest",
+  "protests",
+  "uprising",
+  "revolt",
+  "revolution",
+  "riot",
+  "riots",
+  "demonstration",
+  "unrest",
+  "dissent",
+  "rebellion",
+  "insurgent",
+  "overthrow",
+  "coup",
+  "martial law",
+  "curfew",
+  "shutdown",
+  "blackout",
 ];
 
 const FLASHPOINT_KEYWORDS = [
-  'iran', 'tehran', 'russia', 'moscow', 'china', 'beijing', 'taiwan', 'ukraine', 'kyiv',
-  'north korea', 'pyongyang', 'israel', 'gaza', 'west bank', 'syria', 'damascus',
-  'yemen', 'hezbollah', 'hamas', 'kremlin', 'pentagon', 'nato', 'wagner',
+  "iran",
+  "tehran",
+  "russia",
+  "moscow",
+  "china",
+  "beijing",
+  "taiwan",
+  "ukraine",
+  "kyiv",
+  "north korea",
+  "pyongyang",
+  "israel",
+  "gaza",
+  "west bank",
+  "syria",
+  "damascus",
+  "yemen",
+  "hezbollah",
+  "hamas",
+  "kremlin",
+  "pentagon",
+  "nato",
+  "wagner",
 ];
 
 const BUSINESS_DEMOTE = [
-  'ceo', 'earnings', 'stock', 'startup', 'data center', 'datacenter', 'revenue',
-  'quarterly', 'profit', 'investor', 'ipo', 'funding', 'valuation',
+  "ceo",
+  "earnings",
+  "stock",
+  "startup",
+  "data center",
+  "datacenter",
+  "revenue",
+  "quarterly",
+  "profit",
+  "investor",
+  "ipo",
+  "funding",
+  "valuation",
 ];
 
 class ParallelAnalysisService {
@@ -78,11 +156,10 @@ class ParallelAnalysisService {
   private analysisCount = 0;
 
   async analyzeHeadlines(clusters: ClusteredEvent[]): Promise<AnalysisReport> {
-
     this.analysisCount++;
 
     const analyzed: AnalyzedHeadline[] = [];
-    const titles = clusters.map(c => c.primaryTitle);
+    const titles = clusters.map((c) => c.primaryTitle);
 
     let sentiments: Array<{ label: string; score: number }> | null = null;
     let entities: NEREntity[][] | null = null;
@@ -126,13 +203,16 @@ class ParallelAnalysisService {
       perspectives.push(this.scoreByVelocity(cluster));
       perspectives.push(this.scoreBySourceDiversity(cluster));
 
-      const { finalScore, confidence, disagreement } = this.aggregateScores(perspectives);
+      const { finalScore, confidence, disagreement } =
+        this.aggregateScores(perspectives);
 
-      const flagged = disagreement > 0.3 || (finalScore > 0.5 && this.isLowKeywordScore(perspectives));
+      const flagged =
+        disagreement > 0.3 ||
+        (finalScore > 0.5 && this.isLowKeywordScore(perspectives));
       const flagReason = flagged
         ? disagreement > 0.3
-          ? 'High disagreement between perspectives'
-          : 'ML scores high but keyword score low - potential missed story'
+          ? "High disagreement between perspectives"
+          : "ML scores high but keyword score low - potential missed story"
         : undefined;
 
       analyzed.push({
@@ -151,20 +231,23 @@ class ParallelAnalysisService {
     analyzed.sort((a, b) => b.finalScore - a.finalScore);
 
     const topByConsensus = analyzed
-      .filter(a => a.confidence > 0.6)
+      .filter((a) => a.confidence > 0.6)
       .slice(0, 10);
 
     const topByDisagreement = analyzed
-      .filter(a => a.disagreement > 0.25)
+      .filter((a) => a.disagreement > 0.25)
       .sort((a, b) => b.disagreement - a.disagreement)
       .slice(0, 5);
 
     const missedByKeywords = analyzed
-      .filter(a => {
-        const keywordScore = a.perspectives.find(p => p.name === 'keywords')?.score ?? 0;
-        const mlAvg = a.perspectives
-          .filter(p => p.name !== 'keywords')
-          .reduce((sum, p) => sum + p.score, 0) / Math.max(1, a.perspectives.length - 1);
+      .filter((a) => {
+        const keywordScore =
+          a.perspectives.find((p) => p.name === "keywords")?.score ?? 0;
+        const mlAvg =
+          a.perspectives
+            .filter((p) => p.name !== "keywords")
+            .reduce((sum, p) => sum + p.score, 0) /
+          Math.max(1, a.perspectives.length - 1);
         return mlAvg > 0.5 && keywordScore < 0.3;
       })
       .slice(0, 5);
@@ -185,61 +268,72 @@ class ParallelAnalysisService {
     return report;
   }
 
-  private scoreByKeywords(titleLower: string, _cluster: ClusteredEvent): PerspectiveScore {
+  private scoreByKeywords(
+    titleLower: string,
+    _cluster: ClusteredEvent,
+  ): PerspectiveScore {
     let score = 0;
     const reasons: string[] = [];
 
-    const violence = VIOLENCE_KEYWORDS.filter(kw => titleLower.includes(kw));
+    const violence = VIOLENCE_KEYWORDS.filter((kw) => titleLower.includes(kw));
     if (violence.length > 0) {
       score += 0.4 + violence.length * 0.1;
-      reasons.push(`violence(${violence.join(',')})`);
+      reasons.push(`violence(${violence.join(",")})`);
     }
 
-    const military = MILITARY_KEYWORDS.filter(kw => titleLower.includes(kw));
+    const military = MILITARY_KEYWORDS.filter((kw) => titleLower.includes(kw));
     if (military.length > 0) {
       score += 0.3 + military.length * 0.08;
-      reasons.push(`military(${military.join(',')})`);
+      reasons.push(`military(${military.join(",")})`);
     }
 
-    const unrest = UNREST_KEYWORDS.filter(kw => titleLower.includes(kw));
+    const unrest = UNREST_KEYWORDS.filter((kw) => titleLower.includes(kw));
     if (unrest.length > 0) {
       score += 0.25 + unrest.length * 0.07;
-      reasons.push(`unrest(${unrest.join(',')})`);
+      reasons.push(`unrest(${unrest.join(",")})`);
     }
 
-    const flashpoint = FLASHPOINT_KEYWORDS.filter(kw => titleLower.includes(kw));
+    const flashpoint = FLASHPOINT_KEYWORDS.filter((kw) =>
+      titleLower.includes(kw),
+    );
     if (flashpoint.length > 0) {
       score += 0.2 + flashpoint.length * 0.05;
-      reasons.push(`flashpoint(${flashpoint.join(',')})`);
+      reasons.push(`flashpoint(${flashpoint.join(",")})`);
     }
 
     if ((violence.length > 0 || unrest.length > 0) && flashpoint.length > 0) {
       score *= 1.3;
-      reasons.push('combo-bonus');
+      reasons.push("combo-bonus");
     }
 
-    const business = BUSINESS_DEMOTE.filter(kw => titleLower.includes(kw));
+    const business = BUSINESS_DEMOTE.filter((kw) => titleLower.includes(kw));
     if (business.length > 0) {
       score *= 0.4;
-      reasons.push(`demoted(${business.join(',')})`);
+      reasons.push(`demoted(${business.join(",")})`);
     }
 
     score = Math.min(1, score);
 
     return {
-      name: 'keywords',
+      name: "keywords",
       score,
       confidence: 0.8,
-      reasoning: reasons.length > 0 ? reasons.join(' + ') : 'no keywords matched',
+      reasoning:
+        reasons.length > 0 ? reasons.join(" + ") : "no keywords matched",
     };
   }
 
-  private scoreBySentiment(sentiment: { label: string; score: number }): PerspectiveScore {
-    const isNegative = sentiment.label === 'negative';
-    const score = isNegative ? sentiment.score * 0.8 : (1 - sentiment.score) * 0.3;
+  private scoreBySentiment(sentiment: {
+    label: string;
+    score: number;
+  }): PerspectiveScore {
+    const isNegative = sentiment.label === "negative";
+    const score = isNegative
+      ? sentiment.score * 0.8
+      : (1 - sentiment.score) * 0.3;
 
     return {
-      name: 'sentiment',
+      name: "sentiment",
       score: Math.min(1, score),
       confidence: sentiment.score,
       reasoning: `${sentiment.label} (${(sentiment.score * 100).toFixed(0)}%) - negative news more important`,
@@ -247,12 +341,12 @@ class ParallelAnalysisService {
   }
 
   private scoreByEntities(entities: NEREntity[]): PerspectiveScore {
-    const locations = entities.filter(e => e.type.includes('LOC'));
-    const people = entities.filter(e => e.type.includes('PER'));
-    const orgs = entities.filter(e => e.type.includes('ORG'));
+    const locations = entities.filter((e) => e.type.includes("LOC"));
+    const people = entities.filter((e) => e.type.includes("PER"));
+    const orgs = entities.filter((e) => e.type.includes("ORG"));
 
-    const geopoliticalLocations = locations.filter(e =>
-      FLASHPOINT_KEYWORDS.some(fp => e.text.toLowerCase().includes(fp))
+    const geopoliticalLocations = locations.filter((e) =>
+      FLASHPOINT_KEYWORDS.some((fp) => e.text.toLowerCase().includes(fp)),
     );
 
     let score = 0;
@@ -260,7 +354,9 @@ class ParallelAnalysisService {
 
     if (geopoliticalLocations.length > 0) {
       score += 0.4;
-      reasons.push(`geo-locations(${geopoliticalLocations.map(e => e.text).join(',')})`);
+      reasons.push(
+        `geo-locations(${geopoliticalLocations.map((e) => e.text).join(",")})`,
+      );
     } else if (locations.length > 0) {
       score += 0.15;
       reasons.push(`locations(${locations.length})`);
@@ -268,12 +364,12 @@ class ParallelAnalysisService {
 
     if (people.length > 0) {
       score += 0.1 + people.length * 0.05;
-      reasons.push(`people(${people.map(e => e.text).join(',')})`);
+      reasons.push(`people(${people.map((e) => e.text).join(",")})`);
     }
 
     if (orgs.length > 0) {
       score += 0.1 + orgs.length * 0.05;
-      reasons.push(`orgs(${orgs.map(e => e.text).join(',')})`);
+      reasons.push(`orgs(${orgs.map((e) => e.text).join(",")})`);
     }
 
     const entityDensity = entities.length;
@@ -283,16 +379,20 @@ class ParallelAnalysisService {
     }
 
     return {
-      name: 'entities',
+      name: "entities",
       score: Math.min(1, score),
       confidence: entities.length > 0 ? 0.7 : 0.3,
-      reasoning: reasons.length > 0 ? reasons.join(' + ') : 'no significant entities',
+      reasoning:
+        reasons.length > 0 ? reasons.join(" + ") : "no significant entities",
     };
   }
 
-  private async scoreByNovelty(title: string, embedding: number[]): Promise<PerspectiveScore> {
+  private async scoreByNovelty(
+    title: string,
+    embedding: number[],
+  ): Promise<PerspectiveScore> {
     let maxSimilarity = 0;
-    let mostSimilar = '';
+    let mostSimilar = "";
 
     for (const [recentTitle, recentEmb] of this.recentEmbeddings) {
       if (recentTitle === title) continue;
@@ -313,41 +413,42 @@ class ParallelAnalysisService {
     const importanceBoost = noveltyScore > 0.5 ? 0.3 : 0;
 
     return {
-      name: 'novelty',
+      name: "novelty",
       score: Math.min(1, noveltyScore * 0.7 + importanceBoost),
       confidence: 0.6,
-      reasoning: maxSimilarity > 0.7
-        ? `similar to: "${mostSimilar}..." (${(maxSimilarity * 100).toFixed(0)}%)`
-        : `novel content (${(noveltyScore * 100).toFixed(0)}% unique)`,
+      reasoning:
+        maxSimilarity > 0.7
+          ? `similar to: "${mostSimilar}..." (${(maxSimilarity * 100).toFixed(0)}%)`
+          : `novel content (${(noveltyScore * 100).toFixed(0)}% unique)`,
     };
   }
 
   private scoreByVelocity(cluster: ClusteredEvent): PerspectiveScore {
     const velocity = cluster.velocity;
     let score = 0;
-    let reasoning = '';
+    let reasoning = "";
 
-    if (!velocity || velocity.level === 'normal') {
+    if (!velocity || velocity.level === "normal") {
       score = 0.2;
-      reasoning = 'normal velocity';
-    } else if (velocity.level === 'elevated') {
+      reasoning = "normal velocity";
+    } else if (velocity.level === "elevated") {
       score = 0.5;
       reasoning = `elevated: +${velocity.sourcesPerHour}/hr`;
-    } else if (velocity.level === 'spike') {
+    } else if (velocity.level === "spike") {
       score = 0.7;
       reasoning = `spike: +${velocity.sourcesPerHour}/hr`;
-    } else if (velocity.level === 'viral') {
+    } else if (velocity.level === "viral") {
       score = 0.9;
       reasoning = `viral: +${velocity.sourcesPerHour}/hr`;
     }
 
-    if (velocity?.trend === 'rising') {
+    if (velocity?.trend === "rising") {
       score += 0.1;
-      reasoning += ' ↑';
+      reasoning += " ↑";
     }
 
     return {
-      name: 'velocity',
+      name: "velocity",
       score: Math.min(1, score),
       confidence: 0.8,
       reasoning,
@@ -357,7 +458,7 @@ class ParallelAnalysisService {
   private scoreBySourceDiversity(cluster: ClusteredEvent): PerspectiveScore {
     const sources = cluster.sourceCount;
     let score = 0;
-    let reasoning = '';
+    let reasoning = "";
 
     if (sources >= 5) {
       score = 0.9;
@@ -370,11 +471,11 @@ class ParallelAnalysisService {
       reasoning = `${sources} sources - multi-source`;
     } else {
       score = 0.2;
-      reasoning = 'single source';
+      reasoning = "single source";
     }
 
     return {
-      name: 'sources',
+      name: "sources",
       score,
       confidence: 0.9,
       reasoning,
@@ -393,8 +494,8 @@ class ParallelAnalysisService {
     const weights: Record<string, number> = {
       keywords: 0.25,
       sentiment: 0.15,
-      entities: 0.20,
-      novelty: 0.10,
+      entities: 0.2,
+      novelty: 0.1,
       velocity: 0.15,
       sources: 0.15,
     };
@@ -413,9 +514,10 @@ class ParallelAnalysisService {
     const finalScore = totalWeight > 0 ? weightedSum / totalWeight : 0;
     const avgConfidence = confidenceSum / perspectives.length;
 
-    const scores = perspectives.map(p => p.score);
+    const scores = perspectives.map((p) => p.score);
     const mean = scores.reduce((a, b) => a + b, 0) / scores.length;
-    const variance = scores.reduce((sum, s) => sum + Math.pow(s - mean, 2), 0) / scores.length;
+    const variance =
+      scores.reduce((sum, s) => sum + Math.pow(s - mean, 2), 0) / scores.length;
     const disagreement = Math.sqrt(variance);
 
     return {
@@ -426,12 +528,22 @@ class ParallelAnalysisService {
   }
 
   private isLowKeywordScore(perspectives: PerspectiveScore[]): boolean {
-    const keywordScore = perspectives.find(p => p.name === 'keywords')?.score ?? 0;
+    const keywordScore =
+      perspectives.find((p) => p.name === "keywords")?.score ?? 0;
     return keywordScore < 0.3;
   }
 
-  private calculateCorrelations(analyzed: AnalyzedHeadline[]): Record<string, number> {
-    const perspectiveNames = ['keywords', 'sentiment', 'entities', 'novelty', 'velocity', 'sources'];
+  private calculateCorrelations(
+    analyzed: AnalyzedHeadline[],
+  ): Record<string, number> {
+    const perspectiveNames = [
+      "keywords",
+      "sentiment",
+      "entities",
+      "novelty",
+      "velocity",
+      "sources",
+    ];
     const correlations: Record<string, number> = {};
 
     for (let i = 0; i < perspectiveNames.length; i++) {
@@ -439,8 +551,12 @@ class ParallelAnalysisService {
         const name1 = perspectiveNames[i];
         const name2 = perspectiveNames[j];
 
-        const scores1 = analyzed.map(a => a.perspectives.find(p => p.name === name1)?.score ?? 0);
-        const scores2 = analyzed.map(a => a.perspectives.find(p => p.name === name2)?.score ?? 0);
+        const scores1 = analyzed.map(
+          (a) => a.perspectives.find((p) => p.name === name1)?.score ?? 0,
+        );
+        const scores2 = analyzed.map(
+          (a) => a.perspectives.find((p) => p.name === name2)?.score ?? 0,
+        );
 
         const correlation = this.pearsonCorrelation(scores1, scores2);
         correlations[`${name1}-${name2}`] = correlation;
@@ -506,20 +622,27 @@ class ParallelAnalysisService {
     const suggestions: string[] = [];
 
     if (this.lastReport.missedByKeywords.length > 2) {
-      suggestions.push('Consider adding more keywords to capture ML-detected important stories');
+      suggestions.push(
+        "Consider adding more keywords to capture ML-detected important stories",
+      );
     }
 
-    const avgDisagreement = this.lastReport.analyzed
-      .reduce((sum, a) => sum + a.disagreement, 0) / this.lastReport.analyzed.length;
+    const avgDisagreement =
+      this.lastReport.analyzed.reduce((sum, a) => sum + a.disagreement, 0) /
+      this.lastReport.analyzed.length;
 
     if (avgDisagreement > 0.25) {
-      suggestions.push('High average disagreement - perspectives may need rebalancing');
+      suggestions.push(
+        "High average disagreement - perspectives may need rebalancing",
+      );
     }
 
     const { perspectiveCorrelations } = this.lastReport;
-    const keywordSentiment = perspectiveCorrelations['keywords-sentiment'] ?? 0;
+    const keywordSentiment = perspectiveCorrelations["keywords-sentiment"] ?? 0;
     if (keywordSentiment < 0.3) {
-      suggestions.push('Low keyword-sentiment correlation - keyword list may be missing emotional content');
+      suggestions.push(
+        "Low keyword-sentiment correlation - keyword list may be missing emotional content",
+      );
     }
 
     return suggestions;

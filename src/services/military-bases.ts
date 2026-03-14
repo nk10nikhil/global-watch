@@ -1,13 +1,19 @@
-import { getRpcBaseUrl } from '@/services/rpc-client';
+import { getRpcBaseUrl } from "@/services/rpc-client";
 import {
   MilitaryServiceClient,
   type ListMilitaryBasesResponse,
   type MilitaryBaseEntry,
   type MilitaryBaseCluster,
-} from '@/generated/client/worldmonitor/military/v1/service_client';
-import type { MilitaryBase, MilitaryBaseType, MilitaryBaseEnriched } from '@/types';
+} from "@/generated/client/worldmonitor/military/v1/service_client";
+import type {
+  MilitaryBase,
+  MilitaryBaseType,
+  MilitaryBaseEnriched,
+} from "@/types";
 
-const client = new MilitaryServiceClient(getRpcBaseUrl(), { fetch: (...args) => globalThis.fetch(...args) });
+const client = new MilitaryServiceClient(getRpcBaseUrl(), {
+  fetch: (...args) => globalThis.fetch(...args),
+});
 
 interface CachedResult {
   bases: MilitaryBaseEnriched[];
@@ -25,9 +31,20 @@ function getBboxGridStep(zoom: number): number {
   return 0.5;
 }
 
-function quantizeBbox(swLat: number, swLon: number, neLat: number, neLon: number, zoom: number): string {
+function quantizeBbox(
+  swLat: number,
+  swLon: number,
+  neLat: number,
+  neLon: number,
+  zoom: number,
+): string {
   const step = getBboxGridStep(zoom);
-  return [quantize(swLat, step), quantize(swLon, step), quantize(neLat, step), quantize(neLon, step)].join(':');
+  return [
+    quantize(swLat, step),
+    quantize(swLon, step),
+    quantize(neLat, step),
+    quantize(neLon, step),
+  ].join(":");
 }
 
 function entryToEnriched(e: MilitaryBaseEntry): MilitaryBaseEnriched {
@@ -36,10 +53,10 @@ function entryToEnriched(e: MilitaryBaseEntry): MilitaryBaseEnriched {
     name: e.name,
     lat: e.latitude,
     lon: e.longitude,
-    type: (e.type || 'other') as MilitaryBaseType,
+    type: (e.type || "other") as MilitaryBaseType,
     country: e.countryIso2,
     arm: e.branch,
-    status: (e.status || undefined) as MilitaryBase['status'],
+    status: (e.status || undefined) as MilitaryBase["status"],
     kind: e.kind,
     tier: e.tier,
     catAirforce: e.catAirforce,
@@ -56,13 +73,16 @@ let pendingFetch: Promise<CachedResult | null> | null = null;
 export type { MilitaryBaseCluster };
 
 export async function fetchMilitaryBases(
-  swLat: number, swLon: number, neLat: number, neLon: number,
+  swLat: number,
+  swLon: number,
+  neLat: number,
+  neLon: number,
   zoom: number,
   filters?: { type?: string; kind?: string; country?: string },
 ): Promise<CachedResult | null> {
   const qBbox = quantizeBbox(swLat, swLon, neLat, neLon, zoom);
   const floorZoom = Math.floor(zoom);
-  const cacheKey = `${qBbox}:${floorZoom}:${filters?.type || ''}:${filters?.kind || ''}:${filters?.country || ''}`;
+  const cacheKey = `${qBbox}:${floorZoom}:${filters?.type || ""}:${filters?.kind || ""}:${filters?.country || ""}`;
 
   if (lastResult && lastResult.cacheKey === cacheKey) {
     return lastResult;
@@ -73,11 +93,14 @@ export async function fetchMilitaryBases(
   pendingFetch = (async () => {
     try {
       const resp: ListMilitaryBasesResponse = await client.listMilitaryBases({
-        swLat, swLon, neLat, neLon,
+        swLat,
+        swLon,
+        neLat,
+        neLon,
         zoom: floorZoom,
-        type: filters?.type || '',
-        kind: filters?.kind || '',
-        country: filters?.country || '',
+        type: filters?.type || "",
+        kind: filters?.kind || "",
+        country: filters?.country || "",
       });
 
       const bases = resp.bases.map(entryToEnriched);
@@ -91,7 +114,7 @@ export async function fetchMilitaryBases(
       lastResult = result;
       return result;
     } catch (err) {
-      console.error('[bases-svc] error', err);
+      console.error("[bases-svc] error", err);
       return lastResult;
     } finally {
       pendingFetch = null;

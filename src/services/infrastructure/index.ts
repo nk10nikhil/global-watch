@@ -6,43 +6,59 @@
  * All data now flows through the InfrastructureServiceClient RPC.
  */
 
-import { getRpcBaseUrl } from '@/services/rpc-client';
+import { getRpcBaseUrl } from "@/services/rpc-client";
 import {
   InfrastructureServiceClient,
   type ListInternetOutagesResponse,
   type ListServiceStatusesResponse,
   type InternetOutage as ProtoOutage,
   type ServiceStatus as ProtoServiceStatus,
-} from '@/generated/client/worldmonitor/infrastructure/v1/service_client';
-import type { InternetOutage } from '@/types';
-import { createCircuitBreaker } from '@/utils';
-import { isFeatureAvailable } from '../runtime-config';
-import { getHydratedData } from '@/services/bootstrap';
+} from "@/generated/client/worldmonitor/infrastructure/v1/service_client";
+import type { InternetOutage } from "@/types";
+import { createCircuitBreaker } from "@/utils";
+import { isFeatureAvailable } from "../runtime-config";
+import { getHydratedData } from "@/services/bootstrap";
 
 // ---- Client + Circuit Breakers ----
 
-const client = new InfrastructureServiceClient(getRpcBaseUrl(), { fetch: (...args) => globalThis.fetch(...args) });
-const outageBreaker = createCircuitBreaker<ListInternetOutagesResponse>({ name: 'Internet Outages', cacheTtlMs: 30 * 60 * 1000, persistCache: true });
-const statusBreaker = createCircuitBreaker<ListServiceStatusesResponse>({ name: 'Service Statuses', cacheTtlMs: 30 * 60 * 1000, persistCache: true });
+const client = new InfrastructureServiceClient(getRpcBaseUrl(), {
+  fetch: (...args) => globalThis.fetch(...args),
+});
+const outageBreaker = createCircuitBreaker<ListInternetOutagesResponse>({
+  name: "Internet Outages",
+  cacheTtlMs: 30 * 60 * 1000,
+  persistCache: true,
+});
+const statusBreaker = createCircuitBreaker<ListServiceStatusesResponse>({
+  name: "Service Statuses",
+  cacheTtlMs: 30 * 60 * 1000,
+  persistCache: true,
+});
 
-const emptyOutageFallback: ListInternetOutagesResponse = { outages: [], pagination: undefined };
+const emptyOutageFallback: ListInternetOutagesResponse = {
+  outages: [],
+  pagination: undefined,
+};
 const emptyStatusFallback: ListServiceStatusesResponse = { statuses: [] };
 
 // ---- Proto enum -> legacy string adapters ----
 
-const SEVERITY_REVERSE: Record<string, 'partial' | 'major' | 'total'> = {
-  OUTAGE_SEVERITY_PARTIAL: 'partial',
-  OUTAGE_SEVERITY_MAJOR: 'major',
-  OUTAGE_SEVERITY_TOTAL: 'total',
+const SEVERITY_REVERSE: Record<string, "partial" | "major" | "total"> = {
+  OUTAGE_SEVERITY_PARTIAL: "partial",
+  OUTAGE_SEVERITY_MAJOR: "major",
+  OUTAGE_SEVERITY_TOTAL: "total",
 };
 
-const STATUS_REVERSE: Record<string, 'operational' | 'degraded' | 'outage' | 'unknown'> = {
-  SERVICE_OPERATIONAL_STATUS_OPERATIONAL: 'operational',
-  SERVICE_OPERATIONAL_STATUS_DEGRADED: 'degraded',
-  SERVICE_OPERATIONAL_STATUS_PARTIAL_OUTAGE: 'degraded',
-  SERVICE_OPERATIONAL_STATUS_MAJOR_OUTAGE: 'outage',
-  SERVICE_OPERATIONAL_STATUS_MAINTENANCE: 'degraded',
-  SERVICE_OPERATIONAL_STATUS_UNSPECIFIED: 'unknown',
+const STATUS_REVERSE: Record<
+  string,
+  "operational" | "degraded" | "outage" | "unknown"
+> = {
+  SERVICE_OPERATIONAL_STATUS_OPERATIONAL: "operational",
+  SERVICE_OPERATIONAL_STATUS_DEGRADED: "degraded",
+  SERVICE_OPERATIONAL_STATUS_PARTIAL_OUTAGE: "degraded",
+  SERVICE_OPERATIONAL_STATUS_MAJOR_OUTAGE: "outage",
+  SERVICE_OPERATIONAL_STATUS_MAINTENANCE: "degraded",
+  SERVICE_OPERATIONAL_STATUS_UNSPECIFIED: "unknown",
 };
 
 // ---- Adapter: proto InternetOutage -> legacy InternetOutage ----
@@ -58,7 +74,7 @@ function toOutage(proto: ProtoOutage): InternetOutage {
     region: proto.region || undefined,
     lat: proto.location?.latitude ?? 0,
     lon: proto.location?.longitude ?? 0,
-    severity: SEVERITY_REVERSE[proto.severity] || 'partial',
+    severity: SEVERITY_REVERSE[proto.severity] || "partial",
     categories: proto.categories,
     cause: proto.cause || undefined,
     outageType: proto.outageType || undefined,
@@ -77,21 +93,25 @@ export function isOutagesConfigured(): boolean | null {
 }
 
 export async function fetchInternetOutages(): Promise<InternetOutage[]> {
-  if (!isFeatureAvailable('internetOutages')) {
+  if (!isFeatureAvailable("internetOutages")) {
     outagesConfigured = false;
     return [];
   }
 
-  const hydrated = getHydratedData('outages') as ListInternetOutagesResponse | undefined;
-  const resp = (hydrated?.outages?.length ? hydrated : null) ?? await outageBreaker.execute(async () => {
-    return client.listInternetOutages({
-      country: '',
-      start: 0,
-      end: 0,
-      pageSize: 0,
-      cursor: '',
-    });
-  }, emptyOutageFallback);
+  const hydrated = getHydratedData("outages") as
+    | ListInternetOutagesResponse
+    | undefined;
+  const resp =
+    (hydrated?.outages?.length ? hydrated : null) ??
+    (await outageBreaker.execute(async () => {
+      return client.listInternetOutages({
+        country: "",
+        start: 0,
+        end: 0,
+        pageSize: 0,
+        cursor: "",
+      });
+    }, emptyOutageFallback));
 
   if (resp.outages.length === 0) {
     if (outagesConfigured === null) outagesConfigured = false;
@@ -114,7 +134,7 @@ export interface ServiceStatusResult {
   id: string;
   name: string;
   category: string;
-  status: 'operational' | 'degraded' | 'outage' | 'unknown';
+  status: "operational" | "degraded" | "outage" | "unknown";
   description: string;
 }
 
@@ -134,44 +154,74 @@ export interface ServiceStatusResponse {
 
 // Category map for the service IDs (matches the handler's SERVICES list)
 const CATEGORY_MAP: Record<string, string> = {
-  aws: 'cloud', azure: 'cloud', gcp: 'cloud', cloudflare: 'cloud', vercel: 'cloud',
-  netlify: 'cloud', digitalocean: 'cloud', render: 'cloud', railway: 'cloud',
-  github: 'dev', gitlab: 'dev', npm: 'dev', docker: 'dev', bitbucket: 'dev',
-  circleci: 'dev', jira: 'dev', confluence: 'dev', linear: 'dev',
-  slack: 'comm', discord: 'comm', zoom: 'comm', notion: 'comm',
-  openai: 'ai', anthropic: 'ai', replicate: 'ai',
-  stripe: 'saas', twilio: 'saas', datadog: 'saas', sentry: 'saas', supabase: 'saas',
+  aws: "cloud",
+  azure: "cloud",
+  gcp: "cloud",
+  cloudflare: "cloud",
+  vercel: "cloud",
+  netlify: "cloud",
+  digitalocean: "cloud",
+  render: "cloud",
+  railway: "cloud",
+  github: "dev",
+  gitlab: "dev",
+  npm: "dev",
+  docker: "dev",
+  bitbucket: "dev",
+  circleci: "dev",
+  jira: "dev",
+  confluence: "dev",
+  linear: "dev",
+  slack: "comm",
+  discord: "comm",
+  zoom: "comm",
+  notion: "comm",
+  openai: "ai",
+  anthropic: "ai",
+  replicate: "ai",
+  stripe: "saas",
+  twilio: "saas",
+  datadog: "saas",
+  sentry: "saas",
+  supabase: "saas",
 };
 
 function toServiceResult(proto: ProtoServiceStatus): ServiceStatusResult {
   return {
     id: proto.id,
     name: proto.name,
-    category: CATEGORY_MAP[proto.id] || 'saas',
-    status: STATUS_REVERSE[proto.status] || 'unknown',
+    category: CATEGORY_MAP[proto.id] || "saas",
+    status: STATUS_REVERSE[proto.status] || "unknown",
     description: proto.description,
   };
 }
 
 function computeSummary(services: ServiceStatusResult[]): ServiceStatusSummary {
   return {
-    operational: services.filter((s) => s.status === 'operational').length,
-    degraded: services.filter((s) => s.status === 'degraded').length,
-    outage: services.filter((s) => s.status === 'outage').length,
-    unknown: services.filter((s) => s.status === 'unknown').length,
+    operational: services.filter((s) => s.status === "operational").length,
+    degraded: services.filter((s) => s.status === "degraded").length,
+    outage: services.filter((s) => s.status === "outage").length,
+    unknown: services.filter((s) => s.status === "unknown").length,
   };
 }
 
 export async function fetchServiceStatuses(): Promise<ServiceStatusResponse> {
-  const hydrated = getHydratedData('serviceStatuses') as { statuses?: ProtoServiceStatus[] } | undefined;
+  const hydrated = getHydratedData("serviceStatuses") as
+    | { statuses?: ProtoServiceStatus[] }
+    | undefined;
   if (hydrated?.statuses?.length) {
     const services = hydrated.statuses.map(toServiceResult);
-    return { success: true, timestamp: new Date().toISOString(), summary: computeSummary(services), services };
+    return {
+      success: true,
+      timestamp: new Date().toISOString(),
+      summary: computeSummary(services),
+      services,
+    };
   }
 
   const resp = await statusBreaker.execute(async () => {
     return client.listServiceStatuses({
-      status: 'SERVICE_OPERATIONAL_STATUS_UNSPECIFIED',
+      status: "SERVICE_OPERATIONAL_STATUS_UNSPECIFIED",
     });
   }, emptyStatusFallback);
 

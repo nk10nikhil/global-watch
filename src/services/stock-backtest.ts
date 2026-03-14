@@ -1,8 +1,8 @@
-import { getRpcBaseUrl } from '@/services/rpc-client';
+import { getRpcBaseUrl } from "@/services/rpc-client";
 import {
   MarketServiceClient,
   type BacktestStockResponse,
-} from '@/generated/client/worldmonitor/market/v1/service_client';
+} from "@/generated/client/worldmonitor/market/v1/service_client";
 
 const client = new MarketServiceClient(getRpcBaseUrl(), {
   fetch: (...args: Parameters<typeof fetch>) => globalThis.fetch(...args),
@@ -15,7 +15,7 @@ const DEFAULT_EVAL_WINDOW_DAYS = 10;
 export const STOCK_BACKTEST_FRESH_MS = 24 * 60 * 60 * 1000;
 
 async function getTargets(limit: number) {
-  const { getStockAnalysisTargets } = await import('./stock-analysis');
+  const { getStockAnalysisTargets } = await import("./stock-analysis");
   return getStockAnalysisTargets(limit);
 }
 
@@ -70,8 +70,8 @@ export function hasFreshStoredStockBacktests(
   const now = Date.now();
   return symbols.every((symbol) => {
     const item = bySymbol.get(symbol);
-    const ts = Date.parse(item?.generatedAt || '');
-    return !!item?.available && Number.isFinite(ts) && (now - ts) <= maxAgeMs;
+    const ts = Date.parse(item?.generatedAt || "");
+    return !!item?.available && Number.isFinite(ts) && now - ts <= maxAgeMs;
   });
 }
 
@@ -84,7 +84,7 @@ export function getMissingOrStaleStoredStockBacktests(
   const now = Date.now();
   return symbols.filter((symbol) => {
     const item = bySymbol.get(symbol);
-    const ts = Date.parse(item?.generatedAt || '');
-    return !(item?.available && Number.isFinite(ts) && (now - ts) <= maxAgeMs);
+    const ts = Date.parse(item?.generatedAt || "");
+    return !(item?.available && Number.isFinite(ts) && now - ts <= maxAgeMs);
   });
 }

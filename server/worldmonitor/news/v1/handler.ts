@@ -1,8 +1,8 @@
-import type { NewsServiceHandler } from '../../../../src/generated/server/worldmonitor/news/v1/service_server';
+import type { NewsServiceHandler } from "../../../../src/generated/server/worldmonitor/news/v1/service_server";
 
-import { summarizeArticle } from './summarize-article';
-import { getSummarizeArticleCache } from './get-summarize-article-cache';
-import { listFeedDigest } from './list-feed-digest';
+import { summarizeArticle } from "./summarize-article";
+import { getSummarizeArticleCache } from "./get-summarize-article-cache";
+import { listFeedDigest } from "./list-feed-digest";
 
 export const newsHandler: NewsServiceHandler = {
   summarizeArticle,

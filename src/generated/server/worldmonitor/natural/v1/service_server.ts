@@ -96,7 +96,10 @@ export interface ServerContext {
 
 export interface ServerOptions {
   onError?: (error: unknown, req: Request) => Response | Promise<Response>;
-  validateRequest?: (methodName: string, body: unknown) => FieldViolation[] | undefined;
+  validateRequest?: (
+    methodName: string,
+    body: unknown,
+  ) => FieldViolation[] | undefined;
 }
 
 export interface RouteDescriptor {
@@ -106,7 +109,10 @@ export interface RouteDescriptor {
 }
 
 export interface NaturalServiceHandler {
-  listNaturalEvents(ctx: ServerContext, req: ListNaturalEventsRequest): Promise<ListNaturalEventsResponse>;
+  listNaturalEvents(
+    ctx: ServerContext,
+    req: ListNaturalEventsRequest,
+  ): Promise<ListNaturalEventsResponse>;
 }
 
 export function createNaturalServiceRoutes(
@@ -126,7 +132,10 @@ export function createNaturalServiceRoutes(
             days: Number(params.get("days") ?? "0"),
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("listNaturalEvents", body);
+            const bodyViolations = options.validateRequest(
+              "listNaturalEvents",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -139,16 +148,22 @@ export function createNaturalServiceRoutes(
           };
 
           const result = await handler.listNaturalEvents(ctx, body);
-          return new Response(JSON.stringify(result as ListNaturalEventsResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as ListNaturalEventsResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -163,4 +178,3 @@ export function createNaturalServiceRoutes(
     },
   ];
 }
-

@@ -1,9 +1,9 @@
-export type FontFamily = 'mono' | 'system';
+export type FontFamily = "mono" | "system";
 
-const STORAGE_KEY = 'wm-font-family';
-const EVENT_NAME = 'wm-font-changed';
+const STORAGE_KEY = "wm-font-family";
+const EVENT_NAME = "wm-font-changed";
 
-const ALLOWED: FontFamily[] = ['mono', 'system'];
+const ALLOWED: FontFamily[] = ["mono", "system"];
 
 const SYSTEM_FONT_STACK =
   "system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
@@ -15,11 +15,11 @@ export function getFontFamily(): FontFamily {
   } catch {
     // ignore
   }
-  return 'mono';
+  return "mono";
 }
 
 export function setFontFamily(font: FontFamily): void {
-  const safe = ALLOWED.includes(font) ? font : 'mono';
+  const safe = ALLOWED.includes(font) ? font : "mono";
   try {
     localStorage.setItem(STORAGE_KEY, safe);
   } catch {
@@ -31,16 +31,23 @@ export function setFontFamily(font: FontFamily): void {
 
 export function applyFont(font?: FontFamily): void {
   const resolved = font ?? getFontFamily();
-  if (resolved === 'system') {
-    document.documentElement.style.setProperty('--font-body', SYSTEM_FONT_STACK);
+  if (resolved === "system") {
+    document.documentElement.style.setProperty(
+      "--font-body",
+      SYSTEM_FONT_STACK,
+    );
   } else {
-    document.documentElement.style.removeProperty('--font-body');
+    document.documentElement.style.removeProperty("--font-body");
   }
 }
 
-export function subscribeFontChange(cb: (font: FontFamily) => void): () => void {
+export function subscribeFontChange(
+  cb: (font: FontFamily) => void,
+): () => void {
   const handler = (e: Event) => {
-    const detail = (e as CustomEvent).detail as { font?: FontFamily } | undefined;
+    const detail = (e as CustomEvent).detail as
+      | { font?: FontFamily }
+      | undefined;
     cb(detail?.font ?? getFontFamily());
   };
   window.addEventListener(EVENT_NAME, handler);

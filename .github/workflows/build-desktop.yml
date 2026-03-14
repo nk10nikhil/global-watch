@@ -1,24 +1,24 @@
-name: 'Build Desktop App'
+name: "Build Desktop App"
 
 on:
   workflow_dispatch:
     inputs:
       variant:
-        description: 'App variant'
+        description: "App variant"
         required: true
-        default: 'full'
+        default: "full"
         type: choice
         options:
           - full
           - tech
       draft:
-        description: 'Create as draft release'
+        description: "Create as draft release"
         required: false
         default: true
         type: boolean
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 concurrency:
   group: desktop-build-${{ github.ref }}
@@ -35,30 +35,30 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: 'macos-14'
-            args: '--target aarch64-apple-darwin'
-            node_target: 'aarch64-apple-darwin'
-            label: 'macOS-ARM64'
+          - platform: "macos-14"
+            args: "--target aarch64-apple-darwin"
+            node_target: "aarch64-apple-darwin"
+            label: "macOS-ARM64"
             timeout: 180
-          - platform: 'macos-latest'
-            args: '--target x86_64-apple-darwin'
-            node_target: 'x86_64-apple-darwin'
-            label: 'macOS-x64'
+          - platform: "macos-latest"
+            args: "--target x86_64-apple-darwin"
+            node_target: "x86_64-apple-darwin"
+            label: "macOS-x64"
             timeout: 180
-          - platform: 'windows-latest'
-            args: ''
-            node_target: 'x86_64-pc-windows-msvc'
-            label: 'Windows-x64'
+          - platform: "windows-latest"
+            args: ""
+            node_target: "x86_64-pc-windows-msvc"
+            label: "Windows-x64"
             timeout: 120
-          - platform: 'ubuntu-24.04'
-            args: ''
-            node_target: 'x86_64-unknown-linux-gnu'
-            label: 'Linux-x64'
+          - platform: "ubuntu-24.04"
+            args: ""
+            node_target: "x86_64-unknown-linux-gnu"
+            label: "Linux-x64"
             timeout: 120
-          - platform: 'ubuntu-24.04-arm'
-            args: '--target aarch64-unknown-linux-gnu'
-            node_target: 'aarch64-unknown-linux-gnu'
-            label: 'Linux-ARM64'
+          - platform: "ubuntu-24.04-arm"
+            args: "--target aarch64-unknown-linux-gnu"
+            node_target: "aarch64-unknown-linux-gnu"
+            label: "Linux-ARM64"
             timeout: 120
 
     runs-on: ${{ matrix.platform }}
@@ -75,8 +75,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
-          node-version: '22'
-          cache: 'npm'
+          node-version: "22"
+          cache: "npm"
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@631a55b12751854ce901bb631d5902ceb48146f7
@@ -87,7 +87,7 @@ jobs:
       - name: Rust cache
         uses: swatinem/rust-cache@ad397744b0d591a723ab90405b7247fac0e6b8db
         with:
-          workspaces: './src-tauri -> target'
+          workspaces: "./src-tauri -> target"
           cache-on-failure: true
 
       - name: Install Linux system dependencies
@@ -115,7 +115,7 @@ jobs:
       - name: Bundle Node.js runtime
         shell: bash
         env:
-          NODE_VERSION: '22.14.0'
+          NODE_VERSION: "22.14.0"
           NODE_TARGET: ${{ matrix.node_target }}
         run: bash scripts/download-node.sh --target "$NODE_TARGET"
 
@@ -206,7 +206,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VITE_VARIANT: full
-          VITE_DESKTOP_RUNTIME: '1'
+          VITE_DESKTOP_RUNTIME: "1"
           VITE_WS_API_URL: https://worldmonitor.app
           CONVEX_URL: ${{ secrets.CONVEX_URL }}
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
@@ -217,8 +217,8 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         with:
           tagName: v__VERSION__
-          releaseName: 'World Monitor v__VERSION__'
-          releaseBody: 'See changelog below.'
+          releaseName: "World Monitor v__VERSION__"
+          releaseBody: "See changelog below."
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && fromJSON(github.event.inputs.draft) }}
           prerelease: false
           args: ${{ matrix.args }}
@@ -231,13 +231,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VITE_VARIANT: full
-          VITE_DESKTOP_RUNTIME: '1'
+          VITE_DESKTOP_RUNTIME: "1"
           VITE_WS_API_URL: https://worldmonitor.app
           CONVEX_URL: ${{ secrets.CONVEX_URL }}
         with:
           tagName: v__VERSION__
-          releaseName: 'World Monitor v__VERSION__'
-          releaseBody: 'See changelog below.'
+          releaseName: "World Monitor v__VERSION__"
+          releaseBody: "See changelog below."
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && fromJSON(github.event.inputs.draft) }}
           prerelease: false
           args: ${{ matrix.args }}
@@ -250,7 +250,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VITE_VARIANT: tech
-          VITE_DESKTOP_RUNTIME: '1'
+          VITE_DESKTOP_RUNTIME: "1"
           VITE_WS_API_URL: https://worldmonitor.app
           CONVEX_URL: ${{ secrets.CONVEX_URL }}
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
@@ -261,8 +261,8 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         with:
           tagName: v__VERSION__-tech
-          releaseName: 'Tech Monitor v__VERSION__'
-          releaseBody: 'See changelog below.'
+          releaseName: "Tech Monitor v__VERSION__"
+          releaseBody: "See changelog below."
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && fromJSON(github.event.inputs.draft) }}
           prerelease: false
           tauriScript: npx tauri
@@ -276,13 +276,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VITE_VARIANT: tech
-          VITE_DESKTOP_RUNTIME: '1'
+          VITE_DESKTOP_RUNTIME: "1"
           VITE_WS_API_URL: https://worldmonitor.app
           CONVEX_URL: ${{ secrets.CONVEX_URL }}
         with:
           tagName: v__VERSION__-tech
-          releaseName: 'Tech Monitor v__VERSION__'
-          releaseBody: 'See changelog below.'
+          releaseName: "Tech Monitor v__VERSION__"
+          releaseBody: "See changelog below."
           releaseDraft: ${{ github.event_name == 'workflow_dispatch' && fromJSON(github.event.inputs.draft) }}
           prerelease: false
           tauriScript: npx tauri
@@ -311,9 +311,9 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          APPIMAGETOOL_VERSION: '1.9.1'
-          APPIMAGETOOL_SHA256_X86_64: 'ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0'
-          APPIMAGETOOL_SHA256_AARCH64: 'f0837e7448a0c1e4e650a93bb3e85802546e60654ef287576f46c71c126a9158'
+          APPIMAGETOOL_VERSION: "1.9.1"
+          APPIMAGETOOL_SHA256_X86_64: "ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0"
+          APPIMAGETOOL_SHA256_AARCH64: "f0837e7448a0c1e4e650a93bb3e85802546e60654ef287576f46c71c126a9158"
         run: |
           # --- Deterministic artifact selection ---
           mapfile -t IMAGES < <(find src-tauri/target -path '*/bundle/appimage/*.AppImage')

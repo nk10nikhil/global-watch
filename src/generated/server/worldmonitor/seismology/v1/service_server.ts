@@ -70,7 +70,10 @@ export interface ServerContext {
 
 export interface ServerOptions {
   onError?: (error: unknown, req: Request) => Response | Promise<Response>;
-  validateRequest?: (methodName: string, body: unknown) => FieldViolation[] | undefined;
+  validateRequest?: (
+    methodName: string,
+    body: unknown,
+  ) => FieldViolation[] | undefined;
 }
 
 export interface RouteDescriptor {
@@ -80,7 +83,10 @@ export interface RouteDescriptor {
 }
 
 export interface SeismologyServiceHandler {
-  listEarthquakes(ctx: ServerContext, req: ListEarthquakesRequest): Promise<ListEarthquakesResponse>;
+  listEarthquakes(
+    ctx: ServerContext,
+    req: ListEarthquakesRequest,
+  ): Promise<ListEarthquakesResponse>;
 }
 
 export function createSeismologyServiceRoutes(
@@ -104,7 +110,10 @@ export function createSeismologyServiceRoutes(
             minMagnitude: Number(params.get("min_magnitude") ?? "0"),
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("listEarthquakes", body);
+            const bodyViolations = options.validateRequest(
+              "listEarthquakes",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -117,16 +126,22 @@ export function createSeismologyServiceRoutes(
           };
 
           const result = await handler.listEarthquakes(ctx, body);
-          return new Response(JSON.stringify(result as ListEarthquakesResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as ListEarthquakesResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -141,4 +156,3 @@ export function createSeismologyServiceRoutes(
     },
   ];
 }
-

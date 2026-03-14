@@ -46,13 +46,38 @@ export interface PaginationResponse {
   totalCount: number;
 }
 
-export type AirportRegion = "AIRPORT_REGION_UNSPECIFIED" | "AIRPORT_REGION_AMERICAS" | "AIRPORT_REGION_EUROPE" | "AIRPORT_REGION_APAC" | "AIRPORT_REGION_MENA" | "AIRPORT_REGION_AFRICA";
+export type AirportRegion =
+  | "AIRPORT_REGION_UNSPECIFIED"
+  | "AIRPORT_REGION_AMERICAS"
+  | "AIRPORT_REGION_EUROPE"
+  | "AIRPORT_REGION_APAC"
+  | "AIRPORT_REGION_MENA"
+  | "AIRPORT_REGION_AFRICA";
 
-export type FlightDelaySeverity = "FLIGHT_DELAY_SEVERITY_UNSPECIFIED" | "FLIGHT_DELAY_SEVERITY_NORMAL" | "FLIGHT_DELAY_SEVERITY_MINOR" | "FLIGHT_DELAY_SEVERITY_MODERATE" | "FLIGHT_DELAY_SEVERITY_MAJOR" | "FLIGHT_DELAY_SEVERITY_SEVERE";
+export type FlightDelaySeverity =
+  | "FLIGHT_DELAY_SEVERITY_UNSPECIFIED"
+  | "FLIGHT_DELAY_SEVERITY_NORMAL"
+  | "FLIGHT_DELAY_SEVERITY_MINOR"
+  | "FLIGHT_DELAY_SEVERITY_MODERATE"
+  | "FLIGHT_DELAY_SEVERITY_MAJOR"
+  | "FLIGHT_DELAY_SEVERITY_SEVERE";
 
-export type FlightDelaySource = "FLIGHT_DELAY_SOURCE_UNSPECIFIED" | "FLIGHT_DELAY_SOURCE_FAA" | "FLIGHT_DELAY_SOURCE_EUROCONTROL" | "FLIGHT_DELAY_SOURCE_COMPUTED" | "FLIGHT_DELAY_SOURCE_AVIATIONSTACK" | "FLIGHT_DELAY_SOURCE_NOTAM";
+export type FlightDelaySource =
+  | "FLIGHT_DELAY_SOURCE_UNSPECIFIED"
+  | "FLIGHT_DELAY_SOURCE_FAA"
+  | "FLIGHT_DELAY_SOURCE_EUROCONTROL"
+  | "FLIGHT_DELAY_SOURCE_COMPUTED"
+  | "FLIGHT_DELAY_SOURCE_AVIATIONSTACK"
+  | "FLIGHT_DELAY_SOURCE_NOTAM";
 
-export type FlightDelayType = "FLIGHT_DELAY_TYPE_UNSPECIFIED" | "FLIGHT_DELAY_TYPE_GROUND_STOP" | "FLIGHT_DELAY_TYPE_GROUND_DELAY" | "FLIGHT_DELAY_TYPE_DEPARTURE_DELAY" | "FLIGHT_DELAY_TYPE_ARRIVAL_DELAY" | "FLIGHT_DELAY_TYPE_GENERAL" | "FLIGHT_DELAY_TYPE_CLOSURE";
+export type FlightDelayType =
+  | "FLIGHT_DELAY_TYPE_UNSPECIFIED"
+  | "FLIGHT_DELAY_TYPE_GROUND_STOP"
+  | "FLIGHT_DELAY_TYPE_GROUND_DELAY"
+  | "FLIGHT_DELAY_TYPE_DEPARTURE_DELAY"
+  | "FLIGHT_DELAY_TYPE_ARRIVAL_DELAY"
+  | "FLIGHT_DELAY_TYPE_GENERAL"
+  | "FLIGHT_DELAY_TYPE_CLOSURE";
 
 // ---- New entity types ----
 
@@ -106,7 +131,11 @@ export interface FlightInstance {
   updatedAt: number;
 }
 
-export type PositionSource = "POSITION_SOURCE_UNSPECIFIED" | "POSITION_SOURCE_OPENSKY" | "POSITION_SOURCE_WINGBITS" | "POSITION_SOURCE_SIMULATED";
+export type PositionSource =
+  | "POSITION_SOURCE_UNSPECIFIED"
+  | "POSITION_SOURCE_OPENSKY"
+  | "POSITION_SOURCE_WINGBITS"
+  | "POSITION_SOURCE_SIMULATED";
 
 export interface PositionSample {
   icao24: string;
@@ -122,7 +151,12 @@ export interface PositionSample {
   observedAt: number;
 }
 
-export type CabinClass = "CABIN_CLASS_UNSPECIFIED" | "CABIN_CLASS_ECONOMY" | "CABIN_CLASS_PREMIUM_ECONOMY" | "CABIN_CLASS_BUSINESS" | "CABIN_CLASS_FIRST";
+export type CabinClass =
+  | "CABIN_CLASS_UNSPECIFIED"
+  | "CABIN_CLASS_ECONOMY"
+  | "CABIN_CLASS_PREMIUM_ECONOMY"
+  | "CABIN_CLASS_BUSINESS"
+  | "CABIN_CLASS_FIRST";
 
 export interface PriceQuote {
   id: string;
@@ -183,7 +217,11 @@ export interface GetAirportOpsSummaryResponse {
   cacheHit: boolean;
 }
 
-export type FlightDirection = "FLIGHT_DIRECTION_UNSPECIFIED" | "FLIGHT_DIRECTION_DEPARTURE" | "FLIGHT_DIRECTION_ARRIVAL" | "FLIGHT_DIRECTION_BOTH";
+export type FlightDirection =
+  | "FLIGHT_DIRECTION_UNSPECIFIED"
+  | "FLIGHT_DIRECTION_DEPARTURE"
+  | "FLIGHT_DIRECTION_ARRIVAL"
+  | "FLIGHT_DIRECTION_BOTH";
 
 export interface ListAirportFlightsRequest {
   airport: string;
@@ -331,19 +369,31 @@ export class AviationServiceClient {
     this.defaultHeaders = { ...options?.defaultHeaders };
   }
 
-  private async get<T>(path: string, params: URLSearchParams, options?: AviationServiceCallOptions): Promise<T> {
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+  private async get<T>(
+    path: string,
+    params: URLSearchParams,
+    options?: AviationServiceCallOptions,
+  ): Promise<T> {
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
       ...this.defaultHeaders,
       ...options?.headers,
     };
-    const resp = await this.fetchFn(url, { method: "GET", headers, signal: options?.signal });
+    const resp = await this.fetchFn(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    });
     if (!resp.ok) return this.handleError(resp);
     return resp.json() as Promise<T>;
   }
 
-  async listAirportDelays(req: ListAirportDelaysRequest, options?: AviationServiceCallOptions): Promise<ListAirportDelaysResponse> {
+  async listAirportDelays(
+    req: ListAirportDelaysRequest,
+    options?: AviationServiceCallOptions,
+  ): Promise<ListAirportDelaysResponse> {
     const p = new URLSearchParams();
     if (req.pageSize) p.set("page_size", String(req.pageSize));
     if (req.cursor) p.set("cursor", req.cursor);
@@ -352,13 +402,19 @@ export class AviationServiceClient {
     return this.get("/api/aviation/v1/list-airport-delays", p, options);
   }
 
-  async getAirportOpsSummary(req: GetAirportOpsSummaryRequest, options?: AviationServiceCallOptions): Promise<GetAirportOpsSummaryResponse> {
+  async getAirportOpsSummary(
+    req: GetAirportOpsSummaryRequest,
+    options?: AviationServiceCallOptions,
+  ): Promise<GetAirportOpsSummaryResponse> {
     const p = new URLSearchParams();
     for (const a of req.airports ?? []) p.append("airports", a);
     return this.get("/api/aviation/v1/get-airport-ops-summary", p, options);
   }
 
-  async listAirportFlights(req: ListAirportFlightsRequest, options?: AviationServiceCallOptions): Promise<ListAirportFlightsResponse> {
+  async listAirportFlights(
+    req: ListAirportFlightsRequest,
+    options?: AviationServiceCallOptions,
+  ): Promise<ListAirportFlightsResponse> {
     const p = new URLSearchParams();
     if (req.airport) p.set("airport", req.airport);
     if (req.direction) p.set("direction", req.direction);
@@ -366,14 +422,20 @@ export class AviationServiceClient {
     return this.get("/api/aviation/v1/list-airport-flights", p, options);
   }
 
-  async getCarrierOps(req: GetCarrierOpsRequest, options?: AviationServiceCallOptions): Promise<GetCarrierOpsResponse> {
+  async getCarrierOps(
+    req: GetCarrierOpsRequest,
+    options?: AviationServiceCallOptions,
+  ): Promise<GetCarrierOpsResponse> {
     const p = new URLSearchParams();
     for (const a of req.airports ?? []) p.append("airports", a);
     if (req.minFlights) p.set("min_flights", String(req.minFlights));
     return this.get("/api/aviation/v1/get-carrier-ops", p, options);
   }
 
-  async getFlightStatus(req: GetFlightStatusRequest, options?: AviationServiceCallOptions): Promise<GetFlightStatusResponse> {
+  async getFlightStatus(
+    req: GetFlightStatusRequest,
+    options?: AviationServiceCallOptions,
+  ): Promise<GetFlightStatusResponse> {
     const p = new URLSearchParams();
     if (req.flightNumber) p.set("flight_number", req.flightNumber);
     if (req.date) p.set("date", req.date);
@@ -381,7 +443,10 @@ export class AviationServiceClient {
     return this.get("/api/aviation/v1/get-flight-status", p, options);
   }
 
-  async trackAircraft(req: TrackAircraftRequest, options?: AviationServiceCallOptions): Promise<TrackAircraftResponse> {
+  async trackAircraft(
+    req: TrackAircraftRequest,
+    options?: AviationServiceCallOptions,
+  ): Promise<TrackAircraftResponse> {
     const p = new URLSearchParams();
     if (req.icao24) p.set("icao24", req.icao24);
     if (req.callsign) p.set("callsign", req.callsign);
@@ -392,7 +457,10 @@ export class AviationServiceClient {
     return this.get("/api/aviation/v1/track-aircraft", p, options);
   }
 
-  async searchFlightPrices(req: SearchFlightPricesRequest, options?: AviationServiceCallOptions): Promise<SearchFlightPricesResponse> {
+  async searchFlightPrices(
+    req: SearchFlightPricesRequest,
+    options?: AviationServiceCallOptions,
+  ): Promise<SearchFlightPricesResponse> {
     const p = new URLSearchParams();
     if (req.origin) p.set("origin", req.origin);
     if (req.destination) p.set("destination", req.destination);
@@ -405,7 +473,10 @@ export class AviationServiceClient {
     return this.get("/api/aviation/v1/search-flight-prices", p, options);
   }
 
-  async listAviationNews(req: ListAviationNewsRequest, options?: AviationServiceCallOptions): Promise<ListAviationNewsResponse> {
+  async listAviationNews(
+    req: ListAviationNewsRequest,
+    options?: AviationServiceCallOptions,
+  ): Promise<ListAviationNewsResponse> {
     const p = new URLSearchParams();
     for (const e of req.entities ?? []) p.append("entities", e);
     if (req.windowHours) p.set("window_hours", String(req.windowHours));
@@ -423,6 +494,10 @@ export class AviationServiceClient {
         if (e instanceof ValidationError) throw e;
       }
     }
-    throw new ApiError(resp.status, `Request failed with status ${resp.status}`, body);
+    throw new ApiError(
+      resp.status,
+      `Request failed with status ${resp.status}`,
+      body,
+    );
   }
 }

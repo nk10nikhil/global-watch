@@ -670,7 +670,8 @@
 
 .wm-dl-btn.linux {
   background: color-mix(in srgb, var(--semantic-elevated) 8%, transparent);
-  border: 1px solid color-mix(in srgb, var(--semantic-elevated) 18%, transparent);
+  border: 1px solid
+    color-mix(in srgb, var(--semantic-elevated) 18%, transparent);
   color: var(--semantic-elevated);
 }
 
@@ -792,7 +793,11 @@
 }
 
 .giving-fresh-live {
-  background: color-mix(in srgb, var(--semantic-positive, #44ff88) 15%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--semantic-positive, #44ff88) 15%,
+    transparent
+  );
   color: var(--semantic-positive, #44ff88);
 }
 
@@ -845,14 +850,19 @@
   font-weight: 700;
   padding: 1px 4px;
   border-radius: 2px;
-  background: color-mix(in srgb, var(--semantic-positive, #44ff88) 12%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--semantic-positive, #44ff88) 12%,
+    transparent
+  );
   color: var(--semantic-positive, #44ff88);
   letter-spacing: 0.5px;
   vertical-align: middle;
   margin-left: 4px;
 }
 
-.giving-crypto-content {}
+.giving-crypto-content {
+}
 
 .giving-crypto-stats {
   display: grid;
@@ -861,7 +871,8 @@
   margin-bottom: 10px;
 }
 
-.giving-crypto-receivers {}
+.giving-crypto-receivers {
+}
 
 .giving-section-title {
   font-size: 10px;
@@ -889,7 +900,8 @@
   border-bottom: none;
 }
 
-.giving-inst-content {}
+.giving-inst-content {
+}
 
 .giving-inst-grid {
   display: grid;
@@ -1145,11 +1157,11 @@
 }
 
 @keyframes oref-pulse-anim {
-
   0%,
   100% {
     opacity: 1;
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--semantic-critical) 60%, transparent);
+    box-shadow: 0 0 0 0
+      color-mix(in srgb, var(--semantic-critical) 60%, transparent);
   }
 
   50% {
@@ -1249,7 +1261,11 @@
   font-size: 8px;
   font-weight: 700;
   color: var(--semantic-warning, #f59e0b);
-  background: color-mix(in srgb, var(--semantic-warning, #f59e0b) 12%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--semantic-warning, #f59e0b) 12%,
+    transparent
+  );
   padding: 1px 4px;
   border-radius: 3px;
   text-transform: uppercase;
@@ -1534,8 +1550,13 @@
 }
 
 .wc-row.wc-home {
-  background: color-mix(in srgb, var(--semantic-positive, #44ff88) 8%, transparent);
-  border-left: 2px solid color-mix(in srgb, var(--semantic-positive, #44ff88) 40%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--semantic-positive, #44ff88) 8%,
+    transparent
+  );
+  border-left: 2px solid
+    color-mix(in srgb, var(--semantic-positive, #44ff88) 40%, transparent);
 }
 
 .wc-drag-handle {
@@ -2090,7 +2111,7 @@
 
 /* Base state for placeholder */
 .map-bottom-grid::after {
-  content: 'Drop panels here to move them below the map';
+  content: "Drop panels here to move them below the map";
   position: absolute;
   top: 50%;
   left: 50%;
@@ -2136,16 +2157,72 @@
 }
 
 /* DeductionPanel (PERF-012: extracted from inline <style>) */
-.deduction-panel-content { display: flex; flex-direction: column; gap: 12px; padding: 8px; height: 100%; overflow-y: auto; }
-.deduction-form { display: flex; flex-direction: column; gap: 8px; }
+.deduction-panel-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px;
+  height: 100%;
+  overflow-y: auto;
+}
+.deduction-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 .deduction-input,
-.deduction-geo-input { width: 100%; padding: 8px; background: var(--bg-secondary, #2a2a2a); border: 1px solid var(--border-color, #444); color: var(--text-primary, #fff); border-radius: 4px; font-family: inherit; resize: vertical; box-sizing: border-box; }
-.deduction-submit-btn { padding: 8px 16px; background: var(--accent-color, #3b82f6); color: white; border: none; border-radius: 4px; cursor: pointer; align-self: flex-end; font-weight: 500; }
-.deduction-submit-btn:hover { background: var(--accent-hover, #2563eb); }
-.deduction-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.deduction-result { flex: 1; margin-top: 8px; line-height: 1.5; font-size: 0.9em; color: var(--text-primary, #ddd); }
-.deduction-result.loading { opacity: 0.7; font-style: italic; }
-.deduction-result.error { color: var(--semantic-critical, #ef4444); }
-.deduction-result h3 { margin-top: 12px; margin-bottom: 4px; font-size: 1.1em; color: var(--text-bright, #fff); }
-.deduction-result ul { padding-left: 20px; margin-top: 4px; }
-.deduction-result li { margin-bottom: 4px; }
+.deduction-geo-input {
+  width: 100%;
+  padding: 8px;
+  background: var(--bg-secondary, #2a2a2a);
+  border: 1px solid var(--border-color, #444);
+  color: var(--text-primary, #fff);
+  border-radius: 4px;
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+}
+.deduction-submit-btn {
+  padding: 8px 16px;
+  background: var(--accent-color, #3b82f6);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  align-self: flex-end;
+  font-weight: 500;
+}
+.deduction-submit-btn:hover {
+  background: var(--accent-hover, #2563eb);
+}
+.deduction-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.deduction-result {
+  flex: 1;
+  margin-top: 8px;
+  line-height: 1.5;
+  font-size: 0.9em;
+  color: var(--text-primary, #ddd);
+}
+.deduction-result.loading {
+  opacity: 0.7;
+  font-style: italic;
+}
+.deduction-result.error {
+  color: var(--semantic-critical, #ef4444);
+}
+.deduction-result h3 {
+  margin-top: 12px;
+  margin-bottom: 4px;
+  font-size: 1.1em;
+  color: var(--text-bright, #fff);
+}
+.deduction-result ul {
+  padding-left: 20px;
+  margin-top: 4px;
+}
+.deduction-result li {
+  margin-bottom: 4px;
+}

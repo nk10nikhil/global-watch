@@ -2,10 +2,16 @@
 title: "Military Tracking"
 description: "Military vessel and aircraft identification, surge detection, foreign presence monitoring, and strategic posture analysis across global theaters."
 ---
+
 WorldMonitor provides specialized tracking of military vessels and aircraft, identifying assets by their transponder characteristics and monitoring activity patterns. The system detects surge events, foreign military presence in sensitive regions, and assesses strike capability across multiple strategic theaters.
 
 <Note>
-The system defines **10 active conflict zones** (Iran, Strait of Hormuz, Ukraine, Gaza, South Lebanon, Red Sea, Sudan, Myanmar, Korean DMZ, Pakistan-Afghanistan Border) and **4 military command hotspots** (INDO-PACIFIC, CENTCOM, EUCOM, ARCTIC). Different subsystems group these into theater lists tailored to their specific analysis, so theater counts vary by context throughout this page.
+  The system defines **10 active conflict zones** (Iran, Strait of Hormuz,
+  Ukraine, Gaza, South Lebanon, Red Sea, Sudan, Myanmar, Korean DMZ,
+  Pakistan-Afghanistan Border) and **4 military command hotspots**
+  (INDO-PACIFIC, CENTCOM, EUCOM, ARCTIC). Different subsystems group these into
+  theater lists tailored to their specific analysis, so theater counts vary by
+  context throughout this page.
 </Note>
 
 ## Military Vessel Identification
@@ -14,24 +20,24 @@ Vessels are identified as military through multiple methods:
 
 **MMSI Analysis**: Maritime Mobile Service Identity numbers encode the vessel's flag state. The system maintains a mapping of 150+ country codes to identify naval vessels:
 
-| MID Range | Country | Notes |
-|-----------|---------|-------|
-| 338-339 | USA | US Navy, Coast Guard |
-| 273 | Russia | Russian Navy |
-| 412-414 | China | PLAN vessels |
-| 232-235 | UK | Royal Navy |
-| 226-228 | France | Marine Nationale |
+| MID Range | Country | Notes                |
+| --------- | ------- | -------------------- |
+| 338-339   | USA     | US Navy, Coast Guard |
+| 273       | Russia  | Russian Navy         |
+| 412-414   | China   | PLAN vessels         |
+| 232-235   | UK      | Royal Navy           |
+| 226-228   | France  | Marine Nationale     |
 
 **Known Vessel Database**: A curated database of 50+ named vessels enables positive identification when AIS transmits vessel names:
 
-| Category | Tracked Vessels |
-|----------|-----------------|
-| **US Carriers** | All 11 Nimitz/Ford-class (CVN-68 through CVN-78) |
-| **UK Carriers** | HMS Queen Elizabeth (R08), HMS Prince of Wales (R09) |
-| **Chinese Carriers** | Liaoning (16), Shandong (17), Fujian (18) |
-| **Russian Carrier** | Admiral Kuznetsov |
-| **Notable Destroyers** | USS Zumwalt (DDG-1000), HMS Defender (D36), HMS Duncan (D37) |
-| **Research/Intel** | USNS Victorious (T-AGOS-19), USNS Impeccable (T-AGOS-23), Yuan Wang |
+| Category               | Tracked Vessels                                                     |
+| ---------------------- | ------------------------------------------------------------------- |
+| **US Carriers**        | All 11 Nimitz/Ford-class (CVN-68 through CVN-78)                    |
+| **UK Carriers**        | HMS Queen Elizabeth (R08), HMS Prince of Wales (R09)                |
+| **Chinese Carriers**   | Liaoning (16), Shandong (17), Fujian (18)                           |
+| **Russian Carrier**    | Admiral Kuznetsov                                                   |
+| **Notable Destroyers** | USS Zumwalt (DDG-1000), HMS Defender (D36), HMS Duncan (D37)        |
+| **Research/Intel**     | USNS Victorious (T-AGOS-19), USNS Impeccable (T-AGOS-23), Yuan Wang |
 
 **Vessel Classification Algorithm**:
 
@@ -46,14 +52,14 @@ Vessels are identified as military through multiple methods:
 
 The system monitors 12 critical maritime chokepoints with configurable detection radii:
 
-| Chokepoint | Strategic Significance |
-|------------|----------------------|
-| Strait of Hormuz | Persian Gulf access, oil transit |
-| Suez Canal | Mediterranean-Red Sea link |
-| Strait of Malacca | Pacific-Indian Ocean route |
-| Taiwan Strait | Cross-strait tensions |
-| Bosphorus | Black Sea access |
-| GIUK Gap | North Atlantic submarine route |
+| Chokepoint        | Strategic Significance           |
+| ----------------- | -------------------------------- |
+| Strait of Hormuz  | Persian Gulf access, oil transit |
+| Suez Canal        | Mediterranean-Red Sea link       |
+| Strait of Malacca | Pacific-Indian Ocean route       |
+| Taiwan Strait     | Cross-strait tensions            |
+| Bosphorus         | Black Sea access                 |
+| GIUK Gap          | North Atlantic submarine route   |
 
 When military vessels enter these zones, proximity alerts are generated.
 
@@ -116,23 +122,23 @@ The system continuously monitors military aircraft activity to detect **surge ev
 
 Military activity is analyzed across five geographic theaters (a subset of the system's full conflict zone and hotspot definitions, scoped to regions with reliable ADS-B coverage for surge analysis):
 
-| Theater | Coverage | Key Areas |
-|---------|----------|-----------|
-| **Middle East** | Persian Gulf, Levant, Arabian Peninsula | US CENTCOM activity, Iranian airspace |
-| **Eastern Europe** | Ukraine, Baltics, Black Sea | NATO-Russia border activity |
-| **Western Europe** | Central Europe, North Sea | NATO exercises, air policing |
-| **Pacific** | East Asia, Southeast Asia | Taiwan Strait, Korean Peninsula |
-| **Horn of Africa** | Red Sea, East Africa | Counter-piracy, Houthi activity |
+| Theater            | Coverage                                | Key Areas                             |
+| ------------------ | --------------------------------------- | ------------------------------------- |
+| **Middle East**    | Persian Gulf, Levant, Arabian Peninsula | US CENTCOM activity, Iranian airspace |
+| **Eastern Europe** | Ukraine, Baltics, Black Sea             | NATO-Russia border activity           |
+| **Western Europe** | Central Europe, North Sea               | NATO exercises, air policing          |
+| **Pacific**        | East Asia, Southeast Asia               | Taiwan Strait, Korean Peninsula       |
+| **Horn of Africa** | Red Sea, East Africa                    | Counter-piracy, Houthi activity       |
 
 ### Aircraft Classification
 
 Aircraft are categorized by callsign pattern matching:
 
-| Type | Callsign Patterns | Significance |
-|------|-------------------|--------------|
-| **Transport** | RCH, REACH, MOOSE, HERKY, EVAC, DUSTOFF | Airlift operations, troop movement |
-| **Fighter** | VIPER, EAGLE, RAPTOR, STRIKE | Combat air patrol, interception |
-| **Reconnaissance** | SIGNT, COBRA, RIVET, JSTARS | Intelligence gathering |
+| Type               | Callsign Patterns                       | Significance                       |
+| ------------------ | --------------------------------------- | ---------------------------------- |
+| **Transport**      | RCH, REACH, MOOSE, HERKY, EVAC, DUSTOFF | Airlift operations, troop movement |
+| **Fighter**        | VIPER, EAGLE, RAPTOR, STRIKE            | Combat air patrol, interception    |
+| **Reconnaissance** | SIGNT, COBRA, RIVET, JSTARS             | Intelligence gathering             |
 
 ### Baseline Calculation
 
@@ -157,12 +163,12 @@ surge_triggered = (
 
 When a surge is detected, the system generates a `military_surge` signal:
 
-| Field | Content |
-|-------|---------|
-| **Location** | Theater centroid coordinates |
-| **Message** | "Military Transport Surge in [Theater]: [X] aircraft (baseline: [Y])" |
-| **Details** | Aircraft types, nearby bases (150km radius), top callsigns |
-| **Confidence** | Based on surge ratio (0.6-0.9) |
+| Field          | Content                                                               |
+| -------------- | --------------------------------------------------------------------- |
+| **Location**   | Theater centroid coordinates                                          |
+| **Message**    | "Military Transport Surge in [Theater]: [X] aircraft (baseline: [Y])" |
+| **Details**    | Aircraft types, nearby bases (150km radius), top callsigns            |
+| **Confidence** | Based on surge ratio (0.6-0.9)                                        |
 
 ### Foreign Military Presence Detection
 
@@ -172,16 +178,16 @@ Beyond surge detection, the system monitors for **foreign military aircraft in s
 
 The system tracks 18 strategically significant geographic areas:
 
-| Region | Sensitivity | Monitored For |
-|--------|-------------|---------------|
-| **Taiwan Strait** | Critical | PLAAF activity, US transits |
-| **Persian Gulf** | Critical | Iranian, US, Gulf state activity |
-| **Baltic Sea** | High | Russian activity near NATO |
-| **Black Sea** | High | NATO reconnaissance, Russian activity |
-| **South China Sea** | High | PLAAF patrols, US FONOPs |
-| **Korean Peninsula** | High | DPRK activity, US-ROK exercises |
-| **Eastern Mediterranean** | Medium | Russian naval aviation, NATO |
-| **Arctic** | Medium | Russian bomber patrols |
+| Region                    | Sensitivity | Monitored For                         |
+| ------------------------- | ----------- | ------------------------------------- |
+| **Taiwan Strait**         | Critical    | PLAAF activity, US transits           |
+| **Persian Gulf**          | Critical    | Iranian, US, Gulf state activity      |
+| **Baltic Sea**            | High        | Russian activity near NATO            |
+| **Black Sea**             | High        | NATO reconnaissance, Russian activity |
+| **South China Sea**       | High        | PLAAF patrols, US FONOPs              |
+| **Korean Peninsula**      | High        | DPRK activity, US-ROK exercises       |
+| **Eastern Mediterranean** | Medium      | Russian naval aviation, NATO          |
+| **Arctic**                | Medium      | Russian bomber patrols                |
 
 **Detection Logic**
 
@@ -196,72 +202,73 @@ For each sensitive region, the system:
 
 Certain operator-region combinations trigger **critical severity** alerts:
 
-| Operator | Region | Rationale |
-|----------|--------|-----------|
-| PLAAF | Taiwan Strait | Potential invasion rehearsal |
-| Russian VKS | Arctic | Nuclear bomber patrols |
-| USAF | Persian Gulf | Potential strike package |
+| Operator    | Region        | Rationale                    |
+| ----------- | ------------- | ---------------------------- |
+| PLAAF       | Taiwan Strait | Potential invasion rehearsal |
+| Russian VKS | Arctic        | Nuclear bomber patrols       |
+| USAF        | Persian Gulf  | Potential strike package     |
 
 **Signal Output**
 
 Foreign presence detection generates a `foreign_military_presence` signal:
 
-| Field | Content |
-|-------|---------|
-| **Title** | "Foreign Military Presence: [Region]" |
-| **Details** | "[Operator] aircraft detected: [count] [types]" |
-| **Severity** | Critical/High/Medium based on combination |
+| Field          | Content                                             |
+| -------------- | --------------------------------------------------- |
+| **Title**      | "Foreign Military Presence: [Region]"               |
+| **Details**    | "[Operator] aircraft detected: [count] [types]"     |
+| **Severity**   | Critical/High/Medium based on combination           |
 | **Confidence** | 0.7-0.95 based on aircraft count and type diversity |
 
 ## Baseline-Based Surge Detection
 
 Surges are detected by comparing current aircraft counts to historical baselines within defined military theaters:
 
-| Parameter | Value | Purpose |
-|-----------|-------|---------|
-| Surge threshold | 2.0x baseline | Minimum multiplier to trigger alert |
-| Baseline window | 48 hours | Historical data used for comparison |
+| Parameter       | Value          | Purpose                                 |
+| --------------- | -------------- | --------------------------------------- |
+| Surge threshold | 2.0x baseline  | Minimum multiplier to trigger alert     |
+| Baseline window | 48 hours       | Historical data used for comparison     |
 | Minimum samples | 6 observations | Required data points for valid baseline |
 
 **Aircraft Categories Tracked**:
 
-| Category | Examples | Minimum Count |
-|----------|----------|---------------|
-| Transport/Airlift | C-17, C-130, KC-135, REACH flights | 5 aircraft |
-| Fighter | F-15, F-16, F-22, Typhoon | 4 aircraft |
-| Reconnaissance | RC-135, E-3 AWACS, U-2 | 3 aircraft |
+| Category          | Examples                           | Minimum Count |
+| ----------------- | ---------------------------------- | ------------- |
+| Transport/Airlift | C-17, C-130, KC-135, REACH flights | 5 aircraft    |
+| Fighter           | F-15, F-16, F-22, Typhoon          | 4 aircraft    |
+| Reconnaissance    | RC-135, E-3 AWACS, U-2             | 3 aircraft    |
 
 ### Surge Severity
 
-| Severity | Criteria | Meaning |
-|----------|----------|---------|
-| **Critical** | 4x baseline or higher | Major deployment |
-| **High** | 3x baseline | Significant increase |
-| **Medium** | 2x baseline | Elevated activity |
+| Severity     | Criteria              | Meaning              |
+| ------------ | --------------------- | -------------------- |
+| **Critical** | 4x baseline or higher | Major deployment     |
+| **High**     | 3x baseline           | Significant increase |
+| **Medium**   | 2x baseline           | Elevated activity    |
 
 ### Military Theaters
 
 Surge detection groups activity into four primary strategic theaters (a simplified grouping used for baseline comparison, distinct from the 5-theater and 9-theater lists used elsewhere):
 
-| Theater | Center | Key Bases |
-|---------|--------|-----------|
-| Middle East | Persian Gulf | Al Udeid, Al Dhafra, Incirlik |
-| Eastern Europe | Poland | Ramstein, Spangdahlem, Lask |
-| Pacific | Guam/Japan | Andersen, Kadena, Yokota |
-| Horn of Africa | Djibouti | Camp Lemonnier |
+| Theater        | Center       | Key Bases                     |
+| -------------- | ------------ | ----------------------------- |
+| Middle East    | Persian Gulf | Al Udeid, Al Dhafra, Incirlik |
+| Eastern Europe | Poland       | Ramstein, Spangdahlem, Lask   |
+| Pacific        | Guam/Japan   | Andersen, Kadena, Yokota      |
+| Horn of Africa | Djibouti     | Camp Lemonnier                |
 
 ### Foreign Presence Detection
 
 A separate system monitors for military operators outside their normal operating areas:
 
-| Operator | Home Regions | Alert When Found In |
-|----------|--------------|---------------------|
-| USAF/USN | Alaska ADIZ | Persian Gulf, Taiwan Strait |
-| Russian VKS | Kaliningrad, Arctic, Black Sea | Baltic Region, Alaska ADIZ |
-| PLAAF/PLAN | Taiwan Strait, South China Sea | (alerts when increased) |
-| Israeli IAF | Eastern Med | Iran border region |
+| Operator    | Home Regions                   | Alert When Found In         |
+| ----------- | ------------------------------ | --------------------------- |
+| USAF/USN    | Alaska ADIZ                    | Persian Gulf, Taiwan Strait |
+| Russian VKS | Kaliningrad, Arctic, Black Sea | Baltic Region, Alaska ADIZ  |
+| PLAAF/PLAN  | Taiwan Strait, South China Sea | (alerts when increased)     |
+| Israeli IAF | Eastern Med                    | Iran border region          |
 
 **Example alert**:
+
 ```
 FOREIGN MILITARY PRESENCE: Persian Gulf
 USAF: 3 aircraft detected (KC-135, RC-135W, E-3)
@@ -277,6 +284,7 @@ Both surge and foreign presence alerts query the Focal Point Detector for contex
 3. If news correlation exists, attach headlines and evidence
 
 **Example with correlation**:
+
 ```
 MILITARY AIRLIFT SURGE: Middle East Theater
 Current: 8 transport aircraft (2.5x baseline)
@@ -295,14 +303,14 @@ Military aircraft tracking is enhanced with **Wingbits** enrichment data, provid
 
 When an aircraft is detected via OpenSky ADS-B, the system queries Wingbits for:
 
-| Field | Description | Use Case |
-|-------|-------------|----------|
-| **Registration** | Aircraft tail number (e.g., N12345) | Unique identification |
-| **Owner** | Legal owner of the aircraft | Military branch detection |
-| **Operator** | Operating entity | Distinguish military vs. contractor |
-| **Manufacturer** | Boeing, Lockheed Martin, etc. | Aircraft type classification |
-| **Model** | Specific aircraft model | Capability assessment |
-| **Built Year** | Year of manufacture | Fleet age analysis |
+| Field            | Description                         | Use Case                            |
+| ---------------- | ----------------------------------- | ----------------------------------- |
+| **Registration** | Aircraft tail number (e.g., N12345) | Unique identification               |
+| **Owner**        | Legal owner of the aircraft         | Military branch detection           |
+| **Operator**     | Operating entity                    | Distinguish military vs. contractor |
+| **Manufacturer** | Boeing, Lockheed Martin, etc.       | Aircraft type classification        |
+| **Model**        | Specific aircraft model             | Capability assessment               |
+| **Built Year**   | Year of manufacture                 | Fleet age analysis                  |
 
 ### Military Classification Algorithm
 
@@ -333,12 +341,12 @@ The enrichment service analyzes owner and operator fields against curated keywor
 
 Each enriched aircraft receives a confidence classification:
 
-| Level | Criteria | Display |
-|-------|----------|---------|
-| **Confirmed** | Direct military owner/operator match | Green badge |
-| **Likely** | Military ICAO code or aircraft type | Yellow badge |
-| **Possible** | Defense contractor ownership | Gray badge |
-| **Civilian** | No military indicators | No badge |
+| Level         | Criteria                             | Display      |
+| ------------- | ------------------------------------ | ------------ |
+| **Confirmed** | Direct military owner/operator match | Green badge  |
+| **Likely**    | Military ICAO code or aircraft type  | Yellow badge |
+| **Possible**  | Defense contractor ownership         | Gray badge   |
+| **Civilian**  | No military indicators               | No badge     |
 
 ### Caching Strategy
 
@@ -356,20 +364,20 @@ The Spaceports layer displays global launch facilities for monitoring space-rela
 
 ### Tracked Launch Sites
 
-| Site | Country | Operator | Activity Level |
-|------|---------|----------|----------------|
-| **Kennedy Space Center** | USA | NASA/Space Force | High |
-| **Vandenberg SFB** | USA | US Space Force | Medium |
-| **Starbase** | USA | SpaceX | High |
-| **Baikonur Cosmodrome** | Kazakhstan | Roscosmos | Medium |
-| **Plesetsk Cosmodrome** | Russia | Roscosmos/Military | Medium |
-| **Vostochny Cosmodrome** | Russia | Roscosmos | Low |
-| **Jiuquan SLC** | China | CNSA | High |
-| **Xichang SLC** | China | CNSA | High |
-| **Wenchang SLC** | China | CNSA | Medium |
-| **Guiana Space Centre** | France | ESA/CNES | Medium |
-| **Satish Dhawan SC** | India | ISRO | Medium |
-| **Tanegashima SC** | Japan | JAXA | Low |
+| Site                     | Country    | Operator           | Activity Level |
+| ------------------------ | ---------- | ------------------ | -------------- |
+| **Kennedy Space Center** | USA        | NASA/Space Force   | High           |
+| **Vandenberg SFB**       | USA        | US Space Force     | Medium         |
+| **Starbase**             | USA        | SpaceX             | High           |
+| **Baikonur Cosmodrome**  | Kazakhstan | Roscosmos          | Medium         |
+| **Plesetsk Cosmodrome**  | Russia     | Roscosmos/Military | Medium         |
+| **Vostochny Cosmodrome** | Russia     | Roscosmos          | Low            |
+| **Jiuquan SLC**          | China      | CNSA               | High           |
+| **Xichang SLC**          | China      | CNSA               | High           |
+| **Wenchang SLC**         | China      | CNSA               | Medium         |
+| **Guiana Space Centre**  | France     | ESA/CNES           | Medium         |
+| **Satish Dhawan SC**     | India      | ISRO               | Medium         |
+| **Tanegashima SC**       | Japan      | JAXA               | Low            |
 
 ### Why This Matters
 
@@ -388,17 +396,17 @@ The AI Strategic Posture panel aggregates military aircraft and naval vessels ac
 
 Nine geographic theaters are monitored continuously for posture analysis (this is a separate, more granular grouping than the surge detection theaters above, tailored for strategic posture assessment with per-theater strike capability thresholds):
 
-| Theater | Bounds | Elevated Threshold | Critical Threshold |
-|---------|--------|--------------------|--------------------|
-| **Iran Theater** | Persian Gulf, Iraq, Syria (20N-42N, 30E-65E) | 50 aircraft | 100 aircraft |
-| **Taiwan Strait** | Taiwan, East China Sea (18N-30N, 115E-130E) | 30 aircraft | 60 aircraft |
-| **Korean Peninsula** | North/South Korea (33N-43N, 124E-132E) | 20 aircraft | 50 aircraft |
-| **Baltic Theater** | Baltics, Poland, Scandinavia (52N-65N, 10E-32E) | 20 aircraft | 40 aircraft |
-| **Black Sea** | Ukraine, Turkey, Romania (40N-48N, 26E-42E) | 15 aircraft | 30 aircraft |
-| **South China Sea** | Philippines, Vietnam (5N-25N, 105E-121E) | 25 aircraft | 50 aircraft |
-| **Eastern Mediterranean** | Syria, Cyprus, Lebanon (33N-37N, 25E-37E) | 15 aircraft | 30 aircraft |
-| **Israel/Gaza** | Israel, Gaza Strip (29N-33N, 33E-36E) | 10 aircraft | 25 aircraft |
-| **Yemen/Red Sea** | Bab el-Mandeb, Houthi areas (11N-22N, 32E-54E) | 15 aircraft | 30 aircraft |
+| Theater                   | Bounds                                          | Elevated Threshold | Critical Threshold |
+| ------------------------- | ----------------------------------------------- | ------------------ | ------------------ |
+| **Iran Theater**          | Persian Gulf, Iraq, Syria (20N-42N, 30E-65E)    | 50 aircraft        | 100 aircraft       |
+| **Taiwan Strait**         | Taiwan, East China Sea (18N-30N, 115E-130E)     | 30 aircraft        | 60 aircraft        |
+| **Korean Peninsula**      | North/South Korea (33N-43N, 124E-132E)          | 20 aircraft        | 50 aircraft        |
+| **Baltic Theater**        | Baltics, Poland, Scandinavia (52N-65N, 10E-32E) | 20 aircraft        | 40 aircraft        |
+| **Black Sea**             | Ukraine, Turkey, Romania (40N-48N, 26E-42E)     | 15 aircraft        | 30 aircraft        |
+| **South China Sea**       | Philippines, Vietnam (5N-25N, 105E-121E)        | 25 aircraft        | 50 aircraft        |
+| **Eastern Mediterranean** | Syria, Cyprus, Lebanon (33N-37N, 25E-37E)       | 15 aircraft        | 30 aircraft        |
+| **Israel/Gaza**           | Israel, Gaza Strip (29N-33N, 33E-36E)           | 10 aircraft        | 25 aircraft        |
+| **Yemen/Red Sea**         | Bab el-Mandeb, Houthi areas (11N-22N, 32E-54E)  | 15 aircraft        | 30 aircraft        |
 
 ### Strike Capability Assessment
 
@@ -412,13 +420,13 @@ Beyond raw counts, the system assesses whether forces in a theater constitute an
 
 Each theater has custom thresholds reflecting realistic strike package sizes:
 
-| Theater | Min Tankers | Min AWACS | Min Fighters |
-|---------|-------------|-----------|--------------|
-| Iran Theater | 10 | 2 | 30 |
-| Taiwan Strait | 5 | 1 | 20 |
-| Korean Peninsula | 4 | 1 | 15 |
-| Baltic/Black Sea | 3-4 | 1 | 10-15 |
-| Israel/Gaza | 2 | 1 | 8 |
+| Theater          | Min Tankers | Min AWACS | Min Fighters |
+| ---------------- | ----------- | --------- | ------------ |
+| Iran Theater     | 10          | 2         | 30           |
+| Taiwan Strait    | 5           | 1         | 20           |
+| Korean Peninsula | 4           | 1         | 15           |
+| Baltic/Black Sea | 3-4         | 1         | 10-15        |
+| Israel/Gaza      | 2           | 1         | 8            |
 
 When all three criteria are met, the theater is flagged as **STRIKE CAPABLE**, indicating forces sufficient for sustained offensive operations.
 
@@ -426,24 +434,24 @@ When all three criteria are met, the theater is flagged as **STRIKE CAPABLE**, i
 
 The panel augments aircraft data with real-time naval vessel positions from AIS tracking. Vessels are classified into categories:
 
-| Category | Examples | Strategic Significance |
-|----------|----------|------------------------|
-| **Carriers** | CVN, CV, LHD | Power projection, air superiority |
-| **Destroyers** | DDG, DDH | Air defense, cruise missile strike |
-| **Frigates** | FFG, FF | Multi-role escort, ASW |
-| **Submarines** | SSN, SSK, SSBN | Deterrence, ISR, strike |
-| **Patrol** | PC, PG | Coastal defense |
-| **Auxiliary** | T-AO, AOR | Fleet support, logistics |
+| Category       | Examples       | Strategic Significance             |
+| -------------- | -------------- | ---------------------------------- |
+| **Carriers**   | CVN, CV, LHD   | Power projection, air superiority  |
+| **Destroyers** | DDG, DDH       | Air defense, cruise missile strike |
+| **Frigates**   | FFG, FF        | Multi-role escort, ASW             |
+| **Submarines** | SSN, SSK, SSBN | Deterrence, ISR, strike            |
+| **Patrol**     | PC, PG         | Coastal defense                    |
+| **Auxiliary**  | T-AO, AOR      | Fleet support, logistics           |
 
 **Data Accumulation Note**: AIS vessel data arrives via WebSocket stream and accumulates gradually. The panel automatically re-checks vessel counts at 30, 60, 90, and 120 seconds after initial load to capture late-arriving data.
 
 ### Posture Levels
 
-| Level | Indicator | Criteria | Meaning |
-|-------|-----------|----------|---------|
-| **Normal** | NORM | Below elevated threshold | Routine peacetime activity |
-| **Elevated** | ELEV | At or above elevated threshold | Increased activity, possible exercises |
-| **Critical** | CRIT | At or above critical threshold | Major deployment, potential crisis |
+| Level        | Indicator | Criteria                       | Meaning                                |
+| ------------ | --------- | ------------------------------ | -------------------------------------- |
+| **Normal**   | NORM      | Below elevated threshold       | Routine peacetime activity             |
+| **Elevated** | ELEV      | At or above elevated threshold | Increased activity, possible exercises |
+| **Critical** | CRIT      | At or above critical threshold | Major deployment, potential crisis     |
 
 **Elevated + Strike Capable** is treated as a higher alert state than regular elevated status.
 
@@ -459,9 +467,9 @@ Activity trends are computed from rolling historical data:
 
 Theater posture computations run on edge servers with Redis caching:
 
-| Cache Type | TTL | Purpose |
-|------------|-----|---------|
-| **Active cache** | 5 minutes | Matches OpenSky refresh rate |
-| **Stale cache** | 1 hour | Fallback when upstream APIs fail |
+| Cache Type       | TTL       | Purpose                          |
+| ---------------- | --------- | -------------------------------- |
+| **Active cache** | 5 minutes | Matches OpenSky refresh rate     |
+| **Stale cache**  | 1 hour    | Fallback when upstream APIs fail |
 
 This ensures consistent data across all users and minimizes redundant API calls to OpenSky Network.

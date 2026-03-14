@@ -1,32 +1,32 @@
-import { strict as assert } from 'node:assert';
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
-import { createServer, request as httpRequest } from 'node:http';
-import https from 'node:https';
-import { EventEmitter } from 'node:events';
-import { brotliDecompressSync, gunzipSync } from 'node:zlib';
-import os from 'node:os';
-import path from 'node:path';
-import test from 'node:test';
-import { createLocalApiServer } from './local-api-server.mjs';
+import { strict as assert } from "node:assert";
+import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
+import { createServer, request as httpRequest } from "node:http";
+import https from "node:https";
+import { EventEmitter } from "node:events";
+import { brotliDecompressSync, gunzipSync } from "node:zlib";
+import os from "node:os";
+import path from "node:path";
+import test from "node:test";
+import { createLocalApiServer } from "./local-api-server.mjs";
 
-async function listen(server, host = '127.0.0.1', port = 0) {
+async function listen(server, host = "127.0.0.1", port = 0) {
   await new Promise((resolve, reject) => {
     const onListening = () => {
-      server.off('error', onError);
+      server.off("error", onError);
       resolve();
     };
     const onError = (error) => {
-      server.off('listening', onListening);
+      server.off("listening", onListening);
       reject(error);
     };
-    server.once('listening', onListening);
-    server.once('error', onError);
+    server.once("listening", onListening);
+    server.once("error", onError);
     server.listen(port, host);
   });
 
   const address = server.address();
-  if (!address || typeof address === 'string') {
-    throw new Error('Failed to resolve server address');
+  if (!address || typeof address === "string") {
+    throw new Error("Failed to resolve server address");
   }
   return address.port;
 }
@@ -35,26 +35,33 @@ async function postJsonViaHttp(url, payload) {
   const target = new URL(url);
   const body = JSON.stringify(payload);
   return new Promise((resolve, reject) => {
-    const req = httpRequest({
-      hostname: target.hostname,
-      port: Number(target.port || 80),
-      path: `${target.pathname}${target.search}`,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': String(Buffer.byteLength(body)),
+    const req = httpRequest(
+      {
+        hostname: target.hostname,
+        port: Number(target.port || 80),
+        path: `${target.pathname}${target.search}`,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Content-Length": String(Buffer.byteLength(body)),
+        },
       },
-    }, (res) => {
-      const chunks = [];
-      res.on('data', (chunk) => chunks.push(chunk));
-      res.on('end', () => {
-        const text = Buffer.concat(chunks).toString('utf8');
-        let json = null;
-        try { json = JSON.parse(text); } catch { /* non-json response */ }
-        resolve({ status: res.statusCode || 0, text, json });
-      });
-    });
-    req.on('error', reject);
+      (res) => {
+        const chunks = [];
+        res.on("data", (chunk) => chunks.push(chunk));
+        res.on("end", () => {
+          const text = Buffer.concat(chunks).toString("utf8");
+          let json = null;
+          try {
+            json = JSON.parse(text);
+          } catch {
+            /* non-json response */
+          }
+          resolve({ status: res.statusCode || 0, text, json });
+        });
+      },
+    );
+    req.on("error", reject);
     req.write(body);
     req.end();
   });
@@ -64,20 +71,20 @@ function mockHttpsRequestOnce({ statusCode, headers, body }) {
   const original = https.request;
   https.request = (_options, onResponse) => {
     const req = new EventEmitter();
-    req.setTimeout = () => { };
-    req.write = () => { };
+    req.setTimeout = () => {};
+    req.write = () => {};
     req.destroy = (error) => {
-      if (error) req.emit('error', error);
+      if (error) req.emit("error", error);
     };
     req.end = () => {
       queueMicrotask(() => {
         const res = new EventEmitter();
         res.statusCode = statusCode;
-        res.statusMessage = '';
+        res.statusMessage = "";
         res.headers = headers;
         onResponse(res);
-        if (body) res.emit('data', Buffer.from(body));
-        res.emit('end');
+        if (body) res.emit("data", Buffer.from(body));
+        res.emit("end");
       });
     };
     return req;
@@ -91,15 +98,17 @@ async function setupRemoteServer() {
   const hits = [];
   const origins = [];
   const server = createServer((req, res) => {
-    const url = new URL(req.url || '/', 'http://127.0.0.1');
+    const url = new URL(req.url || "/", "http://127.0.0.1");
     hits.push(url.pathname);
     origins.push(req.headers.origin || null);
-    res.writeHead(200, { 'content-type': 'application/json' });
-    res.end(JSON.stringify({
-      source: 'remote',
-      path: url.pathname,
-      origin: req.headers.origin || null,
-    }));
+    res.writeHead(200, { "content-type": "application/json" });
+    res.end(
+      JSON.stringify({
+        source: "remote",
+        path: url.pathname,
+        origin: req.headers.origin || null,
+      }),
+    );
   });
 
   const port = await listen(server);
@@ -116,16 +125,16 @@ async function setupRemoteServer() {
 }
 
 async function setupApiDir(files) {
-  const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'wm-sidecar-test-'));
-  const apiDir = path.join(tempRoot, 'api');
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), "wm-sidecar-test-"));
+  const apiDir = path.join(tempRoot, "api");
   await mkdir(apiDir, { recursive: true });
 
   await Promise.all(
     Object.entries(files).map(async ([relativePath, source]) => {
       const absolute = path.join(apiDir, relativePath);
       await mkdir(path.dirname(absolute), { recursive: true });
-      await writeFile(absolute, source, 'utf8');
-    })
+      await writeFile(absolute, source, "utf8");
+    }),
   );
 
   return {
@@ -137,16 +146,18 @@ async function setupApiDir(files) {
 }
 
 async function setupResourceDirWithUpApi(files) {
-  const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'wm-sidecar-resource-test-'));
-  const apiDir = path.join(tempRoot, '_up_', 'api');
+  const tempRoot = await mkdtemp(
+    path.join(os.tmpdir(), "wm-sidecar-resource-test-"),
+  );
+  const apiDir = path.join(tempRoot, "_up_", "api");
   await mkdir(apiDir, { recursive: true });
 
   await Promise.all(
     Object.entries(files).map(async ([relativePath, source]) => {
       const absolute = path.join(apiDir, relativePath);
       await mkdir(path.dirname(absolute), { recursive: true });
-      await writeFile(absolute, source, 'utf8');
-    })
+      await writeFile(absolute, source, "utf8");
+    }),
   );
 
   return {
@@ -158,10 +169,10 @@ async function setupResourceDirWithUpApi(files) {
   };
 }
 
-test('returns local error directly when cloudFallback is off (default)', async () => {
+test("returns local error directly when cloudFallback is off (default)", async () => {
   const remote = await setupRemoteServer();
   const localApi = await setupApiDir({
-    'fred-data.js': `
+    "fred-data.js": `
       export default async function handler() {
         return new Response(JSON.stringify({ source: 'local-error' }), {
           status: 500,
@@ -175,7 +186,7 @@ test('returns local error directly when cloudFallback is off (default)', async (
     port: 0,
     apiDir: localApi.apiDir,
     remoteBase: remote.remoteBase,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
@@ -183,7 +194,7 @@ test('returns local error directly when cloudFallback is off (default)', async (
     const response = await fetch(`http://127.0.0.1:${port}/api/fred-data`);
     assert.equal(response.status, 500);
     const body = await response.json();
-    assert.equal(body.source, 'local-error');
+    assert.equal(body.source, "local-error");
     assert.equal(remote.hits.length, 0);
   } finally {
     await app.close();
@@ -192,10 +203,10 @@ test('returns local error directly when cloudFallback is off (default)', async (
   }
 });
 
-test('falls back to cloud when cloudFallback is enabled and local handler returns 500', async () => {
+test("falls back to cloud when cloudFallback is enabled and local handler returns 500", async () => {
   const remote = await setupRemoteServer();
   const localApi = await setupApiDir({
-    'fred-data.js': `
+    "fred-data.js": `
       export default async function handler() {
         return new Response(JSON.stringify({ source: 'local-error' }), {
           status: 500,
@@ -209,8 +220,8 @@ test('falls back to cloud when cloudFallback is enabled and local handler return
     port: 0,
     apiDir: localApi.apiDir,
     remoteBase: remote.remoteBase,
-    cloudFallback: 'true',
-    logger: { log() { }, warn() { }, error() { } },
+    cloudFallback: "true",
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
@@ -218,8 +229,8 @@ test('falls back to cloud when cloudFallback is enabled and local handler return
     const response = await fetch(`http://127.0.0.1:${port}/api/fred-data`);
     assert.equal(response.status, 200);
     const body = await response.json();
-    assert.equal(body.source, 'remote');
-    assert.equal(remote.hits.includes('/api/fred-data'), true);
+    assert.equal(body.source, "remote");
+    assert.equal(remote.hits.includes("/api/fred-data"), true);
   } finally {
     await app.close();
     await localApi.cleanup();
@@ -227,22 +238,22 @@ test('falls back to cloud when cloudFallback is enabled and local handler return
   }
 });
 
-test('preserves POST body when cloud fallback is triggered after local non-OK response', async () => {
+test("preserves POST body when cloud fallback is triggered after local non-OK response", async () => {
   const remoteBodies = [];
   const remote = createServer((req, res) => {
     const chunks = [];
-    req.on('data', (chunk) => chunks.push(chunk));
-    req.on('end', () => {
-      const body = Buffer.concat(chunks).toString('utf8');
+    req.on("data", (chunk) => chunks.push(chunk));
+    req.on("end", () => {
+      const body = Buffer.concat(chunks).toString("utf8");
       remoteBodies.push(body);
-      res.writeHead(200, { 'content-type': 'application/json' });
-      res.end(JSON.stringify({ source: 'remote', body }));
+      res.writeHead(200, { "content-type": "application/json" });
+      res.end(JSON.stringify({ source: "remote", body }));
     });
   });
   const remotePort = await listen(remote);
 
   const localApi = await setupApiDir({
-    'post-fail.js': `
+    "post-fail.js": `
       export default async function handler(req) {
         await req.text();
         return new Response(JSON.stringify({ source: 'local-error' }), {
@@ -257,22 +268,22 @@ test('preserves POST body when cloud fallback is triggered after local non-OK re
     port: 0,
     apiDir: localApi.apiDir,
     remoteBase: `http://127.0.0.1:${remotePort}`,
-    cloudFallback: 'true',
-    logger: { log() { }, warn() { }, error() { } },
+    cloudFallback: "true",
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
-    const payload = JSON.stringify({ secret: 'keep-body' });
+    const payload = JSON.stringify({ secret: "keep-body" });
     const response = await fetch(`http://127.0.0.1:${port}/api/post-fail`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      method: "POST",
+      headers: { "content-type": "application/json" },
       body: payload,
     });
     assert.equal(response.status, 200);
 
     const body = await response.json();
-    assert.equal(body.source, 'remote');
+    assert.equal(body.source, "remote");
     assert.equal(body.body, payload);
     assert.equal(remoteBodies[0], payload);
   } finally {
@@ -284,10 +295,10 @@ test('preserves POST body when cloud fallback is triggered after local non-OK re
   }
 });
 
-test('uses local handler response when local handler succeeds', async () => {
+test("uses local handler response when local handler succeeds", async () => {
   const remote = await setupRemoteServer();
   const localApi = await setupApiDir({
-    'live.js': `
+    "live.js": `
       export default async function handler() {
         return new Response(JSON.stringify({ source: 'local-ok' }), {
           status: 200,
@@ -301,7 +312,7 @@ test('uses local handler response when local handler succeeds', async () => {
     port: 0,
     apiDir: localApi.apiDir,
     remoteBase: remote.remoteBase,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
@@ -309,7 +320,7 @@ test('uses local handler response when local handler succeeds', async () => {
     const response = await fetch(`http://127.0.0.1:${port}/api/live`);
     assert.equal(response.status, 200);
     const body = await response.json();
-    assert.equal(body.source, 'local-ok');
+    assert.equal(body.source, "local-ok");
     assert.equal(remote.hits.length, 0);
   } finally {
     await app.close();
@@ -318,7 +329,7 @@ test('uses local handler response when local handler succeeds', async () => {
   }
 });
 
-test('returns 404 when local route does not exist and cloudFallback is off', async () => {
+test("returns 404 when local route does not exist and cloudFallback is off", async () => {
   const remote = await setupRemoteServer();
   const localApi = await setupApiDir({});
 
@@ -326,7 +337,7 @@ test('returns 404 when local route does not exist and cloudFallback is off', asy
     port: 0,
     apiDir: localApi.apiDir,
     remoteBase: remote.remoteBase,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
@@ -334,7 +345,7 @@ test('returns 404 when local route does not exist and cloudFallback is off', asy
     const response = await fetch(`http://127.0.0.1:${port}/api/not-found`);
     assert.equal(response.status, 404);
     const body = await response.json();
-    assert.equal(body.error, 'No local handler for this endpoint');
+    assert.equal(body.error, "No local handler for this endpoint");
     assert.equal(remote.hits.length, 0);
   } finally {
     await app.close();
@@ -343,10 +354,10 @@ test('returns 404 when local route does not exist and cloudFallback is off', asy
   }
 });
 
-test('replaces browser origin with localhost origin for local handlers', async () => {
+test("replaces browser origin with localhost origin for local handlers", async () => {
   const remote = await setupRemoteServer();
   const localApi = await setupApiDir({
-    'origin-check.js': `
+    "origin-check.js": `
       export default async function handler(req) {
         const origin = req.headers.get('origin');
         return new Response(JSON.stringify({
@@ -365,17 +376,17 @@ test('replaces browser origin with localhost origin for local handlers', async (
     port: 0,
     apiDir: localApi.apiDir,
     remoteBase: remote.remoteBase,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
     const response = await fetch(`http://127.0.0.1:${port}/api/origin-check`, {
-      headers: { Origin: 'https://tauri.localhost' },
+      headers: { Origin: "https://tauri.localhost" },
     });
     assert.equal(response.status, 200);
     const body = await response.json();
-    assert.equal(body.source, 'local');
+    assert.equal(body.source, "local");
     // Since e14af08f (#709) the server strips the browser Origin but
     // immediately replaces it with `http://127.0.0.1:<port>`, so the
     // handler does receive an Origin header — just the localhost one.
@@ -389,15 +400,15 @@ test('replaces browser origin with localhost origin for local handlers', async (
   }
 });
 
-test('preserves Request body when handler uses fetch(Request)', async () => {
-  let receivedBody = '';
+test("preserves Request body when handler uses fetch(Request)", async () => {
+  let receivedBody = "";
 
   const upstream = createServer((req, res) => {
     const chunks = [];
-    req.on('data', (chunk) => chunks.push(chunk));
-    req.on('end', () => {
-      receivedBody = Buffer.concat(chunks).toString('utf8');
-      res.writeHead(200, { 'content-type': 'application/json' });
+    req.on("data", (chunk) => chunks.push(chunk));
+    req.on("end", () => {
+      receivedBody = Buffer.concat(chunks).toString("utf8");
+      res.writeHead(200, { "content-type": "application/json" });
       res.end(JSON.stringify({ receivedBody }));
     });
   });
@@ -405,7 +416,7 @@ test('preserves Request body when handler uses fetch(Request)', async () => {
   process.env.WM_TEST_UPSTREAM = `http://127.0.0.1:${upstreamPort}`;
 
   const localApi = await setupApiDir({
-    'request-proxy.js': `
+    "request-proxy.js": `
       export default async function handler() {
         const request = new Request(\`\${process.env.WM_TEST_UPSTREAM}/echo\`, {
           method: 'POST',
@@ -425,7 +436,7 @@ test('preserves Request body when handler uses fetch(Request)', async () => {
   const app = await createLocalApiServer({
     port: 0,
     apiDir: localApi.apiDir,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
@@ -445,19 +456,19 @@ test('preserves Request body when handler uses fetch(Request)', async () => {
   }
 });
 
-test('returns local handler error when fetch(Request) uses a consumed body', async () => {
+test("returns local handler error when fetch(Request) uses a consumed body", async () => {
   let upstreamHits = 0;
 
   const upstream = createServer((req, res) => {
     upstreamHits += 1;
-    res.writeHead(200, { 'content-type': 'application/json' });
+    res.writeHead(200, { "content-type": "application/json" });
     res.end(JSON.stringify({ ok: true }));
   });
   const upstreamPort = await listen(upstream);
   process.env.WM_TEST_UPSTREAM = `http://127.0.0.1:${upstreamPort}`;
 
   const localApi = await setupApiDir({
-    'request-consumed.js': `
+    "request-consumed.js": `
       export default async function handler() {
         const request = new Request(\`\${process.env.WM_TEST_UPSTREAM}/echo\`, {
           method: 'POST',
@@ -477,16 +488,18 @@ test('returns local handler error when fetch(Request) uses a consumed body', asy
   const app = await createLocalApiServer({
     port: 0,
     apiDir: localApi.apiDir,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
-    const response = await fetch(`http://127.0.0.1:${port}/api/request-consumed`);
+    const response = await fetch(
+      `http://127.0.0.1:${port}/api/request-consumed`,
+    );
     assert.equal(response.status, 502);
     const body = await response.json();
-    assert.equal(body.error, 'Local handler error');
-    assert.equal(typeof body.reason, 'string');
+    assert.equal(body.error, "Local handler error");
+    assert.equal(typeof body.reason, "string");
     assert.equal(body.reason.length > 0, true);
     assert.equal(upstreamHits, 0);
   } finally {
@@ -499,7 +512,7 @@ test('returns local handler error when fetch(Request) uses a consumed body', asy
   }
 });
 
-test('strips browser origin headers when proxying to cloud fallback (cloudFallback enabled)', async () => {
+test("strips browser origin headers when proxying to cloud fallback (cloudFallback enabled)", async () => {
   const remote = await setupRemoteServer();
   const localApi = await setupApiDir({});
 
@@ -507,18 +520,21 @@ test('strips browser origin headers when proxying to cloud fallback (cloudFallba
     port: 0,
     apiDir: localApi.apiDir,
     remoteBase: remote.remoteBase,
-    cloudFallback: 'true',
-    logger: { log() { }, warn() { }, error() { } },
+    cloudFallback: "true",
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
-    const response = await fetch(`http://127.0.0.1:${port}/api/no-local-handler`, {
-      headers: { Origin: 'https://tauri.localhost' },
-    });
+    const response = await fetch(
+      `http://127.0.0.1:${port}/api/no-local-handler`,
+      {
+        headers: { Origin: "https://tauri.localhost" },
+      },
+    );
     assert.equal(response.status, 200);
     const body = await response.json();
-    assert.equal(body.source, 'remote');
+    assert.equal(body.source, "remote");
     assert.equal(body.origin, null);
     assert.equal(remote.origins[0], null);
   } finally {
@@ -528,9 +544,9 @@ test('strips browser origin headers when proxying to cloud fallback (cloudFallba
   }
 });
 
-test('responds to OPTIONS preflight with CORS headers', async () => {
+test("responds to OPTIONS preflight with CORS headers", async () => {
   const localApi = await setupApiDir({
-    'data.js': `
+    "data.js": `
       export default async function handler() {
         return new Response('{}', { status: 200, headers: { 'content-type': 'application/json' } });
       }
@@ -540,23 +556,28 @@ test('responds to OPTIONS preflight with CORS headers', async () => {
   const app = await createLocalApiServer({
     port: 0,
     apiDir: localApi.apiDir,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
-    const response = await fetch(`http://127.0.0.1:${port}/api/data`, { method: 'OPTIONS' });
+    const response = await fetch(`http://127.0.0.1:${port}/api/data`, {
+      method: "OPTIONS",
+    });
     assert.equal(response.status, 204);
-    assert.equal(response.headers.get('access-control-allow-methods'), 'GET, POST, PUT, DELETE, OPTIONS');
+    assert.equal(
+      response.headers.get("access-control-allow-methods"),
+      "GET, POST, PUT, DELETE, OPTIONS",
+    );
   } finally {
     await app.close();
     await localApi.cleanup();
   }
 });
 
-test('preserves Origin in Vary when gzip compression is applied', async () => {
+test("preserves Origin in Vary when gzip compression is applied", async () => {
   const localApi = await setupApiDir({
-    'large.js': `
+    "large.js": `
       export default async function handler() {
         return new Response(JSON.stringify({ payload: 'x'.repeat(4096) }), {
           status: 200,
@@ -569,39 +590,42 @@ test('preserves Origin in Vary when gzip compression is applied', async () => {
   const app = await createLocalApiServer({
     port: 0,
     apiDir: localApi.apiDir,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
     const response = await fetch(`http://127.0.0.1:${port}/api/large`, {
       headers: {
-        Origin: 'https://tauri.localhost',
-        'Accept-Encoding': 'gzip',
+        Origin: "https://tauri.localhost",
+        "Accept-Encoding": "gzip",
       },
     });
 
     assert.equal(response.status, 200);
-    assert.equal(response.headers.get('access-control-allow-origin'), 'https://tauri.localhost');
-    assert.equal(response.headers.get('content-encoding'), 'gzip');
+    assert.equal(
+      response.headers.get("access-control-allow-origin"),
+      "https://tauri.localhost",
+    );
+    assert.equal(response.headers.get("content-encoding"), "gzip");
 
-    const vary = (response.headers.get('vary') || '')
-      .split(',')
+    const vary = (response.headers.get("vary") || "")
+      .split(",")
       .map((part) => part.trim().toLowerCase())
       .filter(Boolean);
 
-    assert.equal(vary.includes('origin'), true);
-    assert.equal(vary.includes('accept-encoding'), true);
+    assert.equal(vary.includes("origin"), true);
+    assert.equal(vary.includes("accept-encoding"), true);
   } finally {
     await app.close();
     await localApi.cleanup();
   }
 });
 
-test('resolves packaged tauri resource layout under _up_/api', async () => {
+test("resolves packaged tauri resource layout under _up_/api", async () => {
   const remote = await setupRemoteServer();
   const localResource = await setupResourceDirWithUpApi({
-    'live.js': `
+    "live.js": `
       export default async function handler() {
         return new Response(JSON.stringify({ source: 'local-up' }), {
           status: 200,
@@ -615,7 +639,7 @@ test('resolves packaged tauri resource layout under _up_/api', async () => {
     port: 0,
     resourceDir: localResource.resourceDir,
     remoteBase: remote.remoteBase,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
@@ -626,7 +650,7 @@ test('resolves packaged tauri resource layout under _up_/api', async () => {
     const response = await fetch(`http://127.0.0.1:${port}/api/live`);
     assert.equal(response.status, 200);
     const body = await response.json();
-    assert.equal(body.source, 'local-up');
+    assert.equal(body.source, "local-up");
     assert.equal(remote.hits.length, 0);
   } finally {
     await app.close();
@@ -637,27 +661,33 @@ test('resolves packaged tauri resource layout under _up_/api', async () => {
 
 // ── Ollama env key allowlist + validation tests ──
 
-test('accepts OLLAMA_API_URL via /api/local-env-update', async () => {
+test("accepts OLLAMA_API_URL via /api/local-env-update", async () => {
   const localApi = await setupApiDir({});
 
   const app = await createLocalApiServer({
     port: 0,
     apiDir: localApi.apiDir,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
-    const response = await fetch(`http://127.0.0.1:${port}/api/local-env-update`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key: 'OLLAMA_API_URL', value: 'http://127.0.0.1:11434' }),
-    });
+    const response = await fetch(
+      `http://127.0.0.1:${port}/api/local-env-update`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          key: "OLLAMA_API_URL",
+          value: "http://127.0.0.1:11434",
+        }),
+      },
+    );
     assert.equal(response.status, 200);
     const body = await response.json();
     assert.equal(body.ok, true);
-    assert.equal(body.key, 'OLLAMA_API_URL');
-    assert.equal(process.env.OLLAMA_API_URL, 'http://127.0.0.1:11434');
+    assert.equal(body.key, "OLLAMA_API_URL");
+    assert.equal(process.env.OLLAMA_API_URL, "http://127.0.0.1:11434");
   } finally {
     delete process.env.OLLAMA_API_URL;
     await app.close();
@@ -665,27 +695,30 @@ test('accepts OLLAMA_API_URL via /api/local-env-update', async () => {
   }
 });
 
-test('accepts OLLAMA_MODEL via /api/local-env-update', async () => {
+test("accepts OLLAMA_MODEL via /api/local-env-update", async () => {
   const localApi = await setupApiDir({});
 
   const app = await createLocalApiServer({
     port: 0,
     apiDir: localApi.apiDir,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
-    const response = await fetch(`http://127.0.0.1:${port}/api/local-env-update`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key: 'OLLAMA_MODEL', value: 'llama3.1:8b' }),
-    });
+    const response = await fetch(
+      `http://127.0.0.1:${port}/api/local-env-update`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: "OLLAMA_MODEL", value: "llama3.1:8b" }),
+      },
+    );
     assert.equal(response.status, 200);
     const body = await response.json();
     assert.equal(body.ok, true);
-    assert.equal(body.key, 'OLLAMA_MODEL');
-    assert.equal(process.env.OLLAMA_MODEL, 'llama3.1:8b');
+    assert.equal(body.key, "OLLAMA_MODEL");
+    assert.equal(process.env.OLLAMA_MODEL, "llama3.1:8b");
   } finally {
     delete process.env.OLLAMA_MODEL;
     await app.close();
@@ -693,40 +726,43 @@ test('accepts OLLAMA_MODEL via /api/local-env-update', async () => {
   }
 });
 
-test('rejects unknown key via /api/local-env-update', async () => {
+test("rejects unknown key via /api/local-env-update", async () => {
   const localApi = await setupApiDir({});
 
   const app = await createLocalApiServer({
     port: 0,
     apiDir: localApi.apiDir,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
-    const response = await fetch(`http://127.0.0.1:${port}/api/local-env-update`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key: 'NOT_ALLOWED_KEY', value: 'some-value' }),
-    });
+    const response = await fetch(
+      `http://127.0.0.1:${port}/api/local-env-update`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: "NOT_ALLOWED_KEY", value: "some-value" }),
+      },
+    );
     assert.equal(response.status, 403);
     const body = await response.json();
-    assert.equal(body.error, 'key not in allowlist');
+    assert.equal(body.error, "key not in allowlist");
   } finally {
     await app.close();
     await localApi.cleanup();
   }
 });
 
-test('validates OLLAMA_API_URL via /api/local-validate-secret (reachable endpoint)', async () => {
+test("validates OLLAMA_API_URL via /api/local-validate-secret (reachable endpoint)", async () => {
   // Stand up a mock Ollama server that responds to /v1/models
   const mockOllama = createServer((req, res) => {
-    if (req.url === '/v1/models') {
-      res.writeHead(200, { 'content-type': 'application/json' });
-      res.end(JSON.stringify({ data: [{ id: 'llama3.1:8b' }] }));
+    if (req.url === "/v1/models") {
+      res.writeHead(200, { "content-type": "application/json" });
+      res.end(JSON.stringify({ data: [{ id: "llama3.1:8b" }] }));
     } else {
       res.writeHead(404);
-      res.end('not found');
+      res.end("not found");
     }
   });
   const ollamaPort = await listen(mockOllama);
@@ -735,20 +771,26 @@ test('validates OLLAMA_API_URL via /api/local-validate-secret (reachable endpoin
   const app = await createLocalApiServer({
     port: 0,
     apiDir: localApi.apiDir,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
-    const response = await fetch(`http://127.0.0.1:${port}/api/local-validate-secret`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key: 'OLLAMA_API_URL', value: `http://127.0.0.1:${ollamaPort}` }),
-    });
+    const response = await fetch(
+      `http://127.0.0.1:${port}/api/local-validate-secret`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          key: "OLLAMA_API_URL",
+          value: `http://127.0.0.1:${ollamaPort}`,
+        }),
+      },
+    );
     assert.equal(response.status, 200);
     const body = await response.json();
     assert.equal(body.valid, true);
-    assert.equal(body.message, 'Ollama endpoint verified');
+    assert.equal(body.message, "Ollama endpoint verified");
   } finally {
     await app.close();
     await localApi.cleanup();
@@ -758,14 +800,14 @@ test('validates OLLAMA_API_URL via /api/local-validate-secret (reachable endpoin
   }
 });
 
-test('validates LM Studio style /v1 base URL via /api/local-validate-secret', async () => {
+test("validates LM Studio style /v1 base URL via /api/local-validate-secret", async () => {
   const mockOpenAiCompatible = createServer((req, res) => {
-    if (req.url === '/v1/models') {
-      res.writeHead(200, { 'content-type': 'application/json' });
-      res.end(JSON.stringify({ data: [{ id: 'qwen2.5-7b-instruct' }] }));
+    if (req.url === "/v1/models") {
+      res.writeHead(200, { "content-type": "application/json" });
+      res.end(JSON.stringify({ data: [{ id: "qwen2.5-7b-instruct" }] }));
     } else {
       res.writeHead(404);
-      res.end('not found');
+      res.end("not found");
     }
   });
   const providerPort = await listen(mockOpenAiCompatible);
@@ -774,20 +816,26 @@ test('validates LM Studio style /v1 base URL via /api/local-validate-secret', as
   const app = await createLocalApiServer({
     port: 0,
     apiDir: localApi.apiDir,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
-    const response = await fetch(`http://127.0.0.1:${port}/api/local-validate-secret`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key: 'OLLAMA_API_URL', value: `http://127.0.0.1:${providerPort}/v1` }),
-    });
+    const response = await fetch(
+      `http://127.0.0.1:${port}/api/local-validate-secret`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          key: "OLLAMA_API_URL",
+          value: `http://127.0.0.1:${providerPort}/v1`,
+        }),
+      },
+    );
     assert.equal(response.status, 200);
     const body = await response.json();
     assert.equal(body.valid, true);
-    assert.equal(body.message, 'Ollama endpoint verified');
+    assert.equal(body.message, "Ollama endpoint verified");
   } finally {
     await app.close();
     await localApi.cleanup();
@@ -797,15 +845,15 @@ test('validates LM Studio style /v1 base URL via /api/local-validate-secret', as
   }
 });
 
-test('validates OLLAMA_API_URL via native /api/tags fallback', async () => {
+test("validates OLLAMA_API_URL via native /api/tags fallback", async () => {
   // Mock server that only responds to /api/tags (not /v1/models)
   const mockOllama = createServer((req, res) => {
-    if (req.url === '/api/tags') {
-      res.writeHead(200, { 'content-type': 'application/json' });
-      res.end(JSON.stringify({ models: [{ name: 'llama3.1:8b' }] }));
+    if (req.url === "/api/tags") {
+      res.writeHead(200, { "content-type": "application/json" });
+      res.end(JSON.stringify({ models: [{ name: "llama3.1:8b" }] }));
     } else {
       res.writeHead(404);
-      res.end('not found');
+      res.end("not found");
     }
   });
   const ollamaPort = await listen(mockOllama);
@@ -814,20 +862,26 @@ test('validates OLLAMA_API_URL via native /api/tags fallback', async () => {
   const app = await createLocalApiServer({
     port: 0,
     apiDir: localApi.apiDir,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
-    const response = await fetch(`http://127.0.0.1:${port}/api/local-validate-secret`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key: 'OLLAMA_API_URL', value: `http://127.0.0.1:${ollamaPort}` }),
-    });
+    const response = await fetch(
+      `http://127.0.0.1:${port}/api/local-validate-secret`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          key: "OLLAMA_API_URL",
+          value: `http://127.0.0.1:${ollamaPort}`,
+        }),
+      },
+    );
     assert.equal(response.status, 200);
     const body = await response.json();
     assert.equal(body.valid, true);
-    assert.equal(body.message, 'Ollama endpoint verified (native API)');
+    assert.equal(body.message, "Ollama endpoint verified (native API)");
   } finally {
     await app.close();
     await localApi.cleanup();
@@ -837,82 +891,97 @@ test('validates OLLAMA_API_URL via native /api/tags fallback', async () => {
   }
 });
 
-test('validates OLLAMA_MODEL stores model name', async () => {
+test("validates OLLAMA_MODEL stores model name", async () => {
   const localApi = await setupApiDir({});
   const app = await createLocalApiServer({
     port: 0,
     apiDir: localApi.apiDir,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
-    const response = await fetch(`http://127.0.0.1:${port}/api/local-validate-secret`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key: 'OLLAMA_MODEL', value: 'mistral:7b' }),
-    });
+    const response = await fetch(
+      `http://127.0.0.1:${port}/api/local-validate-secret`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: "OLLAMA_MODEL", value: "mistral:7b" }),
+      },
+    );
     assert.equal(response.status, 200);
     const body = await response.json();
     assert.equal(body.valid, true);
-    assert.equal(body.message, 'Model name stored');
+    assert.equal(body.message, "Model name stored");
   } finally {
     await app.close();
     await localApi.cleanup();
   }
 });
 
-test('rejects OLLAMA_API_URL with non-http protocol', async () => {
+test("rejects OLLAMA_API_URL with non-http protocol", async () => {
   const localApi = await setupApiDir({});
   const app = await createLocalApiServer({
     port: 0,
     apiDir: localApi.apiDir,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
-    const response = await fetch(`http://127.0.0.1:${port}/api/local-validate-secret`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key: 'OLLAMA_API_URL', value: 'ftp://127.0.0.1:11434' }),
-    });
+    const response = await fetch(
+      `http://127.0.0.1:${port}/api/local-validate-secret`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          key: "OLLAMA_API_URL",
+          value: "ftp://127.0.0.1:11434",
+        }),
+      },
+    );
     assert.equal(response.status, 422);
     const body = await response.json();
     assert.equal(body.valid, false);
-    assert.equal(body.message, 'Must be an http(s) URL');
+    assert.equal(body.message, "Must be an http(s) URL");
   } finally {
     await app.close();
     await localApi.cleanup();
   }
 });
 
-test('treats Cloudflare challenge 403 as soft-pass during secret validation', async () => {
+test("treats Cloudflare challenge 403 as soft-pass during secret validation", async () => {
   const localApi = await setupApiDir({});
   const restoreHttps = mockHttpsRequestOnce({
     statusCode: 403,
     headers: {
-      'content-type': 'text/html; charset=utf-8',
-      'cf-ray': 'abc123',
+      "content-type": "text/html; charset=utf-8",
+      "cf-ray": "abc123",
     },
-    body: '<html><title>Attention Required</title><body>Cloudflare Ray ID: 123</body></html>',
+    body: "<html><title>Attention Required</title><body>Cloudflare Ray ID: 123</body></html>",
   });
 
   const app = await createLocalApiServer({
     port: 0,
     apiDir: localApi.apiDir,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
-    const response = await postJsonViaHttp(`http://127.0.0.1:${port}/api/local-validate-secret`, {
-      key: 'GROQ_API_KEY',
-      value: 'dummy-key',
-    });
+    const response = await postJsonViaHttp(
+      `http://127.0.0.1:${port}/api/local-validate-secret`,
+      {
+        key: "GROQ_API_KEY",
+        value: "dummy-key",
+      },
+    );
     assert.equal(response.status, 200);
     assert.equal(response.json?.valid, true);
-    assert.equal(response.json?.message, 'Groq key stored (Cloudflare blocked verification)');
+    assert.equal(
+      response.json?.message,
+      "Groq key stored (Cloudflare blocked verification)",
+    );
   } finally {
     restoreHttps();
     await app.close();
@@ -920,32 +989,35 @@ test('treats Cloudflare challenge 403 as soft-pass during secret validation', as
   }
 });
 
-test('does not soft-pass provider auth 403 JSON responses even with cf-ray header', async () => {
+test("does not soft-pass provider auth 403 JSON responses even with cf-ray header", async () => {
   const localApi = await setupApiDir({});
   const restoreHttps = mockHttpsRequestOnce({
     statusCode: 403,
     headers: {
-      'content-type': 'application/json',
-      'cf-ray': 'abc123',
+      "content-type": "application/json",
+      "cf-ray": "abc123",
     },
-    body: JSON.stringify({ error: 'invalid api key' }),
+    body: JSON.stringify({ error: "invalid api key" }),
   });
 
   const app = await createLocalApiServer({
     port: 0,
     apiDir: localApi.apiDir,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
-    const response = await postJsonViaHttp(`http://127.0.0.1:${port}/api/local-validate-secret`, {
-      key: 'GROQ_API_KEY',
-      value: 'invalid-key',
-    });
+    const response = await postJsonViaHttp(
+      `http://127.0.0.1:${port}/api/local-validate-secret`,
+      {
+        key: "GROQ_API_KEY",
+        value: "invalid-key",
+      },
+    );
     assert.equal(response.status, 422);
     assert.equal(response.json?.valid, false);
-    assert.equal(response.json?.message, 'Groq rejected this key');
+    assert.equal(response.json?.message, "Groq rejected this key");
   } finally {
     restoreHttps();
     await app.close();
@@ -953,38 +1025,50 @@ test('does not soft-pass provider auth 403 JSON responses even with cf-ray heade
   }
 });
 
-test('auth-required behavior unchanged — rejects unauthenticated requests when token is set', async () => {
+test("auth-required behavior unchanged — rejects unauthenticated requests when token is set", async () => {
   const localApi = await setupApiDir({});
   const originalToken = process.env.LOCAL_API_TOKEN;
-  process.env.LOCAL_API_TOKEN = 'secret-token-123';
+  process.env.LOCAL_API_TOKEN = "secret-token-123";
 
   const app = await createLocalApiServer({
     port: 0,
     apiDir: localApi.apiDir,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
     // Request without auth header should be rejected
-    const response = await fetch(`http://127.0.0.1:${port}/api/local-env-update`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key: 'OLLAMA_API_URL', value: 'http://127.0.0.1:11434' }),
-    });
+    const response = await fetch(
+      `http://127.0.0.1:${port}/api/local-env-update`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          key: "OLLAMA_API_URL",
+          value: "http://127.0.0.1:11434",
+        }),
+      },
+    );
     assert.equal(response.status, 401);
     const body = await response.json();
-    assert.equal(body.error, 'Unauthorized');
+    assert.equal(body.error, "Unauthorized");
 
     // Request with correct auth header should succeed
-    const authedResponse = await fetch(`http://127.0.0.1:${port}/api/local-env-update`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer secret-token-123',
+    const authedResponse = await fetch(
+      `http://127.0.0.1:${port}/api/local-env-update`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer secret-token-123",
+        },
+        body: JSON.stringify({
+          key: "OLLAMA_API_URL",
+          value: "http://127.0.0.1:11434",
+        }),
       },
-      body: JSON.stringify({ key: 'OLLAMA_API_URL', value: 'http://127.0.0.1:11434' }),
-    });
+    );
     assert.equal(authedResponse.status, 200);
   } finally {
     if (originalToken !== undefined) {
@@ -998,11 +1082,10 @@ test('auth-required behavior unchanged — rejects unauthenticated requests when
   }
 });
 
-
-test('prefers Brotli compression for payloads larger than 1KB when supported by the client', async () => {
+test("prefers Brotli compression for payloads larger than 1KB when supported by the client", async () => {
   const remote = await setupRemoteServer();
   const localApi = await setupApiDir({
-    'compression-check.js': `
+    "compression-check.js": `
       export default async function handler() {
         const payload = { value: 'x'.repeat(3000) };
         return new Response(JSON.stringify(payload), {
@@ -1017,19 +1100,22 @@ test('prefers Brotli compression for payloads larger than 1KB when supported by 
     port: 0,
     apiDir: localApi.apiDir,
     remoteBase: remote.remoteBase,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
-    const response = await fetch(`http://127.0.0.1:${port}/api/compression-check`, {
-      headers: { 'Accept-Encoding': 'gzip, br' },
-    });
+    const response = await fetch(
+      `http://127.0.0.1:${port}/api/compression-check`,
+      {
+        headers: { "Accept-Encoding": "gzip, br" },
+      },
+    );
     assert.equal(response.status, 200);
-    assert.equal(response.headers.get('content-encoding'), 'br');
+    assert.equal(response.headers.get("content-encoding"), "br");
 
     const compressed = Buffer.from(await response.arrayBuffer());
-    const decompressed = brotliDecompressSync(compressed).toString('utf8');
+    const decompressed = brotliDecompressSync(compressed).toString("utf8");
     const body = JSON.parse(decompressed);
     assert.equal(body.value.length, 3000);
     assert.equal(remote.hits.length, 0);
@@ -1040,10 +1126,10 @@ test('prefers Brotli compression for payloads larger than 1KB when supported by 
   }
 });
 
-test('uses gzip compression when Brotli is unavailable but gzip is accepted', async () => {
+test("uses gzip compression when Brotli is unavailable but gzip is accepted", async () => {
   const remote = await setupRemoteServer();
   const localApi = await setupApiDir({
-    'compression-check.js': `
+    "compression-check.js": `
       export default async function handler() {
         const payload = { value: 'x'.repeat(3000) };
         return new Response(JSON.stringify(payload), {
@@ -1058,19 +1144,22 @@ test('uses gzip compression when Brotli is unavailable but gzip is accepted', as
     port: 0,
     apiDir: localApi.apiDir,
     remoteBase: remote.remoteBase,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
-    const response = await fetch(`http://127.0.0.1:${port}/api/compression-check`, {
-      headers: { 'Accept-Encoding': 'gzip' },
-    });
+    const response = await fetch(
+      `http://127.0.0.1:${port}/api/compression-check`,
+      {
+        headers: { "Accept-Encoding": "gzip" },
+      },
+    );
     assert.equal(response.status, 200);
-    assert.equal(response.headers.get('content-encoding'), 'gzip');
+    assert.equal(response.headers.get("content-encoding"), "gzip");
 
     const compressed = Buffer.from(await response.arrayBuffer());
-    const decompressed = gunzipSync(compressed).toString('utf8');
+    const decompressed = gunzipSync(compressed).toString("utf8");
     const body = JSON.parse(decompressed);
     assert.equal(body.value.length, 3000);
     assert.equal(remote.hits.length, 0);
@@ -1083,15 +1172,15 @@ test('uses gzip compression when Brotli is unavailable but gzip is accepted', as
 
 // ── Security hardening tests ────────────────────────────────────────────
 
-test('rejects unauthenticated requests to /api/local-status when token is set', async () => {
+test("rejects unauthenticated requests to /api/local-status when token is set", async () => {
   const localApi = await setupApiDir({});
   const originalToken = process.env.LOCAL_API_TOKEN;
-  process.env.LOCAL_API_TOKEN = 'security-test-token';
+  process.env.LOCAL_API_TOKEN = "security-test-token";
 
   const app = await createLocalApiServer({
     port: 0,
     apiDir: localApi.apiDir,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
@@ -1099,11 +1188,11 @@ test('rejects unauthenticated requests to /api/local-status when token is set', 
     const response = await fetch(`http://127.0.0.1:${port}/api/local-status`);
     assert.equal(response.status, 401);
     const body = await response.json();
-    assert.equal(body.error, 'Unauthorized');
+    assert.equal(body.error, "Unauthorized");
 
     // With token should succeed
     const authed = await fetch(`http://127.0.0.1:${port}/api/local-status`, {
-      headers: { 'Authorization': 'Bearer security-test-token' },
+      headers: { Authorization: "Bearer security-test-token" },
     });
     assert.equal(authed.status, 200);
   } finally {
@@ -1117,20 +1206,22 @@ test('rejects unauthenticated requests to /api/local-status when token is set', 
   }
 });
 
-test('rejects unauthenticated requests to /api/local-traffic-log when token is set', async () => {
+test("rejects unauthenticated requests to /api/local-traffic-log when token is set", async () => {
   const localApi = await setupApiDir({});
   const originalToken = process.env.LOCAL_API_TOKEN;
-  process.env.LOCAL_API_TOKEN = 'security-test-token';
+  process.env.LOCAL_API_TOKEN = "security-test-token";
 
   const app = await createLocalApiServer({
     port: 0,
     apiDir: localApi.apiDir,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
-    const response = await fetch(`http://127.0.0.1:${port}/api/local-traffic-log`);
+    const response = await fetch(
+      `http://127.0.0.1:${port}/api/local-traffic-log`,
+    );
     assert.equal(response.status, 401);
   } finally {
     if (originalToken !== undefined) {
@@ -1143,20 +1234,22 @@ test('rejects unauthenticated requests to /api/local-traffic-log when token is s
   }
 });
 
-test('rejects unauthenticated requests to /api/local-debug-toggle when token is set', async () => {
+test("rejects unauthenticated requests to /api/local-debug-toggle when token is set", async () => {
   const localApi = await setupApiDir({});
   const originalToken = process.env.LOCAL_API_TOKEN;
-  process.env.LOCAL_API_TOKEN = 'security-test-token';
+  process.env.LOCAL_API_TOKEN = "security-test-token";
 
   const app = await createLocalApiServer({
     port: 0,
     apiDir: localApi.apiDir,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
-    const response = await fetch(`http://127.0.0.1:${port}/api/local-debug-toggle`);
+    const response = await fetch(
+      `http://127.0.0.1:${port}/api/local-debug-toggle`,
+    );
     assert.equal(response.status, 401);
   } finally {
     if (originalToken !== undefined) {
@@ -1169,20 +1262,22 @@ test('rejects unauthenticated requests to /api/local-debug-toggle when token is 
   }
 });
 
-test('rejects unauthenticated requests to /api/rss-proxy when token is set', async () => {
+test("rejects unauthenticated requests to /api/rss-proxy when token is set", async () => {
   const localApi = await setupApiDir({});
   const originalToken = process.env.LOCAL_API_TOKEN;
-  process.env.LOCAL_API_TOKEN = 'security-test-token';
+  process.env.LOCAL_API_TOKEN = "security-test-token";
 
   const app = await createLocalApiServer({
     port: 0,
     apiDir: localApi.apiDir,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
-    const response = await fetch(`http://127.0.0.1:${port}/api/rss-proxy?url=https://example.com/rss`);
+    const response = await fetch(
+      `http://127.0.0.1:${port}/api/rss-proxy?url=https://example.com/rss`,
+    );
     assert.equal(response.status, 401);
   } finally {
     if (originalToken !== undefined) {
@@ -1195,15 +1290,15 @@ test('rejects unauthenticated requests to /api/rss-proxy when token is set', asy
   }
 });
 
-test('allows unauthenticated requests to /api/service-status (health check exempt)', async () => {
+test("allows unauthenticated requests to /api/service-status (health check exempt)", async () => {
   const localApi = await setupApiDir({});
   const originalToken = process.env.LOCAL_API_TOKEN;
-  process.env.LOCAL_API_TOKEN = 'security-test-token';
+  process.env.LOCAL_API_TOKEN = "security-test-token";
 
   const app = await createLocalApiServer({
     port: 0,
     apiDir: localApi.apiDir,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
@@ -1223,48 +1318,58 @@ test('allows unauthenticated requests to /api/service-status (health check exemp
   }
 });
 
-test('rss-proxy blocks requests to localhost (SSRF protection)', async () => {
+test("rss-proxy blocks requests to localhost (SSRF protection)", async () => {
   const localApi = await setupApiDir({});
 
   const app = await createLocalApiServer({
     port: 0,
     apiDir: localApi.apiDir,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
-    const response = await fetch(`http://127.0.0.1:${port}/api/rss-proxy?url=http://127.0.0.1:3000`);
+    const response = await fetch(
+      `http://127.0.0.1:${port}/api/rss-proxy?url=http://127.0.0.1:3000`,
+    );
     assert.equal(response.status, 403);
     const body = await response.json();
-    assert.ok(body.error.includes('private') || body.error.includes('localhost'));
+    assert.ok(
+      body.error.includes("private") || body.error.includes("localhost"),
+    );
   } finally {
     await app.close();
     await localApi.cleanup();
   }
 });
 
-test('rss-proxy blocks requests to private IP ranges (SSRF protection)', async () => {
+test("rss-proxy blocks requests to private IP ranges (SSRF protection)", async () => {
   const localApi = await setupApiDir({});
 
   const app = await createLocalApiServer({
     port: 0,
     apiDir: localApi.apiDir,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
     // Test 192.168.x.x range
-    const response1 = await fetch(`http://127.0.0.1:${port}/api/rss-proxy?url=http://192.168.1.1/`);
+    const response1 = await fetch(
+      `http://127.0.0.1:${port}/api/rss-proxy?url=http://192.168.1.1/`,
+    );
     assert.equal(response1.status, 403);
 
     // Test 10.x.x.x range
-    const response2 = await fetch(`http://127.0.0.1:${port}/api/rss-proxy?url=http://10.0.0.1/`);
+    const response2 = await fetch(
+      `http://127.0.0.1:${port}/api/rss-proxy?url=http://10.0.0.1/`,
+    );
     assert.equal(response2.status, 403);
 
     // Test 172.16-31.x.x range
-    const response3 = await fetch(`http://127.0.0.1:${port}/api/rss-proxy?url=http://172.16.0.1/`);
+    const response3 = await fetch(
+      `http://127.0.0.1:${port}/api/rss-proxy?url=http://172.16.0.1/`,
+    );
     assert.equal(response3.status, 403);
   } finally {
     await app.close();
@@ -1272,51 +1377,55 @@ test('rss-proxy blocks requests to private IP ranges (SSRF protection)', async (
   }
 });
 
-test('rss-proxy blocks non-http protocols (SSRF protection)', async () => {
+test("rss-proxy blocks non-http protocols (SSRF protection)", async () => {
   const localApi = await setupApiDir({});
 
   const app = await createLocalApiServer({
     port: 0,
     apiDir: localApi.apiDir,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
-    const response = await fetch(`http://127.0.0.1:${port}/api/rss-proxy?url=file:///etc/passwd`);
+    const response = await fetch(
+      `http://127.0.0.1:${port}/api/rss-proxy?url=file:///etc/passwd`,
+    );
     assert.equal(response.status, 403);
     const body = await response.json();
-    assert.ok(body.error.includes('http'));
+    assert.ok(body.error.includes("http"));
   } finally {
     await app.close();
     await localApi.cleanup();
   }
 });
 
-test('rss-proxy blocks URLs with credentials (SSRF protection)', async () => {
+test("rss-proxy blocks URLs with credentials (SSRF protection)", async () => {
   const localApi = await setupApiDir({});
 
   const app = await createLocalApiServer({
     port: 0,
     apiDir: localApi.apiDir,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
-    const response = await fetch(`http://127.0.0.1:${port}/api/rss-proxy?url=http://user:pass@example.com/rss`);
+    const response = await fetch(
+      `http://127.0.0.1:${port}/api/rss-proxy?url=http://user:pass@example.com/rss`,
+    );
     assert.equal(response.status, 403);
     const body = await response.json();
-    assert.ok(body.error.includes('credentials'));
+    assert.ok(body.error.includes("credentials"));
   } finally {
     await app.close();
     await localApi.cleanup();
   }
 });
 
-test('traffic log strips query strings from entries to protect privacy', async () => {
+test("traffic log strips query strings from entries to protect privacy", async () => {
   const localApi = await setupApiDir({
-    'test-endpoint.js': `
+    "test-endpoint.js": `
       export default async function handler() {
         return new Response(JSON.stringify({ ok: true }), {
           status: 200,
@@ -1329,42 +1438,49 @@ test('traffic log strips query strings from entries to protect privacy', async (
   const app = await createLocalApiServer({
     port: 0,
     apiDir: localApi.apiDir,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
   try {
     // Make a request that will be recorded in the traffic log
-    await fetch(`http://127.0.0.1:${port}/api/test-endpoint?secret=value&key=data`);
+    await fetch(
+      `http://127.0.0.1:${port}/api/test-endpoint?secret=value&key=data`,
+    );
 
     // Retrieve the traffic log
-    const logResponse = await fetch(`http://127.0.0.1:${port}/api/local-traffic-log`);
+    const logResponse = await fetch(
+      `http://127.0.0.1:${port}/api/local-traffic-log`,
+    );
     assert.equal(logResponse.status, 200);
     const logBody = await logResponse.json();
 
     // Verify query strings are stripped
-    const entry = logBody.entries.find(e => e.path.includes('test-endpoint'));
-    assert.ok(entry, 'Traffic log should contain the test-endpoint entry');
-    assert.equal(entry.path, '/api/test-endpoint');
-    assert.ok(!entry.path.includes('secret='), 'Query string should be stripped from traffic log');
+    const entry = logBody.entries.find((e) => e.path.includes("test-endpoint"));
+    assert.ok(entry, "Traffic log should contain the test-endpoint entry");
+    assert.equal(entry.path, "/api/test-endpoint");
+    assert.ok(
+      !entry.path.includes("secret="),
+      "Query string should be stripped from traffic log",
+    );
   } finally {
     await app.close();
     await localApi.cleanup();
   }
 });
 
-test('service-status reports bound fallback port after EADDRINUSE recovery', async () => {
+test("service-status reports bound fallback port after EADDRINUSE recovery", async () => {
   const blocker = createServer((_req, res) => {
-    res.writeHead(200, { 'content-type': 'text/plain' });
-    res.end('occupied');
+    res.writeHead(200, { "content-type": "text/plain" });
+    res.end("occupied");
   });
-  await listen(blocker, '127.0.0.1', 46123);
+  await listen(blocker, "127.0.0.1", 46123);
 
   const localApi = await setupApiDir({});
   const app = await createLocalApiServer({
     port: 46123,
     apiDir: localApi.apiDir,
-    logger: { log() { }, warn() { }, error() { } },
+    logger: { log() {}, warn() {}, error() {} },
   });
   const { port } = await app.start();
 
@@ -1376,7 +1492,9 @@ test('service-status reports bound fallback port after EADDRINUSE recovery', asy
     const body = await response.json();
 
     assert.equal(body.local.port, port);
-    const localService = body.services.find((service) => service.id === 'local-api');
+    const localService = body.services.find(
+      (service) => service.id === "local-api",
+    );
     assert.equal(localService.description, `Running on 127.0.0.1:${port}`);
   } finally {
     await app.close();

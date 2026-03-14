@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
-import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { writeFileSync, mkdirSync, existsSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = join(__dirname, 'data');
-const RAW_PATH = join(DATA_DIR, 'osm-military-raw.json');
-const PROCESSED_PATH = join(DATA_DIR, 'osm-military-processed.json');
+const DATA_DIR = join(__dirname, "data");
+const RAW_PATH = join(DATA_DIR, "osm-military-raw.json");
+const PROCESSED_PATH = join(DATA_DIR, "osm-military-processed.json");
 
-const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
+const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
 const OVERPASS_QUERY = `
 [out:json][timeout:300];
 (
@@ -30,7 +30,7 @@ function ensureDataDir() {
 }
 
 async function fetchOverpassData() {
-  console.log('Querying Overpass API for military features with names...');
+  console.log("Querying Overpass API for military features with names...");
   console.log(`Query:\n${OVERPASS_QUERY}\n`);
 
   const controller = new AbortController();
@@ -38,8 +38,8 @@ async function fetchOverpassData() {
 
   try {
     const res = await fetch(OVERPASS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: `data=${encodeURIComponent(OVERPASS_QUERY)}`,
       signal: controller.signal,
     });
@@ -48,16 +48,18 @@ async function fetchOverpassData() {
 
     if (!res.ok) {
       const text = await res.text();
-      throw new Error(`Overpass API returned ${res.status}: ${text.slice(0, 500)}`);
+      throw new Error(
+        `Overpass API returned ${res.status}: ${text.slice(0, 500)}`,
+      );
     }
 
-    console.log('Response received, reading body...');
+    console.log("Response received, reading body...");
     const json = await res.json();
     return json;
   } catch (err) {
     clearTimeout(timeout);
-    if (err.name === 'AbortError') {
-      throw new Error('Overpass API request timed out after 5 minutes');
+    if (err.name === "AbortError") {
+      throw new Error("Overpass API request timed out after 5 minutes");
     }
     throw err;
   }
@@ -77,12 +79,12 @@ function processFeatures(raw) {
     const typePrefix = el.type; // node, way, relation
     const osmId = `${typePrefix}/${el.id}`;
 
-    const name = tags['name:en'] || tags.name || '';
-    const country = tags['addr:country'] || '';
-    const kind = tags.military || '';
-    const operator = tags.operator || '';
-    const description = tags.description || '';
-    const militaryBranch = tags.military_branch || '';
+    const name = tags["name:en"] || tags.name || "";
+    const country = tags["addr:country"] || "";
+    const kind = tags.military || "";
+    const operator = tags.operator || "";
+    const description = tags.description || "";
+    const militaryBranch = tags.military_branch || "";
 
     return {
       osm_id: osmId,
@@ -116,7 +118,7 @@ function printSummary(features) {
   for (const f of features) {
     kindCounts[f.kind] = (kindCounts[f.kind] || 0) + 1;
   }
-  console.log('\nBy military tag value:');
+  console.log("\nBy military tag value:");
   const sorted = Object.entries(kindCounts).sort((a, b) => b[1] - a[1]);
   for (const [kind, count] of sorted) {
     console.log(`  ${kind}: ${count}`);
@@ -127,9 +129,11 @@ function printSummary(features) {
   console.log(`\nFeatures with country tag: ${withCountry}`);
 
   // Sample entries
-  console.log('\nSample entries (first 5):');
+  console.log("\nSample entries (first 5):");
   for (const f of features.slice(0, 5)) {
-    console.log(`  ${f.osm_id} | ${f.name} | ${f.kind} | ${f.lat?.toFixed(4)},${f.lon?.toFixed(4)} | ${f.country || '(no country)'}`);
+    console.log(
+      `  ${f.osm_id} | ${f.name} | ${f.kind} | ${f.lat?.toFixed(4)},${f.lon?.toFixed(4)} | ${f.country || "(no country)"}`,
+    );
   }
 }
 
@@ -142,7 +146,7 @@ async function main() {
   // Save raw
   console.log(`Saving raw response to ${RAW_PATH}...`);
   writeFileSync(RAW_PATH, JSON.stringify(raw, null, 2));
-  console.log('Raw data saved.');
+  console.log("Raw data saved.");
 
   // Process
   const features = processFeatures(raw);
@@ -150,7 +154,7 @@ async function main() {
   // Save processed
   console.log(`Saving processed data to ${PROCESSED_PATH}...`);
   writeFileSync(PROCESSED_PATH, JSON.stringify(features, null, 2));
-  console.log('Processed data saved.');
+  console.log("Processed data saved.");
 
   printSummary(features);
 
@@ -159,6 +163,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error('Fatal error:', err.message);
+  console.error("Fatal error:", err.message);
   process.exit(1);
 });

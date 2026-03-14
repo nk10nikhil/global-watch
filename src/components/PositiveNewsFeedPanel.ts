@@ -1,25 +1,33 @@
-import { Panel } from './Panel';
-import type { NewsItem } from '@/types';
-import type { HappyContentCategory } from '@/services/positive-classifier';
-import { HAPPY_CATEGORY_ALL, HAPPY_CATEGORY_LABELS } from '@/services/positive-classifier';
-import { shareHappyCard } from '@/services/happy-share-renderer';
-import { formatTime } from '@/utils';
-import { escapeHtml, sanitizeUrl } from '@/utils/sanitize';
-import { t } from '@/services/i18n';
+import { Panel } from "./Panel";
+import type { NewsItem } from "@/types";
+import type { HappyContentCategory } from "@/services/positive-classifier";
+import {
+  HAPPY_CATEGORY_ALL,
+  HAPPY_CATEGORY_LABELS,
+} from "@/services/positive-classifier";
+import { shareHappyCard } from "@/services/happy-share-renderer";
+import { formatTime } from "@/utils";
+import { escapeHtml, sanitizeUrl } from "@/utils/sanitize";
+import { t } from "@/services/i18n";
 
 /**
  * PositiveNewsFeedPanel -- scrolling positive news feed with category filter bar
  * and rich image cards. Primary visible panel for the happy variant.
  */
 export class PositiveNewsFeedPanel extends Panel {
-  private activeFilter: HappyContentCategory | 'all' = 'all';
+  private activeFilter: HappyContentCategory | "all" = "all";
   private allItems: NewsItem[] = [];
   private filteredItems: NewsItem[] = [];
   private filterButtons: Map<string, HTMLButtonElement> = new Map();
   private filterClickHandlers: Map<HTMLButtonElement, () => void> = new Map();
 
   constructor() {
-    super({ id: 'positive-feed', title: 'Good News Feed', showCount: true, trackActivity: true });
+    super({
+      id: "positive-feed",
+      title: "Good News Feed",
+      showCount: true,
+      trackActivity: true,
+    });
     this.createFilterBar();
   }
 
@@ -28,28 +36,28 @@ export class PositiveNewsFeedPanel extends Panel {
    * Inserted between panel header and content area.
    */
   private createFilterBar(): void {
-    const filterBar = document.createElement('div');
-    filterBar.className = 'positive-feed-filters';
+    const filterBar = document.createElement("div");
+    filterBar.className = "positive-feed-filters";
 
     // "All" button (active by default)
-    const allBtn = document.createElement('button');
-    allBtn.className = 'positive-filter-btn active';
-    allBtn.textContent = 'All';
-    allBtn.dataset.category = 'all';
-    const allHandler = () => this.setFilter('all');
-    allBtn.addEventListener('click', allHandler);
+    const allBtn = document.createElement("button");
+    allBtn.className = "positive-filter-btn active";
+    allBtn.textContent = "All";
+    allBtn.dataset.category = "all";
+    const allHandler = () => this.setFilter("all");
+    allBtn.addEventListener("click", allHandler);
     this.filterClickHandlers.set(allBtn, allHandler);
-    this.filterButtons.set('all', allBtn);
+    this.filterButtons.set("all", allBtn);
     filterBar.appendChild(allBtn);
 
     // Per-category buttons
     for (const category of HAPPY_CATEGORY_ALL) {
-      const btn = document.createElement('button');
-      btn.className = 'positive-filter-btn';
+      const btn = document.createElement("button");
+      btn.className = "positive-filter-btn";
       btn.textContent = HAPPY_CATEGORY_LABELS[category];
       btn.dataset.category = category;
       const handler = () => this.setFilter(category);
-      btn.addEventListener('click', handler);
+      btn.addEventListener("click", handler);
       this.filterClickHandlers.set(btn, handler);
       this.filterButtons.set(category, btn);
       filterBar.appendChild(btn);
@@ -62,15 +70,15 @@ export class PositiveNewsFeedPanel extends Panel {
   /**
    * Update the active filter and re-render.
    */
-  private setFilter(filter: HappyContentCategory | 'all'): void {
+  private setFilter(filter: HappyContentCategory | "all"): void {
     this.activeFilter = filter;
 
     // Update button active states
     for (const [key, btn] of this.filterButtons) {
       if (key === filter) {
-        btn.classList.add('active');
+        btn.classList.add("active");
       } else {
-        btn.classList.remove('active');
+        btn.classList.remove("active");
       }
     }
 
@@ -91,9 +99,12 @@ export class PositiveNewsFeedPanel extends Panel {
    * Filter items by current active filter and render cards.
    */
   private applyFilter(): void {
-    const filtered = this.activeFilter === 'all'
-      ? this.allItems
-      : this.allItems.filter(item => item.happyCategory === this.activeFilter);
+    const filtered =
+      this.activeFilter === "all"
+        ? this.allItems
+        : this.allItems.filter(
+            (item) => item.happyCategory === this.activeFilter,
+          );
 
     this.renderCards(filtered);
   }
@@ -106,15 +117,17 @@ export class PositiveNewsFeedPanel extends Panel {
     this.filteredItems = items;
 
     if (items.length === 0) {
-      this.content.innerHTML = `<div class="positive-feed-empty">${escapeHtml(t('components.positiveNewsFeed.noStories'))}</div>`;
+      this.content.innerHTML = `<div class="positive-feed-empty">${escapeHtml(t("components.positiveNewsFeed.noStories"))}</div>`;
       return;
     }
 
-    this.content.innerHTML = items.map((item, idx) => this.renderCard(item, idx)).join('');
+    this.content.innerHTML = items
+      .map((item, idx) => this.renderCard(item, idx))
+      .join("");
 
     // Delegated click handler for share buttons (remove first to avoid stacking)
-    this.content.removeEventListener('click', this.handleShareClick);
-    this.content.addEventListener('click', this.handleShareClick);
+    this.content.removeEventListener("click", this.handleShareClick);
+    this.content.addEventListener("click", this.handleShareClick);
   }
 
   /**
@@ -122,13 +135,15 @@ export class PositiveNewsFeedPanel extends Panel {
    */
   private handleShareClick = (e: Event): void => {
     const target = e.target as HTMLElement;
-    const shareBtn = target.closest('.positive-card-share') as HTMLButtonElement | null;
+    const shareBtn = target.closest(
+      ".positive-card-share",
+    ) as HTMLButtonElement | null;
     if (!shareBtn) return;
 
     e.preventDefault();
     e.stopPropagation();
 
-    const idx = parseInt(shareBtn.dataset.idx ?? '', 10);
+    const idx = parseInt(shareBtn.dataset.idx ?? "", 10);
     const item = this.filteredItems[idx];
     if (!item) return;
 
@@ -136,8 +151,8 @@ export class PositiveNewsFeedPanel extends Panel {
     shareHappyCard(item).catch(() => {});
 
     // Brief visual feedback
-    shareBtn.classList.add('shared');
-    setTimeout(() => shareBtn.classList.remove('shared'), 1500);
+    shareBtn.classList.add("shared");
+    setTimeout(() => shareBtn.classList.remove("shared"), 1500);
   };
 
   /**
@@ -148,14 +163,16 @@ export class PositiveNewsFeedPanel extends Panel {
   private renderCard(item: NewsItem, idx: number): string {
     const imageHtml = item.imageUrl
       ? `<div class="positive-card-image"><img src="${sanitizeUrl(item.imageUrl)}" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>`
-      : '';
+      : "";
 
-    const categoryLabel = item.happyCategory ? HAPPY_CATEGORY_LABELS[item.happyCategory] : '';
+    const categoryLabel = item.happyCategory
+      ? HAPPY_CATEGORY_LABELS[item.happyCategory]
+      : "";
     const categoryBadgeHtml = item.happyCategory
       ? `<span class="positive-card-category cat-${escapeHtml(item.happyCategory)}">${escapeHtml(categoryLabel)}</span>`
-      : '';
+      : "";
 
-    return `<a class="positive-card" href="${sanitizeUrl(item.link)}" target="_blank" rel="noopener" data-category="${escapeHtml(item.happyCategory || '')}">
+    return `<a class="positive-card" href="${sanitizeUrl(item.link)}" target="_blank" rel="noopener" data-category="${escapeHtml(item.happyCategory || "")}">
   ${imageHtml}
   <div class="positive-card-body">
     <div class="positive-card-meta">
@@ -180,7 +197,7 @@ export class PositiveNewsFeedPanel extends Panel {
    */
   public destroy(): void {
     for (const [btn, handler] of this.filterClickHandlers) {
-      btn.removeEventListener('click', handler);
+      btn.removeEventListener("click", handler);
     }
     this.filterClickHandlers.clear();
     this.filterButtons.clear();

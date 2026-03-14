@@ -1,7 +1,7 @@
-import { Panel } from './Panel';
-import type { NewsItem } from '@/types';
-import { escapeHtml, sanitizeUrl } from '@/utils/sanitize';
-import { t } from '@/services/i18n';
+import { Panel } from "./Panel";
+import type { NewsItem } from "@/types";
+import { escapeHtml, sanitizeUrl } from "@/utils/sanitize";
+import { t } from "@/services/i18n";
 
 /**
  * BreakthroughsTickerPanel -- Horizontally scrolling ticker of science breakthroughs.
@@ -15,7 +15,11 @@ export class BreakthroughsTickerPanel extends Panel {
   private tickerTrack: HTMLElement | null = null;
 
   constructor() {
-    super({ id: 'breakthroughs', title: 'Breakthroughs', trackActivity: false });
+    super({
+      id: "breakthroughs",
+      title: "Breakthroughs",
+      trackActivity: false,
+    });
     this.createTickerDOM();
   }
 
@@ -23,17 +27,17 @@ export class BreakthroughsTickerPanel extends Panel {
    * Create the ticker wrapper and track elements.
    */
   private createTickerDOM(): void {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'breakthroughs-ticker-wrapper';
+    const wrapper = document.createElement("div");
+    wrapper.className = "breakthroughs-ticker-wrapper";
 
-    const track = document.createElement('div');
-    track.className = 'breakthroughs-ticker-track';
+    const track = document.createElement("div");
+    track.className = "breakthroughs-ticker-track";
 
     wrapper.appendChild(track);
     this.tickerTrack = track;
 
     // Clear loading state and append the ticker
-    this.content.innerHTML = '';
+    this.content.innerHTML = "";
     this.content.appendChild(wrapper);
   }
 
@@ -45,8 +49,7 @@ export class BreakthroughsTickerPanel extends Panel {
     if (!this.tickerTrack) return;
 
     if (items.length === 0) {
-      this.tickerTrack.innerHTML =
-        `<span class="ticker-item ticker-placeholder">${t('components.breakthroughsTicker.noData')}</span>`;
+      this.tickerTrack.innerHTML = `<span class="ticker-item ticker-placeholder">${t("components.breakthroughsTicker.noData")}</span>`;
       return;
     }
 
@@ -59,7 +62,7 @@ export class BreakthroughsTickerPanel extends Panel {
           `<span class="ticker-item-title">${escapeHtml(item.title)}</span>` +
           `</a>`,
       )
-      .join('');
+      .join("");
 
     // Double the content for seamless infinite scroll
     this.tickerTrack.innerHTML = itemsHtml + itemsHtml;
@@ -70,7 +73,7 @@ export class BreakthroughsTickerPanel extends Panel {
    */
   public destroy(): void {
     if (this.tickerTrack) {
-      this.tickerTrack.style.animationPlayState = 'paused';
+      this.tickerTrack.style.animationPlayState = "paused";
       this.tickerTrack = null;
     }
     super.destroy();

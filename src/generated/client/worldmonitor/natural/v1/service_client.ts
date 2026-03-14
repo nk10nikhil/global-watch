@@ -109,11 +109,16 @@ export class NaturalServiceClient {
     this.defaultHeaders = { ...options?.defaultHeaders };
   }
 
-  async listNaturalEvents(req: ListNaturalEventsRequest, options?: NaturalServiceCallOptions): Promise<ListNaturalEventsResponse> {
+  async listNaturalEvents(
+    req: ListNaturalEventsRequest,
+    options?: NaturalServiceCallOptions,
+  ): Promise<ListNaturalEventsResponse> {
     let path = "/api/natural/v1/list-natural-events";
     const params = new URLSearchParams();
-    if (req.days != null && req.days !== 0) params.set("days", String(req.days));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.days != null && req.days !== 0)
+      params.set("days", String(req.days));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -131,7 +136,7 @@ export class NaturalServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as ListNaturalEventsResponse;
+    return (await resp.json()) as ListNaturalEventsResponse;
   }
 
   private async handleError(resp: Response): Promise<never> {
@@ -146,7 +151,10 @@ export class NaturalServiceClient {
         if (e instanceof ValidationError) throw e;
       }
     }
-    throw new ApiError(resp.status, `Request failed with status ${resp.status}`, body);
+    throw new ApiError(
+      resp.status,
+      `Request failed with status ${resp.status}`,
+      body,
+    );
   }
 }
-

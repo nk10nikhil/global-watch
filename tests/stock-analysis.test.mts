@@ -1,8 +1,8 @@
-import assert from 'node:assert/strict';
-import { afterEach, describe, it } from 'node:test';
+import assert from "node:assert/strict";
+import { afterEach, describe, it } from "node:test";
 
-import { analyzeStock } from '../server/worldmonitor/market/v1/analyze-stock.ts';
-import { MarketServiceClient } from '../src/generated/client/worldmonitor/market/v1/service_client.ts';
+import { analyzeStock } from "../server/worldmonitor/market/v1/analyze-stock.ts";
+import { MarketServiceClient } from "../src/generated/client/worldmonitor/market/v1/service_client.ts";
 
 const originalFetch = globalThis.fetch;
 
@@ -11,19 +11,28 @@ const mockChartPayload = {
     result: [
       {
         meta: {
-          currency: 'USD',
+          currency: "USD",
           regularMarketPrice: 132,
           previousClose: 131,
         },
-        timestamp: Array.from({ length: 80 }, (_, index) => 1_700_000_000 + (index * 86_400)),
+        timestamp: Array.from(
+          { length: 80 },
+          (_, index) => 1_700_000_000 + index * 86_400,
+        ),
         indicators: {
           quote: [
             {
-              open: Array.from({ length: 80 }, (_, index) => 100 + (index * 0.4)),
-              high: Array.from({ length: 80 }, (_, index) => 101 + (index * 0.4)),
-              low: Array.from({ length: 80 }, (_, index) => 99 + (index * 0.4)),
-              close: Array.from({ length: 80 }, (_, index) => 100 + (index * 0.4)),
-              volume: Array.from({ length: 80 }, (_, index) => 1_000_000 + (index * 5_000)),
+              open: Array.from({ length: 80 }, (_, index) => 100 + index * 0.4),
+              high: Array.from({ length: 80 }, (_, index) => 101 + index * 0.4),
+              low: Array.from({ length: 80 }, (_, index) => 99 + index * 0.4),
+              close: Array.from(
+                { length: 80 },
+                (_, index) => 100 + index * 0.4,
+              ),
+              volume: Array.from(
+                { length: 80 },
+                (_, index) => 1_000_000 + index * 5_000,
+              ),
             },
           ],
         },
@@ -58,32 +67,37 @@ afterEach(() => {
   delete process.env.OLLAMA_MODEL;
 });
 
-describe('analyzeStock handler', () => {
-  it('builds a structured fallback report from Yahoo history and RSS headlines', async () => {
+describe("analyzeStock handler", () => {
+  it("builds a structured fallback report from Yahoo history and RSS headlines", async () => {
     globalThis.fetch = (async (input: RequestInfo | URL) => {
-      const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
-      if (url.includes('query1.finance.yahoo.com')) {
+      const url =
+        typeof input === "string"
+          ? input
+          : input instanceof URL
+            ? input.toString()
+            : input.url;
+      if (url.includes("query1.finance.yahoo.com")) {
         return new Response(JSON.stringify(mockChartPayload), { status: 200 });
       }
-      if (url.includes('news.google.com')) {
+      if (url.includes("news.google.com")) {
         return new Response(mockNewsXml, { status: 200 });
       }
       throw new Error(`Unexpected URL: ${url}`);
     }) as typeof fetch;
 
     const response = await analyzeStock({} as never, {
-      symbol: 'AAPL',
-      name: 'Apple',
+      symbol: "AAPL",
+      name: "Apple",
       includeNews: true,
     });
 
     assert.equal(response.available, true);
-    assert.equal(response.symbol, 'AAPL');
-    assert.equal(response.name, 'Apple');
-    assert.equal(response.currency, 'USD');
+    assert.equal(response.symbol, "AAPL");
+    assert.equal(response.name, "Apple");
+    assert.equal(response.currency, "USD");
     assert.ok(response.signal.length > 0);
     assert.ok(response.signalScore > 0);
-    assert.equal(response.provider, 'rules');
+    assert.equal(response.provider, "rules");
     assert.equal(response.fallback, true);
     assert.equal(response.newsSearched, true);
     assert.match(response.analysisId, /^stock:/);
@@ -96,16 +110,27 @@ describe('analyzeStock handler', () => {
   });
 });
 
-describe('MarketServiceClient analyzeStock', () => {
-  it('serializes the analyze-stock query parameters using generated names', async () => {
-    let requestedUrl = '';
+describe("MarketServiceClient analyzeStock", () => {
+  it("serializes the analyze-stock query parameters using generated names", async () => {
+    let requestedUrl = "";
     globalThis.fetch = (async (input: RequestInfo | URL) => {
-      requestedUrl = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
-      return new Response(JSON.stringify({ available: false }), { status: 200 });
+      requestedUrl =
+        typeof input === "string"
+          ? input
+          : input instanceof URL
+            ? input.toString()
+            : input.url;
+      return new Response(JSON.stringify({ available: false }), {
+        status: 200,
+      });
     }) as typeof fetch;
 
-    const client = new MarketServiceClient('');
-    await client.analyzeStock({ symbol: 'MSFT', name: 'Microsoft', includeNews: true });
+    const client = new MarketServiceClient("");
+    await client.analyzeStock({
+      symbol: "MSFT",
+      name: "Microsoft",
+      includeNews: true,
+    });
 
     assert.match(requestedUrl, /\/api\/market\/v1\/analyze-stock\?/);
     assert.match(requestedUrl, /symbol=MSFT/);

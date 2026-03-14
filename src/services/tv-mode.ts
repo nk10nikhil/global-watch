@@ -4,8 +4,8 @@
  * triggers CSS rules scoped under `[data-tv-mode]` in happy-theme.css.
  */
 
-const TV_INTERVAL_KEY = 'tv-mode-interval';
-const MIN_INTERVAL = 30_000;  // 30 seconds
+const TV_INTERVAL_KEY = "tv-mode-interval";
+const MIN_INTERVAL = 30_000; // 30 seconds
 const MAX_INTERVAL = 120_000; // 2 minutes
 const DEFAULT_INTERVAL = 60_000; // 1 minute
 
@@ -33,7 +33,7 @@ export class TvModeController {
     const stored = localStorage.getItem(TV_INTERVAL_KEY);
     const parsed = stored ? parseInt(stored, 10) : NaN;
     this.intervalMs = clampInterval(
-      Number.isFinite(parsed) ? parsed : (opts.intervalMs ?? DEFAULT_INTERVAL)
+      Number.isFinite(parsed) ? parsed : (opts.intervalMs ?? DEFAULT_INTERVAL),
     );
   }
 
@@ -43,14 +43,24 @@ export class TvModeController {
 
   enter(): void {
     // Set data attribute — triggers all CSS overrides
-    document.documentElement.dataset.tvMode = 'true';
+    document.documentElement.dataset.tvMode = "true";
 
     // Request fullscreen
-    const el = document.documentElement as HTMLElement & { webkitRequestFullscreen?: () => void };
+    const el = document.documentElement as HTMLElement & {
+      webkitRequestFullscreen?: () => void;
+    };
     if (el.requestFullscreen) {
-      try { void el.requestFullscreen()?.catch(() => {}); } catch { /* noop */ }
+      try {
+        void el.requestFullscreen()?.catch(() => {});
+      } catch {
+        /* noop */
+      }
     } else if (el.webkitRequestFullscreen) {
-      try { el.webkitRequestFullscreen(); } catch { /* noop */ }
+      try {
+        el.webkitRequestFullscreen();
+      } catch {
+        /* noop */
+      }
     }
 
     // Show first panel
@@ -62,12 +72,12 @@ export class TvModeController {
 
     // Listen for Escape key
     this.boundKeyHandler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         e.preventDefault();
         this.exit();
       }
     };
-    document.addEventListener('keydown', this.boundKeyHandler);
+    document.addEventListener("keydown", this.boundKeyHandler);
   }
 
   exit(): void {
@@ -76,7 +86,11 @@ export class TvModeController {
 
     // Exit fullscreen if active
     if (document.fullscreenElement) {
-      try { void document.exitFullscreen()?.catch(() => {}); } catch { /* noop */ }
+      try {
+        void document.exitFullscreen()?.catch(() => {});
+      } catch {
+        /* noop */
+      }
     }
 
     // Stop cycling
@@ -84,7 +98,7 @@ export class TvModeController {
 
     // Remove key listener
     if (this.boundKeyHandler) {
-      document.removeEventListener('keydown', this.boundKeyHandler);
+      document.removeEventListener("keydown", this.boundKeyHandler);
       this.boundKeyHandler = null;
     }
 
@@ -143,27 +157,27 @@ export class TvModeController {
   }
 
   private showPanel(index: number): void {
-    const panelsGrid = document.getElementById('panelsGrid');
-    const mapSection = document.getElementById('mapSection');
+    const panelsGrid = document.getElementById("panelsGrid");
+    const mapSection = document.getElementById("mapSection");
 
     if (!panelsGrid) return;
 
-    const allPanels = panelsGrid.querySelectorAll<HTMLElement>('.panel');
+    const allPanels = panelsGrid.querySelectorAll<HTMLElement>(".panel");
 
     // Index 0 = map
     if (index === 0) {
       // Show map, hide panels grid content
       if (mapSection) {
-        mapSection.style.display = '';
+        mapSection.style.display = "";
       }
-      allPanels.forEach(p => {
-        p.classList.add('tv-hidden');
-        p.classList.remove('tv-active');
+      allPanels.forEach((p) => {
+        p.classList.add("tv-hidden");
+        p.classList.remove("tv-active");
       });
     } else {
       // Hide map, show specific panel
       if (mapSection) {
-        mapSection.style.display = 'none';
+        mapSection.style.display = "none";
       }
 
       // Panel index is offset by 1 (index 0 = map, index 1 = first panel, etc.)
@@ -171,11 +185,11 @@ export class TvModeController {
 
       allPanels.forEach((p, i) => {
         if (i === panelIndex) {
-          p.classList.remove('tv-hidden');
-          p.classList.add('tv-active');
+          p.classList.remove("tv-hidden");
+          p.classList.add("tv-active");
         } else {
-          p.classList.add('tv-hidden');
-          p.classList.remove('tv-active');
+          p.classList.add("tv-hidden");
+          p.classList.remove("tv-active");
         }
       });
     }
@@ -185,17 +199,17 @@ export class TvModeController {
   }
 
   private showAllPanels(): void {
-    const panelsGrid = document.getElementById('panelsGrid');
-    const mapSection = document.getElementById('mapSection');
+    const panelsGrid = document.getElementById("panelsGrid");
+    const mapSection = document.getElementById("mapSection");
 
     if (panelsGrid) {
-      panelsGrid.querySelectorAll<HTMLElement>('.panel').forEach(p => {
-        p.classList.remove('tv-hidden', 'tv-active');
+      panelsGrid.querySelectorAll<HTMLElement>(".panel").forEach((p) => {
+        p.classList.remove("tv-hidden", "tv-active");
       });
     }
 
     if (mapSection) {
-      mapSection.style.display = '';
+      mapSection.style.display = "";
     }
   }
 }

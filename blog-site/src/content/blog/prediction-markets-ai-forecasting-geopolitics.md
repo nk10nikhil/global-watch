@@ -74,14 +74,14 @@ For sensitive forecasting work (government, corporate intelligence), Tier 1 mean
 
 The most powerful use of World Monitor's forecasting isn't any single source. It's the triangulation:
 
-| Signal Source | What It Provides | Strength |
-|--------------|------------------|----------|
-| **Prediction markets** | Crowd-aggregated probability | Calibrated, market-tested |
-| **AI Deduction** | Structured scenario analysis | Comprehensive, sourced |
-| **CII scores** | Quantitative instability measure | Algorithmic, consistent |
-| **News velocity** | Information flow rate | Leading indicator |
-| **Military signals** | Force posture changes | Physical, verifiable |
-| **Telegram OSINT** | Raw ground-level intelligence | Fast, unfiltered |
+| Signal Source          | What It Provides                 | Strength                  |
+| ---------------------- | -------------------------------- | ------------------------- |
+| **Prediction markets** | Crowd-aggregated probability     | Calibrated, market-tested |
+| **AI Deduction**       | Structured scenario analysis     | Comprehensive, sourced    |
+| **CII scores**         | Quantitative instability measure | Algorithmic, consistent   |
+| **News velocity**      | Information flow rate            | Leading indicator         |
+| **Military signals**   | Force posture changes            | Physical, verifiable      |
+| **Telegram OSINT**     | Raw ground-level intelligence    | Fast, unfiltered          |
 
 When all six point in the same direction, confidence is high. When they diverge, you've found an interesting signal: either the market is wrong, the AI is missing context, or there's information asymmetry worth investigating.
 

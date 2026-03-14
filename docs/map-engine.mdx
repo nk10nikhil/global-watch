@@ -24,12 +24,12 @@ Two rendering engines are available, switchable at runtime via Settings or the `
 
 The flat map supports multiple tile providers, selectable at runtime via **Settings → Map Tile Provider**. The selection persists in localStorage.
 
-| Provider | Description | Cost | Default |
-|----------|-------------|------|---------|
-| **OpenFreeMap** | Free community-hosted OpenStreetMap tiles. Dark and Positron styles. No API key required. | Free | Yes (when `VITE_PMTILES_URL` is unset) |
-| **CARTO** | CARTO's Dark Matter and Voyager GL styles. No API key required. | Free tier | No |
-| **PMTiles (self-hosted)** | Self-hosted vector tiles via the [PMTiles](https://protomaps.com/docs/pmtiles) format. Tiles are served as a single `.pmtiles` archive file over HTTP Range requests — the browser only downloads tiles for the current viewport (~50-200KB per pan/zoom), not the entire file. Requires `VITE_PMTILES_URL` environment variable. | Self-hosted | Yes (when `VITE_PMTILES_URL` is set) |
-| **Auto** | Tries PMTiles first, falls back to OpenFreeMap on error (2+ tile load failures or 10s timeout). Only available when `VITE_PMTILES_URL` is set. | Self-hosted | No |
+| Provider                  | Description                                                                                                                                                                                                                                                                                                                       | Cost        | Default                                |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- | -------------------------------------- |
+| **OpenFreeMap**           | Free community-hosted OpenStreetMap tiles. Dark and Positron styles. No API key required.                                                                                                                                                                                                                                         | Free        | Yes (when `VITE_PMTILES_URL` is unset) |
+| **CARTO**                 | CARTO's Dark Matter and Voyager GL styles. No API key required.                                                                                                                                                                                                                                                                   | Free tier   | No                                     |
+| **PMTiles (self-hosted)** | Self-hosted vector tiles via the [PMTiles](https://protomaps.com/docs/pmtiles) format. Tiles are served as a single `.pmtiles` archive file over HTTP Range requests — the browser only downloads tiles for the current viewport (~50-200KB per pan/zoom), not the entire file. Requires `VITE_PMTILES_URL` environment variable. | Self-hosted | Yes (when `VITE_PMTILES_URL` is set)   |
+| **Auto**                  | Tries PMTiles first, falls back to OpenFreeMap on error (2+ tile load failures or 10s timeout). Only available when `VITE_PMTILES_URL` is set.                                                                                                                                                                                    | Self-hosted | No                                     |
 
 **OSS-friendly defaults**: When `VITE_PMTILES_URL` is not set (the default), only OpenFreeMap and CARTO appear in Settings. PMTiles and Auto options are hidden. This ensures community installations work out of the box with zero configuration and no external tile hosting costs.
 
@@ -44,11 +44,11 @@ The flat map supports multiple tile providers, selectable at runtime via **Setti
 
 Each tile provider offers different visual themes, selectable via **Settings → Map Theme**. The theme selection is **per-provider** — switching providers remembers each provider's last-used theme. Map theme is fully independent of the app theme (Auto/Dark/Light); the app theme only affects UI chrome, while the map theme controls basemap appearance.
 
-| Provider | Available Themes | Default |
-|----------|-----------------|---------|
-| **PMTiles** | Black (deepest dark), Dark, Grayscale, Light, White | Black |
-| **OpenFreeMap** | Dark, Positron (light) | Dark |
-| **CARTO** | Dark Matter, Voyager (light), Positron (light) | Dark Matter |
+| Provider        | Available Themes                                    | Default     |
+| --------------- | --------------------------------------------------- | ----------- |
+| **PMTiles**     | Black (deepest dark), Dark, Grayscale, Light, White | Black       |
+| **OpenFreeMap** | Dark, Positron (light)                              | Dark        |
+| **CARTO**       | Dark Matter, Voyager (light), Positron (light)      | Dark Matter |
 
 **Sprite mapping**: PMTiles themes `black`, `dark`, and `grayscale` use the `dark` Protomaps sprite sheet; `light` and `white` use the `light` sprite sheet.
 

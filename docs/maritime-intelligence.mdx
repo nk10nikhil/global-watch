@@ -2,23 +2,24 @@
 title: "Maritime Intelligence"
 description: "Real-time vessel tracking with chokepoint monitoring, traffic density analysis, dark ship detection, and WebSocket-based AIS data streaming."
 ---
+
 The Ships layer provides real-time vessel tracking and maritime domain awareness through AIS (Automatic Identification System) data, monitoring critical chokepoints, detecting anomalous vessel behavior, and streaming position updates over WebSocket connections.
 
 ## Chokepoint Monitoring
 
 The system monitors nine strategic waterways where disruptions could impact global trade:
 
-| Chokepoint | Strategic Importance |
-|------------|---------------------|
-| **Strait of Hormuz** | 20% of global oil transits; Iran control |
-| **Suez Canal** | Europe-Asia shipping; single point of failure |
-| **Strait of Malacca** | Primary Asia-Pacific oil route |
-| **Bab el-Mandeb** | Red Sea access; Yemen/Houthi activity |
-| **Panama Canal** | Americas east-west transit |
-| **Taiwan Strait** | Semiconductor supply chain; PLA activity |
-| **Strait of Gibraltar** | Atlantic-Mediterranean gateway; NATO chokepoint |
-| **Bosphorus** | Black Sea access; Turkish straits control |
-| **Dardanelles** | Aegean-Sea of Marmara link; Turkish straits control |
+| Chokepoint              | Strategic Importance                                |
+| ----------------------- | --------------------------------------------------- |
+| **Strait of Hormuz**    | 20% of global oil transits; Iran control            |
+| **Suez Canal**          | Europe-Asia shipping; single point of failure       |
+| **Strait of Malacca**   | Primary Asia-Pacific oil route                      |
+| **Bab el-Mandeb**       | Red Sea access; Yemen/Houthi activity               |
+| **Panama Canal**        | Americas east-west transit                          |
+| **Taiwan Strait**       | Semiconductor supply chain; PLA activity            |
+| **Strait of Gibraltar** | Atlantic-Mediterranean gateway; NATO chokepoint     |
+| **Bosphorus**           | Black Sea access; Turkish straits control           |
+| **Dardanelles**         | Aegean-Sea of Marmara link; Turkish straits control |
 
 ## Density Analysis
 
@@ -63,12 +64,12 @@ Browser -> Railway Relay -> External APIs
 
 **Relay Functions**:
 
-| Endpoint | Purpose | Authentication |
-|----------|---------|----------------|
-| `/` (WebSocket) | AIS vessel stream | AISStream API key |
-| `/opensky` | Military aircraft | OAuth2 Bearer token |
-| `/rss` | Blocked RSS feeds | None (user-agent spoofing) |
-| `/health` | Status check | None |
+| Endpoint        | Purpose           | Authentication             |
+| --------------- | ----------------- | -------------------------- |
+| `/` (WebSocket) | AIS vessel stream | AISStream API key          |
+| `/opensky`      | Military aircraft | OAuth2 Bearer token        |
+| `/rss`          | Blocked RSS feeds | None (user-agent spoofing) |
+| `/health`       | Status check      | None                       |
 
 **Environment Variables** (Railway):
 

@@ -1,11 +1,11 @@
-import { FEEDS, INTEL_SOURCES, SOURCE_REGION_MAP } from '@/config/feeds';
-import { PANEL_CATEGORY_MAP } from '@/config/panels';
-import { SITE_VARIANT } from '@/config/variant';
-import { t } from '@/services/i18n';
-import type { MapProvider } from '@/config/basemap';
-import { escapeHtml } from '@/utils/sanitize';
-import type { PanelConfig } from '@/types';
-import { renderPreferences } from '@/services/preferences-content';
+import { FEEDS, INTEL_SOURCES, SOURCE_REGION_MAP } from "@/config/feeds";
+import { PANEL_CATEGORY_MAP } from "@/config/panels";
+import { SITE_VARIANT } from "@/config/variant";
+import { t } from "@/services/i18n";
+import type { MapProvider } from "@/config/basemap";
+import { escapeHtml } from "@/utils/sanitize";
+import type { PanelConfig } from "@/types";
+import { renderPreferences } from "@/services/preferences-content";
 
 const GEAR_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`;
 
@@ -22,16 +22,16 @@ export interface UnifiedSettingsConfig {
   onMapProviderChange?: (provider: MapProvider) => void;
 }
 
-type TabId = 'settings' | 'panels' | 'sources';
+type TabId = "settings" | "panels" | "sources";
 
 export class UnifiedSettings {
   private overlay: HTMLElement;
   private config: UnifiedSettingsConfig;
-  private activeTab: TabId = 'settings';
-  private activeSourceRegion = 'all';
-  private sourceFilter = '';
-  private activePanelCategory = 'all';
-  private panelFilter = '';
+  private activeTab: TabId = "settings";
+  private activeSourceRegion = "all";
+  private sourceFilter = "";
+  private activePanelCategory = "all";
+  private panelFilter = "";
   private escapeHandler: (e: KeyboardEvent) => void;
   private prefsCleanup: (() => void) | null = null;
   private draftPanelSettings: Record<string, PanelConfig> = {};
@@ -41,19 +41,19 @@ export class UnifiedSettings {
   constructor(config: UnifiedSettingsConfig) {
     this.config = config;
 
-    this.overlay = document.createElement('div');
-    this.overlay.className = 'modal-overlay';
-    this.overlay.id = 'unifiedSettingsModal';
-    this.overlay.setAttribute('role', 'dialog');
-    this.overlay.setAttribute('aria-label', t('header.settings'));
+    this.overlay = document.createElement("div");
+    this.overlay.className = "modal-overlay";
+    this.overlay.id = "unifiedSettingsModal";
+    this.overlay.setAttribute("role", "dialog");
+    this.overlay.setAttribute("aria-label", t("header.settings"));
 
     this.resetPanelDraft();
 
     this.escapeHandler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') this.close();
+      if (e.key === "Escape") this.close();
     };
 
-    this.overlay.addEventListener('click', (e) => {
+    this.overlay.addEventListener("click", (e) => {
       const target = e.target as HTMLElement;
 
       if (target === this.overlay) {
@@ -61,45 +61,47 @@ export class UnifiedSettings {
         return;
       }
 
-      if (target.closest('.unified-settings-close')) {
+      if (target.closest(".unified-settings-close")) {
         this.close();
         return;
       }
 
-      const tab = target.closest<HTMLElement>('.unified-settings-tab');
+      const tab = target.closest<HTMLElement>(".unified-settings-tab");
       if (tab?.dataset.tab) {
         this.switchTab(tab.dataset.tab as TabId);
         return;
       }
 
-      const panelCatPill = target.closest<HTMLElement>('[data-panel-cat]');
+      const panelCatPill = target.closest<HTMLElement>("[data-panel-cat]");
       if (panelCatPill?.dataset.panelCat) {
         this.activePanelCategory = panelCatPill.dataset.panelCat;
-        this.panelFilter = '';
-        const searchInput = this.overlay.querySelector<HTMLInputElement>('.panels-search input');
-        if (searchInput) searchInput.value = '';
+        this.panelFilter = "";
+        const searchInput = this.overlay.querySelector<HTMLInputElement>(
+          ".panels-search input",
+        );
+        if (searchInput) searchInput.value = "";
         this.renderPanelCategoryPills();
         this.renderPanelsTab();
         return;
       }
 
-      if (target.closest('.panels-reset-layout')) {
+      if (target.closest(".panels-reset-layout")) {
         this.config.resetLayout();
         return;
       }
 
-      if (target.closest('.panels-save-layout')) {
+      if (target.closest(".panels-save-layout")) {
         this.savePanelChanges();
         return;
       }
 
-      const panelItem = target.closest<HTMLElement>('.panel-toggle-item');
+      const panelItem = target.closest<HTMLElement>(".panel-toggle-item");
       if (panelItem?.dataset.panel) {
         this.toggleDraftPanel(panelItem.dataset.panel);
         return;
       }
 
-      const sourceItem = target.closest<HTMLElement>('.source-toggle-item');
+      const sourceItem = target.closest<HTMLElement>(".source-toggle-item");
       if (sourceItem?.dataset.source) {
         this.config.toggleSource(sourceItem.dataset.source);
         this.renderSourcesGrid();
@@ -107,19 +109,21 @@ export class UnifiedSettings {
         return;
       }
 
-      const pill = target.closest<HTMLElement>('.unified-settings-region-pill');
+      const pill = target.closest<HTMLElement>(".unified-settings-region-pill");
       if (pill?.dataset.region) {
         this.activeSourceRegion = pill.dataset.region;
-        this.sourceFilter = '';
-        const searchInput = this.overlay.querySelector<HTMLInputElement>('.sources-search input');
-        if (searchInput) searchInput.value = '';
+        this.sourceFilter = "";
+        const searchInput = this.overlay.querySelector<HTMLInputElement>(
+          ".sources-search input",
+        );
+        if (searchInput) searchInput.value = "";
         this.renderRegionPills();
         this.renderSourcesGrid();
         this.updateSourcesCounter();
         return;
       }
 
-      if (target.closest('.sources-select-all')) {
+      if (target.closest(".sources-select-all")) {
         const visible = this.getVisibleSourceNames();
         this.config.setSourcesEnabled(visible, true);
         this.renderSourcesGrid();
@@ -127,7 +131,7 @@ export class UnifiedSettings {
         return;
       }
 
-      if (target.closest('.sources-select-none')) {
+      if (target.closest(".sources-select-none")) {
         const visible = this.getVisibleSourceNames();
         this.config.setSourcesEnabled(visible, false);
         this.renderSourcesGrid();
@@ -136,12 +140,12 @@ export class UnifiedSettings {
       }
     });
 
-    this.overlay.addEventListener('input', (e) => {
+    this.overlay.addEventListener("input", (e) => {
       const target = e.target as HTMLInputElement;
-      if (target.closest('.panels-search')) {
+      if (target.closest(".panels-search")) {
         this.panelFilter = target.value;
         this.renderPanelsTab();
-      } else if (target.closest('.sources-search')) {
+      } else if (target.closest(".sources-search")) {
         this.sourceFilter = target.value;
         this.renderSourcesGrid();
         this.updateSourcesCounter();
@@ -156,31 +160,32 @@ export class UnifiedSettings {
     if (tab) this.activeTab = tab;
     this.resetPanelDraft();
     this.render();
-    this.overlay.classList.add('active');
-    localStorage.setItem('wm-settings-open', '1');
-    document.addEventListener('keydown', this.escapeHandler);
+    this.overlay.classList.add("active");
+    localStorage.setItem("wm-settings-open", "1");
+    document.addEventListener("keydown", this.escapeHandler);
   }
 
   public close(): void {
-    if (this.hasPendingPanelChanges() && !confirm(t('header.unsavedChanges'))) return;
-    this.overlay.classList.remove('active');
+    if (this.hasPendingPanelChanges() && !confirm(t("header.unsavedChanges")))
+      return;
+    this.overlay.classList.remove("active");
     this.resetPanelDraft();
-    localStorage.removeItem('wm-settings-open');
-    document.removeEventListener('keydown', this.escapeHandler);
+    localStorage.removeItem("wm-settings-open");
+    document.removeEventListener("keydown", this.escapeHandler);
   }
 
   public refreshPanelToggles(): void {
     this.resetPanelDraft();
-    if (this.activeTab === 'panels') this.renderPanelsTab();
+    if (this.activeTab === "panels") this.renderPanelsTab();
   }
 
   public getButton(): HTMLButtonElement {
-    const btn = document.createElement('button');
-    btn.className = 'unified-settings-btn';
-    btn.id = 'unifiedSettingsBtn';
-    btn.setAttribute('aria-label', t('header.settings'));
+    const btn = document.createElement("button");
+    btn.className = "unified-settings-btn";
+    btn.id = "unifiedSettingsBtn";
+    btn.setAttribute("aria-label", t("header.settings"));
     btn.innerHTML = GEAR_SVG;
-    btn.addEventListener('click', () => this.open());
+    btn.addEventListener("click", () => this.open());
     return btn;
   }
 
@@ -188,7 +193,7 @@ export class UnifiedSettings {
     if (this.savedTimeout) clearTimeout(this.savedTimeout);
     this.prefsCleanup?.();
     this.prefsCleanup = null;
-    document.removeEventListener('keydown', this.escapeHandler);
+    document.removeEventListener("keydown", this.escapeHandler);
     this.overlay.remove();
   }
 
@@ -196,7 +201,8 @@ export class UnifiedSettings {
     this.prefsCleanup?.();
     this.prefsCleanup = null;
 
-    const tabClass = (id: TabId) => `unified-settings-tab${this.activeTab === id ? ' active' : ''}`;
+    const tabClass = (id: TabId) =>
+      `unified-settings-tab${this.activeTab === id ? " active" : ""}`;
     const prefs = renderPreferences({
       isDesktopApp: this.config.isDesktopApp,
       onMapProviderChange: this.config.onMapProviderChange,
@@ -205,56 +211,58 @@ export class UnifiedSettings {
     this.overlay.innerHTML = `
       <div class="modal unified-settings-modal">
         <div class="modal-header">
-          <span class="modal-title">${t('header.settings')}</span>
+          <span class="modal-title">${t("header.settings")}</span>
           <button class="modal-close unified-settings-close" aria-label="Close">\u00d7</button>
         </div>
         <div class="unified-settings-tabs" role="tablist" aria-label="Settings">
-          <button class="${tabClass('settings')}" data-tab="settings" role="tab" aria-selected="${this.activeTab === 'settings'}" id="us-tab-settings" aria-controls="us-tab-panel-settings">${t('header.tabSettings')}</button>
-          <button class="${tabClass('panels')}" data-tab="panels" role="tab" aria-selected="${this.activeTab === 'panels'}" id="us-tab-panels" aria-controls="us-tab-panel-panels">${t('header.tabPanels')}</button>
-          <button class="${tabClass('sources')}" data-tab="sources" role="tab" aria-selected="${this.activeTab === 'sources'}" id="us-tab-sources" aria-controls="us-tab-panel-sources">${t('header.tabSources')}</button>
+          <button class="${tabClass("settings")}" data-tab="settings" role="tab" aria-selected="${this.activeTab === "settings"}" id="us-tab-settings" aria-controls="us-tab-panel-settings">${t("header.tabSettings")}</button>
+          <button class="${tabClass("panels")}" data-tab="panels" role="tab" aria-selected="${this.activeTab === "panels"}" id="us-tab-panels" aria-controls="us-tab-panel-panels">${t("header.tabPanels")}</button>
+          <button class="${tabClass("sources")}" data-tab="sources" role="tab" aria-selected="${this.activeTab === "sources"}" id="us-tab-sources" aria-controls="us-tab-panel-sources">${t("header.tabSources")}</button>
         </div>
-        <div class="unified-settings-tab-panel${this.activeTab === 'settings' ? ' active' : ''}" data-panel-id="settings" id="us-tab-panel-settings" role="tabpanel" aria-labelledby="us-tab-settings">
+        <div class="unified-settings-tab-panel${this.activeTab === "settings" ? " active" : ""}" data-panel-id="settings" id="us-tab-panel-settings" role="tabpanel" aria-labelledby="us-tab-settings">
           ${prefs.html}
         </div>
-        <div class="unified-settings-tab-panel${this.activeTab === 'panels' ? ' active' : ''}" data-panel-id="panels" id="us-tab-panel-panels" role="tabpanel" aria-labelledby="us-tab-panels">
+        <div class="unified-settings-tab-panel${this.activeTab === "panels" ? " active" : ""}" data-panel-id="panels" id="us-tab-panel-panels" role="tabpanel" aria-labelledby="us-tab-panels">
           <div class="unified-settings-region-wrapper">
             <div class="unified-settings-region-bar" id="usPanelCatBar"></div>
           </div>
           <div class="panels-search">
-            <input type="text" placeholder="${t('header.filterPanels')}" value="${escapeHtml(this.panelFilter)}" />
+            <input type="text" placeholder="${t("header.filterPanels")}" value="${escapeHtml(this.panelFilter)}" />
           </div>
           <div class="panel-toggle-grid" id="usPanelToggles"></div>
           <div class="panels-footer">
             <span class="panels-status" id="usPanelsStatus" aria-live="polite"></span>
-            <button class="panels-save-layout">${t('modals.story.save')}</button>
-            <button class="panels-reset-layout" title="${t('header.resetLayoutTooltip')}" aria-label="${t('header.resetLayoutTooltip')}">${t('header.resetLayout')}</button>
+            <button class="panels-save-layout">${t("modals.story.save")}</button>
+            <button class="panels-reset-layout" title="${t("header.resetLayoutTooltip")}" aria-label="${t("header.resetLayoutTooltip")}">${t("header.resetLayout")}</button>
           </div>
         </div>
-        <div class="unified-settings-tab-panel${this.activeTab === 'sources' ? ' active' : ''}" data-panel-id="sources" id="us-tab-panel-sources" role="tabpanel" aria-labelledby="us-tab-sources">
+        <div class="unified-settings-tab-panel${this.activeTab === "sources" ? " active" : ""}" data-panel-id="sources" id="us-tab-panel-sources" role="tabpanel" aria-labelledby="us-tab-sources">
           <div class="unified-settings-region-wrapper">
             <div class="unified-settings-region-bar" id="usRegionBar"></div>
           </div>
           <div class="sources-search">
-            <input type="text" placeholder="${t('header.filterSources')}" value="${escapeHtml(this.sourceFilter)}" />
+            <input type="text" placeholder="${t("header.filterSources")}" value="${escapeHtml(this.sourceFilter)}" />
           </div>
           <div class="sources-toggle-grid" id="usSourceToggles"></div>
           <div class="sources-footer">
             <span class="sources-counter" id="usSourcesCounter"></span>
-            <button class="sources-select-all">${t('common.selectAll')}</button>
-            <button class="sources-select-none">${t('common.selectNone')}</button>
+            <button class="sources-select-all">${t("common.selectAll")}</button>
+            <button class="sources-select-none">${t("common.selectNone")}</button>
           </div>
         </div>
       </div>
     `;
 
-    const settingsPanel = this.overlay.querySelector('#us-tab-panel-settings');
+    const settingsPanel = this.overlay.querySelector("#us-tab-panel-settings");
     if (settingsPanel) {
       this.prefsCleanup = prefs.attach(settingsPanel as HTMLElement);
     }
 
-    const closeBtn = this.overlay.querySelector<HTMLButtonElement>('.unified-settings-close');
+    const closeBtn = this.overlay.querySelector<HTMLButtonElement>(
+      ".unified-settings-close",
+    );
     if (closeBtn) {
-      closeBtn.addEventListener('click', (e) => {
+      closeBtn.addEventListener("click", (e) => {
         e.preventDefault();
         this.close();
       });
@@ -270,27 +278,32 @@ export class UnifiedSettings {
   private switchTab(tab: TabId): void {
     this.activeTab = tab;
 
-    this.overlay.querySelectorAll('.unified-settings-tab').forEach(el => {
+    this.overlay.querySelectorAll(".unified-settings-tab").forEach((el) => {
       const isActive = (el as HTMLElement).dataset.tab === tab;
-      el.classList.toggle('active', isActive);
-      el.setAttribute('aria-selected', String(isActive));
+      el.classList.toggle("active", isActive);
+      el.setAttribute("aria-selected", String(isActive));
     });
 
-    this.overlay.querySelectorAll('.unified-settings-tab-panel').forEach(el => {
-      el.classList.toggle('active', (el as HTMLElement).dataset.panelId === tab);
-    });
+    this.overlay
+      .querySelectorAll(".unified-settings-tab-panel")
+      .forEach((el) => {
+        el.classList.toggle(
+          "active",
+          (el as HTMLElement).dataset.panelId === tab,
+        );
+      });
   }
 
   private getAvailablePanelCategories(): Array<{ key: string; label: string }> {
     const panelKeys = new Set(Object.keys(this.config.getPanelSettings()));
-    const variant = SITE_VARIANT || 'full';
+    const variant = SITE_VARIANT || "full";
     const categories: Array<{ key: string; label: string }> = [
-      { key: 'all', label: t('header.sourceRegionAll') }
+      { key: "all", label: t("header.sourceRegionAll") },
     ];
 
     for (const [catKey, catDef] of Object.entries(PANEL_CATEGORY_MAP)) {
       if (catDef.variants && !catDef.variants.includes(variant)) continue;
-      const hasPanel = catDef.panelKeys.some(pk => panelKeys.has(pk));
+      const hasPanel = catDef.panelKeys.some((pk) => panelKeys.has(pk));
       if (hasPanel) {
         categories.push({ key: catKey, label: t(catDef.labelKey) });
       }
@@ -301,11 +314,12 @@ export class UnifiedSettings {
 
   private getVisiblePanelEntries(): Array<[string, PanelConfig]> {
     const panelSettings = this.draftPanelSettings;
-    const variant = SITE_VARIANT || 'full';
-    let entries = Object.entries(panelSettings)
-      .filter(([key]) => key !== 'runtime-config' || this.config.isDesktopApp);
+    const variant = SITE_VARIANT || "full";
+    let entries = Object.entries(panelSettings).filter(
+      ([key]) => key !== "runtime-config" || this.config.isDesktopApp,
+    );
 
-    if (this.activePanelCategory !== 'all') {
+    if (this.activePanelCategory !== "all") {
       const catDef = PANEL_CATEGORY_MAP[this.activePanelCategory];
       if (catDef && (!catDef.variants || catDef.variants.includes(variant))) {
         const allowed = new Set(catDef.panelKeys);
@@ -315,10 +329,14 @@ export class UnifiedSettings {
 
     if (this.panelFilter) {
       const lower = this.panelFilter.toLowerCase();
-      entries = entries.filter(([key, panel]) =>
-        key.toLowerCase().includes(lower) ||
-        panel.name.toLowerCase().includes(lower) ||
-        this.config.getLocalizedPanelName(key, panel.name).toLowerCase().includes(lower)
+      entries = entries.filter(
+        ([key, panel]) =>
+          key.toLowerCase().includes(lower) ||
+          panel.name.toLowerCase().includes(lower) ||
+          this.config
+            .getLocalizedPanelName(key, panel.name)
+            .toLowerCase()
+            .includes(lower),
       );
     }
 
@@ -326,35 +344,42 @@ export class UnifiedSettings {
   }
 
   private renderPanelCategoryPills(): void {
-    const bar = this.overlay.querySelector('#usPanelCatBar');
+    const bar = this.overlay.querySelector("#usPanelCatBar");
     if (!bar) return;
 
     const categories = this.getAvailablePanelCategories();
-    bar.innerHTML = categories.map(c =>
-      `<button class="unified-settings-region-pill${this.activePanelCategory === c.key ? ' active' : ''}" data-panel-cat="${c.key}">${escapeHtml(c.label)}</button>`
-    ).join('');
+    bar.innerHTML = categories
+      .map(
+        (c) =>
+          `<button class="unified-settings-region-pill${this.activePanelCategory === c.key ? " active" : ""}" data-panel-cat="${c.key}">${escapeHtml(c.label)}</button>`,
+      )
+      .join("");
   }
 
   private renderPanelsTab(): void {
-    const container = this.overlay.querySelector('#usPanelToggles');
+    const container = this.overlay.querySelector("#usPanelToggles");
     if (!container) return;
 
     const savedSettings = this.config.getPanelSettings();
     const entries = this.getVisiblePanelEntries();
-    container.innerHTML = entries.map(([key, panel]) => {
-      const changed = savedSettings[key]?.enabled !== panel.enabled;
-      return `
-        <div class="panel-toggle-item ${panel.enabled ? 'active' : ''}${changed ? ' changed' : ''}" data-panel="${escapeHtml(key)}" aria-pressed="${panel.enabled}">
-          <div class="panel-toggle-checkbox">${panel.enabled ? '\u2713' : ''}</div>
+    container.innerHTML = entries
+      .map(([key, panel]) => {
+        const changed = savedSettings[key]?.enabled !== panel.enabled;
+        return `
+        <div class="panel-toggle-item ${panel.enabled ? "active" : ""}${changed ? " changed" : ""}" data-panel="${escapeHtml(key)}" aria-pressed="${panel.enabled}">
+          <div class="panel-toggle-checkbox">${panel.enabled ? "\u2713" : ""}</div>
           <span class="panel-toggle-label">${escapeHtml(this.config.getLocalizedPanelName(key, panel.name))}</span>
         </div>
       `;
-    }).join('');
+      })
+      .join("");
 
     this.updatePanelsFooter();
   }
 
-  private clonePanelSettings(source: Record<string, PanelConfig> = this.config.getPanelSettings()): Record<string, PanelConfig> {
+  private clonePanelSettings(
+    source: Record<string, PanelConfig> = this.config.getPanelSettings(),
+  ): Record<string, PanelConfig> {
     return Object.fromEntries(
       Object.entries(source).map(([key, panel]) => [key, { ...panel }]),
     );
@@ -367,7 +392,9 @@ export class UnifiedSettings {
 
   private hasPendingPanelChanges(): boolean {
     const savedSettings = this.config.getPanelSettings();
-    return Object.entries(this.draftPanelSettings).some(([key, panel]) => savedSettings[key]?.enabled !== panel.enabled);
+    return Object.entries(this.draftPanelSettings).some(
+      ([key, panel]) => savedSettings[key]?.enabled !== panel.enabled,
+    );
   }
 
   private toggleDraftPanel(key: string): void {
@@ -380,7 +407,9 @@ export class UnifiedSettings {
 
   private savePanelChanges(): void {
     if (!this.hasPendingPanelChanges()) return;
-    this.config.savePanelSettings(this.clonePanelSettings(this.draftPanelSettings));
+    this.config.savePanelSettings(
+      this.clonePanelSettings(this.draftPanelSettings),
+    );
     this.draftPanelSettings = this.clonePanelSettings();
     this.panelsJustSaved = true;
     this.renderPanelsTab();
@@ -393,8 +422,10 @@ export class UnifiedSettings {
   }
 
   private updatePanelsFooter(): void {
-    const status = this.overlay.querySelector<HTMLElement>('#usPanelsStatus');
-    const saveButton = this.overlay.querySelector<HTMLButtonElement>('.panels-save-layout');
+    const status = this.overlay.querySelector<HTMLElement>("#usPanelsStatus");
+    const saveButton = this.overlay.querySelector<HTMLButtonElement>(
+      ".panels-save-layout",
+    );
     const hasPendingChanges = this.hasPendingPanelChanges();
 
     if (saveButton) {
@@ -402,25 +433,27 @@ export class UnifiedSettings {
     }
 
     if (status) {
-      status.textContent = this.panelsJustSaved ? t('modals.settingsWindow.saved') : '';
-      status.classList.toggle('visible', this.panelsJustSaved);
+      status.textContent = this.panelsJustSaved
+        ? t("modals.settingsWindow.saved")
+        : "";
+      status.classList.toggle("visible", this.panelsJustSaved);
     }
   }
 
   private getAvailableRegions(): Array<{ key: string; label: string }> {
     const feedKeys = new Set(Object.keys(FEEDS));
     const regions: Array<{ key: string; label: string }> = [
-      { key: 'all', label: t('header.sourceRegionAll') }
+      { key: "all", label: t("header.sourceRegionAll") },
     ];
 
     for (const [regionKey, regionDef] of Object.entries(SOURCE_REGION_MAP)) {
-      if (regionKey === 'intel') {
+      if (regionKey === "intel") {
         if (INTEL_SOURCES.length > 0) {
           regions.push({ key: regionKey, label: t(regionDef.labelKey) });
         }
         continue;
       }
-      const hasFeeds = regionDef.feedKeys.some(fk => feedKeys.has(fk));
+      const hasFeeds = regionDef.feedKeys.some((fk) => feedKeys.has(fk));
       if (hasFeeds) {
         regions.push({ key: regionKey, label: t(regionDef.labelKey) });
       }
@@ -435,17 +468,20 @@ export class UnifiedSettings {
 
     for (const [regionKey, regionDef] of Object.entries(SOURCE_REGION_MAP)) {
       const sources: string[] = [];
-      if (regionKey === 'intel') {
-        INTEL_SOURCES.forEach(f => sources.push(f.name));
+      if (regionKey === "intel") {
+        INTEL_SOURCES.forEach((f) => sources.push(f.name));
       } else {
         for (const fk of regionDef.feedKeys) {
           if (feedKeys.has(fk)) {
-            FEEDS[fk]!.forEach(f => sources.push(f.name));
+            FEEDS[fk]!.forEach((f) => sources.push(f.name));
           }
         }
       }
       if (sources.length > 0) {
-        map.set(regionKey, sources.sort((a, b) => a.localeCompare(b)));
+        map.set(
+          regionKey,
+          sources.sort((a, b) => a.localeCompare(b)),
+        );
       }
     }
 
@@ -454,7 +490,7 @@ export class UnifiedSettings {
 
   private getVisibleSourceNames(): string[] {
     let sources: string[];
-    if (this.activeSourceRegion === 'all') {
+    if (this.activeSourceRegion === "all") {
       sources = this.config.getAllSourceNames();
     } else {
       const byRegion = this.getSourcesByRegion();
@@ -463,49 +499,57 @@ export class UnifiedSettings {
 
     if (this.sourceFilter) {
       const lower = this.sourceFilter.toLowerCase();
-      sources = sources.filter(s => s.toLowerCase().includes(lower));
+      sources = sources.filter((s) => s.toLowerCase().includes(lower));
     }
 
     return sources;
   }
 
   private renderRegionPills(): void {
-    const bar = this.overlay.querySelector('#usRegionBar');
+    const bar = this.overlay.querySelector("#usRegionBar");
     if (!bar) return;
 
     const regions = this.getAvailableRegions();
-    bar.innerHTML = regions.map(r =>
-      `<button class="unified-settings-region-pill${this.activeSourceRegion === r.key ? ' active' : ''}" data-region="${r.key}">${escapeHtml(r.label)}</button>`
-    ).join('');
+    bar.innerHTML = regions
+      .map(
+        (r) =>
+          `<button class="unified-settings-region-pill${this.activeSourceRegion === r.key ? " active" : ""}" data-region="${r.key}">${escapeHtml(r.label)}</button>`,
+      )
+      .join("");
   }
 
   private renderSourcesGrid(): void {
-    const container = this.overlay.querySelector('#usSourceToggles');
+    const container = this.overlay.querySelector("#usSourceToggles");
     if (!container) return;
 
     const sources = this.getVisibleSourceNames();
     const disabled = this.config.getDisabledSources();
 
-    container.innerHTML = sources.map(source => {
-      const isEnabled = !disabled.has(source);
-      const escaped = escapeHtml(source);
-      return `
-        <div class="source-toggle-item ${isEnabled ? 'active' : ''}" data-source="${escaped}">
-          <div class="source-toggle-checkbox">${isEnabled ? '\u2713' : ''}</div>
+    container.innerHTML = sources
+      .map((source) => {
+        const isEnabled = !disabled.has(source);
+        const escaped = escapeHtml(source);
+        return `
+        <div class="source-toggle-item ${isEnabled ? "active" : ""}" data-source="${escaped}">
+          <div class="source-toggle-checkbox">${isEnabled ? "\u2713" : ""}</div>
           <span class="source-toggle-label">${escaped}</span>
         </div>
       `;
-    }).join('');
+      })
+      .join("");
   }
 
   private updateSourcesCounter(): void {
-    const counter = this.overlay.querySelector('#usSourcesCounter');
+    const counter = this.overlay.querySelector("#usSourcesCounter");
     if (!counter) return;
 
     const disabled = this.config.getDisabledSources();
     const allSources = this.config.getAllSourceNames();
     const enabledTotal = allSources.length - disabled.size;
 
-    counter.textContent = t('header.sourcesEnabled', { enabled: String(enabledTotal), total: String(allSources.length) });
+    counter.textContent = t("header.sourcesEnabled", {
+      enabled: String(enabledTotal),
+      total: String(allSources.length),
+    });
   }
 }

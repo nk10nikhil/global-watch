@@ -130,8 +130,7 @@ export interface GetAircraftDetailsBatchResponse {
   configured: boolean;
 }
 
-export interface GetWingbitsStatusRequest {
-}
+export interface GetWingbitsStatusRequest {}
 
 export interface GetWingbitsStatusResponse {
   configured: boolean;
@@ -233,13 +232,52 @@ export interface MilitaryBaseCluster {
   expansionZoom: number;
 }
 
-export type MilitaryActivityType = "MILITARY_ACTIVITY_TYPE_UNSPECIFIED" | "MILITARY_ACTIVITY_TYPE_EXERCISE" | "MILITARY_ACTIVITY_TYPE_PATROL" | "MILITARY_ACTIVITY_TYPE_TRANSPORT" | "MILITARY_ACTIVITY_TYPE_DEPLOYMENT" | "MILITARY_ACTIVITY_TYPE_TRANSIT" | "MILITARY_ACTIVITY_TYPE_UNKNOWN";
+export type MilitaryActivityType =
+  | "MILITARY_ACTIVITY_TYPE_UNSPECIFIED"
+  | "MILITARY_ACTIVITY_TYPE_EXERCISE"
+  | "MILITARY_ACTIVITY_TYPE_PATROL"
+  | "MILITARY_ACTIVITY_TYPE_TRANSPORT"
+  | "MILITARY_ACTIVITY_TYPE_DEPLOYMENT"
+  | "MILITARY_ACTIVITY_TYPE_TRANSIT"
+  | "MILITARY_ACTIVITY_TYPE_UNKNOWN";
 
-export type MilitaryAircraftType = "MILITARY_AIRCRAFT_TYPE_UNSPECIFIED" | "MILITARY_AIRCRAFT_TYPE_FIGHTER" | "MILITARY_AIRCRAFT_TYPE_BOMBER" | "MILITARY_AIRCRAFT_TYPE_TRANSPORT" | "MILITARY_AIRCRAFT_TYPE_TANKER" | "MILITARY_AIRCRAFT_TYPE_AWACS" | "MILITARY_AIRCRAFT_TYPE_RECONNAISSANCE" | "MILITARY_AIRCRAFT_TYPE_HELICOPTER" | "MILITARY_AIRCRAFT_TYPE_DRONE" | "MILITARY_AIRCRAFT_TYPE_PATROL" | "MILITARY_AIRCRAFT_TYPE_SPECIAL_OPS" | "MILITARY_AIRCRAFT_TYPE_VIP" | "MILITARY_AIRCRAFT_TYPE_UNKNOWN";
+export type MilitaryAircraftType =
+  | "MILITARY_AIRCRAFT_TYPE_UNSPECIFIED"
+  | "MILITARY_AIRCRAFT_TYPE_FIGHTER"
+  | "MILITARY_AIRCRAFT_TYPE_BOMBER"
+  | "MILITARY_AIRCRAFT_TYPE_TRANSPORT"
+  | "MILITARY_AIRCRAFT_TYPE_TANKER"
+  | "MILITARY_AIRCRAFT_TYPE_AWACS"
+  | "MILITARY_AIRCRAFT_TYPE_RECONNAISSANCE"
+  | "MILITARY_AIRCRAFT_TYPE_HELICOPTER"
+  | "MILITARY_AIRCRAFT_TYPE_DRONE"
+  | "MILITARY_AIRCRAFT_TYPE_PATROL"
+  | "MILITARY_AIRCRAFT_TYPE_SPECIAL_OPS"
+  | "MILITARY_AIRCRAFT_TYPE_VIP"
+  | "MILITARY_AIRCRAFT_TYPE_UNKNOWN";
 
-export type MilitaryConfidence = "MILITARY_CONFIDENCE_UNSPECIFIED" | "MILITARY_CONFIDENCE_LOW" | "MILITARY_CONFIDENCE_MEDIUM" | "MILITARY_CONFIDENCE_HIGH";
+export type MilitaryConfidence =
+  | "MILITARY_CONFIDENCE_UNSPECIFIED"
+  | "MILITARY_CONFIDENCE_LOW"
+  | "MILITARY_CONFIDENCE_MEDIUM"
+  | "MILITARY_CONFIDENCE_HIGH";
 
-export type MilitaryOperator = "MILITARY_OPERATOR_UNSPECIFIED" | "MILITARY_OPERATOR_USAF" | "MILITARY_OPERATOR_USN" | "MILITARY_OPERATOR_USMC" | "MILITARY_OPERATOR_USA" | "MILITARY_OPERATOR_RAF" | "MILITARY_OPERATOR_RN" | "MILITARY_OPERATOR_FAF" | "MILITARY_OPERATOR_GAF" | "MILITARY_OPERATOR_PLAAF" | "MILITARY_OPERATOR_PLAN" | "MILITARY_OPERATOR_VKS" | "MILITARY_OPERATOR_IAF" | "MILITARY_OPERATOR_NATO" | "MILITARY_OPERATOR_OTHER";
+export type MilitaryOperator =
+  | "MILITARY_OPERATOR_UNSPECIFIED"
+  | "MILITARY_OPERATOR_USAF"
+  | "MILITARY_OPERATOR_USN"
+  | "MILITARY_OPERATOR_USMC"
+  | "MILITARY_OPERATOR_USA"
+  | "MILITARY_OPERATOR_RAF"
+  | "MILITARY_OPERATOR_RN"
+  | "MILITARY_OPERATOR_FAF"
+  | "MILITARY_OPERATOR_GAF"
+  | "MILITARY_OPERATOR_PLAAF"
+  | "MILITARY_OPERATOR_PLAN"
+  | "MILITARY_OPERATOR_VKS"
+  | "MILITARY_OPERATOR_IAF"
+  | "MILITARY_OPERATOR_NATO"
+  | "MILITARY_OPERATOR_OTHER";
 
 export interface FieldViolation {
   field: string;
@@ -276,7 +314,10 @@ export interface ServerContext {
 
 export interface ServerOptions {
   onError?: (error: unknown, req: Request) => Response | Promise<Response>;
-  validateRequest?: (methodName: string, body: unknown) => FieldViolation[] | undefined;
+  validateRequest?: (
+    methodName: string,
+    body: unknown,
+  ) => FieldViolation[] | undefined;
 }
 
 export interface RouteDescriptor {
@@ -286,13 +327,34 @@ export interface RouteDescriptor {
 }
 
 export interface MilitaryServiceHandler {
-  listMilitaryFlights(ctx: ServerContext, req: ListMilitaryFlightsRequest): Promise<ListMilitaryFlightsResponse>;
-  getTheaterPosture(ctx: ServerContext, req: GetTheaterPostureRequest): Promise<GetTheaterPostureResponse>;
-  getAircraftDetails(ctx: ServerContext, req: GetAircraftDetailsRequest): Promise<GetAircraftDetailsResponse>;
-  getAircraftDetailsBatch(ctx: ServerContext, req: GetAircraftDetailsBatchRequest): Promise<GetAircraftDetailsBatchResponse>;
-  getWingbitsStatus(ctx: ServerContext, req: GetWingbitsStatusRequest): Promise<GetWingbitsStatusResponse>;
-  getUSNIFleetReport(ctx: ServerContext, req: GetUSNIFleetReportRequest): Promise<GetUSNIFleetReportResponse>;
-  listMilitaryBases(ctx: ServerContext, req: ListMilitaryBasesRequest): Promise<ListMilitaryBasesResponse>;
+  listMilitaryFlights(
+    ctx: ServerContext,
+    req: ListMilitaryFlightsRequest,
+  ): Promise<ListMilitaryFlightsResponse>;
+  getTheaterPosture(
+    ctx: ServerContext,
+    req: GetTheaterPostureRequest,
+  ): Promise<GetTheaterPostureResponse>;
+  getAircraftDetails(
+    ctx: ServerContext,
+    req: GetAircraftDetailsRequest,
+  ): Promise<GetAircraftDetailsResponse>;
+  getAircraftDetailsBatch(
+    ctx: ServerContext,
+    req: GetAircraftDetailsBatchRequest,
+  ): Promise<GetAircraftDetailsBatchResponse>;
+  getWingbitsStatus(
+    ctx: ServerContext,
+    req: GetWingbitsStatusRequest,
+  ): Promise<GetWingbitsStatusResponse>;
+  getUSNIFleetReport(
+    ctx: ServerContext,
+    req: GetUSNIFleetReportRequest,
+  ): Promise<GetUSNIFleetReportResponse>;
+  listMilitaryBases(
+    ctx: ServerContext,
+    req: ListMilitaryBasesRequest,
+  ): Promise<ListMilitaryBasesResponse>;
 }
 
 export function createMilitaryServiceRoutes(
@@ -319,7 +381,10 @@ export function createMilitaryServiceRoutes(
             aircraftType: params.get("aircraft_type") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("listMilitaryFlights", body);
+            const bodyViolations = options.validateRequest(
+              "listMilitaryFlights",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -332,16 +397,22 @@ export function createMilitaryServiceRoutes(
           };
 
           const result = await handler.listMilitaryFlights(ctx, body);
-          return new Response(JSON.stringify(result as ListMilitaryFlightsResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as ListMilitaryFlightsResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -366,7 +437,10 @@ export function createMilitaryServiceRoutes(
             theater: params.get("theater") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getTheaterPosture", body);
+            const bodyViolations = options.validateRequest(
+              "getTheaterPosture",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -379,16 +453,22 @@ export function createMilitaryServiceRoutes(
           };
 
           const result = await handler.getTheaterPosture(ctx, body);
-          return new Response(JSON.stringify(result as GetTheaterPostureResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetTheaterPostureResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -413,7 +493,10 @@ export function createMilitaryServiceRoutes(
             icao24: params.get("icao24") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getAircraftDetails", body);
+            const bodyViolations = options.validateRequest(
+              "getAircraftDetails",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -426,16 +509,22 @@ export function createMilitaryServiceRoutes(
           };
 
           const result = await handler.getAircraftDetails(ctx, body);
-          return new Response(JSON.stringify(result as GetAircraftDetailsResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetAircraftDetailsResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -454,9 +543,12 @@ export function createMilitaryServiceRoutes(
       handler: async (req: Request): Promise<Response> => {
         try {
           const pathParams: Record<string, string> = {};
-          const body = await req.json() as GetAircraftDetailsBatchRequest;
+          const body = (await req.json()) as GetAircraftDetailsBatchRequest;
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getAircraftDetailsBatch", body);
+            const bodyViolations = options.validateRequest(
+              "getAircraftDetailsBatch",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -469,16 +561,22 @@ export function createMilitaryServiceRoutes(
           };
 
           const result = await handler.getAircraftDetailsBatch(ctx, body);
-          return new Response(JSON.stringify(result as GetAircraftDetailsBatchResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetAircraftDetailsBatchResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -506,16 +604,22 @@ export function createMilitaryServiceRoutes(
           };
 
           const result = await handler.getWingbitsStatus(ctx, body);
-          return new Response(JSON.stringify(result as GetWingbitsStatusResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetWingbitsStatusResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -540,7 +644,10 @@ export function createMilitaryServiceRoutes(
             forceRefresh: params.get("force_refresh") === "true",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getUSNIFleetReport", body);
+            const bodyViolations = options.validateRequest(
+              "getUSNIFleetReport",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -553,16 +660,22 @@ export function createMilitaryServiceRoutes(
           };
 
           const result = await handler.getUSNIFleetReport(ctx, body);
-          return new Response(JSON.stringify(result as GetUSNIFleetReportResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetUSNIFleetReportResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -594,7 +707,10 @@ export function createMilitaryServiceRoutes(
             country: params.get("country") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("listMilitaryBases", body);
+            const bodyViolations = options.validateRequest(
+              "listMilitaryBases",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -607,16 +723,22 @@ export function createMilitaryServiceRoutes(
           };
 
           const result = await handler.listMilitaryBases(ctx, body);
-          return new Response(JSON.stringify(result as ListMilitaryBasesResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as ListMilitaryBasesResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -631,4 +753,3 @@ export function createMilitaryServiceRoutes(
     },
   ];
 }
-

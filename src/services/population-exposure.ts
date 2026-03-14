@@ -1,17 +1,31 @@
-import { createCircuitBreaker } from '@/utils';
-import { getRpcBaseUrl } from '@/services/rpc-client';
-import type { CountryPopulation, PopulationExposure } from '@/types';
-import { DisplacementServiceClient } from '@/generated/client/worldmonitor/displacement/v1/service_client';
-import type { GetPopulationExposureResponse } from '@/generated/client/worldmonitor/displacement/v1/service_client';
+import { createCircuitBreaker } from "@/utils";
+import { getRpcBaseUrl } from "@/services/rpc-client";
+import type { CountryPopulation, PopulationExposure } from "@/types";
+import { DisplacementServiceClient } from "@/generated/client/worldmonitor/displacement/v1/service_client";
+import type { GetPopulationExposureResponse } from "@/generated/client/worldmonitor/displacement/v1/service_client";
 
-const client = new DisplacementServiceClient(getRpcBaseUrl(), { fetch: (...args) => globalThis.fetch(...args) });
+const client = new DisplacementServiceClient(getRpcBaseUrl(), {
+  fetch: (...args) => globalThis.fetch(...args),
+});
 
-const countriesBreaker = createCircuitBreaker<GetPopulationExposureResponse>({ name: 'WorldPop Countries', cacheTtlMs: 30 * 60 * 1000, persistCache: true });
+const countriesBreaker = createCircuitBreaker<GetPopulationExposureResponse>({
+  name: "WorldPop Countries",
+  cacheTtlMs: 30 * 60 * 1000,
+  persistCache: true,
+});
 
 export async function fetchCountryPopulations(): Promise<CountryPopulation[]> {
-  const result = await countriesBreaker.execute(async () => {
-    return client.getPopulationExposure({ mode: 'countries', lat: 0, lon: 0, radius: 0 });
-  }, { success: false, countries: [] });
+  const result = await countriesBreaker.execute(
+    async () => {
+      return client.getPopulationExposure({
+        mode: "countries",
+        lat: 0,
+        lon: 0,
+        radius: 0,
+      });
+    },
+    { success: false, countries: [] },
+  );
 
   return result.countries;
 }
@@ -23,9 +37,18 @@ interface ExposureResponse {
   densityPerKm2: number;
 }
 
-export async function fetchExposure(lat: number, lon: number, radiusKm: number): Promise<ExposureResponse | null> {
+export async function fetchExposure(
+  lat: number,
+  lon: number,
+  radiusKm: number,
+): Promise<ExposureResponse | null> {
   try {
-    const result = await client.getPopulationExposure({ mode: 'exposure', lat, lon, radius: radiusKm });
+    const result = await client.getPopulationExposure({
+      mode: "exposure",
+      lat,
+      lon,
+      radius: radiusKm,
+    });
     if (!result.exposure) return null;
     return result.exposure;
   } catch {
@@ -43,18 +66,18 @@ interface EventForExposure {
 
 function getRadiusForEventType(type: string): number {
   switch (type) {
-    case 'conflict':
-    case 'battle':
-    case 'state-based':
-    case 'non-state':
-    case 'one-sided':
+    case "conflict":
+    case "battle":
+    case "state-based":
+    case "non-state":
+    case "one-sided":
       return 50;
-    case 'earthquake':
+    case "earthquake":
       return 100;
-    case 'flood':
+    case "flood":
       return 100;
-    case 'fire':
-    case 'wildfire':
+    case "fire":
+    case "wildfire":
       return 30;
     default:
       return 50;
@@ -83,11 +106,11 @@ export async function enrichEventsWithExposure(
           exposedPopulation: exposure.exposedPopulation,
           exposureRadiusKm: radius,
         } as PopulationExposure;
-      })
+      }),
     );
 
     for (const r of batchResults) {
-      if (r.status === 'fulfilled' && r.value) results.push(r.value);
+      if (r.status === "fulfilled" && r.value) results.push(r.value);
     }
   }
 

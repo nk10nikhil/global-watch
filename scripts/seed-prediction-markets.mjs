@@ -1,20 +1,27 @@
 #!/usr/bin/env node
 
-import { loadEnvFile, CHROME_UA, sleep, runSeed } from './_seed-utils.mjs';
+import { loadEnvFile, CHROME_UA, sleep, runSeed } from "./_seed-utils.mjs";
 import {
-  isExcluded, isMemeCandidate, tagRegions, parseYesPrice,
-  shouldInclude, scoreMarket, filterAndScore, isExpired,
-} from './_prediction-scoring.mjs';
-import predictionTags from './data/prediction-tags.json' with { type: 'json' };
+  isExcluded,
+  isMemeCandidate,
+  tagRegions,
+  parseYesPrice,
+  shouldInclude,
+  scoreMarket,
+  filterAndScore,
+  isExpired,
+} from "./_prediction-scoring.mjs";
+import predictionTags from "./data/prediction-tags.json" with { type: "json" };
 
 loadEnvFile(import.meta.url);
 
-const CANONICAL_KEY = 'prediction:markets-bootstrap:v1';
+const CANONICAL_KEY = "prediction:markets-bootstrap:v1";
 const CACHE_TTL = 900; // 15 min — matches client poll interval
 
-const GAMMA_BASE = 'https://gamma-api.polymarket.com';
-const KALSHI_BASE = 'https://trading-api.kalshi.com/trade-api/v2';
-const KALSHI_ENABLED = process.env.KALSHI_API_KEY !== undefined && process.env.KALSHI_API_KEY !== '';
+const GAMMA_BASE = "https://gamma-api.polymarket.com";
+const KALSHI_BASE = "https://trading-api.kalshi.com/trade-api/v2";
+const KALSHI_ENABLED =
+  process.env.KALSHI_API_KEY !== undefined && process.env.KALSHI_API_KEY !== "";
 const FETCH_TIMEOUT = 10_000;
 const TAG_DELAY_MS = 300;
 
@@ -25,17 +32,17 @@ const FINANCE_TAGS = predictionTags.finance;
 async function fetchEventsByTag(tag, limit = 20) {
   const params = new URLSearchParams({
     tag_slug: tag,
-    closed: 'false',
-    active: 'true',
-    archived: 'false',
+    closed: "false",
+    active: "true",
+    archived: "false",
     end_date_min: new Date().toISOString(),
-    order: 'volume',
-    ascending: 'false',
+    order: "volume",
+    ascending: "false",
     limit: String(limit),
   });
 
   const resp = await fetch(`${GAMMA_BASE}/events?${params}`, {
-    headers: { Accept: 'application/json', 'User-Agent': CHROME_UA },
+    headers: { Accept: "application/json", "User-Agent": CHROME_UA },
     signal: AbortSignal.timeout(FETCH_TIMEOUT),
   });
   if (!resp.ok) {
@@ -49,12 +56,13 @@ async function fetchEventsByTag(tag, limit = 20) {
 async function fetchKalshiEvents() {
   try {
     const params = new URLSearchParams({
-      status: 'open',
-      with_nested_markets: 'true',
-      limit: '100',
+      status: "open",
+      with_nested_markets: "true",
+      limit: "100",
     });
-    const headers = { Accept: 'application/json', 'User-Agent': CHROME_UA };
-    if (process.env.KALSHI_API_KEY) headers.Authorization = `Bearer ${process.env.KALSHI_API_KEY}`;
+    const headers = { Accept: "application/json", "User-Agent": CHROME_UA };
+    if (process.env.KALSHI_API_KEY)
+      headers.Authorization = `Bearer ${process.env.KALSHI_API_KEY}`;
     const resp = await fetch(`${KALSHI_BASE}/events?${params}`, {
       headers,
       signal: AbortSignal.timeout(FETCH_TIMEOUT),
@@ -80,7 +88,7 @@ async function fetchKalshiMarkets() {
     if (isExcluded(event.title)) continue;
 
     const binaryActive = event.markets.filter(
-      m => m.market_type === 'binary' && m.status === 'active',
+      (m) => m.market_type === "binary" && m.status === "active",
     );
     if (binaryActive.length === 0) continue;
 
@@ -94,7 +102,9 @@ async function fetchKalshiMarkets() {
     if (volume <= 5000) continue;
 
     const rawPrice = parseFloat(topMarket.last_price_dollars);
-    const yesPrice = Number.isFinite(rawPrice) ? +(rawPrice * 100).toFixed(1) : 50;
+    const yesPrice = Number.isFinite(rawPrice)
+      ? +(rawPrice * 100).toFixed(1)
+      : 50;
 
     results.push({
       title: topMarket.yes_sub_title || topMarket.title || event.title,
@@ -103,7 +113,7 @@ async function fetchKalshiMarkets() {
       url: `https://kalshi.com/markets/${topMarket.ticker}`,
       endDate: topMarket.close_time ?? undefined,
       tags: [],
-      source: 'kalshi',
+      source: "kalshi",
     });
   }
 
@@ -111,13 +121,17 @@ async function fetchKalshiMarkets() {
 }
 
 async function fetchAllPredictions() {
-  const allTags = [...new Set([...GEOPOLITICAL_TAGS, ...TECH_TAGS, ...FINANCE_TAGS])];
+  const allTags = [
+    ...new Set([...GEOPOLITICAL_TAGS, ...TECH_TAGS, ...FINANCE_TAGS]),
+  ];
   const seen = new Set();
   const markets = [];
 
   // Start Kalshi fetch early so it overlaps with Polymarket tag iterations
-  const kalshiPromise = KALSHI_ENABLED ? fetchKalshiMarkets() : Promise.resolve([]);
-  if (!KALSHI_ENABLED) console.log('  [kalshi] disabled (no KALSHI_API_KEY)');
+  const kalshiPromise = KALSHI_ENABLED
+    ? fetchKalshiMarkets()
+    : Promise.resolve([]);
+  if (!KALSHI_ENABLED) console.log("  [kalshi] disabled (no KALSHI_API_KEY)");
 
   for (const tag of allTags) {
     try {
@@ -133,12 +147,15 @@ async function fetchAllPredictions() {
         if (eventVolume < 1000) continue;
 
         if (event.markets?.length > 0) {
-          const active = event.markets.filter(m => !m.closed && !isExpired(m.endDate));
+          const active = event.markets.filter(
+            (m) => !m.closed && !isExpired(m.endDate),
+          );
           if (active.length === 0) continue;
 
           const topMarket = active.reduce((best, m) => {
             const vol = m.volumeNum ?? (m.volume ? parseFloat(m.volume) : 0);
-            const bestVol = best.volumeNum ?? (best.volume ? parseFloat(best.volume) : 0);
+            const bestVol =
+              best.volumeNum ?? (best.volume ? parseFloat(best.volume) : 0);
             return vol > bestVol ? m : best;
           });
 
@@ -151,8 +168,8 @@ async function fetchAllPredictions() {
             volume: eventVolume,
             url: `https://polymarket.com/event/${event.slug}`,
             endDate: topMarket.endDate ?? event.endDate ?? undefined,
-            tags: (event.tags ?? []).map(t => t.slug),
-            source: 'polymarket',
+            tags: (event.tags ?? []).map((t) => t.slug),
+            source: "polymarket",
           });
         } else {
           continue; // no markets = no price signal, skip
@@ -172,10 +189,18 @@ async function fetchAllPredictions() {
   console.log(`  total raw markets: ${markets.length}`);
 
   const geopolitical = filterAndScore(markets, null);
-  const tech = filterAndScore(markets, m => m.tags?.some(t => TECH_TAGS.includes(t)));
-  const finance = filterAndScore(markets, m => m.source === 'kalshi' || m.tags?.some(t => FINANCE_TAGS.includes(t)));
+  const tech = filterAndScore(markets, (m) =>
+    m.tags?.some((t) => TECH_TAGS.includes(t)),
+  );
+  const finance = filterAndScore(
+    markets,
+    (m) =>
+      m.source === "kalshi" || m.tags?.some((t) => FINANCE_TAGS.includes(t)),
+  );
 
-  console.log(`  geopolitical: ${geopolitical.length}, tech: ${tech.length}, finance: ${finance.length}`);
+  console.log(
+    `  geopolitical: ${geopolitical.length}, tech: ${tech.length}, finance: ${finance.length}`,
+  );
 
   return {
     geopolitical,
@@ -185,8 +210,10 @@ async function fetchAllPredictions() {
   };
 }
 
-await runSeed('prediction', 'markets', CANONICAL_KEY, fetchAllPredictions, {
+await runSeed("prediction", "markets", CANONICAL_KEY, fetchAllPredictions, {
   ttlSeconds: CACHE_TTL,
   lockTtlMs: 60_000,
-  validateFn: (data) => (data?.geopolitical?.length > 0 || data?.tech?.length > 0) && data?.finance?.length > 0,
+  validateFn: (data) =>
+    (data?.geopolitical?.length > 0 || data?.tech?.length > 0) &&
+    data?.finance?.length > 0,
 });

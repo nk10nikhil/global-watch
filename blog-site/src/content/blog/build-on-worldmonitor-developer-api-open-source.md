@@ -43,30 +43,30 @@ For developers building on World Monitor, this means you can trust the API contr
 
 World Monitor's API is organized into domain-specific services:
 
-| Domain | What It Covers |
-|--------|---------------|
-| **Conflict** | ACLED events, UCDP data, hotspot scoring |
-| **Military** | Bases, ADS-B flights, AIS vessels, USNI reports |
-| **Market** | Stock quotes, forex, commodities, sector performance |
-| **Crypto** | BTC signals, stablecoin pegs, ETF flows, Fear & Greed |
-| **Aviation** | Airport delays, flight tracking, airspace data |
-| **Maritime** | Vessel positions, port status, dark vessel detection |
-| **Climate** | Temperature anomalies, precipitation, sea level |
-| **Imagery** | Satellite data via STAC API |
-| **News** | Aggregated RSS feeds, trending keywords |
-| **Intelligence** | CII scores, theater posture, convergence events |
-| **Infrastructure** | Cables, pipelines, nuclear facilities, datacenters |
-| **Prediction** | Polymarket data, forecast probabilities |
-| **Cyber** | Threat feeds, C2 servers, malware URLs |
-| **Disaster** | Earthquakes, fires, volcanic events |
-| **Displacement** | UNHCR refugee and IDP data |
-| **Travel** | Government advisories, risk levels |
-| **Central Bank** | Policy rates, BIS data, REER |
-| **Tech** | AI labs, startups, accelerators, tech hubs |
-| **Commodity** | Mining sites, exchange hubs, energy infrastructure |
-| **Regulation** | AI policy tracking, regulatory changes |
-| **Health** | System health, data freshness, circuit breaker status |
-| **Bootstrap** | Hydration data for initial app load |
+| Domain             | What It Covers                                        |
+| ------------------ | ----------------------------------------------------- |
+| **Conflict**       | ACLED events, UCDP data, hotspot scoring              |
+| **Military**       | Bases, ADS-B flights, AIS vessels, USNI reports       |
+| **Market**         | Stock quotes, forex, commodities, sector performance  |
+| **Crypto**         | BTC signals, stablecoin pegs, ETF flows, Fear & Greed |
+| **Aviation**       | Airport delays, flight tracking, airspace data        |
+| **Maritime**       | Vessel positions, port status, dark vessel detection  |
+| **Climate**        | Temperature anomalies, precipitation, sea level       |
+| **Imagery**        | Satellite data via STAC API                           |
+| **News**           | Aggregated RSS feeds, trending keywords               |
+| **Intelligence**   | CII scores, theater posture, convergence events       |
+| **Infrastructure** | Cables, pipelines, nuclear facilities, datacenters    |
+| **Prediction**     | Polymarket data, forecast probabilities               |
+| **Cyber**          | Threat feeds, C2 servers, malware URLs                |
+| **Disaster**       | Earthquakes, fires, volcanic events                   |
+| **Displacement**   | UNHCR refugee and IDP data                            |
+| **Travel**         | Government advisories, risk levels                    |
+| **Central Bank**   | Policy rates, BIS data, REER                          |
+| **Tech**           | AI labs, startups, accelerators, tech hubs            |
+| **Commodity**      | Mining sites, exchange hubs, energy infrastructure    |
+| **Regulation**     | AI policy tracking, regulatory changes                |
+| **Health**         | System health, data freshness, circuit breaker status |
+| **Bootstrap**      | Hydration data for initial app load                   |
 
 Each domain has its own edge function, proto definitions, and TypeScript client.
 
@@ -81,6 +81,7 @@ The API layer runs on **Vercel Edge Functions**, providing:
 - **Rate limiting** with Cloudflare-aware client IP detection
 
 API endpoints follow the pattern:
+
 ```
 api.worldmonitor.app/api/{domain}/v1/{rpc}
 ```
@@ -99,7 +100,7 @@ Build a domain-specific dashboard that pulls exactly the data you need. Use the 
 
 ```typescript
 // Auto-generated client with full type safety
-const cii = await intelligenceClient.getCII({ countries: ['US', 'CN', 'RU'] });
+const cii = await intelligenceClient.getCII({ countries: ["US", "CN", "RU"] });
 // cii.scores is typed as CIIScore[] with all fields known at compile time
 ```
 
@@ -167,20 +168,20 @@ The proto-first architecture makes contributing safe: the type system catches co
 
 For reference, World Monitor is built with:
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React, TypeScript, Vite |
-| 3D Globe | globe.gl, Three.js |
-| Flat Map | deck.gl, MapLibre |
-| API | Vercel Edge Functions |
-| Contracts | Protocol Buffers (92 files) |
-| Desktop | Tauri (Rust) |
-| Sidecar | Node.js |
-| Caching | Redis |
-| Browser ML | Transformers.js, ONNX |
-| Styling | CSS Custom Properties |
-| i18n | i18next (21 locales) |
-| Testing | Vitest, Playwright |
+| Layer      | Technology                  |
+| ---------- | --------------------------- |
+| Frontend   | React, TypeScript, Vite     |
+| 3D Globe   | globe.gl, Three.js          |
+| Flat Map   | deck.gl, MapLibre           |
+| API        | Vercel Edge Functions       |
+| Contracts  | Protocol Buffers (92 files) |
+| Desktop    | Tauri (Rust)                |
+| Sidecar    | Node.js                     |
+| Caching    | Redis                       |
+| Browser ML | Transformers.js, ONNX       |
+| Styling    | CSS Custom Properties       |
+| i18n       | i18next (21 locales)        |
+| Testing    | Vitest, Playwright          |
 
 ## Why Build on World Monitor?
 

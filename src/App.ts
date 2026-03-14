@@ -1,5 +1,5 @@
-import type { Monitor, PanelConfig, MapLayers } from '@/types';
-import type { AppContext } from '@/app/app-context';
+import type { Monitor, PanelConfig, MapLayers } from "@/types";
+import type { AppContext } from "@/app/app-context";
 import {
   REFRESH_INTERVALS,
   DEFAULT_PANELS,
@@ -7,54 +7,88 @@ import {
   MOBILE_DEFAULT_MAP_LAYERS,
   STORAGE_KEYS,
   SITE_VARIANT,
-} from '@/config';
-import { sanitizeLayersForVariant } from '@/config/map-layer-definitions';
-import type { MapVariant } from '@/config/map-layer-definitions';
-import { initDB, cleanOldSnapshots, isAisConfigured, initAisStream, isOutagesConfigured, disconnectAisStream } from '@/services';
-import { mlWorker } from '@/services/ml-worker';
-import { getAiFlowSettings, subscribeAiFlowChange, isHeadlineMemoryEnabled } from '@/services/ai-flow-settings';
-import { startLearning } from '@/services/country-instability';
-import { loadFromStorage, parseMapUrlState, saveToStorage, isMobileDevice } from '@/utils';
-import type { ParsedMapUrlState } from '@/utils';
-import { SignalModal, IntelligenceGapBadge, BreakingNewsBanner } from '@/components';
-import { initBreakingNewsAlerts, destroyBreakingNewsAlerts } from '@/services/breaking-news-alerts';
-import type { ServiceStatusPanel } from '@/components/ServiceStatusPanel';
-import type { StablecoinPanel } from '@/components/StablecoinPanel';
-import type { ETFFlowsPanel } from '@/components/ETFFlowsPanel';
-import type { MacroSignalsPanel } from '@/components/MacroSignalsPanel';
-import type { StrategicPosturePanel } from '@/components/StrategicPosturePanel';
-import type { StrategicRiskPanel } from '@/components/StrategicRiskPanel';
-import type { GulfEconomiesPanel } from '@/components/GulfEconomiesPanel';
-import { isDesktopRuntime, waitForSidecarReady } from '@/services/runtime';
-import { getSecretState } from '@/services/runtime-config';
-import { BETA_MODE } from '@/config/beta';
-import { trackEvent, trackDeeplinkOpened } from '@/services/analytics';
-import { preloadCountryGeometry, getCountryNameByCode } from '@/services/country-geometry';
-import { initI18n } from '@/services/i18n';
+} from "@/config";
+import { sanitizeLayersForVariant } from "@/config/map-layer-definitions";
+import type { MapVariant } from "@/config/map-layer-definitions";
+import {
+  initDB,
+  cleanOldSnapshots,
+  isAisConfigured,
+  initAisStream,
+  isOutagesConfigured,
+  disconnectAisStream,
+} from "@/services";
+import { mlWorker } from "@/services/ml-worker";
+import {
+  getAiFlowSettings,
+  subscribeAiFlowChange,
+  isHeadlineMemoryEnabled,
+} from "@/services/ai-flow-settings";
+import { startLearning } from "@/services/country-instability";
+import {
+  loadFromStorage,
+  parseMapUrlState,
+  saveToStorage,
+  isMobileDevice,
+} from "@/utils";
+import type { ParsedMapUrlState } from "@/utils";
+import {
+  SignalModal,
+  IntelligenceGapBadge,
+  BreakingNewsBanner,
+} from "@/components";
+import {
+  initBreakingNewsAlerts,
+  destroyBreakingNewsAlerts,
+} from "@/services/breaking-news-alerts";
+import type { ServiceStatusPanel } from "@/components/ServiceStatusPanel";
+import type { StablecoinPanel } from "@/components/StablecoinPanel";
+import type { ETFFlowsPanel } from "@/components/ETFFlowsPanel";
+import type { MacroSignalsPanel } from "@/components/MacroSignalsPanel";
+import type { StrategicPosturePanel } from "@/components/StrategicPosturePanel";
+import type { StrategicRiskPanel } from "@/components/StrategicRiskPanel";
+import type { GulfEconomiesPanel } from "@/components/GulfEconomiesPanel";
+import { isDesktopRuntime, waitForSidecarReady } from "@/services/runtime";
+import { getSecretState } from "@/services/runtime-config";
+import { BETA_MODE } from "@/config/beta";
+import { trackEvent, trackDeeplinkOpened } from "@/services/analytics";
+import {
+  preloadCountryGeometry,
+  getCountryNameByCode,
+} from "@/services/country-geometry";
+import { initI18n } from "@/services/i18n";
 
-import { computeDefaultDisabledSources, getLocaleBoostedSources, getTotalFeedCount } from '@/config/feeds';
-import { fetchBootstrapData } from '@/services/bootstrap';
-import { DesktopUpdater } from '@/app/desktop-updater';
-import { CountryIntelManager } from '@/app/country-intel';
-import { SearchManager } from '@/app/search-manager';
-import { RefreshScheduler } from '@/app/refresh-scheduler';
-import { PanelLayoutManager } from '@/app/panel-layout';
-import { DataLoaderManager } from '@/app/data-loader';
-import { EventHandlerManager } from '@/app/event-handlers';
-import { resolveUserRegion, resolvePreciseUserCoordinates, type PreciseCoordinates } from '@/utils/user-location';
-import { showProBanner } from '@/components/ProBanner';
+import {
+  computeDefaultDisabledSources,
+  getLocaleBoostedSources,
+  getTotalFeedCount,
+} from "@/config/feeds";
+import { fetchBootstrapData } from "@/services/bootstrap";
+import { DesktopUpdater } from "@/app/desktop-updater";
+import { CountryIntelManager } from "@/app/country-intel";
+import { SearchManager } from "@/app/search-manager";
+import { RefreshScheduler } from "@/app/refresh-scheduler";
+import { PanelLayoutManager } from "@/app/panel-layout";
+import { DataLoaderManager } from "@/app/data-loader";
+import { EventHandlerManager } from "@/app/event-handlers";
+import {
+  resolveUserRegion,
+  resolvePreciseUserCoordinates,
+  type PreciseCoordinates,
+} from "@/utils/user-location";
+import { showProBanner } from "@/components/ProBanner";
 import {
   CorrelationEngine,
   militaryAdapter,
   escalationAdapter,
   economicAdapter,
   disasterAdapter,
-} from '@/services/correlation-engine';
-import type { CorrelationPanel } from '@/components/CorrelationPanel';
+} from "@/services/correlation-engine";
+import type { CorrelationPanel } from "@/components/CorrelationPanel";
 
-const CYBER_LAYER_ENABLED = import.meta.env.VITE_ENABLE_CYBER_LAYER === 'true';
+const CYBER_LAYER_ENABLED = import.meta.env.VITE_ENABLE_CYBER_LAYER === "true";
 
-export type { CountryBriefSignals } from '@/app/app-context';
+export type { CountryBriefSignals } from "@/app/app-context";
 
 export class App {
   private state: AppContext;
@@ -83,18 +117,23 @@ export class App {
   };
 
   private isPanelNearViewport(panelId: string, marginPx = 400): boolean {
-    const panel = this.state.panels[panelId] as { isNearViewport?: (marginPx?: number) => boolean } | undefined;
+    const panel = this.state.panels[panelId] as
+      | { isNearViewport?: (marginPx?: number) => boolean }
+      | undefined;
     return panel?.isNearViewport?.(marginPx) ?? false;
   }
 
   private isAnyPanelNearViewport(panelIds: string[], marginPx = 400): boolean {
-    return panelIds.some((panelId) => this.isPanelNearViewport(panelId, marginPx));
+    return panelIds.some((panelId) =>
+      this.isPanelNearViewport(panelId, marginPx),
+    );
   }
 
   private async primeVisiblePanelData(forceAll = false): Promise<void> {
     const tasks: Promise<unknown>[] = [];
     const primeTask = (key: string, task: () => Promise<unknown>): void => {
-      if (this.visiblePanelPrimed.has(key) || this.state.inFlight.has(key)) return;
+      if (this.visiblePanelPrimed.has(key) || this.state.inFlight.has(key))
+        return;
       const wrapped = (async () => {
         this.state.inFlight.add(key);
         try {
@@ -107,59 +146,74 @@ export class App {
       tasks.push(wrapped);
     };
 
-    const shouldPrime = (id: string): boolean => forceAll || this.isPanelNearViewport(id);
-    const shouldPrimeAny = (ids: string[]): boolean => forceAll || this.isAnyPanelNearViewport(ids);
+    const shouldPrime = (id: string): boolean =>
+      forceAll || this.isPanelNearViewport(id);
+    const shouldPrimeAny = (ids: string[]): boolean =>
+      forceAll || this.isAnyPanelNearViewport(ids);
 
-    if (shouldPrime('service-status')) {
-      const panel = this.state.panels['service-status'] as ServiceStatusPanel | undefined;
-      if (panel) primeTask('service-status', () => panel.fetchStatus());
+    if (shouldPrime("service-status")) {
+      const panel = this.state.panels["service-status"] as
+        | ServiceStatusPanel
+        | undefined;
+      if (panel) primeTask("service-status", () => panel.fetchStatus());
     }
-    if (shouldPrime('macro-signals')) {
-      const panel = this.state.panels['macro-signals'] as MacroSignalsPanel | undefined;
-      if (panel) primeTask('macro-signals', () => panel.fetchData());
+    if (shouldPrime("macro-signals")) {
+      const panel = this.state.panels["macro-signals"] as
+        | MacroSignalsPanel
+        | undefined;
+      if (panel) primeTask("macro-signals", () => panel.fetchData());
     }
-    if (shouldPrime('etf-flows')) {
-      const panel = this.state.panels['etf-flows'] as ETFFlowsPanel | undefined;
-      if (panel) primeTask('etf-flows', () => panel.fetchData());
+    if (shouldPrime("etf-flows")) {
+      const panel = this.state.panels["etf-flows"] as ETFFlowsPanel | undefined;
+      if (panel) primeTask("etf-flows", () => panel.fetchData());
     }
-    if (shouldPrime('stablecoins')) {
-      const panel = this.state.panels['stablecoins'] as StablecoinPanel | undefined;
-      if (panel) primeTask('stablecoins', () => panel.fetchData());
+    if (shouldPrime("stablecoins")) {
+      const panel = this.state.panels["stablecoins"] as
+        | StablecoinPanel
+        | undefined;
+      if (panel) primeTask("stablecoins", () => panel.fetchData());
     }
-    if (shouldPrime('telegram-intel')) {
-      primeTask('telegram-intel', () => this.dataLoader.loadTelegramIntel());
+    if (shouldPrime("telegram-intel")) {
+      primeTask("telegram-intel", () => this.dataLoader.loadTelegramIntel());
     }
-    if (shouldPrime('gulf-economies')) {
-      const panel = this.state.panels['gulf-economies'] as GulfEconomiesPanel | undefined;
-      if (panel) primeTask('gulf-economies', () => panel.fetchData());
+    if (shouldPrime("gulf-economies")) {
+      const panel = this.state.panels["gulf-economies"] as
+        | GulfEconomiesPanel
+        | undefined;
+      if (panel) primeTask("gulf-economies", () => panel.fetchData());
     }
-    if (shouldPrimeAny(['markets', 'heatmap', 'commodities', 'crypto'])) {
-      primeTask('markets', () => this.dataLoader.loadMarkets());
+    if (shouldPrimeAny(["markets", "heatmap", "commodities", "crypto"])) {
+      primeTask("markets", () => this.dataLoader.loadMarkets());
     }
-    if (shouldPrime('polymarket')) {
-      primeTask('predictions', () => this.dataLoader.loadPredictions());
+    if (shouldPrime("polymarket")) {
+      primeTask("predictions", () => this.dataLoader.loadPredictions());
     }
-    if (shouldPrime('economic')) {
-      primeTask('fred', () => this.dataLoader.loadFredData());
-      primeTask('oil', () => this.dataLoader.loadOilAnalytics());
-      primeTask('spending', () => this.dataLoader.loadGovernmentSpending());
-      primeTask('bis', () => this.dataLoader.loadBisData());
+    if (shouldPrime("economic")) {
+      primeTask("fred", () => this.dataLoader.loadFredData());
+      primeTask("oil", () => this.dataLoader.loadOilAnalytics());
+      primeTask("spending", () => this.dataLoader.loadGovernmentSpending());
+      primeTask("bis", () => this.dataLoader.loadBisData());
     }
-    if (shouldPrime('trade-policy')) {
-      primeTask('tradePolicy', () => this.dataLoader.loadTradePolicy());
+    if (shouldPrime("trade-policy")) {
+      primeTask("tradePolicy", () => this.dataLoader.loadTradePolicy());
     }
-    if (shouldPrime('supply-chain')) {
-      primeTask('supplyChain', () => this.dataLoader.loadSupplyChain());
+    if (shouldPrime("supply-chain")) {
+      primeTask("supplyChain", () => this.dataLoader.loadSupplyChain());
     }
-    if (SITE_VARIANT === 'finance' && getSecretState('WORLDMONITOR_API_KEY').present) {
-      if (shouldPrime('stock-analysis')) {
-        primeTask('stockAnalysis', () => this.dataLoader.loadStockAnalysis());
+    if (
+      SITE_VARIANT === "finance" &&
+      getSecretState("WORLDMONITOR_API_KEY").present
+    ) {
+      if (shouldPrime("stock-analysis")) {
+        primeTask("stockAnalysis", () => this.dataLoader.loadStockAnalysis());
       }
-      if (shouldPrime('stock-backtest')) {
-        primeTask('stockBacktest', () => this.dataLoader.loadStockBacktest());
+      if (shouldPrime("stock-backtest")) {
+        primeTask("stockBacktest", () => this.dataLoader.loadStockBacktest());
       }
-      if (shouldPrime('daily-market-brief')) {
-        primeTask('dailyMarketBrief', () => this.dataLoader.loadDailyMarketBrief());
+      if (shouldPrime("daily-market-brief")) {
+        primeTask("dailyMarketBrief", () =>
+          this.dataLoader.loadDailyMarketBrief(),
+        );
       }
     }
 
@@ -172,34 +226,41 @@ export class App {
     const el = document.getElementById(containerId);
     if (!el) throw new Error(`Container ${containerId} not found`);
 
-    const PANEL_ORDER_KEY = 'panel-order';
-    const PANEL_SPANS_KEY = 'worldmonitor-panel-spans';
+    const PANEL_ORDER_KEY = "panel-order";
+    const PANEL_SPANS_KEY = "worldmonitor-panel-spans";
 
     const isMobile = isMobileDevice();
     const isDesktopApp = isDesktopRuntime();
     const monitors = loadFromStorage<Monitor[]>(STORAGE_KEYS.monitors, []);
 
     // Use mobile-specific defaults on first load (no saved layers)
-    const defaultLayers = isMobile ? MOBILE_DEFAULT_MAP_LAYERS : DEFAULT_MAP_LAYERS;
+    const defaultLayers = isMobile
+      ? MOBILE_DEFAULT_MAP_LAYERS
+      : DEFAULT_MAP_LAYERS;
 
     let mapLayers: MapLayers;
     let panelSettings: Record<string, PanelConfig>;
 
     // Check if variant changed - reset all settings to variant defaults
-    const storedVariant = localStorage.getItem('worldmonitor-variant');
+    const storedVariant = localStorage.getItem("worldmonitor-variant");
     const currentVariant = SITE_VARIANT;
-    console.log(`[App] Variant check: stored="${storedVariant}", current="${currentVariant}"`);
+    console.log(
+      `[App] Variant check: stored="${storedVariant}", current="${currentVariant}"`,
+    );
     if (storedVariant !== currentVariant) {
       // Variant changed - use defaults for new variant, clear old settings
-      console.log('[App] Variant changed - resetting to defaults');
-      localStorage.setItem('worldmonitor-variant', currentVariant);
+      console.log("[App] Variant changed - resetting to defaults");
+      localStorage.setItem("worldmonitor-variant", currentVariant);
       localStorage.removeItem(STORAGE_KEYS.mapLayers);
       localStorage.removeItem(STORAGE_KEYS.panels);
       localStorage.removeItem(PANEL_ORDER_KEY);
-      localStorage.removeItem(PANEL_ORDER_KEY + '-bottom');
-      localStorage.removeItem(PANEL_ORDER_KEY + '-bottom-set');
+      localStorage.removeItem(PANEL_ORDER_KEY + "-bottom");
+      localStorage.removeItem(PANEL_ORDER_KEY + "-bottom-set");
       localStorage.removeItem(PANEL_SPANS_KEY);
-      mapLayers = sanitizeLayersForVariant({ ...defaultLayers }, currentVariant as MapVariant);
+      mapLayers = sanitizeLayersForVariant(
+        { ...defaultLayers },
+        currentVariant as MapVariant,
+      );
       panelSettings = { ...DEFAULT_PANELS };
     } else {
       mapLayers = sanitizeLayersForVariant(
@@ -208,7 +269,7 @@ export class App {
       );
       panelSettings = loadFromStorage<Record<string, PanelConfig>>(
         STORAGE_KEYS.panels,
-        DEFAULT_PANELS
+        DEFAULT_PANELS,
       );
       // Merge in any new panels that didn't exist when settings were saved
       for (const [key, config] of Object.entries(DEFAULT_PANELS)) {
@@ -216,99 +277,122 @@ export class App {
           panelSettings[key] = { ...config };
         }
       }
-      console.log('[App] Loaded panel settings from storage:', Object.entries(panelSettings).filter(([_, v]) => !v.enabled).map(([k]) => k));
+      console.log(
+        "[App] Loaded panel settings from storage:",
+        Object.entries(panelSettings)
+          .filter(([_, v]) => !v.enabled)
+          .map(([k]) => k),
+      );
 
       // One-time migration: reorder panels for existing users (v1.9 panel layout)
-      const PANEL_ORDER_MIGRATION_KEY = 'worldmonitor-panel-order-v1.9';
+      const PANEL_ORDER_MIGRATION_KEY = "worldmonitor-panel-order-v1.9";
       if (!localStorage.getItem(PANEL_ORDER_MIGRATION_KEY)) {
         const savedOrder = localStorage.getItem(PANEL_ORDER_KEY);
         if (savedOrder) {
           try {
             const order: string[] = JSON.parse(savedOrder);
-            const priorityPanels = ['insights', 'strategic-posture', 'cii', 'strategic-risk'];
-            const filtered = order.filter(k => !priorityPanels.includes(k) && k !== 'live-news');
-            const liveNewsIdx = order.indexOf('live-news');
-            const newOrder = liveNewsIdx !== -1 ? ['live-news'] : [];
-            newOrder.push(...priorityPanels.filter(p => order.includes(p)));
+            const priorityPanels = [
+              "insights",
+              "strategic-posture",
+              "cii",
+              "strategic-risk",
+            ];
+            const filtered = order.filter(
+              (k) => !priorityPanels.includes(k) && k !== "live-news",
+            );
+            const liveNewsIdx = order.indexOf("live-news");
+            const newOrder = liveNewsIdx !== -1 ? ["live-news"] : [];
+            newOrder.push(...priorityPanels.filter((p) => order.includes(p)));
             newOrder.push(...filtered);
             localStorage.setItem(PANEL_ORDER_KEY, JSON.stringify(newOrder));
-            console.log('[App] Migrated panel order to v1.9 layout');
+            console.log("[App] Migrated panel order to v1.9 layout");
           } catch {
             // Invalid saved order, will use defaults
           }
         }
-        localStorage.setItem(PANEL_ORDER_MIGRATION_KEY, 'done');
+        localStorage.setItem(PANEL_ORDER_MIGRATION_KEY, "done");
       }
 
       // Tech variant migration: move insights to top (after live-news)
-      if (currentVariant === 'tech') {
-        const TECH_INSIGHTS_MIGRATION_KEY = 'worldmonitor-tech-insights-top-v1';
+      if (currentVariant === "tech") {
+        const TECH_INSIGHTS_MIGRATION_KEY = "worldmonitor-tech-insights-top-v1";
         if (!localStorage.getItem(TECH_INSIGHTS_MIGRATION_KEY)) {
           const savedOrder = localStorage.getItem(PANEL_ORDER_KEY);
           if (savedOrder) {
             try {
               const order: string[] = JSON.parse(savedOrder);
-              const filtered = order.filter(k => k !== 'insights' && k !== 'live-news');
+              const filtered = order.filter(
+                (k) => k !== "insights" && k !== "live-news",
+              );
               const newOrder: string[] = [];
-              if (order.includes('live-news')) newOrder.push('live-news');
-              if (order.includes('insights')) newOrder.push('insights');
+              if (order.includes("live-news")) newOrder.push("live-news");
+              if (order.includes("insights")) newOrder.push("insights");
               newOrder.push(...filtered);
               localStorage.setItem(PANEL_ORDER_KEY, JSON.stringify(newOrder));
-              console.log('[App] Tech variant: Migrated insights panel to top');
+              console.log("[App] Tech variant: Migrated insights panel to top");
             } catch {
               // Invalid saved order, will use defaults
             }
           }
-          localStorage.setItem(TECH_INSIGHTS_MIGRATION_KEY, 'done');
+          localStorage.setItem(TECH_INSIGHTS_MIGRATION_KEY, "done");
         }
       }
     }
 
     // One-time migration: prune removed panel keys from stored settings and order
-    const PANEL_PRUNE_KEY = 'worldmonitor-panel-prune-v1';
+    const PANEL_PRUNE_KEY = "worldmonitor-panel-prune-v1";
     if (!localStorage.getItem(PANEL_PRUNE_KEY)) {
       const validKeys = new Set(Object.keys(DEFAULT_PANELS));
       let pruned = false;
       for (const key of Object.keys(panelSettings)) {
-        if (!validKeys.has(key) && key !== 'runtime-config') {
+        if (!validKeys.has(key) && key !== "runtime-config") {
           delete panelSettings[key];
           pruned = true;
         }
       }
       if (pruned) saveToStorage(STORAGE_KEYS.panels, panelSettings);
-      for (const orderKey of [PANEL_ORDER_KEY, PANEL_ORDER_KEY + '-bottom-set', PANEL_ORDER_KEY + '-bottom']) {
+      for (const orderKey of [
+        PANEL_ORDER_KEY,
+        PANEL_ORDER_KEY + "-bottom-set",
+        PANEL_ORDER_KEY + "-bottom",
+      ]) {
         try {
           const raw = localStorage.getItem(orderKey);
           if (!raw) continue;
           const arr = JSON.parse(raw);
           if (!Array.isArray(arr)) continue;
           const filtered = arr.filter((k: string) => validKeys.has(k));
-          if (filtered.length !== arr.length) localStorage.setItem(orderKey, JSON.stringify(filtered));
-        } catch { localStorage.removeItem(orderKey); }
+          if (filtered.length !== arr.length)
+            localStorage.setItem(orderKey, JSON.stringify(filtered));
+        } catch {
+          localStorage.removeItem(orderKey);
+        }
       }
-      localStorage.setItem(PANEL_PRUNE_KEY, 'done');
+      localStorage.setItem(PANEL_PRUNE_KEY, "done");
     }
 
     // One-time migration: clear stale panel ordering and sizing state
-    const LAYOUT_RESET_MIGRATION_KEY = 'worldmonitor-layout-reset-v2.5';
+    const LAYOUT_RESET_MIGRATION_KEY = "worldmonitor-layout-reset-v2.5";
     if (!localStorage.getItem(LAYOUT_RESET_MIGRATION_KEY)) {
       const hadSavedOrder = !!localStorage.getItem(PANEL_ORDER_KEY);
       const hadSavedSpans = !!localStorage.getItem(PANEL_SPANS_KEY);
       if (hadSavedOrder || hadSavedSpans) {
         localStorage.removeItem(PANEL_ORDER_KEY);
-        localStorage.removeItem(PANEL_ORDER_KEY + '-bottom');
-        localStorage.removeItem(PANEL_ORDER_KEY + '-bottom-set');
+        localStorage.removeItem(PANEL_ORDER_KEY + "-bottom");
+        localStorage.removeItem(PANEL_ORDER_KEY + "-bottom-set");
         localStorage.removeItem(PANEL_SPANS_KEY);
-        console.log('[App] Applied layout reset migration (v2.5): cleared panel order/spans');
+        console.log(
+          "[App] Applied layout reset migration (v2.5): cleared panel order/spans",
+        );
       }
-      localStorage.setItem(LAYOUT_RESET_MIGRATION_KEY, 'done');
+      localStorage.setItem(LAYOUT_RESET_MIGRATION_KEY, "done");
     }
 
     // Desktop key management panel must always remain accessible in Tauri.
     if (isDesktopApp) {
-      if (!panelSettings['runtime-config']) {
-        panelSettings['runtime-config'] = {
-          name: 'Desktop Configuration',
+      if (!panelSettings["runtime-config"]) {
+        panelSettings["runtime-config"] = {
+          name: "Desktop Configuration",
           enabled: true,
           priority: 2,
         };
@@ -316,40 +400,57 @@ export class App {
       }
     }
 
-    let initialUrlState: ParsedMapUrlState | null = parseMapUrlState(window.location.search, mapLayers);
+    let initialUrlState: ParsedMapUrlState | null = parseMapUrlState(
+      window.location.search,
+      mapLayers,
+    );
     if (initialUrlState.layers) {
-      mapLayers = sanitizeLayersForVariant(initialUrlState.layers, currentVariant as MapVariant);
+      mapLayers = sanitizeLayersForVariant(
+        initialUrlState.layers,
+        currentVariant as MapVariant,
+      );
       initialUrlState.layers = mapLayers;
     }
     if (!CYBER_LAYER_ENABLED) {
       mapLayers.cyberThreats = false;
     }
     // One-time migration: reduce default-enabled sources (full variant only)
-    if (currentVariant === 'full') {
-      const baseKey = 'worldmonitor-sources-reduction-v3';
+    if (currentVariant === "full") {
+      const baseKey = "worldmonitor-sources-reduction-v3";
       if (!localStorage.getItem(baseKey)) {
         const defaultDisabled = computeDefaultDisabledSources();
         saveToStorage(STORAGE_KEYS.disabledFeeds, defaultDisabled);
-        localStorage.setItem(baseKey, 'done');
+        localStorage.setItem(baseKey, "done");
         const total = getTotalFeedCount();
-        console.log(`[App] Sources reduction: ${defaultDisabled.length} disabled, ${total - defaultDisabled.length} enabled`);
+        console.log(
+          `[App] Sources reduction: ${defaultDisabled.length} disabled, ${total - defaultDisabled.length} enabled`,
+        );
       }
       // Locale boost: additively enable locale-matched sources (runs once per locale)
-      const userLang = ((navigator.language ?? 'en').split('-')[0] ?? 'en').toLowerCase();
+      const userLang = (
+        (navigator.language ?? "en").split("-")[0] ?? "en"
+      ).toLowerCase();
       const localeKey = `worldmonitor-locale-boost-${userLang}`;
-      if (userLang !== 'en' && !localStorage.getItem(localeKey)) {
+      if (userLang !== "en" && !localStorage.getItem(localeKey)) {
         const boosted = getLocaleBoostedSources(userLang);
         if (boosted.size > 0) {
-          const current = loadFromStorage<string[]>(STORAGE_KEYS.disabledFeeds, []);
-          const updated = current.filter(name => !boosted.has(name));
+          const current = loadFromStorage<string[]>(
+            STORAGE_KEYS.disabledFeeds,
+            [],
+          );
+          const updated = current.filter((name) => !boosted.has(name));
           saveToStorage(STORAGE_KEYS.disabledFeeds, updated);
-          console.log(`[App] Locale boost (${userLang}): enabled ${current.length - updated.length} sources`);
+          console.log(
+            `[App] Locale boost (${userLang}): enabled ${current.length - updated.length} sources`,
+          );
         }
-        localStorage.setItem(localeKey, 'done');
+        localStorage.setItem(localeKey, "done");
       }
     }
 
-    const disabledSources = new Set(loadFromStorage<string[]>(STORAGE_KEYS.disabledFeeds, []));
+    const disabledSources = new Set(
+      loadFromStorage<string[]>(STORAGE_KEYS.disabledFeeds, []),
+    );
 
     // Build shared state object
     this.state = {
@@ -369,7 +470,7 @@ export class App {
       intelligenceCache: {},
       cyberThreatsCache: null,
       disabledSources,
-      currentTimeRange: '7d',
+      currentTimeRange: "7d",
       inFlight: new Set(),
       seenGeoAlerts: new Set(),
       monitors,
@@ -399,7 +500,7 @@ export class App {
       isPlaybackMode: false,
       isIdle: false,
       initialLoadComplete: false,
-      resolvedLocation: 'global',
+      resolvedLocation: "global",
       initialUrlState,
       PANEL_ORDER_KEY,
       PANEL_SPANS_KEY,
@@ -411,16 +512,19 @@ export class App {
     this.desktopUpdater = new DesktopUpdater(this.state);
 
     this.dataLoader = new DataLoaderManager(this.state, {
-      renderCriticalBanner: (postures) => this.panelLayout.renderCriticalBanner(postures),
+      renderCriticalBanner: (postures) =>
+        this.panelLayout.renderCriticalBanner(postures),
       refreshOpenCountryBrief: () => this.countryIntel.refreshOpenBrief(),
     });
 
     this.searchManager = new SearchManager(this.state, {
-      openCountryBriefByCode: (code, country) => this.countryIntel.openCountryBriefByCode(code, country),
+      openCountryBriefByCode: (code, country) =>
+        this.countryIntel.openCountryBriefByCode(code, country),
     });
 
     this.panelLayout = new PanelLayoutManager(this.state, {
-      openCountryStory: (code, name) => this.countryIntel.openCountryStory(code, name),
+      openCountryStory: (code, name) =>
+        this.countryIntel.openCountryStory(code, name),
       openCountryBrief: (code) => {
         const name = CountryIntelManager.resolveCountryName(code);
         void this.countryIntel.openCountryBriefByCode(code, name);
@@ -435,16 +539,20 @@ export class App {
       loadAllData: () => this.dataLoader.loadAllData(),
       flushStaleRefreshes: () => this.refreshScheduler.flushStaleRefreshes(),
       setHiddenSince: (ts) => this.refreshScheduler.setHiddenSince(ts),
-      loadDataForLayer: (layer) => { void this.dataLoader.loadDataForLayer(layer as keyof MapLayers); },
+      loadDataForLayer: (layer) => {
+        void this.dataLoader.loadDataForLayer(layer as keyof MapLayers);
+      },
       waitForAisData: () => this.dataLoader.waitForAisData(),
-      syncDataFreshnessWithLayers: () => this.dataLoader.syncDataFreshnessWithLayers(),
+      syncDataFreshnessWithLayers: () =>
+        this.dataLoader.syncDataFreshnessWithLayers(),
       ensureCorrectZones: () => this.panelLayout.ensureCorrectZones(),
       refreshOpenCountryBrief: () => this.countryIntel.refreshOpenBrief(),
       stopLayerActivity: (layer) => this.dataLoader.stopLayerActivity(layer),
     });
 
     // Wire cross-module callback: DataLoader → SearchManager
-    this.dataLoader.updateSearchIndex = () => this.searchManager.updateSearchIndex();
+    this.dataLoader.updateSearchIndex = () =>
+      this.searchManager.updateSearchIndex();
 
     // Track destroy order (reverse of init)
     this.modules = [
@@ -465,17 +573,20 @@ export class App {
     const aiFlow = getAiFlowSettings();
     if (aiFlow.browserModel || isDesktopRuntime()) {
       await mlWorker.init();
-      if (BETA_MODE) mlWorker.loadModel('summarization-beta').catch(() => { });
+      if (BETA_MODE) mlWorker.loadModel("summarization-beta").catch(() => {});
     }
 
     if (aiFlow.headlineMemory) {
-      mlWorker.init().then(ok => {
-        if (ok) mlWorker.loadModel('embeddings').catch(() => { });
-      }).catch(() => { });
+      mlWorker
+        .init()
+        .then((ok) => {
+          if (ok) mlWorker.loadModel("embeddings").catch(() => {});
+        })
+        .catch(() => {});
     }
 
     this.unsubAiFlow = subscribeAiFlowChange((key) => {
-      if (key === 'browserModel') {
+      if (key === "browserModel") {
         const s = getAiFlowSettings();
         if (s.browserModel) {
           mlWorker.init();
@@ -483,13 +594,16 @@ export class App {
           mlWorker.terminate();
         }
       }
-      if (key === 'headlineMemory') {
+      if (key === "headlineMemory") {
         if (isHeadlineMemoryEnabled()) {
-          mlWorker.init().then(ok => {
-            if (ok) mlWorker.loadModel('embeddings').catch(() => { });
-          }).catch(() => { });
+          mlWorker
+            .init()
+            .then((ok) => {
+              if (ok) mlWorker.loadModel("embeddings").catch(() => {});
+            })
+            .catch(() => {});
         } else {
-          mlWorker.unloadModel('embeddings').catch(() => { });
+          mlWorker.unloadModel("embeddings").catch(() => {});
           const s = getAiFlowSettings();
           if (!s.browserModel && !isDesktopRuntime()) {
             mlWorker.terminate();
@@ -514,7 +628,9 @@ export class App {
     await fetchBootstrapData();
 
     const geoCoordsPromise: Promise<PreciseCoordinates | null> =
-      this.state.isMobile && this.state.initialUrlState?.lat === undefined && this.state.initialUrlState?.lon === undefined
+      this.state.isMobile &&
+      this.state.initialUrlState?.lat === undefined &&
+      this.state.initialUrlState?.lon === undefined
         ? resolvePreciseUserCoordinates(5000)
         : Promise.resolve(null);
 
@@ -531,7 +647,7 @@ export class App {
     }
 
     // Happy variant: pre-populate panels from persistent cache for instant render
-    if (SITE_VARIANT === 'happy') {
+    if (SITE_VARIANT === "happy") {
       await this.dataLoader.hydrateHappyPanelsFromCache();
     }
 
@@ -544,12 +660,12 @@ export class App {
       this.state.findingsBadge = new IntelligenceGapBadge();
       this.state.findingsBadge.setOnSignalClick((signal) => {
         if (this.state.countryBriefPage?.isVisible()) return;
-        if (localStorage.getItem('wm-settings-open') === '1') return;
+        if (localStorage.getItem("wm-settings-open") === "1") return;
         this.state.signalModal?.showSignal(signal);
       });
       this.state.findingsBadge.setOnAlertClick((alert) => {
         if (this.state.countryBriefPage?.isVisible()) return;
-        if (localStorage.getItem('wm-settings-open') === '1') return;
+        if (localStorage.getItem("wm-settings-open") === "1") return;
         this.state.signalModal?.showAlert(alert);
       });
     }
@@ -583,11 +699,14 @@ export class App {
     // Phase 5: Event listeners + URL sync
     this.eventHandlers.init();
     // Capture deep link params BEFORE URL sync overwrites them
-    const initState = parseMapUrlState(window.location.search, this.state.mapLayers);
+    const initState = parseMapUrlState(
+      window.location.search,
+      this.state.mapLayers,
+    );
     this.pendingDeepLinkCountry = initState.country ?? null;
     this.pendingDeepLinkExpanded = initState.expanded === true;
     const earlyParams = new URLSearchParams(window.location.search);
-    this.pendingDeepLinkStoryCode = earlyParams.get('c') ?? null;
+    this.pendingDeepLinkStoryCode = earlyParams.get("c") ?? null;
     this.eventHandlers.setupUrlStateSync();
 
     this.state.countryBriefPage?.onStateChange?.(() => {
@@ -605,8 +724,10 @@ export class App {
     // primeVisiblePanelData owns ETF, Stablecoins, Gulf Economies, etc. that
     // are NOT part of loadAllData. Running them in parallel prevents those
     // panels from being blocked when a loadAllData batch is slow.
-    window.addEventListener('scroll', this.handleViewportPrime, { passive: true });
-    window.addEventListener('resize', this.handleViewportPrime);
+    window.addEventListener("scroll", this.handleViewportPrime, {
+      passive: true,
+    });
+    window.addEventListener("resize", this.handleViewportPrime);
     await Promise.all([
       this.dataLoader.loadAllData(true),
       this.primeVisiblePanelData(true),
@@ -615,8 +736,15 @@ export class App {
     // Initial correlation engine run
     if (this.state.correlationEngine) {
       void this.state.correlationEngine.run(this.state).then(() => {
-        for (const domain of ['military', 'escalation', 'economic', 'disaster'] as const) {
-          const panel = this.state.panels[`${domain}-correlation`] as CorrelationPanel | undefined;
+        for (const domain of [
+          "military",
+          "escalation",
+          "economic",
+          "disaster",
+        ] as const) {
+          const panel = this.state.panels[`${domain}-correlation`] as
+            | CorrelationPanel
+            | undefined;
           panel?.updateCards(this.state.correlationEngine!.getCards(domain));
         }
       });
@@ -626,25 +754,27 @@ export class App {
 
     // Hide unconfigured layers after first data load
     if (!isAisConfigured()) {
-      this.state.map?.hideLayerToggle('ais');
+      this.state.map?.hideLayerToggle("ais");
     }
     if (isOutagesConfigured() === false) {
-      this.state.map?.hideLayerToggle('outages');
+      this.state.map?.hideLayerToggle("outages");
     }
     if (!CYBER_LAYER_ENABLED) {
-      this.state.map?.hideLayerToggle('cyberThreats');
+      this.state.map?.hideLayerToggle("cyberThreats");
     }
 
     // Phase 7: Refresh scheduling
     this.setupRefreshIntervals();
     this.eventHandlers.setupSnapshotSaving();
-    cleanOldSnapshots().catch((e) => console.warn('[Storage] Snapshot cleanup failed:', e));
+    cleanOldSnapshots().catch((e) =>
+      console.warn("[Storage] Snapshot cleanup failed:", e),
+    );
 
     // Phase 8: Update checks
     this.desktopUpdater.init();
 
     // Analytics
-    trackEvent('wm_app_loaded', {
+    trackEvent("wm_app_loaded", {
       load_time_ms: Math.round(performance.now() - initStart),
       panel_count: Object.keys(this.state.panels).length,
     });
@@ -653,8 +783,8 @@ export class App {
 
   public destroy(): void {
     this.state.isDestroyed = true;
-    window.removeEventListener('scroll', this.handleViewportPrime);
-    window.removeEventListener('resize', this.handleViewportPrime);
+    window.removeEventListener("scroll", this.handleViewportPrime);
+    window.removeEventListener("resize", this.handleViewportPrime);
     if (this.visiblePanelPrimeRaf !== null) {
       window.cancelAnimationFrame(this.visiblePanelPrimeRaf);
       this.visiblePanelPrimeRaf = null;
@@ -678,17 +808,23 @@ export class App {
     const DEEP_LINK_INITIAL_DELAY_MS = 1500;
 
     // Check for country brief deep link: ?c=IR (captured early before URL sync)
-    const storyCode = this.pendingDeepLinkStoryCode ?? url.searchParams.get('c');
+    const storyCode =
+      this.pendingDeepLinkStoryCode ?? url.searchParams.get("c");
     this.pendingDeepLinkStoryCode = null;
-    if (url.pathname === '/story' || storyCode) {
+    if (url.pathname === "/story" || storyCode) {
       const countryCode = storyCode;
       if (countryCode) {
-        trackDeeplinkOpened('country', countryCode);
-        const countryName = getCountryNameByCode(countryCode.toUpperCase()) || countryCode;
+        trackDeeplinkOpened("country", countryCode);
+        const countryName =
+          getCountryNameByCode(countryCode.toUpperCase()) || countryCode;
         setTimeout(() => {
-          this.countryIntel.openCountryBriefByCode(countryCode.toUpperCase(), countryName, {
-            maximize: true,
-          });
+          this.countryIntel.openCountryBriefByCode(
+            countryCode.toUpperCase(),
+            countryName,
+            {
+              maximize: true,
+            },
+          );
           this.eventHandlers.syncUrlState();
         }, DEEP_LINK_INITIAL_DELAY_MS);
         return;
@@ -701,7 +837,7 @@ export class App {
     this.pendingDeepLinkCountry = null;
     this.pendingDeepLinkExpanded = false;
     if (deepLinkCountry) {
-      trackDeeplinkOpened('country', deepLinkCountry);
+      trackDeeplinkOpened("country", deepLinkCountry);
       const cName = CountryIntelManager.resolveCountryName(deepLinkCountry);
       setTimeout(() => {
         this.countryIntel.openCountryBriefByCode(deepLinkCountry, cName, {
@@ -714,149 +850,265 @@ export class App {
 
   private setupRefreshIntervals(): void {
     // Always refresh news for all variants
-    this.refreshScheduler.scheduleRefresh('news', () => this.dataLoader.loadNews(), REFRESH_INTERVALS.feeds);
+    this.refreshScheduler.scheduleRefresh(
+      "news",
+      () => this.dataLoader.loadNews(),
+      REFRESH_INTERVALS.feeds,
+    );
 
     // Happy variant only refreshes news -- skip all geopolitical/financial/military refreshes
-    if (SITE_VARIANT !== 'happy') {
+    if (SITE_VARIANT !== "happy") {
       this.refreshScheduler.registerAll([
         {
-          name: 'markets',
+          name: "markets",
           fn: () => this.dataLoader.loadMarkets(),
           intervalMs: REFRESH_INTERVALS.markets,
-          condition: () => this.isAnyPanelNearViewport(['markets', 'heatmap', 'commodities', 'crypto']),
+          condition: () =>
+            this.isAnyPanelNearViewport([
+              "markets",
+              "heatmap",
+              "commodities",
+              "crypto",
+            ]),
         },
         {
-          name: 'predictions',
+          name: "predictions",
           fn: () => this.dataLoader.loadPredictions(),
           intervalMs: REFRESH_INTERVALS.predictions,
-          condition: () => this.isPanelNearViewport('polymarket'),
+          condition: () => this.isPanelNearViewport("polymarket"),
         },
-        { name: 'pizzint', fn: () => this.dataLoader.loadPizzInt(), intervalMs: 10 * 60 * 1000 },
-        { name: 'natural', fn: () => this.dataLoader.loadNatural(), intervalMs: 60 * 60 * 1000, condition: () => this.state.mapLayers.natural },
-        { name: 'weather', fn: () => this.dataLoader.loadWeatherAlerts(), intervalMs: 10 * 60 * 1000, condition: () => this.state.mapLayers.weather },
-        { name: 'fred', fn: () => this.dataLoader.loadFredData(), intervalMs: 6 * 60 * 60 * 1000, condition: () => this.isPanelNearViewport('economic') },
-        { name: 'oil', fn: () => this.dataLoader.loadOilAnalytics(), intervalMs: 6 * 60 * 60 * 1000, condition: () => this.isPanelNearViewport('economic') },
-        { name: 'spending', fn: () => this.dataLoader.loadGovernmentSpending(), intervalMs: 6 * 60 * 60 * 1000, condition: () => this.isPanelNearViewport('economic') },
-        { name: 'bis', fn: () => this.dataLoader.loadBisData(), intervalMs: 6 * 60 * 60 * 1000, condition: () => this.isPanelNearViewport('economic') },
-        { name: 'firms', fn: () => this.dataLoader.loadFirmsData(), intervalMs: 30 * 60 * 1000 },
-        { name: 'ais', fn: () => this.dataLoader.loadAisSignals(), intervalMs: REFRESH_INTERVALS.ais, condition: () => this.state.mapLayers.ais },
-        { name: 'cables', fn: () => this.dataLoader.loadCableActivity(), intervalMs: 30 * 60 * 1000, condition: () => this.state.mapLayers.cables },
-        { name: 'cableHealth', fn: () => this.dataLoader.loadCableHealth(), intervalMs: 2 * 60 * 60 * 1000, condition: () => this.state.mapLayers.cables },
-        { name: 'flights', fn: () => this.dataLoader.loadFlightDelays(), intervalMs: 2 * 60 * 60 * 1000, condition: () => this.state.mapLayers.flights },
         {
-          name: 'cyberThreats', fn: () => {
+          name: "pizzint",
+          fn: () => this.dataLoader.loadPizzInt(),
+          intervalMs: 10 * 60 * 1000,
+        },
+        {
+          name: "natural",
+          fn: () => this.dataLoader.loadNatural(),
+          intervalMs: 60 * 60 * 1000,
+          condition: () => this.state.mapLayers.natural,
+        },
+        {
+          name: "weather",
+          fn: () => this.dataLoader.loadWeatherAlerts(),
+          intervalMs: 10 * 60 * 1000,
+          condition: () => this.state.mapLayers.weather,
+        },
+        {
+          name: "fred",
+          fn: () => this.dataLoader.loadFredData(),
+          intervalMs: 6 * 60 * 60 * 1000,
+          condition: () => this.isPanelNearViewport("economic"),
+        },
+        {
+          name: "oil",
+          fn: () => this.dataLoader.loadOilAnalytics(),
+          intervalMs: 6 * 60 * 60 * 1000,
+          condition: () => this.isPanelNearViewport("economic"),
+        },
+        {
+          name: "spending",
+          fn: () => this.dataLoader.loadGovernmentSpending(),
+          intervalMs: 6 * 60 * 60 * 1000,
+          condition: () => this.isPanelNearViewport("economic"),
+        },
+        {
+          name: "bis",
+          fn: () => this.dataLoader.loadBisData(),
+          intervalMs: 6 * 60 * 60 * 1000,
+          condition: () => this.isPanelNearViewport("economic"),
+        },
+        {
+          name: "firms",
+          fn: () => this.dataLoader.loadFirmsData(),
+          intervalMs: 30 * 60 * 1000,
+        },
+        {
+          name: "ais",
+          fn: () => this.dataLoader.loadAisSignals(),
+          intervalMs: REFRESH_INTERVALS.ais,
+          condition: () => this.state.mapLayers.ais,
+        },
+        {
+          name: "cables",
+          fn: () => this.dataLoader.loadCableActivity(),
+          intervalMs: 30 * 60 * 1000,
+          condition: () => this.state.mapLayers.cables,
+        },
+        {
+          name: "cableHealth",
+          fn: () => this.dataLoader.loadCableHealth(),
+          intervalMs: 2 * 60 * 60 * 1000,
+          condition: () => this.state.mapLayers.cables,
+        },
+        {
+          name: "flights",
+          fn: () => this.dataLoader.loadFlightDelays(),
+          intervalMs: 2 * 60 * 60 * 1000,
+          condition: () => this.state.mapLayers.flights,
+        },
+        {
+          name: "cyberThreats",
+          fn: () => {
             this.state.cyberThreatsCache = null;
             return this.dataLoader.loadCyberThreats();
-          }, intervalMs: 10 * 60 * 1000, condition: () => CYBER_LAYER_ENABLED && this.state.mapLayers.cyberThreats
+          },
+          intervalMs: 10 * 60 * 1000,
+          condition: () =>
+            CYBER_LAYER_ENABLED && this.state.mapLayers.cyberThreats,
         },
       ]);
     }
 
-    if (SITE_VARIANT === 'finance') {
+    if (SITE_VARIANT === "finance") {
       this.refreshScheduler.scheduleRefresh(
-        'stock-analysis',
+        "stock-analysis",
         () => this.dataLoader.loadStockAnalysis(),
         15 * 60 * 1000,
-        () => getSecretState('WORLDMONITOR_API_KEY').present && this.isPanelNearViewport('stock-analysis'),
+        () =>
+          getSecretState("WORLDMONITOR_API_KEY").present &&
+          this.isPanelNearViewport("stock-analysis"),
       );
       this.refreshScheduler.scheduleRefresh(
-        'daily-market-brief',
+        "daily-market-brief",
         () => this.dataLoader.loadDailyMarketBrief(),
         60 * 60 * 1000,
-        () => getSecretState('WORLDMONITOR_API_KEY').present && this.isPanelNearViewport('daily-market-brief'),
+        () =>
+          getSecretState("WORLDMONITOR_API_KEY").present &&
+          this.isPanelNearViewport("daily-market-brief"),
       );
       this.refreshScheduler.scheduleRefresh(
-        'stock-backtest',
+        "stock-backtest",
         () => this.dataLoader.loadStockBacktest(),
         4 * 60 * 60 * 1000,
-        () => getSecretState('WORLDMONITOR_API_KEY').present && this.isPanelNearViewport('stock-backtest'),
+        () =>
+          getSecretState("WORLDMONITOR_API_KEY").present &&
+          this.isPanelNearViewport("stock-backtest"),
       );
     }
 
     // Panel-level refreshes (moved from panel constructors into scheduler for hidden-tab awareness + jitter)
     this.refreshScheduler.scheduleRefresh(
-      'service-status',
-      () => (this.state.panels['service-status'] as ServiceStatusPanel).fetchStatus(),
+      "service-status",
+      () =>
+        (
+          this.state.panels["service-status"] as ServiceStatusPanel
+        ).fetchStatus(),
       3 * 60_000,
-      () => this.isPanelNearViewport('service-status')
+      () => this.isPanelNearViewport("service-status"),
     );
     this.refreshScheduler.scheduleRefresh(
-      'stablecoins',
-      () => (this.state.panels['stablecoins'] as StablecoinPanel).fetchData(),
+      "stablecoins",
+      () => (this.state.panels["stablecoins"] as StablecoinPanel).fetchData(),
       15 * 60_000,
-      () => this.isPanelNearViewport('stablecoins')
+      () => this.isPanelNearViewport("stablecoins"),
     );
     this.refreshScheduler.scheduleRefresh(
-      'etf-flows',
-      () => (this.state.panels['etf-flows'] as ETFFlowsPanel).fetchData(),
+      "etf-flows",
+      () => (this.state.panels["etf-flows"] as ETFFlowsPanel).fetchData(),
       15 * 60_000,
-      () => this.isPanelNearViewport('etf-flows')
+      () => this.isPanelNearViewport("etf-flows"),
     );
     this.refreshScheduler.scheduleRefresh(
-      'macro-signals',
-      () => (this.state.panels['macro-signals'] as MacroSignalsPanel).fetchData(),
+      "macro-signals",
+      () =>
+        (this.state.panels["macro-signals"] as MacroSignalsPanel).fetchData(),
       15 * 60_000,
-      () => this.isPanelNearViewport('macro-signals')
+      () => this.isPanelNearViewport("macro-signals"),
     );
     this.refreshScheduler.scheduleRefresh(
-      'strategic-posture',
-      () => (this.state.panels['strategic-posture'] as StrategicPosturePanel).refresh(),
+      "strategic-posture",
+      () =>
+        (
+          this.state.panels["strategic-posture"] as StrategicPosturePanel
+        ).refresh(),
       15 * 60_000,
-      () => !!this.state.panels['strategic-posture']
+      () => !!this.state.panels["strategic-posture"],
     );
     this.refreshScheduler.scheduleRefresh(
-      'strategic-risk',
-      () => (this.state.panels['strategic-risk'] as StrategicRiskPanel).refresh(),
+      "strategic-risk",
+      () =>
+        (this.state.panels["strategic-risk"] as StrategicRiskPanel).refresh(),
       5 * 60_000,
-      () => !!this.state.panels['strategic-risk']
+      () => !!this.state.panels["strategic-risk"],
     );
 
     // Server-side temporal anomalies (news + satellite_fires)
-    if (SITE_VARIANT !== 'happy') {
-      this.refreshScheduler.scheduleRefresh('temporalBaseline', () => this.dataLoader.refreshTemporalBaseline(), 600_000);
+    if (SITE_VARIANT !== "happy") {
+      this.refreshScheduler.scheduleRefresh(
+        "temporalBaseline",
+        () => this.dataLoader.refreshTemporalBaseline(),
+        600_000,
+      );
     }
 
     // WTO trade policy data — annual data, poll every 10 min to avoid hammering upstream
-    if (SITE_VARIANT === 'full' || SITE_VARIANT === 'finance' || SITE_VARIANT === 'commodity') {
-      this.refreshScheduler.scheduleRefresh('tradePolicy', () => this.dataLoader.loadTradePolicy(), 60 * 60 * 1000, () => this.isPanelNearViewport('trade-policy'));
-      this.refreshScheduler.scheduleRefresh('supplyChain', () => this.dataLoader.loadSupplyChain(), 60 * 60 * 1000, () => this.isPanelNearViewport('supply-chain'));
+    if (
+      SITE_VARIANT === "full" ||
+      SITE_VARIANT === "finance" ||
+      SITE_VARIANT === "commodity"
+    ) {
+      this.refreshScheduler.scheduleRefresh(
+        "tradePolicy",
+        () => this.dataLoader.loadTradePolicy(),
+        60 * 60 * 1000,
+        () => this.isPanelNearViewport("trade-policy"),
+      );
+      this.refreshScheduler.scheduleRefresh(
+        "supplyChain",
+        () => this.dataLoader.loadSupplyChain(),
+        60 * 60 * 1000,
+        () => this.isPanelNearViewport("supply-chain"),
+      );
     }
 
     // Telegram Intel (near real-time, 60s refresh)
     this.refreshScheduler.scheduleRefresh(
-      'telegram-intel',
+      "telegram-intel",
       () => this.dataLoader.loadTelegramIntel(),
       60 * 1_000,
-      () => this.isPanelNearViewport('telegram-intel')
+      () => this.isPanelNearViewport("telegram-intel"),
     );
 
     this.refreshScheduler.scheduleRefresh(
-      'gulf-economies',
-      () => (this.state.panels['gulf-economies'] as GulfEconomiesPanel).fetchData(),
+      "gulf-economies",
+      () =>
+        (this.state.panels["gulf-economies"] as GulfEconomiesPanel).fetchData(),
       10 * 60_000,
-      () => this.isPanelNearViewport('gulf-economies')
+      () => this.isPanelNearViewport("gulf-economies"),
     );
 
     // Refresh intelligence signals for CII (geopolitical variant only)
-    if (SITE_VARIANT === 'full') {
-      this.refreshScheduler.scheduleRefresh('intelligence', () => {
-        const { military, iranEvents } = this.state.intelligenceCache;
-        this.state.intelligenceCache = {};
-        if (military) this.state.intelligenceCache.military = military;
-        if (iranEvents) this.state.intelligenceCache.iranEvents = iranEvents;
-        return this.dataLoader.loadIntelligenceSignals();
-      }, 15 * 60 * 1000);
+    if (SITE_VARIANT === "full") {
+      this.refreshScheduler.scheduleRefresh(
+        "intelligence",
+        () => {
+          const { military, iranEvents } = this.state.intelligenceCache;
+          this.state.intelligenceCache = {};
+          if (military) this.state.intelligenceCache.military = military;
+          if (iranEvents) this.state.intelligenceCache.iranEvents = iranEvents;
+          return this.dataLoader.loadIntelligenceSignals();
+        },
+        15 * 60 * 1000,
+      );
     }
 
     // Correlation engine refresh
     this.refreshScheduler.scheduleRefresh(
-      'correlation-engine',
+      "correlation-engine",
       async () => {
         const engine = this.state.correlationEngine;
         if (!engine) return;
         await engine.run(this.state);
-        for (const domain of ['military', 'escalation', 'economic', 'disaster'] as const) {
-          const panel = this.state.panels[`${domain}-correlation`] as CorrelationPanel | undefined;
+        for (const domain of [
+          "military",
+          "escalation",
+          "economic",
+          "disaster",
+        ] as const) {
+          const panel = this.state.panels[`${domain}-correlation`] as
+            | CorrelationPanel
+            | undefined;
           panel?.updateCards(engine.getCards(domain));
         }
       },

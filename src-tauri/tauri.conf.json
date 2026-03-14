@@ -20,12 +20,7 @@
         "minHeight": 720,
         "resizable": true,
         "fullscreen": false,
-        "backgroundColor": [
-          26,
-          28,
-          30,
-          255
-        ]
+        "backgroundColor": [26, 28, 30, 255]
       }
     ],
     "security": {
@@ -34,13 +29,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": [
-      "app",
-      "dmg",
-      "nsis",
-      "msi",
-      "appimage"
-    ],
+    "targets": ["app", "dmg", "nsis", "msi", "appimage"],
     "category": "Productivity",
     "shortDescription": "World Monitor desktop app (supports World and Tech variants)",
     "longDescription": "World Monitor desktop app for real-time global intelligence. Build with VITE_VARIANT=tech to package Tech Monitor branding and dataset defaults.",

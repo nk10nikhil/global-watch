@@ -36,7 +36,7 @@ function startSweepIfNeeded(): void {
     }
   }, SWEEP_INTERVAL_MS);
   // Don't hold the process open
-  if (typeof sweepTimer === 'object' && 'unref' in sweepTimer) {
+  if (typeof sweepTimer === "object" && "unref" in sweepTimer) {
     sweepTimer.unref();
   }
 }
@@ -74,7 +74,11 @@ export function sidecarCacheGet(key: string): unknown | null {
   return JSON.parse(entry.value);
 }
 
-export function sidecarCacheSet(key: string, value: unknown, ttlSeconds: number): void {
+export function sidecarCacheSet(
+  key: string,
+  value: unknown,
+  ttlSeconds: number,
+): void {
   const clamped = Math.max(MIN_TTL_S, Math.min(MAX_TTL_S, ttlSeconds));
   const json = JSON.stringify(value);
   // Rough byte estimate: JS strings are UTF-16 (2 bytes per code unit).
@@ -82,7 +86,9 @@ export function sidecarCacheSet(key: string, value: unknown, ttlSeconds: number)
   const size = json.length * 2;
 
   if (size > MAX_SINGLE_VALUE_BYTES) {
-    console.warn(`[sidecar-cache] rejecting key "${key}": ${(size / 1024 / 1024).toFixed(1)} MB exceeds 2 MB limit`);
+    console.warn(
+      `[sidecar-cache] rejecting key "${key}": ${(size / 1024 / 1024).toFixed(1)} MB exceeds 2 MB limit`,
+    );
     return;
   }
 
@@ -108,6 +114,16 @@ export function sidecarCacheSet(key: string, value: unknown, ttlSeconds: number)
   startSweepIfNeeded();
 }
 
-export function sidecarCacheStats(): { entries: number; bytes: number; hits: number; misses: number } {
-  return { entries: store.size, bytes: totalBytes, hits: hitCount, misses: missCount };
+export function sidecarCacheStats(): {
+  entries: number;
+  bytes: number;
+  hits: number;
+  misses: number;
+} {
+  return {
+    entries: store.size,
+    bytes: totalBytes,
+    hits: hitCount,
+    misses: missCount,
+  };
 }

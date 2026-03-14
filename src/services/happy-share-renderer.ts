@@ -3,9 +3,9 @@
  * Generates a 1080x1080 PNG from a NewsItem with warm gradient,
  * category badge, headline, source, date, and HappyMonitor watermark.
  */
-import type { NewsItem } from '@/types';
-import type { HappyContentCategory } from '@/services/positive-classifier';
-import { HAPPY_CATEGORY_LABELS } from '@/services/positive-classifier';
+import type { NewsItem } from "@/types";
+import type { HappyContentCategory } from "@/services/positive-classifier";
+import { HAPPY_CATEGORY_LABELS } from "@/services/positive-classifier";
 
 const SIZE = 1080;
 const PAD = 80;
@@ -13,34 +13,38 @@ const CONTENT_W = SIZE - PAD * 2;
 
 /** Category-specific gradient stops (light, warm palettes) */
 const CATEGORY_GRADIENTS: Record<HappyContentCategory, [string, string]> = {
-  'science-health': ['#E8F4FD', '#C5DFF8'],
-  'nature-wildlife': ['#E8F5E4', '#C5E8BE'],
-  'humanity-kindness': ['#FDE8EE', '#F5C5D5'],
-  'innovation-tech': ['#FDF5E8', '#F5E2C0'],
-  'climate-wins': ['#E4F5E8', '#BEE8C5'],
-  'culture-community': ['#F0E8FD', '#D8C5F5'],
+  "science-health": ["#E8F4FD", "#C5DFF8"],
+  "nature-wildlife": ["#E8F5E4", "#C5E8BE"],
+  "humanity-kindness": ["#FDE8EE", "#F5C5D5"],
+  "innovation-tech": ["#FDF5E8", "#F5E2C0"],
+  "climate-wins": ["#E4F5E8", "#BEE8C5"],
+  "culture-community": ["#F0E8FD", "#D8C5F5"],
 };
 
 /** Category accent colors for badges and decorative line */
 const CATEGORY_ACCENTS: Record<HappyContentCategory, string> = {
-  'science-health': '#7BA5C4',
-  'nature-wildlife': '#6B8F5E',
-  'humanity-kindness': '#C48B9F',
-  'innovation-tech': '#C4A35A',
-  'climate-wins': '#2d9a4e',
-  'culture-community': '#8b5cf6',
+  "science-health": "#7BA5C4",
+  "nature-wildlife": "#6B8F5E",
+  "humanity-kindness": "#C48B9F",
+  "innovation-tech": "#C4A35A",
+  "climate-wins": "#2d9a4e",
+  "culture-community": "#8b5cf6",
 };
 
-const DEFAULT_CATEGORY: HappyContentCategory = 'humanity-kindness';
+const DEFAULT_CATEGORY: HappyContentCategory = "humanity-kindness";
 
 /**
  * Word-wrap helper: splits text into lines that fit within maxWidth.
  * Canvas 2D has no auto-wrap, so we measure word-by-word.
  */
-function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
+function wrapText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+): string[] {
   const words = text.split(/\s+/);
   const lines: string[] = [];
-  let currentLine = '';
+  let currentLine = "";
 
   for (const word of words) {
     const testLine = currentLine ? `${currentLine} ${word}` : word;
@@ -60,7 +64,14 @@ function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number)
 /**
  * Draw a rounded rectangle path (does not fill/stroke -- caller does that).
  */
-function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number): void {
+function roundRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number,
+): void {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
   ctx.lineTo(x + w - r, y);
@@ -78,17 +89,21 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
  * Render a branded 1080x1080 share card from a NewsItem.
  * Text-only (no images) to avoid cross-origin canvas tainting.
  */
-export async function renderHappyShareCard(item: NewsItem): Promise<HTMLCanvasElement> {
+export async function renderHappyShareCard(
+  item: NewsItem,
+): Promise<HTMLCanvasElement> {
   // Ensure Nunito fonts are loaded before rendering
   await Promise.all([
-    document.fonts.load('700 48px Nunito'),
-    document.fonts.load('400 26px Nunito'),
-  ]).catch(() => { /* proceed with system font fallback if fonts fail */ });
+    document.fonts.load("700 48px Nunito"),
+    document.fonts.load("400 26px Nunito"),
+  ]).catch(() => {
+    /* proceed with system font fallback if fonts fail */
+  });
 
-  const canvas = document.createElement('canvas');
+  const canvas = document.createElement("canvas");
   canvas.width = SIZE;
   canvas.height = SIZE;
-  const ctx = canvas.getContext('2d')!;
+  const ctx = canvas.getContext("2d")!;
 
   const category: HappyContentCategory = item.happyCategory || DEFAULT_CATEGORY;
   const [gradStart, gradEnd] = CATEGORY_GRADIENTS[category];
@@ -105,7 +120,7 @@ export async function renderHappyShareCard(item: NewsItem): Promise<HTMLCanvasEl
 
   // -- Category badge (pill shape, top-left) --
   const categoryLabel = HAPPY_CATEGORY_LABELS[category];
-  ctx.font = '700 24px Nunito, system-ui, sans-serif';
+  ctx.font = "700 24px Nunito, system-ui, sans-serif";
   const badgeTextW = ctx.measureText(categoryLabel).width;
   const badgePadX = 16;
   const badgePadY = 6;
@@ -115,25 +130,28 @@ export async function renderHappyShareCard(item: NewsItem): Promise<HTMLCanvasEl
   ctx.fillStyle = accent;
   roundRect(ctx, PAD, y, badgeW, badgeH, badgeH / 2);
   ctx.fill();
-  ctx.fillStyle = '#FFFFFF';
+  ctx.fillStyle = "#FFFFFF";
   ctx.fillText(categoryLabel, PAD + badgePadX, y + badgeH - badgePadY - 4);
 
   y += badgeH + 48;
 
   // -- Headline text (word-wrapped, max ~6 lines) --
-  ctx.font = '700 48px Nunito, system-ui, sans-serif';
-  ctx.fillStyle = '#2D3748';
+  ctx.font = "700 48px Nunito, system-ui, sans-serif";
+  ctx.fillStyle = "#2D3748";
   const headlineLines = wrapText(ctx, item.title, CONTENT_W);
   const maxLines = 6;
   const displayLines = headlineLines.slice(0, maxLines);
 
   // If we truncated, add ellipsis to last line
   if (headlineLines.length > maxLines) {
-    let lastLine = displayLines[maxLines - 1] ?? '';
-    while (ctx.measureText(lastLine + '...').width > CONTENT_W && lastLine.length > 0) {
+    let lastLine = displayLines[maxLines - 1] ?? "";
+    while (
+      ctx.measureText(lastLine + "...").width > CONTENT_W &&
+      lastLine.length > 0
+    ) {
       lastLine = lastLine.slice(0, -1);
     }
-    displayLines[maxLines - 1] = lastLine + '...';
+    displayLines[maxLines - 1] = lastLine + "...";
   }
 
   const lineHeight = 62;
@@ -145,18 +163,28 @@ export async function renderHappyShareCard(item: NewsItem): Promise<HTMLCanvasEl
   y += 24;
 
   // -- Source attribution --
-  ctx.font = '400 26px Nunito, system-ui, sans-serif';
-  ctx.fillStyle = '#718096';
+  ctx.font = "400 26px Nunito, system-ui, sans-serif";
+  ctx.fillStyle = "#718096";
   ctx.fillText(item.source, PAD, y);
 
   y += 36;
 
   // -- Date --
-  ctx.font = '400 22px Nunito, system-ui, sans-serif';
-  ctx.fillStyle = '#A0AEC0';
+  ctx.font = "400 22px Nunito, system-ui, sans-serif";
+  ctx.fillStyle = "#A0AEC0";
   const dateStr = item.pubDate
-    ? item.pubDate.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
-    : new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    ? item.pubDate.toLocaleDateString(undefined, {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : new Date().toLocaleDateString(undefined, {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
   ctx.fillText(dateStr, PAD, y);
 
   // -- Decorative accent line (separator above branding) --
@@ -170,13 +198,13 @@ export async function renderHappyShareCard(item: NewsItem): Promise<HTMLCanvasEl
 
   // -- HappyMonitor branding --
   const brandY = SIZE - 120;
-  ctx.font = '700 28px Nunito, system-ui, sans-serif';
-  ctx.fillStyle = '#C4A35A'; // gold
-  ctx.fillText('\u2600 HappyMonitor', PAD, brandY); // sun emoji (Unicode escape)
+  ctx.font = "700 28px Nunito, system-ui, sans-serif";
+  ctx.fillStyle = "#C4A35A"; // gold
+  ctx.fillText("\u2600 HappyMonitor", PAD, brandY); // sun emoji (Unicode escape)
 
-  ctx.font = '400 22px Nunito, system-ui, sans-serif';
-  ctx.fillStyle = '#A0AEC0';
-  ctx.fillText('happy.worldmonitor.app', PAD, brandY + 34);
+  ctx.font = "400 22px Nunito, system-ui, sans-serif";
+  ctx.fillStyle = "#A0AEC0";
+  ctx.fillText("happy.worldmonitor.app", PAD, brandY + 34);
 
   return canvas;
 }
@@ -192,11 +220,13 @@ export async function shareHappyCard(item: NewsItem): Promise<void> {
   const blob = await new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((b) => {
       if (b) resolve(b);
-      else reject(new Error('Canvas toBlob returned null'));
-    }, 'image/png');
+      else reject(new Error("Canvas toBlob returned null"));
+    }, "image/png");
   });
 
-  const file = new File([blob], 'happymonitor-story.png', { type: 'image/png' });
+  const file = new File([blob], "happymonitor-story.png", {
+    type: "image/png",
+  });
 
   // Attempt 1: Web Share API (mobile-first)
   if (navigator.share && navigator.canShare?.({ files: [file] })) {
@@ -213,9 +243,7 @@ export async function shareHappyCard(item: NewsItem): Promise<void> {
 
   // Attempt 2: Copy image to clipboard
   try {
-    await navigator.clipboard.write([
-      new ClipboardItem({ 'image/png': blob }),
-    ]);
+    await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
     return;
   } catch {
     /* clipboard write failed — fall through to download */
@@ -223,9 +251,9 @@ export async function shareHappyCard(item: NewsItem): Promise<void> {
 
   // Attempt 3: Download via anchor element
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  const a = document.createElement("a");
   a.href = url;
-  a.download = 'happymonitor-story.png';
+  a.download = "happymonitor-story.png";
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

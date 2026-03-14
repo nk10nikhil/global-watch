@@ -13,13 +13,13 @@ export {
   canonicalizeSummaryInputs,
   buildSummaryCacheKey,
   buildSummaryCacheKey as getCacheKey,
-} from '../../../../src/utils/summary-cache-key';
+} from "../../../../src/utils/summary-cache-key";
 
 // ========================================================================
 // Hash utility (unified FNV-1a 52-bit -- H-7 fix)
 // ========================================================================
 
-import { hashString } from '../../../_shared/hash';
+import { hashString } from "../../../_shared/hash";
 export { hashString };
 
 // ========================================================================
@@ -27,7 +27,7 @@ export { hashString };
 // ========================================================================
 
 // @ts-ignore -- plain JS module, no .d.mts needed for this pure function
-export { deduplicateHeadlines } from './dedup.mjs';
+export { deduplicateHeadlines } from "./dedup.mjs";
 
 // ========================================================================
 // SummarizeArticle: Full prompt builder (ported from _summarize-handler.js)
@@ -38,16 +38,21 @@ export function buildArticlePrompts(
   uniqueHeadlines: string[],
   opts: { mode: string; geoContext: string; variant: string; lang: string },
 ): { systemPrompt: string; userPrompt: string } {
-  const headlineText = uniqueHeadlines.map((h, i) => `${i + 1}. ${h}`).join('\n');
-  const intelSection = opts.geoContext ? `\n\n${opts.geoContext}` : '';
-  const isTechVariant = opts.variant === 'tech';
-  const dateContext = `Current date: ${new Date().toISOString().split('T')[0]}.${isTechVariant ? '' : ' Provide geopolitical context appropriate for the current date.'}`;
-  const langInstruction = opts.lang && opts.lang !== 'en' ? `\nIMPORTANT: Output the summary in ${opts.lang.toUpperCase()} language.` : '';
+  const headlineText = uniqueHeadlines
+    .map((h, i) => `${i + 1}. ${h}`)
+    .join("\n");
+  const intelSection = opts.geoContext ? `\n\n${opts.geoContext}` : "";
+  const isTechVariant = opts.variant === "tech";
+  const dateContext = `Current date: ${new Date().toISOString().split("T")[0]}.${isTechVariant ? "" : " Provide geopolitical context appropriate for the current date."}`;
+  const langInstruction =
+    opts.lang && opts.lang !== "en"
+      ? `\nIMPORTANT: Output the summary in ${opts.lang.toUpperCase()} language.`
+      : "";
 
   let systemPrompt: string;
   let userPrompt: string;
 
-  if (opts.mode === 'brief') {
+  if (opts.mode === "brief") {
     if (isTechVariant) {
       systemPrompt = `${dateContext}
 
@@ -75,7 +80,7 @@ Rules:
 - No bullet points, no meta-commentary, no elaboration beyond the core facts${langInstruction}`;
     }
     userPrompt = `Each headline below is a separate story. Pick the most important ONE and summarize only that story:\n${headlineText}${intelSection}`;
-  } else if (opts.mode === 'analysis') {
+  } else if (opts.mode === "analysis") {
     if (isTechVariant) {
       systemPrompt = `${dateContext}
 
@@ -103,7 +108,7 @@ Rules:
     userPrompt = isTechVariant
       ? `Each headline is a separate story. What's the key tech trend?\n${headlineText}${intelSection}`
       : `Each headline is a separate story. What's the key pattern or risk?\n${headlineText}${intelSection}`;
-  } else if (opts.mode === 'translate') {
+  } else if (opts.mode === "translate") {
     const targetLang = opts.variant;
     systemPrompt = `You are a professional news translator. Translate the following news headlines/summaries into ${targetLang}.
 Rules:
@@ -133,49 +138,55 @@ export interface ProviderCredentials {
   extraBody?: Record<string, unknown>;
 }
 
-export function getProviderCredentials(provider: string): ProviderCredentials | null {
-  if (provider === 'ollama') {
+export function getProviderCredentials(
+  provider: string,
+): ProviderCredentials | null {
+  if (provider === "ollama") {
     const baseUrl = process.env.OLLAMA_API_URL;
     if (!baseUrl) return null;
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
     const apiKey = process.env.OLLAMA_API_KEY;
     if (apiKey) {
-      headers['Authorization'] = `Bearer ${apiKey}`;
+      headers["Authorization"] = `Bearer ${apiKey}`;
     }
-    const rawMax = parseInt(process.env.OLLAMA_MAX_TOKENS || '300', 10);
-    const ollamaMaxTokens = Number.isFinite(rawMax) ? Math.min(Math.max(rawMax, 50), 2000) : 300;
+    const rawMax = parseInt(process.env.OLLAMA_MAX_TOKENS || "300", 10);
+    const ollamaMaxTokens = Number.isFinite(rawMax)
+      ? Math.min(Math.max(rawMax, 50), 2000)
+      : 300;
     return {
-      apiUrl: new URL('/v1/chat/completions', baseUrl).toString(),
-      model: process.env.OLLAMA_MODEL || 'llama3.1:8b',
+      apiUrl: new URL("/v1/chat/completions", baseUrl).toString(),
+      model: process.env.OLLAMA_MODEL || "llama3.1:8b",
       headers,
       extraBody: { think: false, max_tokens: ollamaMaxTokens },
     };
   }
 
-  if (provider === 'groq') {
+  if (provider === "groq") {
     const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) return null;
     return {
-      apiUrl: 'https://api.groq.com/openai/v1/chat/completions',
-      model: 'llama-3.1-8b-instant',
+      apiUrl: "https://api.groq.com/openai/v1/chat/completions",
+      model: "llama-3.1-8b-instant",
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
       },
     };
   }
 
-  if (provider === 'openrouter') {
+  if (provider === "openrouter") {
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) return null;
     return {
-      apiUrl: 'https://openrouter.ai/api/v1/chat/completions',
-      model: 'google/gemini-2.5-flash',
+      apiUrl: "https://openrouter.ai/api/v1/chat/completions",
+      model: "google/gemini-2.5-flash",
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://worldmonitor.app',
-        'X-Title': 'World Monitor',
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://worldmonitor.app",
+        "X-Title": "World Monitor",
       },
     };
   }

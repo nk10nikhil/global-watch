@@ -101,8 +101,7 @@ export interface RecordBaselineSnapshotResponse {
   error: string;
 }
 
-export interface ListTemporalAnomaliesRequest {
-}
+export interface ListTemporalAnomaliesRequest {}
 
 export interface ListTemporalAnomaliesResponse {
   anomalies: TemporalAnomalyProto[];
@@ -121,8 +120,7 @@ export interface TemporalAnomalyProto {
   message: string;
 }
 
-export interface GetCableHealthRequest {
-}
+export interface GetCableHealthRequest {}
 
 export interface GetCableHealthResponse {
   generatedAt: number;
@@ -143,11 +141,25 @@ export interface CableHealthEvidence {
   ts: number;
 }
 
-export type CableHealthStatus = "CABLE_HEALTH_STATUS_UNSPECIFIED" | "CABLE_HEALTH_STATUS_OK" | "CABLE_HEALTH_STATUS_DEGRADED" | "CABLE_HEALTH_STATUS_FAULT";
+export type CableHealthStatus =
+  | "CABLE_HEALTH_STATUS_UNSPECIFIED"
+  | "CABLE_HEALTH_STATUS_OK"
+  | "CABLE_HEALTH_STATUS_DEGRADED"
+  | "CABLE_HEALTH_STATUS_FAULT";
 
-export type OutageSeverity = "OUTAGE_SEVERITY_UNSPECIFIED" | "OUTAGE_SEVERITY_PARTIAL" | "OUTAGE_SEVERITY_MAJOR" | "OUTAGE_SEVERITY_TOTAL";
+export type OutageSeverity =
+  | "OUTAGE_SEVERITY_UNSPECIFIED"
+  | "OUTAGE_SEVERITY_PARTIAL"
+  | "OUTAGE_SEVERITY_MAJOR"
+  | "OUTAGE_SEVERITY_TOTAL";
 
-export type ServiceOperationalStatus = "SERVICE_OPERATIONAL_STATUS_UNSPECIFIED" | "SERVICE_OPERATIONAL_STATUS_OPERATIONAL" | "SERVICE_OPERATIONAL_STATUS_DEGRADED" | "SERVICE_OPERATIONAL_STATUS_PARTIAL_OUTAGE" | "SERVICE_OPERATIONAL_STATUS_MAJOR_OUTAGE" | "SERVICE_OPERATIONAL_STATUS_MAINTENANCE";
+export type ServiceOperationalStatus =
+  | "SERVICE_OPERATIONAL_STATUS_UNSPECIFIED"
+  | "SERVICE_OPERATIONAL_STATUS_OPERATIONAL"
+  | "SERVICE_OPERATIONAL_STATUS_DEGRADED"
+  | "SERVICE_OPERATIONAL_STATUS_PARTIAL_OUTAGE"
+  | "SERVICE_OPERATIONAL_STATUS_MAJOR_OUTAGE"
+  | "SERVICE_OPERATIONAL_STATUS_MAINTENANCE";
 
 export interface FieldViolation {
   field: string;
@@ -184,7 +196,10 @@ export interface ServerContext {
 
 export interface ServerOptions {
   onError?: (error: unknown, req: Request) => Response | Promise<Response>;
-  validateRequest?: (methodName: string, body: unknown) => FieldViolation[] | undefined;
+  validateRequest?: (
+    methodName: string,
+    body: unknown,
+  ) => FieldViolation[] | undefined;
 }
 
 export interface RouteDescriptor {
@@ -194,12 +209,30 @@ export interface RouteDescriptor {
 }
 
 export interface InfrastructureServiceHandler {
-  listInternetOutages(ctx: ServerContext, req: ListInternetOutagesRequest): Promise<ListInternetOutagesResponse>;
-  listServiceStatuses(ctx: ServerContext, req: ListServiceStatusesRequest): Promise<ListServiceStatusesResponse>;
-  getTemporalBaseline(ctx: ServerContext, req: GetTemporalBaselineRequest): Promise<GetTemporalBaselineResponse>;
-  recordBaselineSnapshot(ctx: ServerContext, req: RecordBaselineSnapshotRequest): Promise<RecordBaselineSnapshotResponse>;
-  getCableHealth(ctx: ServerContext, req: GetCableHealthRequest): Promise<GetCableHealthResponse>;
-  listTemporalAnomalies(ctx: ServerContext, req: ListTemporalAnomaliesRequest): Promise<ListTemporalAnomaliesResponse>;
+  listInternetOutages(
+    ctx: ServerContext,
+    req: ListInternetOutagesRequest,
+  ): Promise<ListInternetOutagesResponse>;
+  listServiceStatuses(
+    ctx: ServerContext,
+    req: ListServiceStatusesRequest,
+  ): Promise<ListServiceStatusesResponse>;
+  getTemporalBaseline(
+    ctx: ServerContext,
+    req: GetTemporalBaselineRequest,
+  ): Promise<GetTemporalBaselineResponse>;
+  recordBaselineSnapshot(
+    ctx: ServerContext,
+    req: RecordBaselineSnapshotRequest,
+  ): Promise<RecordBaselineSnapshotResponse>;
+  getCableHealth(
+    ctx: ServerContext,
+    req: GetCableHealthRequest,
+  ): Promise<GetCableHealthResponse>;
+  listTemporalAnomalies(
+    ctx: ServerContext,
+    req: ListTemporalAnomaliesRequest,
+  ): Promise<ListTemporalAnomaliesResponse>;
 }
 
 export function createInfrastructureServiceRoutes(
@@ -223,7 +256,10 @@ export function createInfrastructureServiceRoutes(
             country: params.get("country") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("listInternetOutages", body);
+            const bodyViolations = options.validateRequest(
+              "listInternetOutages",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -236,16 +272,22 @@ export function createInfrastructureServiceRoutes(
           };
 
           const result = await handler.listInternetOutages(ctx, body);
-          return new Response(JSON.stringify(result as ListInternetOutagesResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as ListInternetOutagesResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -270,7 +312,10 @@ export function createInfrastructureServiceRoutes(
             status: params.get("status") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("listServiceStatuses", body);
+            const bodyViolations = options.validateRequest(
+              "listServiceStatuses",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -283,16 +328,22 @@ export function createInfrastructureServiceRoutes(
           };
 
           const result = await handler.listServiceStatuses(ctx, body);
-          return new Response(JSON.stringify(result as ListServiceStatusesResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as ListServiceStatusesResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -319,7 +370,10 @@ export function createInfrastructureServiceRoutes(
             count: Number(params.get("count") ?? "0"),
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getTemporalBaseline", body);
+            const bodyViolations = options.validateRequest(
+              "getTemporalBaseline",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -332,16 +386,22 @@ export function createInfrastructureServiceRoutes(
           };
 
           const result = await handler.getTemporalBaseline(ctx, body);
-          return new Response(JSON.stringify(result as GetTemporalBaselineResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetTemporalBaselineResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -360,9 +420,12 @@ export function createInfrastructureServiceRoutes(
       handler: async (req: Request): Promise<Response> => {
         try {
           const pathParams: Record<string, string> = {};
-          const body = await req.json() as RecordBaselineSnapshotRequest;
+          const body = (await req.json()) as RecordBaselineSnapshotRequest;
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("recordBaselineSnapshot", body);
+            const bodyViolations = options.validateRequest(
+              "recordBaselineSnapshot",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -375,16 +438,22 @@ export function createInfrastructureServiceRoutes(
           };
 
           const result = await handler.recordBaselineSnapshot(ctx, body);
-          return new Response(JSON.stringify(result as RecordBaselineSnapshotResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as RecordBaselineSnapshotResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -412,16 +481,22 @@ export function createInfrastructureServiceRoutes(
           };
 
           const result = await handler.getCableHealth(ctx, body);
-          return new Response(JSON.stringify(result as GetCableHealthResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetCableHealthResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -449,16 +524,22 @@ export function createInfrastructureServiceRoutes(
           };
 
           const result = await handler.listTemporalAnomalies(ctx, body);
-          return new Response(JSON.stringify(result as ListTemporalAnomaliesResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as ListTemporalAnomaliesResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -473,4 +554,3 @@ export function createInfrastructureServiceRoutes(
     },
   ];
 }
-

@@ -1,6 +1,6 @@
-import { Panel } from './Panel';
-import type { NewsItem } from '@/types';
-import { escapeHtml, sanitizeUrl } from '@/utils/sanitize';
+import { Panel } from "./Panel";
+import type { NewsItem } from "@/types";
+import { escapeHtml, sanitizeUrl } from "@/utils/sanitize";
 
 /**
  * HeroSpotlightPanel -- Daily hero spotlight card with photo, excerpt, and map location.
@@ -17,7 +17,7 @@ export class HeroSpotlightPanel extends Panel {
   public onLocationRequest?: (lat: number, lon: number) => void;
 
   constructor() {
-    super({ id: 'spotlight', title: "Today's Hero", trackActivity: false });
+    super({ id: "spotlight", title: "Today's Hero", trackActivity: false });
     this.content.innerHTML =
       '<div class="hero-card-loading">Loading today\'s hero...</div>';
   }
@@ -35,20 +35,20 @@ export class HeroSpotlightPanel extends Panel {
     // Image section (optional)
     const imageHtml = item.imageUrl
       ? `<div class="hero-card-image"><img src="${sanitizeUrl(item.imageUrl)}" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>`
-      : '';
+      : "";
 
     // Time formatting
     const timeStr = item.pubDate.toLocaleDateString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
 
     // Location button -- only when BOTH lat and lon are defined
     const hasLocation = item.lat !== undefined && item.lon !== undefined;
     const locationHtml = hasLocation
       ? `<button class="hero-card-location-btn" data-lat="${item.lat}" data-lon="${item.lon}" type="button">Show on map</button>`
-      : '';
+      : "";
 
     this.content.innerHTML = `<div class="hero-card">
   ${imageHtml}
@@ -64,11 +64,11 @@ export class HeroSpotlightPanel extends Panel {
 
     // Wire location button click handler
     if (hasLocation) {
-      const btn = this.content.querySelector('.hero-card-location-btn');
+      const btn = this.content.querySelector(".hero-card-location-btn");
       if (btn) {
-        btn.addEventListener('click', () => {
-          const lat = Number(btn.getAttribute('data-lat'));
-          const lon = Number(btn.getAttribute('data-lon'));
+        btn.addEventListener("click", () => {
+          const lat = Number(btn.getAttribute("data-lat"));
+          const lon = Number(btn.getAttribute("data-lon"));
           if (!isNaN(lat) && !isNaN(lon)) {
             this.onLocationRequest?.(lat, lon);
           }

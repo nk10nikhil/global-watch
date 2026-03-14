@@ -8,27 +8,33 @@
  * Standalone fallback — primary seeder is the AIS relay loop.
  */
 
-import { loadEnvFile, CHROME_UA, getRedisCredentials, logSeedResult } from './_seed-utils.mjs';
+import {
+  loadEnvFile,
+  CHROME_UA,
+  getRedisCredentials,
+  logSeedResult,
+} from "./_seed-utils.mjs";
 
 loadEnvFile(import.meta.url);
 
-const RPC_URL = 'https://worldmonitor.app/api/infrastructure/v1/list-service-statuses';
-const CANONICAL_KEY = 'infra:service-statuses:v1';
+const RPC_URL =
+  "https://worldmonitor.app/api/infrastructure/v1/list-service-statuses";
+const CANONICAL_KEY = "infra:service-statuses:v1";
 
 async function warmPing() {
   const startMs = Date.now();
-  console.log('=== infra:service-statuses Warm Ping ===');
+  console.log("=== infra:service-statuses Warm Ping ===");
   console.log(`  Key:     ${CANONICAL_KEY}`);
   console.log(`  Target:  ${RPC_URL}`);
 
   const resp = await fetch(RPC_URL, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'User-Agent': CHROME_UA,
-      Origin: 'https://worldmonitor.app',
+      "Content-Type": "application/json",
+      "User-Agent": CHROME_UA,
+      Origin: "https://worldmonitor.app",
     },
-    body: '{}',
+    body: "{}",
     signal: AbortSignal.timeout(60_000),
   });
 
@@ -40,25 +46,30 @@ async function warmPing() {
 
   // Verify cache was populated
   const { url, token } = getRedisCredentials();
-  const verifyResp = await fetch(`${url}/get/${encodeURIComponent(CANONICAL_KEY)}`, {
-    headers: { Authorization: `Bearer ${token}` },
-    signal: AbortSignal.timeout(5_000),
-  });
+  const verifyResp = await fetch(
+    `${url}/get/${encodeURIComponent(CANONICAL_KEY)}`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      signal: AbortSignal.timeout(5_000),
+    },
+  );
   const verifyData = await verifyResp.json();
   if (verifyData.result) {
-    console.log('  Verified: data present in Redis');
+    console.log("  Verified: data present in Redis");
   } else {
-    console.warn('  WARNING: verification read returned null');
+    console.warn("  WARNING: verification read returned null");
   }
 
   const durationMs = Date.now() - startMs;
-  logSeedResult('infra', count, durationMs, { mode: 'warm-ping' });
+  logSeedResult("infra", count, durationMs, { mode: "warm-ping" });
   console.log(`\n=== Done (${Math.round(durationMs)}ms) ===`);
 }
 
-warmPing().then(() => {
-  process.exit(0);
-}).catch((err) => {
-  console.error('FATAL:', err.message || err);
-  process.exit(1);
-});
+warmPing()
+  .then(() => {
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.error("FATAL:", err.message || err);
+    process.exit(1);
+  });

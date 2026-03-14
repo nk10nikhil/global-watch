@@ -101,8 +101,7 @@ export interface RecordBaselineSnapshotResponse {
   error: string;
 }
 
-export interface ListTemporalAnomaliesRequest {
-}
+export interface ListTemporalAnomaliesRequest {}
 
 export interface ListTemporalAnomaliesResponse {
   anomalies: TemporalAnomalyProto[];
@@ -121,8 +120,7 @@ export interface TemporalAnomalyProto {
   message: string;
 }
 
-export interface GetCableHealthRequest {
-}
+export interface GetCableHealthRequest {}
 
 export interface GetCableHealthResponse {
   generatedAt: number;
@@ -143,11 +141,25 @@ export interface CableHealthEvidence {
   ts: number;
 }
 
-export type CableHealthStatus = "CABLE_HEALTH_STATUS_UNSPECIFIED" | "CABLE_HEALTH_STATUS_OK" | "CABLE_HEALTH_STATUS_DEGRADED" | "CABLE_HEALTH_STATUS_FAULT";
+export type CableHealthStatus =
+  | "CABLE_HEALTH_STATUS_UNSPECIFIED"
+  | "CABLE_HEALTH_STATUS_OK"
+  | "CABLE_HEALTH_STATUS_DEGRADED"
+  | "CABLE_HEALTH_STATUS_FAULT";
 
-export type OutageSeverity = "OUTAGE_SEVERITY_UNSPECIFIED" | "OUTAGE_SEVERITY_PARTIAL" | "OUTAGE_SEVERITY_MAJOR" | "OUTAGE_SEVERITY_TOTAL";
+export type OutageSeverity =
+  | "OUTAGE_SEVERITY_UNSPECIFIED"
+  | "OUTAGE_SEVERITY_PARTIAL"
+  | "OUTAGE_SEVERITY_MAJOR"
+  | "OUTAGE_SEVERITY_TOTAL";
 
-export type ServiceOperationalStatus = "SERVICE_OPERATIONAL_STATUS_UNSPECIFIED" | "SERVICE_OPERATIONAL_STATUS_OPERATIONAL" | "SERVICE_OPERATIONAL_STATUS_DEGRADED" | "SERVICE_OPERATIONAL_STATUS_PARTIAL_OUTAGE" | "SERVICE_OPERATIONAL_STATUS_MAJOR_OUTAGE" | "SERVICE_OPERATIONAL_STATUS_MAINTENANCE";
+export type ServiceOperationalStatus =
+  | "SERVICE_OPERATIONAL_STATUS_UNSPECIFIED"
+  | "SERVICE_OPERATIONAL_STATUS_OPERATIONAL"
+  | "SERVICE_OPERATIONAL_STATUS_DEGRADED"
+  | "SERVICE_OPERATIONAL_STATUS_PARTIAL_OUTAGE"
+  | "SERVICE_OPERATIONAL_STATUS_MAJOR_OUTAGE"
+  | "SERVICE_OPERATIONAL_STATUS_MAINTENANCE";
 
 export interface FieldViolation {
   field: string;
@@ -197,15 +209,23 @@ export class InfrastructureServiceClient {
     this.defaultHeaders = { ...options?.defaultHeaders };
   }
 
-  async listInternetOutages(req: ListInternetOutagesRequest, options?: InfrastructureServiceCallOptions): Promise<ListInternetOutagesResponse> {
+  async listInternetOutages(
+    req: ListInternetOutagesRequest,
+    options?: InfrastructureServiceCallOptions,
+  ): Promise<ListInternetOutagesResponse> {
     let path = "/api/infrastructure/v1/list-internet-outages";
     const params = new URLSearchParams();
-    if (req.start != null && req.start !== 0) params.set("start", String(req.start));
+    if (req.start != null && req.start !== 0)
+      params.set("start", String(req.start));
     if (req.end != null && req.end !== 0) params.set("end", String(req.end));
-    if (req.pageSize != null && req.pageSize !== 0) params.set("page_size", String(req.pageSize));
-    if (req.cursor != null && req.cursor !== "") params.set("cursor", String(req.cursor));
-    if (req.country != null && req.country !== "") params.set("country", String(req.country));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.pageSize != null && req.pageSize !== 0)
+      params.set("page_size", String(req.pageSize));
+    if (req.cursor != null && req.cursor !== "")
+      params.set("cursor", String(req.cursor));
+    if (req.country != null && req.country !== "")
+      params.set("country", String(req.country));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -223,14 +243,19 @@ export class InfrastructureServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as ListInternetOutagesResponse;
+    return (await resp.json()) as ListInternetOutagesResponse;
   }
 
-  async listServiceStatuses(req: ListServiceStatusesRequest, options?: InfrastructureServiceCallOptions): Promise<ListServiceStatusesResponse> {
+  async listServiceStatuses(
+    req: ListServiceStatusesRequest,
+    options?: InfrastructureServiceCallOptions,
+  ): Promise<ListServiceStatusesResponse> {
     let path = "/api/infrastructure/v1/list-service-statuses";
     const params = new URLSearchParams();
-    if (req.status != null && req.status !== "") params.set("status", String(req.status));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.status != null && req.status !== "")
+      params.set("status", String(req.status));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -248,16 +273,23 @@ export class InfrastructureServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as ListServiceStatusesResponse;
+    return (await resp.json()) as ListServiceStatusesResponse;
   }
 
-  async getTemporalBaseline(req: GetTemporalBaselineRequest, options?: InfrastructureServiceCallOptions): Promise<GetTemporalBaselineResponse> {
+  async getTemporalBaseline(
+    req: GetTemporalBaselineRequest,
+    options?: InfrastructureServiceCallOptions,
+  ): Promise<GetTemporalBaselineResponse> {
     let path = "/api/infrastructure/v1/get-temporal-baseline";
     const params = new URLSearchParams();
-    if (req.type != null && req.type !== "") params.set("type", String(req.type));
-    if (req.region != null && req.region !== "") params.set("region", String(req.region));
-    if (req.count != null && req.count !== 0) params.set("count", String(req.count));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.type != null && req.type !== "")
+      params.set("type", String(req.type));
+    if (req.region != null && req.region !== "")
+      params.set("region", String(req.region));
+    if (req.count != null && req.count !== 0)
+      params.set("count", String(req.count));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -275,10 +307,13 @@ export class InfrastructureServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as GetTemporalBaselineResponse;
+    return (await resp.json()) as GetTemporalBaselineResponse;
   }
 
-  async recordBaselineSnapshot(req: RecordBaselineSnapshotRequest, options?: InfrastructureServiceCallOptions): Promise<RecordBaselineSnapshotResponse> {
+  async recordBaselineSnapshot(
+    req: RecordBaselineSnapshotRequest,
+    options?: InfrastructureServiceCallOptions,
+  ): Promise<RecordBaselineSnapshotResponse> {
     let path = "/api/infrastructure/v1/record-baseline-snapshot";
     const url = this.baseURL + path;
 
@@ -299,10 +334,13 @@ export class InfrastructureServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as RecordBaselineSnapshotResponse;
+    return (await resp.json()) as RecordBaselineSnapshotResponse;
   }
 
-  async getCableHealth(req: GetCableHealthRequest, options?: InfrastructureServiceCallOptions): Promise<GetCableHealthResponse> {
+  async getCableHealth(
+    req: GetCableHealthRequest,
+    options?: InfrastructureServiceCallOptions,
+  ): Promise<GetCableHealthResponse> {
     let path = "/api/infrastructure/v1/get-cable-health";
     const url = this.baseURL + path;
 
@@ -322,10 +360,13 @@ export class InfrastructureServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as GetCableHealthResponse;
+    return (await resp.json()) as GetCableHealthResponse;
   }
 
-  async listTemporalAnomalies(req: ListTemporalAnomaliesRequest, options?: InfrastructureServiceCallOptions): Promise<ListTemporalAnomaliesResponse> {
+  async listTemporalAnomalies(
+    req: ListTemporalAnomaliesRequest,
+    options?: InfrastructureServiceCallOptions,
+  ): Promise<ListTemporalAnomaliesResponse> {
     let path = "/api/infrastructure/v1/list-temporal-anomalies";
     const url = this.baseURL + path;
 
@@ -345,7 +386,7 @@ export class InfrastructureServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as ListTemporalAnomaliesResponse;
+    return (await resp.json()) as ListTemporalAnomaliesResponse;
   }
 
   private async handleError(resp: Response): Promise<never> {
@@ -360,7 +401,10 @@ export class InfrastructureServiceClient {
         if (e instanceof ValidationError) throw e;
       }
     }
-    throw new ApiError(resp.status, `Request failed with status ${resp.status}`, body);
+    throw new ApiError(
+      resp.status,
+      `Request failed with status ${resp.status}`,
+      body,
+    );
   }
 }
-

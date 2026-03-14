@@ -1,6 +1,10 @@
-import { isDesktopRuntime } from './runtime';
-import { invokeTauri } from './tauri-bridge';
-import { isStorageQuotaExceeded, isQuotaError, markStorageQuotaExceeded } from '@/utils';
+import { isDesktopRuntime } from "./runtime";
+import { invokeTauri } from "./tauri-bridge";
+import {
+  isStorageQuotaExceeded,
+  isQuotaError,
+  markStorageQuotaExceeded,
+} from "@/utils";
 
 type CacheEnvelope<T> = {
   key: string;
@@ -8,20 +12,22 @@ type CacheEnvelope<T> = {
   data: T;
 };
 
-const CACHE_PREFIX = 'worldmonitor-persistent-cache:';
-const CACHE_DB_NAME = 'worldmonitor_persistent_cache';
+const CACHE_PREFIX = "worldmonitor-persistent-cache:";
+const CACHE_DB_NAME = "worldmonitor_persistent_cache";
 const CACHE_DB_VERSION = 1;
-const CACHE_STORE = 'entries';
+const CACHE_STORE = "entries";
 
 let cacheDbPromise: Promise<IDBDatabase> | null = null;
 
 function isIndexedDbAvailable(): boolean {
-  return typeof window !== 'undefined' && typeof window.indexedDB !== 'undefined';
+  return (
+    typeof window !== "undefined" && typeof window.indexedDB !== "undefined"
+  );
 }
 
 function getCacheDb(): Promise<IDBDatabase> {
   if (!isIndexedDbAvailable()) {
-    return Promise.reject(new Error('IndexedDB unavailable'));
+    return Promise.reject(new Error("IndexedDB unavailable"));
   }
 
   if (cacheDbPromise) return cacheDbPromise;
@@ -29,18 +35,21 @@ function getCacheDb(): Promise<IDBDatabase> {
   cacheDbPromise = new Promise((resolve, reject) => {
     const request = indexedDB.open(CACHE_DB_NAME, CACHE_DB_VERSION);
 
-    request.onerror = () => reject(request.error ?? new Error('Failed to open cache IndexedDB'));
+    request.onerror = () =>
+      reject(request.error ?? new Error("Failed to open cache IndexedDB"));
 
     request.onupgradeneeded = () => {
       const db = request.result;
       if (!db.objectStoreNames.contains(CACHE_STORE)) {
-        db.createObjectStore(CACHE_STORE, { keyPath: 'key' });
+        db.createObjectStore(CACHE_STORE, { keyPath: "key" });
       }
     };
 
     request.onsuccess = () => {
       const db = request.result;
-      db.onclose = () => { cacheDbPromise = null; };
+      db.onclose = () => {
+        cacheDbPromise = null;
+      };
       resolve(db);
     };
   });
@@ -48,13 +57,16 @@ function getCacheDb(): Promise<IDBDatabase> {
   return cacheDbPromise;
 }
 
-async function getFromIndexedDb<T>(key: string): Promise<CacheEnvelope<T> | null> {
+async function getFromIndexedDb<T>(
+  key: string,
+): Promise<CacheEnvelope<T> | null> {
   const db = await getCacheDb();
   return new Promise((resolve, reject) => {
-    const tx = db.transaction(CACHE_STORE, 'readonly');
+    const tx = db.transaction(CACHE_STORE, "readonly");
     const store = tx.objectStore(CACHE_STORE);
     const request = store.get(key);
-    request.onsuccess = () => resolve((request.result as CacheEnvelope<T> | undefined) ?? null);
+    request.onsuccess = () =>
+      resolve((request.result as CacheEnvelope<T> | undefined) ?? null);
     request.onerror = () => reject(request.error);
   });
 }
@@ -62,7 +74,7 @@ async function getFromIndexedDb<T>(key: string): Promise<CacheEnvelope<T> | null
 async function setInIndexedDb<T>(payload: CacheEnvelope<T>): Promise<void> {
   const db = await getCacheDb();
   return new Promise((resolve, reject) => {
-    const tx = db.transaction(CACHE_STORE, 'readwrite');
+    const tx = db.transaction(CACHE_STORE, "readwrite");
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
     tx.objectStore(CACHE_STORE).put(payload);
@@ -72,7 +84,7 @@ async function setInIndexedDb<T>(payload: CacheEnvelope<T>): Promise<void> {
 async function deleteFromIndexedDbByPrefix(prefix: string): Promise<void> {
   const db = await getCacheDb();
   return new Promise((resolve, reject) => {
-    const tx = db.transaction(CACHE_STORE, 'readwrite');
+    const tx = db.transaction(CACHE_STORE, "readwrite");
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
 
@@ -91,7 +103,7 @@ async function deleteFromIndexedDbByPrefix(prefix: string): Promise<void> {
 }
 
 function deleteFromLocalStorageByPrefix(prefix: string): void {
-  if (typeof localStorage === 'undefined') return;
+  if (typeof localStorage === "undefined") return;
 
   const storagePrefix = `${CACHE_PREFIX}${prefix}`;
   const keysToDelete: string[] = [];
@@ -107,13 +119,21 @@ function deleteFromLocalStorageByPrefix(prefix: string): void {
   }
 }
 
-export async function getPersistentCache<T>(key: string): Promise<CacheEnvelope<T> | null> {
+export async function getPersistentCache<T>(
+  key: string,
+): Promise<CacheEnvelope<T> | null> {
   if (isDesktopRuntime()) {
     try {
-      const value = await invokeTauri<CacheEnvelope<T> | null>('read_cache_entry', { key });
+      const value = await invokeTauri<CacheEnvelope<T> | null>(
+        "read_cache_entry",
+        { key },
+      );
       return value ?? null;
     } catch (error) {
-      console.warn('[persistent-cache] Desktop read failed; falling back to browser storage', error);
+      console.warn(
+        "[persistent-cache] Desktop read failed; falling back to browser storage",
+        error,
+      );
     }
   }
 
@@ -121,28 +141,40 @@ export async function getPersistentCache<T>(key: string): Promise<CacheEnvelope<
     try {
       return await getFromIndexedDb<T>(key);
     } catch (error) {
-      console.warn('[persistent-cache] IndexedDB read failed; falling back to localStorage', error);
+      console.warn(
+        "[persistent-cache] IndexedDB read failed; falling back to localStorage",
+        error,
+      );
       cacheDbPromise = null;
     }
   }
 
   try {
     const raw = localStorage.getItem(`${CACHE_PREFIX}${key}`);
-    return raw ? JSON.parse(raw) as CacheEnvelope<T> : null;
+    return raw ? (JSON.parse(raw) as CacheEnvelope<T>) : null;
   } catch {
     return null;
   }
 }
 
-export async function setPersistentCache<T>(key: string, data: T): Promise<void> {
+export async function setPersistentCache<T>(
+  key: string,
+  data: T,
+): Promise<void> {
   const payload: CacheEnvelope<T> = { key, data, updatedAt: Date.now() };
 
   if (isDesktopRuntime()) {
     try {
-      await invokeTauri<void>('write_cache_entry', { key, value: JSON.stringify(payload) });
+      await invokeTauri<void>("write_cache_entry", {
+        key,
+        value: JSON.stringify(payload),
+      });
       return;
     } catch (error) {
-      console.warn('[persistent-cache] Desktop write failed; falling back to browser storage', error);
+      console.warn(
+        "[persistent-cache] Desktop write failed; falling back to browser storage",
+        error,
+      );
     }
   }
 
@@ -152,7 +184,11 @@ export async function setPersistentCache<T>(key: string, data: T): Promise<void>
       return;
     } catch (error) {
       if (isQuotaError(error)) markStorageQuotaExceeded();
-      else console.warn('[persistent-cache] IndexedDB write failed; falling back to localStorage', error);
+      else
+        console.warn(
+          "[persistent-cache] IndexedDB write failed; falling back to localStorage",
+          error,
+        );
       cacheDbPromise = null;
     }
   }
@@ -168,7 +204,7 @@ export async function setPersistentCache<T>(key: string, data: T): Promise<void>
 export async function deletePersistentCache(key: string): Promise<void> {
   if (isDesktopRuntime()) {
     try {
-      await invokeTauri<void>('delete_cache_entry', { key });
+      await invokeTauri<void>("delete_cache_entry", { key });
       return;
     } catch {
       // Fall through to browser storage
@@ -179,14 +215,17 @@ export async function deletePersistentCache(key: string): Promise<void> {
     try {
       const db = await getCacheDb();
       await new Promise<void>((resolve, reject) => {
-        const tx = db.transaction(CACHE_STORE, 'readwrite');
+        const tx = db.transaction(CACHE_STORE, "readwrite");
         tx.oncomplete = () => resolve();
         tx.onerror = () => reject(tx.error);
         tx.objectStore(CACHE_STORE).delete(key);
       });
       return;
     } catch (error) {
-      console.warn('[persistent-cache] IndexedDB delete failed; falling back to localStorage', error);
+      console.warn(
+        "[persistent-cache] IndexedDB delete failed; falling back to localStorage",
+        error,
+      );
       cacheDbPromise = null;
     }
   }
@@ -199,10 +238,12 @@ export async function deletePersistentCache(key: string): Promise<void> {
   }
 }
 
-export async function deletePersistentCacheByPrefix(prefix: string): Promise<void> {
+export async function deletePersistentCacheByPrefix(
+  prefix: string,
+): Promise<void> {
   if (isDesktopRuntime()) {
     try {
-      await invokeTauri<void>('delete_cache_entries_by_prefix', { prefix });
+      await invokeTauri<void>("delete_cache_entries_by_prefix", { prefix });
       return;
     } catch {
       // Fall through to browser storage
@@ -214,7 +255,10 @@ export async function deletePersistentCacheByPrefix(prefix: string): Promise<voi
       await deleteFromIndexedDbByPrefix(prefix);
       return;
     } catch (error) {
-      console.warn('[persistent-cache] IndexedDB prefix delete failed; falling back to localStorage', error);
+      console.warn(
+        "[persistent-cache] IndexedDB prefix delete failed; falling back to localStorage",
+        error,
+      );
       cacheDbPromise = null;
     }
   }
@@ -233,7 +277,7 @@ export function cacheAgeMs(updatedAt: number): number {
 export function describeFreshness(updatedAt: number): string {
   const age = cacheAgeMs(updatedAt);
   const mins = Math.floor(age / 60000);
-  if (mins < 1) return 'just now';
+  if (mins < 1) return "just now";
   if (mins < 60) return `${mins}m ago`;
   const hrs = Math.floor(mins / 60);
   if (hrs < 24) return `${hrs}h ago`;

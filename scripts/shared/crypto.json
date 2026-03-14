@@ -1,8 +1,15 @@
 {
   "ids": [
-    "bitcoin", "ethereum", "binancecoin", "solana",
-    "ripple", "cardano", "dogecoin", "tron",
-    "avalanche-2", "chainlink"
+    "bitcoin",
+    "ethereum",
+    "binancecoin",
+    "solana",
+    "ripple",
+    "cardano",
+    "dogecoin",
+    "tron",
+    "avalanche-2",
+    "chainlink"
   ],
   "meta": {
     "bitcoin": { "name": "Bitcoin", "symbol": "BTC" },

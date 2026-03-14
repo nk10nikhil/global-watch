@@ -5,32 +5,50 @@
  * All data now flows through the MarketServiceClient RPCs.
  */
 
-import { getRpcBaseUrl } from '@/services/rpc-client';
+import { getRpcBaseUrl } from "@/services/rpc-client";
 import {
   MarketServiceClient,
   type ListMarketQuotesResponse,
   type ListCryptoQuotesResponse,
   type MarketQuote as ProtoMarketQuote,
   type CryptoQuote as ProtoCryptoQuote,
-} from '@/generated/client/worldmonitor/market/v1/service_client';
-import type { MarketData, CryptoData } from '@/types';
-import { createCircuitBreaker } from '@/utils/circuit-breaker';
-import { getHydratedData } from '@/services/bootstrap';
+} from "@/generated/client/worldmonitor/market/v1/service_client";
+import type { MarketData, CryptoData } from "@/types";
+import { createCircuitBreaker } from "@/utils/circuit-breaker";
+import { getHydratedData } from "@/services/bootstrap";
 
 // ---- Client + Circuit Breakers ----
 
-const client = new MarketServiceClient(getRpcBaseUrl(), { fetch: (...args: Parameters<typeof fetch>) => globalThis.fetch(...args) });
+const client = new MarketServiceClient(getRpcBaseUrl(), {
+  fetch: (...args: Parameters<typeof fetch>) => globalThis.fetch(...args),
+});
 const MARKET_QUOTES_CACHE_TTL_MS = 5 * 60 * 1000;
-const stockBreaker = createCircuitBreaker<ListMarketQuotesResponse>({ name: 'Market Quotes', cacheTtlMs: MARKET_QUOTES_CACHE_TTL_MS });
-const commodityBreaker = createCircuitBreaker<ListMarketQuotesResponse>({ name: 'Commodity Quotes', cacheTtlMs: MARKET_QUOTES_CACHE_TTL_MS });
-const cryptoBreaker = createCircuitBreaker<ListCryptoQuotesResponse>({ name: 'Crypto Quotes' });
+const stockBreaker = createCircuitBreaker<ListMarketQuotesResponse>({
+  name: "Market Quotes",
+  cacheTtlMs: MARKET_QUOTES_CACHE_TTL_MS,
+});
+const commodityBreaker = createCircuitBreaker<ListMarketQuotesResponse>({
+  name: "Commodity Quotes",
+  cacheTtlMs: MARKET_QUOTES_CACHE_TTL_MS,
+});
+const cryptoBreaker = createCircuitBreaker<ListCryptoQuotesResponse>({
+  name: "Crypto Quotes",
+});
 
-const emptyStockFallback: ListMarketQuotesResponse = { quotes: [], finnhubSkipped: false, skipReason: '', rateLimited: false };
+const emptyStockFallback: ListMarketQuotesResponse = {
+  quotes: [],
+  finnhubSkipped: false,
+  skipReason: "",
+  rateLimited: false,
+};
 const emptyCryptoFallback: ListCryptoQuotesResponse = { quotes: [] };
 
 // ---- Proto -> legacy adapters ----
 
-function toMarketData(proto: ProtoMarketQuote, meta?: { name?: string; display?: string }): MarketData {
+function toMarketData(
+  proto: ProtoMarketQuote,
+  meta?: { name?: string; display?: string },
+): MarketData {
   return {
     symbol: proto.symbol,
     name: meta?.name || proto.name,
@@ -73,17 +91,26 @@ function trimSymbol(symbol: string): string {
 }
 
 function symbolSetKey(symbols: string[]): string {
-  return [...new Set(symbols.map(trimSymbol))].sort().join(',');
+  return [...new Set(symbols.map(trimSymbol))].sort().join(",");
 }
 
 export async function fetchMultipleStocks(
   symbols: Array<{ symbol: string; name: string; display: string }>,
-  options: { onBatch?: (results: MarketData[]) => void; useCommodityBreaker?: boolean } = {},
+  options: {
+    onBatch?: (results: MarketData[]) => void;
+    useCommodityBreaker?: boolean;
+  } = {},
 ): Promise<MarketFetchResult> {
   // Preserve exact requested symbols for cache keys and request payloads so
   // case-distinct instruments do not collapse into one cache entry.
-  const symbolMetaMap = new Map<string, { symbol: string; name: string; display: string }>();
-  const uppercaseMetaMap = new Map<string, { symbol: string; name: string; display: string } | null>();
+  const symbolMetaMap = new Map<
+    string,
+    { symbol: string; name: string; display: string }
+  >();
+  const uppercaseMetaMap = new Map<
+    string,
+    { symbol: string; name: string; display: string } | null
+  >();
   for (const s of symbols) {
     const trimmed = trimSymbol(s.symbol);
     if (!symbolMetaMap.has(trimmed)) symbolMetaMap.set(trimmed, s);
@@ -100,16 +127,23 @@ export async function fetchMultipleStocks(
   const setKey = symbolSetKey(allSymbolStrings);
 
   const breaker = options.useCommodityBreaker ? commodityBreaker : stockBreaker;
-  const resp = await breaker.execute(async () => {
-    return client.listMarketQuotes({ symbols: allSymbolStrings });
-  }, emptyStockFallback, {
-    cacheKey: setKey,
-    shouldCache: (r) => r.quotes.length > 0,
-  });
+  const resp = await breaker.execute(
+    async () => {
+      return client.listMarketQuotes({ symbols: allSymbolStrings });
+    },
+    emptyStockFallback,
+    {
+      cacheKey: setKey,
+      shouldCache: (r) => r.quotes.length > 0,
+    },
+  );
 
   const results = resp.quotes.map((q) => {
     const trimmed = trimSymbol(q.symbol);
-    const meta = symbolMetaMap.get(trimmed) ?? uppercaseMetaMap.get(trimmed.toUpperCase()) ?? undefined;
+    const meta =
+      symbolMetaMap.get(trimmed) ??
+      uppercaseMetaMap.get(trimmed.toUpperCase()) ??
+      undefined;
     return toMarketData(q, meta);
   });
 
@@ -122,7 +156,8 @@ export async function fetchMultipleStocks(
     lastSuccessfulByKey.set(setKey, results);
   }
 
-  const data = results.length > 0 ? results : (lastSuccessfulByKey.get(setKey) || []);
+  const data =
+    results.length > 0 ? results : lastSuccessfulByKey.get(setKey) || [];
   return {
     data,
     skipped: resp.finnhubSkipped || undefined,
@@ -147,19 +182,22 @@ export async function fetchStockQuote(
 let lastSuccessfulCrypto: CryptoData[] = [];
 
 export async function fetchCrypto(): Promise<CryptoData[]> {
-  const hydrated = getHydratedData('cryptoQuotes') as ListCryptoQuotesResponse | undefined;
+  const hydrated = getHydratedData("cryptoQuotes") as
+    | ListCryptoQuotesResponse
+    | undefined;
   if (hydrated?.quotes?.length) {
-    const mapped = hydrated.quotes.map(toCryptoData).filter(c => c.price > 0);
-    if (mapped.length > 0) { lastSuccessfulCrypto = mapped; return mapped; }
+    const mapped = hydrated.quotes.map(toCryptoData).filter((c) => c.price > 0);
+    if (mapped.length > 0) {
+      lastSuccessfulCrypto = mapped;
+      return mapped;
+    }
   }
 
   const resp = await cryptoBreaker.execute(async () => {
     return client.listCryptoQuotes({ ids: [] }); // empty = all defaults
   }, emptyCryptoFallback);
 
-  const results = resp.quotes
-    .map(toCryptoData)
-    .filter(c => c.price > 0);
+  const results = resp.quotes.map(toCryptoData).filter((c) => c.price > 0);
 
   if (results.length > 0) {
     lastSuccessfulCrypto = results;

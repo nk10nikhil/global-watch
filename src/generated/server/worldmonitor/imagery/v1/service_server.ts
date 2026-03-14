@@ -63,7 +63,10 @@ export interface ServerContext {
 
 export interface ServerOptions {
   onError?: (error: unknown, req: Request) => Response | Promise<Response>;
-  validateRequest?: (methodName: string, body: unknown) => FieldViolation[] | undefined;
+  validateRequest?: (
+    methodName: string,
+    body: unknown,
+  ) => FieldViolation[] | undefined;
 }
 
 export interface RouteDescriptor {
@@ -73,7 +76,10 @@ export interface RouteDescriptor {
 }
 
 export interface ImageryServiceHandler {
-  searchImagery(ctx: ServerContext, req: SearchImageryRequest): Promise<SearchImageryResponse>;
+  searchImagery(
+    ctx: ServerContext,
+    req: SearchImageryRequest,
+  ): Promise<SearchImageryResponse>;
 }
 
 function makeHandler<Req, Res>(

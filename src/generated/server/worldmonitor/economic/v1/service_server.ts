@@ -79,8 +79,7 @@ export interface EnergyPrice {
   priceAt: number;
 }
 
-export interface GetMacroSignalsRequest {
-}
+export interface GetMacroSignalsRequest {}
 
 export interface GetMacroSignalsResponse {
   timestamp: string;
@@ -174,8 +173,7 @@ export interface EnergyCapacityYear {
   capacityMw: number;
 }
 
-export interface GetBisPolicyRatesRequest {
-}
+export interface GetBisPolicyRatesRequest {}
 
 export interface GetBisPolicyRatesResponse {
   rates: BisPolicyRate[];
@@ -190,8 +188,7 @@ export interface BisPolicyRate {
   centralBank: string;
 }
 
-export interface GetBisExchangeRatesRequest {
-}
+export interface GetBisExchangeRatesRequest {}
 
 export interface GetBisExchangeRatesResponse {
   rates: BisExchangeRate[];
@@ -206,8 +203,7 @@ export interface BisExchangeRate {
   date: string;
 }
 
-export interface GetBisCreditRequest {
-}
+export interface GetBisCreditRequest {}
 
 export interface GetBisCreditResponse {
   entries: BisCreditToGdp[];
@@ -256,7 +252,10 @@ export interface ServerContext {
 
 export interface ServerOptions {
   onError?: (error: unknown, req: Request) => Response | Promise<Response>;
-  validateRequest?: (methodName: string, body: unknown) => FieldViolation[] | undefined;
+  validateRequest?: (
+    methodName: string,
+    body: unknown,
+  ) => FieldViolation[] | undefined;
 }
 
 export interface RouteDescriptor {
@@ -266,15 +265,42 @@ export interface RouteDescriptor {
 }
 
 export interface EconomicServiceHandler {
-  getFredSeries(ctx: ServerContext, req: GetFredSeriesRequest): Promise<GetFredSeriesResponse>;
-  getFredSeriesBatch(ctx: ServerContext, req: GetFredSeriesBatchRequest): Promise<GetFredSeriesBatchResponse>;
-  listWorldBankIndicators(ctx: ServerContext, req: ListWorldBankIndicatorsRequest): Promise<ListWorldBankIndicatorsResponse>;
-  getEnergyPrices(ctx: ServerContext, req: GetEnergyPricesRequest): Promise<GetEnergyPricesResponse>;
-  getMacroSignals(ctx: ServerContext, req: GetMacroSignalsRequest): Promise<GetMacroSignalsResponse>;
-  getEnergyCapacity(ctx: ServerContext, req: GetEnergyCapacityRequest): Promise<GetEnergyCapacityResponse>;
-  getBisPolicyRates(ctx: ServerContext, req: GetBisPolicyRatesRequest): Promise<GetBisPolicyRatesResponse>;
-  getBisExchangeRates(ctx: ServerContext, req: GetBisExchangeRatesRequest): Promise<GetBisExchangeRatesResponse>;
-  getBisCredit(ctx: ServerContext, req: GetBisCreditRequest): Promise<GetBisCreditResponse>;
+  getFredSeries(
+    ctx: ServerContext,
+    req: GetFredSeriesRequest,
+  ): Promise<GetFredSeriesResponse>;
+  getFredSeriesBatch(
+    ctx: ServerContext,
+    req: GetFredSeriesBatchRequest,
+  ): Promise<GetFredSeriesBatchResponse>;
+  listWorldBankIndicators(
+    ctx: ServerContext,
+    req: ListWorldBankIndicatorsRequest,
+  ): Promise<ListWorldBankIndicatorsResponse>;
+  getEnergyPrices(
+    ctx: ServerContext,
+    req: GetEnergyPricesRequest,
+  ): Promise<GetEnergyPricesResponse>;
+  getMacroSignals(
+    ctx: ServerContext,
+    req: GetMacroSignalsRequest,
+  ): Promise<GetMacroSignalsResponse>;
+  getEnergyCapacity(
+    ctx: ServerContext,
+    req: GetEnergyCapacityRequest,
+  ): Promise<GetEnergyCapacityResponse>;
+  getBisPolicyRates(
+    ctx: ServerContext,
+    req: GetBisPolicyRatesRequest,
+  ): Promise<GetBisPolicyRatesResponse>;
+  getBisExchangeRates(
+    ctx: ServerContext,
+    req: GetBisExchangeRatesRequest,
+  ): Promise<GetBisExchangeRatesResponse>;
+  getBisCredit(
+    ctx: ServerContext,
+    req: GetBisCreditRequest,
+  ): Promise<GetBisCreditResponse>;
 }
 
 export function createEconomicServiceRoutes(
@@ -295,7 +321,10 @@ export function createEconomicServiceRoutes(
             limit: Number(params.get("limit") ?? "0"),
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getFredSeries", body);
+            const bodyViolations = options.validateRequest(
+              "getFredSeries",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -314,10 +343,13 @@ export function createEconomicServiceRoutes(
           });
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -336,13 +368,19 @@ export function createEconomicServiceRoutes(
       handler: async (req: Request): Promise<Response> => {
         try {
           const pathParams: Record<string, string> = {};
-          const rawBody = await req.json() as { series_ids?: string[]; limit?: number };
+          const rawBody = (await req.json()) as {
+            series_ids?: string[];
+            limit?: number;
+          };
           const body: GetFredSeriesBatchRequest = {
             seriesIds: rawBody.series_ids ?? [],
             limit: rawBody.limit ?? 0,
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getFredSeriesBatch", body);
+            const bodyViolations = options.validateRequest(
+              "getFredSeriesBatch",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -355,16 +393,22 @@ export function createEconomicServiceRoutes(
           };
 
           const result = await handler.getFredSeriesBatch(ctx, body);
-          return new Response(JSON.stringify(result as GetFredSeriesBatchResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetFredSeriesBatchResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -393,7 +437,10 @@ export function createEconomicServiceRoutes(
             cursor: params.get("cursor") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("listWorldBankIndicators", body);
+            const bodyViolations = options.validateRequest(
+              "listWorldBankIndicators",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -406,16 +453,22 @@ export function createEconomicServiceRoutes(
           };
 
           const result = await handler.listWorldBankIndicators(ctx, body);
-          return new Response(JSON.stringify(result as ListWorldBankIndicatorsResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as ListWorldBankIndicatorsResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -440,7 +493,10 @@ export function createEconomicServiceRoutes(
             commodities: params.get("commodities") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getEnergyPrices", body);
+            const bodyViolations = options.validateRequest(
+              "getEnergyPrices",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -453,16 +509,22 @@ export function createEconomicServiceRoutes(
           };
 
           const result = await handler.getEnergyPrices(ctx, body);
-          return new Response(JSON.stringify(result as GetEnergyPricesResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetEnergyPricesResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -490,16 +552,22 @@ export function createEconomicServiceRoutes(
           };
 
           const result = await handler.getMacroSignals(ctx, body);
-          return new Response(JSON.stringify(result as GetMacroSignalsResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetMacroSignalsResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -525,7 +593,10 @@ export function createEconomicServiceRoutes(
             years: Number(params.get("years") ?? "0"),
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getEnergyCapacity", body);
+            const bodyViolations = options.validateRequest(
+              "getEnergyCapacity",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -538,16 +609,22 @@ export function createEconomicServiceRoutes(
           };
 
           const result = await handler.getEnergyCapacity(ctx, body);
-          return new Response(JSON.stringify(result as GetEnergyCapacityResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetEnergyCapacityResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -575,16 +652,22 @@ export function createEconomicServiceRoutes(
           };
 
           const result = await handler.getBisPolicyRates(ctx, body);
-          return new Response(JSON.stringify(result as GetBisPolicyRatesResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetBisPolicyRatesResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -612,16 +695,22 @@ export function createEconomicServiceRoutes(
           };
 
           const result = await handler.getBisExchangeRates(ctx, body);
-          return new Response(JSON.stringify(result as GetBisExchangeRatesResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetBisExchangeRatesResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -655,10 +744,13 @@ export function createEconomicServiceRoutes(
           });
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -673,4 +765,3 @@ export function createEconomicServiceRoutes(
     },
   ];
 }
-

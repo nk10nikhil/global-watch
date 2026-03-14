@@ -8,22 +8,62 @@ import type {
   ListWorldBankIndicatorsRequest,
   ListWorldBankIndicatorsResponse,
   WorldBankCountryData,
-} from '../../../../src/generated/server/worldmonitor/economic/v1/service_server';
+} from "../../../../src/generated/server/worldmonitor/economic/v1/service_server";
 
-import { CHROME_UA } from '../../../_shared/constants';
-import { cachedFetchJson } from '../../../_shared/redis';
+import { CHROME_UA } from "../../../_shared/constants";
+import { cachedFetchJson } from "../../../_shared/redis";
 
-const REDIS_CACHE_KEY = 'economic:worldbank:v1';
+const REDIS_CACHE_KEY = "economic:worldbank:v1";
 const REDIS_CACHE_TTL = 86400; // 24 hr — annual data
 
 const TECH_COUNTRIES = [
-  'USA', 'CHN', 'JPN', 'DEU', 'KOR', 'GBR', 'IND', 'ISR', 'SGP', 'TWN',
-  'FRA', 'CAN', 'SWE', 'NLD', 'CHE', 'FIN', 'IRL', 'AUS', 'BRA', 'IDN',
-  'ARE', 'SAU', 'QAT', 'BHR', 'EGY', 'TUR',
-  'MYS', 'THA', 'VNM', 'PHL',
-  'ESP', 'ITA', 'POL', 'CZE', 'DNK', 'NOR', 'AUT', 'BEL', 'PRT', 'EST',
-  'MEX', 'ARG', 'CHL', 'COL',
-  'ZAF', 'NGA', 'KEN',
+  "USA",
+  "CHN",
+  "JPN",
+  "DEU",
+  "KOR",
+  "GBR",
+  "IND",
+  "ISR",
+  "SGP",
+  "TWN",
+  "FRA",
+  "CAN",
+  "SWE",
+  "NLD",
+  "CHE",
+  "FIN",
+  "IRL",
+  "AUS",
+  "BRA",
+  "IDN",
+  "ARE",
+  "SAU",
+  "QAT",
+  "BHR",
+  "EGY",
+  "TUR",
+  "MYS",
+  "THA",
+  "VNM",
+  "PHL",
+  "ESP",
+  "ITA",
+  "POL",
+  "CZE",
+  "DNK",
+  "NOR",
+  "AUT",
+  "BEL",
+  "PRT",
+  "EST",
+  "MEX",
+  "ARG",
+  "CHL",
+  "COL",
+  "ZAF",
+  "NGA",
+  "KEN",
 ];
 
 async function fetchWorldBankIndicators(
@@ -33,7 +73,7 @@ async function fetchWorldBankIndicators(
     const indicator = req.indicatorCode;
     if (!indicator) return [];
 
-    const countryList = req.countryCode || TECH_COUNTRIES.join(';');
+    const countryList = req.countryCode || TECH_COUNTRIES.join(";");
     const currentYear = new Date().getFullYear();
     const years = req.year > 0 ? req.year : 5;
     const startYear = currentYear - years;
@@ -42,8 +82,8 @@ async function fetchWorldBankIndicators(
 
     const response = await fetch(wbUrl, {
       headers: {
-        Accept: 'application/json',
-        'User-Agent': CHROME_UA,
+        Accept: "application/json",
+        "User-Agent": CHROME_UA,
       },
       signal: AbortSignal.timeout(15000),
     });
@@ -58,14 +98,16 @@ async function fetchWorldBankIndicators(
 
     return records
       .filter((r: any) => r.countryiso3code && r.value !== null)
-      .map((r: any): WorldBankCountryData => ({
-        countryCode: r.countryiso3code || r.country?.id || '',
-        countryName: r.country?.value || '',
-        indicatorCode: indicator,
-        indicatorName,
-        year: parseInt(r.date, 10) || 0,
-        value: r.value,
-      }));
+      .map(
+        (r: any): WorldBankCountryData => ({
+          countryCode: r.countryiso3code || r.country?.id || "",
+          countryName: r.country?.value || "",
+          indicatorCode: indicator,
+          indicatorName,
+          year: parseInt(r.date, 10) || 0,
+          value: r.value,
+        }),
+      );
   } catch {
     return [];
   }
@@ -76,11 +118,15 @@ export async function listWorldBankIndicators(
   req: ListWorldBankIndicatorsRequest,
 ): Promise<ListWorldBankIndicatorsResponse> {
   try {
-    const cacheKey = `${REDIS_CACHE_KEY}:${req.indicatorCode}:${req.countryCode || 'all'}:${req.year || 0}`;
-    const result = await cachedFetchJson<ListWorldBankIndicatorsResponse>(cacheKey, REDIS_CACHE_TTL, async () => {
-      const data = await fetchWorldBankIndicators(req);
-      return data.length > 0 ? { data, pagination: undefined } : null;
-    });
+    const cacheKey = `${REDIS_CACHE_KEY}:${req.indicatorCode}:${req.countryCode || "all"}:${req.year || 0}`;
+    const result = await cachedFetchJson<ListWorldBankIndicatorsResponse>(
+      cacheKey,
+      REDIS_CACHE_TTL,
+      async () => {
+        const data = await fetchWorldBankIndicators(req);
+        return data.length > 0 ? { data, pagination: undefined } : null;
+      },
+    );
     return result || { data: [], pagination: undefined };
   } catch {
     return { data: [], pagination: undefined };

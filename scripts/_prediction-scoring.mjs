@@ -1,4 +1,4 @@
-import predictionTags from './data/prediction-tags.json' with { type: 'json' };
+import predictionTags from "./data/prediction-tags.json" with { type: "json" };
 
 export const EXCLUDE_KEYWORDS = predictionTags.excludeKeywords;
 
@@ -8,7 +8,8 @@ export const MEME_PATTERNS = [
 ];
 
 export const REGION_PATTERNS = {
-  america: /\b(us|u\.s\.|united states|america|trump|biden|congress|federal reserve|canada|mexico|brazil)\b/i,
+  america:
+    /\b(us|u\.s\.|united states|america|trump|biden|congress|federal reserve|canada|mexico|brazil)\b/i,
   eu: /\b(europe|european|eu|nato|germany|france|uk|britain|macron|ecb)\b/i,
   mena: /\b(middle east|iran|iraq|syria|israel|palestine|gaza|saudi|yemen|houthi|lebanon)\b/i,
   asia: /\b(china|japan|korea|india|taiwan|xi jinping|asean)\b/i,
@@ -19,12 +20,12 @@ export const REGION_PATTERNS = {
 
 export function isExcluded(title) {
   const lower = title.toLowerCase();
-  return EXCLUDE_KEYWORDS.some(kw => lower.includes(kw));
+  return EXCLUDE_KEYWORDS.some((kw) => lower.includes(kw));
 }
 
 export function isMemeCandidate(title, yesPrice) {
   if (yesPrice >= 15) return false;
-  return MEME_PATTERNS.some(p => p.test(title));
+  return MEME_PATTERNS.some((p) => p.test(title));
 }
 
 export function tagRegions(title) {
@@ -35,7 +36,7 @@ export function tagRegions(title) {
 
 export function parseYesPrice(market) {
   try {
-    const prices = JSON.parse(market.outcomePrices || '[]');
+    const prices = JSON.parse(market.outcomePrices || "[]");
     if (prices.length >= 1) {
       const p = parseFloat(prices[0]);
       if (!isNaN(p) && p >= 0 && p <= 1) return +(p * 100).toFixed(1);
@@ -55,9 +56,9 @@ export function shouldInclude(m, relaxed = false) {
 }
 
 export function scoreMarket(m) {
-  const uncertainty = 1 - (2 * Math.abs(m.yesPrice - 50) / 100);
+  const uncertainty = 1 - (2 * Math.abs(m.yesPrice - 50)) / 100;
   const vol = Math.log10(Math.max(m.volume, 1)) / Math.log10(10_000_000);
-  return (uncertainty * 0.6) + (Math.min(vol, 1) * 0.4);
+  return uncertainty * 0.6 + Math.min(vol, 1) * 0.4;
 }
 
 export function isExpired(endDate) {
@@ -67,16 +68,16 @@ export function isExpired(endDate) {
 }
 
 export function filterAndScore(candidates, tagFilter, limit = 25) {
-  let filtered = candidates.filter(m => !isExpired(m.endDate));
+  let filtered = candidates.filter((m) => !isExpired(m.endDate));
   if (tagFilter) filtered = filtered.filter(tagFilter);
 
-  let result = filtered.filter(m => shouldInclude(m));
+  let result = filtered.filter((m) => shouldInclude(m));
   if (result.length < 15) {
-    result = filtered.filter(m => shouldInclude(m, true));
+    result = filtered.filter((m) => shouldInclude(m, true));
   }
 
   return result
-    .map(m => ({ ...m, regions: tagRegions(m.title) }))
+    .map((m) => ({ ...m, regions: tagRegions(m.title) }))
     .sort((a, b) => scoreMarket(b) - scoreMarket(a))
     .slice(0, limit);
 }

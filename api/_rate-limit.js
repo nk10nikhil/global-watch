@@ -1,5 +1,5 @@
-import { Ratelimit } from '@upstash/ratelimit';
-import { Redis } from '@upstash/redis';
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 
 let ratelimit = null;
 
@@ -12,8 +12,8 @@ function getRatelimit() {
 
   ratelimit = new Ratelimit({
     redis: new Redis({ url, token }),
-    limiter: Ratelimit.slidingWindow(600, '60 s'),
-    prefix: 'rl',
+    limiter: Ratelimit.slidingWindow(600, "60 s"),
+    prefix: "rl",
     analytics: false,
   });
 
@@ -22,10 +22,10 @@ function getRatelimit() {
 
 function getClientIp(request) {
   return (
-    request.headers.get('x-real-ip') ||
-    request.headers.get('cf-connecting-ip') ||
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-    '0.0.0.0'
+    request.headers.get("x-real-ip") ||
+    request.headers.get("cf-connecting-ip") ||
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    "0.0.0.0"
   );
 }
 
@@ -38,14 +38,14 @@ export async function checkRateLimit(request, corsHeaders) {
     const { success, limit, reset } = await rl.limit(ip);
 
     if (!success) {
-      return new Response(JSON.stringify({ error: 'Too many requests' }), {
+      return new Response(JSON.stringify({ error: "Too many requests" }), {
         status: 429,
         headers: {
-          'Content-Type': 'application/json',
-          'X-RateLimit-Limit': String(limit),
-          'X-RateLimit-Remaining': '0',
-          'X-RateLimit-Reset': String(reset),
-          'Retry-After': String(Math.ceil((reset - Date.now()) / 1000)),
+          "Content-Type": "application/json",
+          "X-RateLimit-Limit": String(limit),
+          "X-RateLimit-Remaining": "0",
+          "X-RateLimit-Reset": String(reset),
+          "Retry-After": String(Math.ceil((reset - Date.now()) / 1000)),
           ...corsHeaders,
         },
       });

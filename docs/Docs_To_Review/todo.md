@@ -10,10 +10,10 @@ Dependencies reference `BUG-` or other `TODO-` codes.
 
 ### TODO-001 — Decompose `App.ts` into a Controller Architecture
 
-| Field | Value |
-|---|---|
-| **Priority** | 🔴 High |
-| **Effort** | ~2 days |
+| Field          | Value   |
+| -------------- | ------- |
+| **Priority**   | 🔴 High |
+| **Effort**     | ~2 days |
 | **Depends on** | BUG-001 |
 
 **Description**
@@ -38,11 +38,11 @@ Keep `App` as a thin composition root.
 
 ### TODO-002 — Add Server-Side RSS Aggregation and Caching
 
-| Field | Value |
-|---|---|
-| **Priority** | 🔴 High |
-| **Effort** | ~3 days |
-| **Depends on** | — |
+| Field          | Value   |
+| -------------- | ------- |
+| **Priority**   | 🔴 High |
+| **Effort**     | ~3 days |
+| **Depends on** | —       |
 
 **Description**
 Currently 70+ RSS feeds are fetched client-side through individual proxy rules.
@@ -61,11 +61,11 @@ Create `api/news.js` edge function. Use `@upstash/redis`. Implement feed XML par
 
 ### TODO-003 — Real-Time Alert Webhooks (Slack / Discord / Email)
 
-| Field | Value |
-|---|---|
-| **Priority** | 🔴 High |
-| **Effort** | ~2 days |
-| **Depends on** | — |
+| Field          | Value   |
+| -------------- | ------- |
+| **Priority**   | 🔴 High |
+| **Effort**     | ~2 days |
+| **Depends on** | —       |
 
 **Description**
 The dashboard generates high-value signals (military surge, CII spikes, geographic convergence) but they are only visible when the Dashboard tab is active.
@@ -82,10 +82,10 @@ Users should be able to receive critical alerts via external channels.
 
 ### TODO-004 — Comprehensive API Handler Test Suite
 
-| Field | Value |
-|---|---|
-| **Priority** | 🔴 High |
-| **Effort** | ~2 days |
+| Field          | Value   |
+| -------------- | ------- |
+| **Priority**   | 🔴 High |
+| **Effort**     | ~2 days |
 | **Depends on** | BUG-014 |
 
 **Description**
@@ -99,16 +99,16 @@ For each handler in `api/`:
 2. Test valid input → correct response.
 3. Test malformed input → 400 error.
 4. Test upstream failure → graceful error response.
-Prioritize handlers that accept user-controlled query params.
+   Prioritize handlers that accept user-controlled query params.
 
 ---
 
 ### TODO-005 — Cross-Platform npm Script Compatibility
 
-| Field | Value |
-|---|---|
-| **Priority** | 🔴 High |
-| **Effort** | ~1 hour |
+| Field          | Value            |
+| -------------- | ---------------- |
+| **Priority**   | 🔴 High          |
+| **Effort**     | ~1 hour          |
 | **Depends on** | BUG-013, BUG-019 |
 
 **Description**
@@ -125,11 +125,11 @@ Prefix every inline env-var assignment with `cross-env`, e.g.:
 
 ### TODO-006 — Temporal Anomaly Detection ("Unusual for This Time")
 
-| Field | Value |
-|---|---|
-| **Priority** | 🟡 Medium |
-| **Effort** | ~3 days |
-| **Depends on** | — |
+| Field          | Value     |
+| -------------- | --------- |
+| **Priority**   | 🟡 Medium |
+| **Effort**     | ~3 days   |
+| **Depends on** | —         |
 
 **Description**
 Flag when activity deviates from time-of-day/week norms.
@@ -146,11 +146,11 @@ Example: "Military flights 3× normal for a Tuesday" or "News velocity spike at 
 
 ### TODO-007 — Trade Route Risk Scoring
 
-| Field | Value |
-|---|---|
-| **Priority** | 🟡 Medium |
-| **Effort** | ~4 days |
-| **Depends on** | — |
+| Field          | Value     |
+| -------------- | --------- |
+| **Priority**   | 🟡 Medium |
+| **Effort**     | ~4 days   |
+| **Depends on** | —         |
 
 **Description**
 Score major shipping routes based on chokepoint risk, AIS disruptions, and military posture along the route.
@@ -166,11 +166,11 @@ Score major shipping routes based on chokepoint risk, AIS disruptions, and milit
 
 ### TODO-008 — Choropleth CII Map Layer
 
-| Field | Value |
-|---|---|
-| **Priority** | 🟡 Medium |
-| **Effort** | ~2 days |
-| **Depends on** | — |
+| Field          | Value     |
+| -------------- | --------- |
+| **Priority**   | 🟡 Medium |
+| **Effort**     | ~2 days   |
+| **Depends on** | —         |
 
 **Description**
 Overlay the map with country-colored fills based on CII score.
@@ -186,11 +186,11 @@ Overlay the map with country-colored fills based on CII score.
 
 ### TODO-009 — Custom Country Watchlists (Tier 2 Monitoring)
 
-| Field | Value |
-|---|---|
-| **Priority** | 🟡 Medium |
-| **Effort** | ~2 days |
-| **Depends on** | — |
+| Field          | Value     |
+| -------------- | --------- |
+| **Priority**   | 🟡 Medium |
+| **Effort**     | ~2 days   |
+| **Depends on** | —         |
 
 **Description**
 CII currently monitors 20 hardcoded Tier 1 countries.
@@ -207,11 +207,11 @@ Allow users to add custom countries to a Tier 2 watchlist with the same scoring 
 
 ### TODO-010 — Historical Playback with Timeline Scrubbing
 
-| Field | Value |
-|---|---|
-| **Priority** | 🟡 Medium |
-| **Effort** | ~3 days |
-| **Depends on** | — |
+| Field          | Value     |
+| -------------- | --------- |
+| **Priority**   | 🟡 Medium |
+| **Effort**     | ~3 days   |
+| **Depends on** | —         |
 
 **Description**
 The snapshot system captures periodic state but playback is rudimentary.
@@ -228,11 +228,11 @@ Add a visual timeline scrubber to replay dashboard state over time.
 
 ### TODO-011 — Election Calendar Integration (Auto-Boost Sensitivity)
 
-| Field | Value |
-|---|---|
-| **Priority** | 🟡 Medium |
-| **Effort** | ~1 day |
-| **Depends on** | — |
+| Field          | Value     |
+| -------------- | --------- |
+| **Priority**   | 🟡 Medium |
+| **Effort**     | ~1 day    |
+| **Depends on** | —         |
 
 **Description**
 Automatically boost CII sensitivity 30 days before major elections.
@@ -248,11 +248,11 @@ Automatically boost CII sensitivity 30 days before major elections.
 
 ### TODO-012 — News Translation Support (Localized Feeds)
 
-| Field | Value |
-|---|---|
-| **Priority** | 🟡 Medium |
-| **Effort** | ~3 days |
-| **Depends on** | — |
+| Field          | Value     |
+| -------------- | --------- |
+| **Priority**   | 🟡 Medium |
+| **Effort**     | ~3 days   |
+| **Depends on** | —         |
 
 **Description**
 `docs/NEWS_TRANSLATION_ANALYSIS.md` already proposes a hybrid approach: localized feeds + on-demand LLM translation.
@@ -268,10 +268,10 @@ Automatically boost CII sensitivity 30 days before major elections.
 
 ### TODO-013 — Map Popup Modularization
 
-| Field | Value |
-|---|---|
-| **Priority** | 🟡 Medium |
-| **Effort** | ~2 days |
+| Field          | Value            |
+| -------------- | ---------------- |
+| **Priority**   | 🟡 Medium        |
+| **Effort**     | ~2 days          |
 | **Depends on** | BUG-016, BUG-020 |
 
 **Description**
@@ -289,11 +289,11 @@ Split each into per-layer modules.
 
 ### TODO-014 — ESLint + Prettier Setup
 
-| Field | Value |
-|---|---|
-| **Priority** | 🟡 Medium |
-| **Effort** | ~1 day |
-| **Depends on** | — |
+| Field          | Value     |
+| -------------- | --------- |
+| **Priority**   | 🟡 Medium |
+| **Effort**     | ~1 day    |
+| **Depends on** | —         |
 
 **Description**
 The project has no linter or formatter configured.
@@ -309,11 +309,11 @@ The project has no linter or formatter configured.
 
 ### TODO-015 — Desktop Notification Support for Critical Signals
 
-| Field | Value |
-|---|---|
-| **Priority** | 🟡 Medium |
-| **Effort** | ~1 day |
-| **Depends on** | — |
+| Field          | Value     |
+| -------------- | --------- |
+| **Priority**   | 🟡 Medium |
+| **Effort**     | ~1 day    |
+| **Depends on** | —         |
 
 **Description**
 Use the Web Notifications API (and Tauri's native notifications for desktop) to push critical signals when the tab is in the background.
@@ -328,11 +328,11 @@ Use the Web Notifications API (and Tauri's native notifications for desktop) to 
 
 ### TODO-016 — Stablecoin De-peg Monitoring Enhancements
 
-| Field | Value |
-|---|---|
-| **Priority** | 🟡 Medium |
-| **Effort** | ~1 day |
-| **Depends on** | — |
+| Field          | Value     |
+| -------------- | --------- |
+| **Priority**   | 🟡 Medium |
+| **Effort**     | ~1 day    |
+| **Depends on** | —         |
 
 **Description**
 The `StablecoinPanel` exists but lacks correlation with geopolitical events.
@@ -349,11 +349,11 @@ The `StablecoinPanel` exists but lacks correlation with geopolitical events.
 
 ### TODO-017 — Dark/Light Theme Toggle Improvements
 
-| Field | Value |
-|---|---|
-| **Priority** | 🟢 Low |
-| **Effort** | ~1 day |
-| **Depends on** | — |
+| Field          | Value  |
+| -------------- | ------ |
+| **Priority**   | 🟢 Low |
+| **Effort**     | ~1 day |
+| **Depends on** | —      |
 
 **Description**
 Audit all CSS custom properties for light-theme counterparts. Ensure light mode is visually polished.
@@ -362,11 +362,11 @@ Audit all CSS custom properties for light-theme counterparts. Ensure light mode 
 
 ### TODO-018 — PWA Offline Dashboard State
 
-| Field | Value |
-|---|---|
-| **Priority** | 🟢 Low |
-| **Effort** | ~2 days |
-| **Depends on** | — |
+| Field          | Value   |
+| -------------- | ------- |
+| **Priority**   | 🟢 Low  |
+| **Effort**     | ~2 days |
+| **Depends on** | —       |
 
 **Description**
 Display the last snapshot data when offline with an "Offline — showing cached data" banner.
@@ -375,11 +375,11 @@ Display the last snapshot data when offline with an "Offline — showing cached 
 
 ### TODO-019 — Accessibility (a11y) Audit
 
-| Field | Value |
-|---|---|
-| **Priority** | 🟢 Low |
-| **Effort** | ~3 days |
-| **Depends on** | — |
+| Field          | Value   |
+| -------------- | ------- |
+| **Priority**   | 🟢 Low  |
+| **Effort**     | ~3 days |
+| **Depends on** | —       |
 
 **Description**
 Add ARIA roles, labels, and keyboard navigation for panels, modals, and map controls.
@@ -388,11 +388,11 @@ Add ARIA roles, labels, and keyboard navigation for panels, modals, and map cont
 
 ### TODO-020 — UNHCR / World Bank / IMF Data Integration
 
-| Field | Value |
-|---|---|
-| **Priority** | 🟢 Low |
-| **Effort** | ~2 days per source |
-| **Depends on** | — |
+| Field          | Value              |
+| -------------- | ------------------ |
+| **Priority**   | 🟢 Low             |
+| **Effort**     | ~2 days per source |
+| **Depends on** | —                  |
 
 **Description**
 Additional humanitarian and economic data sources to strengthen CII scoring.
@@ -401,11 +401,11 @@ Additional humanitarian and economic data sources to strengthen CII scoring.
 
 ### TODO-021 — Automated Visual Regression Testing CI
 
-| Field | Value |
-|---|---|
-| **Priority** | 🟢 Low |
-| **Effort** | ~1 day |
-| **Depends on** | — |
+| Field          | Value  |
+| -------------- | ------ |
+| **Priority**   | 🟢 Low |
+| **Effort**     | ~1 day |
+| **Depends on** | —      |
 
 **Description**
 Add GitHub Actions workflow running visual snapshot tests on every PR.
@@ -414,11 +414,11 @@ Add GitHub Actions workflow running visual snapshot tests on every PR.
 
 ### TODO-022 — Sentry Error Tracking Configuration
 
-| Field | Value |
-|---|---|
-| **Priority** | 🟢 Low |
-| **Effort** | ~2 hours |
-| **Depends on** | — |
+| Field          | Value    |
+| -------------- | -------- |
+| **Priority**   | 🟢 Low   |
+| **Effort**     | ~2 hours |
+| **Depends on** | —        |
 
 **Description**
 Initialize Sentry in `src/main.ts` with DSN from environment variable.
@@ -427,11 +427,11 @@ Initialize Sentry in `src/main.ts` with DSN from environment variable.
 
 ### TODO-023 — Satellite Fire Detection Panel Enhancements
 
-| Field | Value |
-|---|---|
-| **Priority** | 🟢 Low |
-| **Effort** | ~1 day |
-| **Depends on** | — |
+| Field          | Value  |
+| -------------- | ------ |
+| **Priority**   | 🟢 Low |
+| **Effort**     | ~1 day |
+| **Depends on** | —      |
 
 **Description**
 Correlate fires near military installations or critical infrastructure — generate `fire_near_infrastructure` signals.
@@ -440,10 +440,10 @@ Correlate fires near military installations or critical infrastructure — gener
 
 ### TODO-024 — Keyboard-Navigable Map with Focus Management
 
-| Field | Value |
-|---|---|
-| **Priority** | 🟢 Low |
-| **Effort** | ~2 days |
+| Field          | Value    |
+| -------------- | -------- |
+| **Priority**   | 🟢 Low   |
+| **Effort**     | ~2 days  |
 | **Depends on** | TODO-019 |
 
 **Description**
@@ -453,11 +453,11 @@ Arrow keys for pan, `+`/`-` for zoom, `Tab` to cycle markers, `Enter` to open po
 
 ### TODO-025 — Data Export Improvements (Scheduled + API)
 
-| Field | Value |
-|---|---|
-| **Priority** | 🟢 Low |
-| **Effort** | ~2 days |
-| **Depends on** | — |
+| Field          | Value   |
+| -------------- | ------- |
+| **Priority**   | 🟢 Low  |
+| **Effort**     | ~2 days |
+| **Depends on** | —       |
 
 **Description**
 Add scheduled export and a public API endpoint for integration with external tools.

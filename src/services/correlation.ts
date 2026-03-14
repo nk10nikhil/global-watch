@@ -3,18 +3,18 @@
  * Core logic is in analysis-core.ts (shared with worker).
  */
 
-import type { ClusteredEvent, MarketData } from '@/types';
-import type { PredictionMarket } from '@/services/prediction';
-import { getSourceType } from '@/config/feeds';
+import type { ClusteredEvent, MarketData } from "@/types";
+import type { PredictionMarket } from "@/services/prediction";
+import { getSourceType } from "@/config/feeds";
 import {
   analyzeCorrelationsCore,
   type CorrelationSignalCore,
   type StreamSnapshot,
   type SourceType,
-} from './analysis-core';
+} from "./analysis-core";
 
 // Re-export types
-export type SignalType = CorrelationSignalCore['type'];
+export type SignalType = CorrelationSignalCore["type"];
 export type CorrelationSignal = CorrelationSignalCore;
 
 // Main-thread state management
@@ -32,7 +32,7 @@ const DEDUPE_TTLS: Record<string, number> = {
 };
 
 function getDedupeType(key: string): string {
-  return key.split(':')[0] || 'default';
+  return key.split(":")[0] || "default";
 }
 
 function isRecentDuplicate(key: string): boolean {
@@ -56,9 +56,10 @@ function markSignalSeen(key: string): void {
 export function analyzeCorrelations(
   events: ClusteredEvent[],
   predictions: PredictionMarket[],
-  markets: MarketData[]
+  markets: MarketData[],
 ): CorrelationSignal[] {
-  const getSourceTypeFn = (source: string): SourceType => getSourceType(source) as SourceType;
+  const getSourceTypeFn = (source: string): SourceType =>
+    getSourceType(source) as SourceType;
 
   const { signals, snapshot } = analyzeCorrelationsCore(
     events,
@@ -67,7 +68,7 @@ export function analyzeCorrelations(
     previousSnapshot,
     getSourceTypeFn,
     isRecentDuplicate,
-    markSignalSeen
+    markSignalSeen,
   );
 
   previousSnapshot = snapshot;
@@ -76,7 +77,7 @@ export function analyzeCorrelations(
 
 export function getRecentSignals(): CorrelationSignal[] {
   const cutoff = Date.now() - 30 * 60 * 1000;
-  return signalHistory.filter(s => s.timestamp.getTime() > cutoff);
+  return signalHistory.filter((s) => s.timestamp.getTime() > cutoff);
 }
 
 export function addToSignalHistory(signals: CorrelationSignal[]): void {
@@ -85,6 +86,6 @@ export function addToSignalHistory(signals: CorrelationSignal[]): void {
     signalHistory.shift();
   }
   if (signals.length > 0) {
-    document.dispatchEvent(new CustomEvent('wm:intelligence-updated'));
+    document.dispatchEvent(new CustomEvent("wm:intelligence-updated"));
   }
 }

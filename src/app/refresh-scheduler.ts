@@ -1,5 +1,8 @@
-import type { AppContext, AppModule } from '@/app/app-context';
-import { startSmartPollLoop, type SmartPollLoopHandle } from '@/services/runtime';
+import type { AppContext, AppModule } from "@/app/app-context";
+import {
+  startSmartPollLoop,
+  type SmartPollLoopHandle,
+} from "@/services/runtime";
 
 export interface RefreshRegistration {
   name: string;
@@ -10,7 +13,10 @@ export interface RefreshRegistration {
 
 export class RefreshScheduler implements AppModule {
   private ctx: AppContext;
-  private refreshRunners = new Map<string, { loop: SmartPollLoopHandle; intervalMs: number }>();
+  private refreshRunners = new Map<
+    string,
+    { loop: SmartPollLoopHandle; intervalMs: number }
+  >();
   private flushTimeoutIds = new Set<ReturnType<typeof setTimeout>>();
   private hiddenSince = 0;
 
@@ -43,31 +49,34 @@ export class RefreshScheduler implements AppModule {
     name: string,
     fn: () => Promise<boolean | void>,
     intervalMs: number,
-    condition?: () => boolean
+    condition?: () => boolean,
   ): void {
     this.refreshRunners.get(name)?.loop.stop();
 
-    const loop = startSmartPollLoop(async () => {
-      if (this.ctx.isDestroyed) return;
-      if (condition && !condition()) return;
-      if (this.ctx.inFlight.has(name)) return;
+    const loop = startSmartPollLoop(
+      async () => {
+        if (this.ctx.isDestroyed) return;
+        if (condition && !condition()) return;
+        if (this.ctx.inFlight.has(name)) return;
 
-      this.ctx.inFlight.add(name);
-      try {
-        return await fn();
-      } finally {
-        this.ctx.inFlight.delete(name);
-      }
-    }, {
-      intervalMs,
-      pauseWhenHidden: true,
-      refreshOnVisible: false,
-      runImmediately: false,
-      maxBackoffMultiplier: 4,
-      onError: (e) => {
-        console.error(`[App] Refresh ${name} failed:`, e);
+        this.ctx.inFlight.add(name);
+        try {
+          return await fn();
+        } finally {
+          this.ctx.inFlight.delete(name);
+        }
       },
-    });
+      {
+        intervalMs,
+        pauseWhenHidden: true,
+        refreshOnVisible: false,
+        runImmediately: false,
+        maxBackoffMultiplier: 4,
+        onError: (e) => {
+          console.error(`[App] Refresh ${name} failed:`, e);
+        },
+      },
+    );
 
     this.refreshRunners.set(name, { loop, intervalMs });
   }

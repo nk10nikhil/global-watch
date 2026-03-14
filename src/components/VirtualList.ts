@@ -49,17 +49,17 @@ export class VirtualList {
     this.onRecycle = options.onRecycle;
 
     // Create viewport structure
-    this.viewport = document.createElement('div');
-    this.viewport.className = 'virtual-viewport';
+    this.viewport = document.createElement("div");
+    this.viewport.className = "virtual-viewport";
 
-    this.content = document.createElement('div');
-    this.content.className = 'virtual-content';
+    this.content = document.createElement("div");
+    this.content.className = "virtual-content";
 
-    this.topSpacer = document.createElement('div');
-    this.topSpacer.className = 'virtual-spacer virtual-spacer-top';
+    this.topSpacer = document.createElement("div");
+    this.topSpacer.className = "virtual-spacer virtual-spacer-top";
 
-    this.bottomSpacer = document.createElement('div');
-    this.bottomSpacer.className = 'virtual-spacer virtual-spacer-bottom';
+    this.bottomSpacer = document.createElement("div");
+    this.bottomSpacer.className = "virtual-spacer virtual-spacer-bottom";
 
     this.content.appendChild(this.topSpacer);
     this.content.appendChild(this.bottomSpacer);
@@ -67,10 +67,12 @@ export class VirtualList {
     this.container.appendChild(this.viewport);
 
     // Bind scroll handler
-    this.viewport.addEventListener('scroll', this.handleScroll, { passive: true });
+    this.viewport.addEventListener("scroll", this.handleScroll, {
+      passive: true,
+    });
 
     // Handle resize
-    if (typeof ResizeObserver !== 'undefined') {
+    if (typeof ResizeObserver !== "undefined") {
       this.resizeObserver = new ResizeObserver(() => {
         if (!this.isDestroyed) {
           this.updateVisibleRange();
@@ -103,7 +105,7 @@ export class VirtualList {
   /**
    * Scroll to a specific item index
    */
-  scrollToIndex(index: number, behavior: ScrollBehavior = 'auto'): void {
+  scrollToIndex(index: number, behavior: ScrollBehavior = "auto"): void {
     const offset = index * this.itemHeight;
     this.viewport.scrollTo({ top: offset, behavior });
   }
@@ -123,13 +125,13 @@ export class VirtualList {
     if (this.scrollRAF !== null) {
       cancelAnimationFrame(this.scrollRAF);
     }
-    this.viewport.removeEventListener('scroll', this.handleScroll);
+    this.viewport.removeEventListener("scroll", this.handleScroll);
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
       this.resizeObserver = null;
     }
     this.itemPool = [];
-    this.container.innerHTML = '';
+    this.container.innerHTML = "";
   }
 
   private handleScroll = (): void => {
@@ -183,7 +185,10 @@ export class VirtualList {
 
     // First pass: reuse elements that are still visible
     for (const pooled of this.itemPool) {
-      if (pooled.currentIndex >= visibleStart && pooled.currentIndex < visibleEnd) {
+      if (
+        pooled.currentIndex >= visibleStart &&
+        pooled.currentIndex < visibleEnd
+      ) {
         usedIndices.add(pooled.currentIndex);
       }
     }
@@ -196,7 +201,10 @@ export class VirtualList {
       // Find a recyclable element
       while (poolIndex < this.itemPool.length) {
         const pooled = this.itemPool[poolIndex]!;
-        if (pooled.currentIndex < visibleStart || pooled.currentIndex >= visibleEnd) {
+        if (
+          pooled.currentIndex < visibleStart ||
+          pooled.currentIndex >= visibleEnd
+        ) {
           // Recycle this element
           if (this.onRecycle) {
             this.onRecycle(pooled.element);
@@ -213,24 +221,27 @@ export class VirtualList {
 
     // Update positions for all visible elements
     for (const pooled of this.itemPool) {
-      if (pooled.currentIndex >= visibleStart && pooled.currentIndex < visibleEnd) {
+      if (
+        pooled.currentIndex >= visibleStart &&
+        pooled.currentIndex < visibleEnd
+      ) {
         pooled.element.style.transform = `translateY(${pooled.currentIndex * this.itemHeight}px)`;
       } else {
         // Hide off-screen elements
-        pooled.element.style.transform = 'translateY(-9999px)';
+        pooled.element.style.transform = "translateY(-9999px)";
       }
     }
   }
 
   private ensurePoolSize(count: number): void {
     while (this.itemPool.length < count) {
-      const element = document.createElement('div');
-      element.className = 'virtual-item';
-      element.style.position = 'absolute';
-      element.style.top = '0';
-      element.style.left = '0';
-      element.style.right = '0';
-      element.style.transform = 'translateY(-9999px)';
+      const element = document.createElement("div");
+      element.className = "virtual-item";
+      element.style.position = "absolute";
+      element.style.top = "0";
+      element.style.left = "0";
+      element.style.right = "0";
+      element.style.transform = "translateY(-9999px)";
 
       // Insert before bottom spacer
       this.content.insertBefore(element, this.bottomSpacer);
@@ -271,7 +282,7 @@ export class WindowedList<T> {
   constructor(
     options: WindowedListOptions,
     renderItem: (item: T, index: number) => string,
-    onRendered?: () => void
+    onRendered?: () => void,
   ) {
     this.container = options.container;
     this.chunkSize = options.chunkSize ?? 10;
@@ -279,8 +290,10 @@ export class WindowedList<T> {
     this.renderItem = renderItem;
     this.onRendered = onRendered;
 
-    this.container.classList.add('windowed-list');
-    this.container.addEventListener('scroll', this.handleScroll, { passive: true });
+    this.container.classList.add("windowed-list");
+    this.container.addEventListener("scroll", this.handleScroll, {
+      passive: true,
+    });
   }
 
   /**
@@ -297,7 +310,7 @@ export class WindowedList<T> {
     this.chunkElements.clear();
 
     // Create container structure
-    this.container.innerHTML = '';
+    this.container.innerHTML = "";
 
     if (items.length === 0) {
       return;
@@ -308,8 +321,8 @@ export class WindowedList<T> {
 
     // Create placeholder for each chunk
     for (let i = 0; i < totalChunks; i++) {
-      const placeholder = document.createElement('div');
-      placeholder.className = 'windowed-chunk';
+      const placeholder = document.createElement("div");
+      placeholder.className = "windowed-chunk";
       placeholder.dataset.chunk = String(i);
       this.container.appendChild(placeholder);
       this.chunkElements.set(i, placeholder);
@@ -352,8 +365,10 @@ export class WindowedList<T> {
 
       // Check if chunk is in viewport (with buffer)
       const bufferPx = viewportHeight * this.bufferChunks;
-      if (relativeBottom >= scrollTop - bufferPx &&
-          relativeTop <= scrollTop + viewportHeight + bufferPx) {
+      if (
+        relativeBottom >= scrollTop - bufferPx &&
+        relativeTop <= scrollTop + viewportHeight + bufferPx
+      ) {
         chunks.push(index);
       }
     }
@@ -388,10 +403,10 @@ export class WindowedList<T> {
 
     const html = chunkItems
       .map((item, i) => this.renderItem(item, startIdx + i))
-      .join('');
+      .join("");
 
     element.innerHTML = html;
-    element.classList.add('rendered');
+    element.classList.add("rendered");
     this.renderedChunks.add(chunkIndex);
   }
 
@@ -403,10 +418,9 @@ export class WindowedList<T> {
       cancelAnimationFrame(this.scrollRAF);
       this.scrollRAF = null;
     }
-    this.container.removeEventListener('scroll', this.handleScroll);
+    this.container.removeEventListener("scroll", this.handleScroll);
     this.chunkElements.clear();
     this.renderedChunks.clear();
     this.items = [];
   }
 }
-

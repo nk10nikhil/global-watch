@@ -1,10 +1,10 @@
-import { invalidateColorCache } from './theme-colors';
+import { invalidateColorCache } from "./theme-colors";
 
-export type Theme = 'dark' | 'light';
-export type ThemePreference = 'auto' | 'dark' | 'light';
+export type Theme = "dark" | "light";
+export type ThemePreference = "auto" | "dark" | "light";
 
-const STORAGE_KEY = 'worldmonitor-theme';
-const DEFAULT_THEME: Theme = 'dark';
+const STORAGE_KEY = "worldmonitor-theme";
+const DEFAULT_THEME: Theme = "dark";
 
 /**
  * Read the stored theme preference from localStorage.
@@ -13,7 +13,7 @@ const DEFAULT_THEME: Theme = 'dark';
 export function getStoredTheme(): Theme {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored === 'dark' || stored === 'light') return stored;
+    if (stored === "dark" || stored === "light") return stored;
   } catch {
     // localStorage unavailable (e.g., sandboxed iframe, private browsing)
   }
@@ -23,16 +23,22 @@ export function getStoredTheme(): Theme {
 export function getThemePreference(): ThemePreference {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored === 'auto' || stored === 'dark' || stored === 'light') return stored;
-  } catch { /* noop */ }
-  return 'auto';
+    if (stored === "auto" || stored === "dark" || stored === "light")
+      return stored;
+  } catch {
+    /* noop */
+  }
+  return "auto";
 }
 
 function resolveAutoTheme(): Theme {
-  if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: light)').matches) {
-    return 'light';
+  if (
+    typeof window !== "undefined" &&
+    window.matchMedia?.("(prefers-color-scheme: light)").matches
+  ) {
+    return "light";
   }
-  return 'dark';
+  return "dark";
 }
 
 let autoMediaQuery: MediaQueryList | null = null;
@@ -40,21 +46,25 @@ let autoMediaHandler: (() => void) | null = null;
 
 function teardownAutoListener(): void {
   if (autoMediaQuery && autoMediaHandler) {
-    autoMediaQuery.removeEventListener('change', autoMediaHandler);
+    autoMediaQuery.removeEventListener("change", autoMediaHandler);
     autoMediaQuery = null;
     autoMediaHandler = null;
   }
 }
 
 export function setThemePreference(pref: ThemePreference): void {
-  try { localStorage.setItem(STORAGE_KEY, pref); } catch { /* noop */ }
+  try {
+    localStorage.setItem(STORAGE_KEY, pref);
+  } catch {
+    /* noop */
+  }
   teardownAutoListener();
-  const effective: Theme = pref === 'auto' ? resolveAutoTheme() : pref;
+  const effective: Theme = pref === "auto" ? resolveAutoTheme() : pref;
   setTheme(effective);
-  if (pref === 'auto' && typeof window !== 'undefined' && window.matchMedia) {
-    autoMediaQuery = window.matchMedia('(prefers-color-scheme: light)');
+  if (pref === "auto" && typeof window !== "undefined" && window.matchMedia) {
+    autoMediaQuery = window.matchMedia("(prefers-color-scheme: light)");
     autoMediaHandler = () => setTheme(resolveAutoTheme());
-    autoMediaQuery.addEventListener('change', autoMediaHandler);
+    autoMediaQuery.addEventListener("change", autoMediaHandler);
   }
 }
 
@@ -63,7 +73,7 @@ export function setThemePreference(pref: ThemePreference): void {
  */
 export function getCurrentTheme(): Theme {
   const value = document.documentElement.dataset.theme;
-  if (value === 'dark' || value === 'light') return value;
+  if (value === "dark" || value === "light") return value;
   return DEFAULT_THEME;
 }
 
@@ -79,12 +89,21 @@ export function setTheme(theme: Theme): void {
   } catch {
     // localStorage unavailable
   }
-  const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+  const meta = document.querySelector<HTMLMetaElement>(
+    'meta[name="theme-color"]',
+  );
   if (meta) {
     const variant = document.documentElement.dataset.variant;
-    meta.content = theme === 'dark' ? (variant === 'happy' ? '#1A2332' : '#0a0f0a') : (variant === 'happy' ? '#FAFAF5' : '#f8f9fa');
+    meta.content =
+      theme === "dark"
+        ? variant === "happy"
+          ? "#1A2332"
+          : "#0a0f0a"
+        : variant === "happy"
+          ? "#FAFAF5"
+          : "#f8f9fa";
   }
-  window.dispatchEvent(new CustomEvent('theme-changed', { detail: { theme } }));
+  window.dispatchEvent(new CustomEvent("theme-changed", { detail: { theme } }));
 }
 
 /**
@@ -100,26 +119,33 @@ export function applyStoredTheme(): void {
 
   // Check raw localStorage to distinguish "no preference" from "explicitly chose dark"
   let raw: string | null = null;
-  try { raw = localStorage.getItem(STORAGE_KEY); } catch { /* noop */ }
-  const hasExplicitPreference = raw === 'dark' || raw === 'light' || raw === 'auto';
+  try {
+    raw = localStorage.getItem(STORAGE_KEY);
+  } catch {
+    /* noop */
+  }
+  const hasExplicitPreference =
+    raw === "dark" || raw === "light" || raw === "auto";
 
   let effective: Theme;
-  if (raw === 'auto') {
+  if (raw === "auto") {
     effective = resolveAutoTheme();
   } else if (hasExplicitPreference) {
     effective = raw as Theme;
   } else {
     // No stored preference: happy defaults to light, others to dark
-    effective = variant === 'happy' ? 'light' : DEFAULT_THEME;
+    effective = variant === "happy" ? "light" : DEFAULT_THEME;
   }
 
   document.documentElement.dataset.theme = effective;
-  const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+  const meta = document.querySelector<HTMLMetaElement>(
+    'meta[name="theme-color"]',
+  );
   if (meta) {
-    if (effective === 'dark') {
-      meta.content = variant === 'happy' ? '#1A2332' : '#0a0f0a';
+    if (effective === "dark") {
+      meta.content = variant === "happy" ? "#1A2332" : "#0a0f0a";
     } else {
-      meta.content = variant === 'happy' ? '#FAFAF5' : '#f8f9fa';
+      meta.content = variant === "happy" ? "#FAFAF5" : "#f8f9fa";
     }
   }
 }

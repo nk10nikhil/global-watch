@@ -1,9 +1,13 @@
 import type {
   AnalyzeStockResponse,
   BacktestStockResponse,
-} from '../../../../src/generated/server/worldmonitor/market/v1/service_server';
-import { getCachedJsonBatch, runRedisPipeline, setCachedJson } from '../../../_shared/redis';
-import { sanitizeSymbol } from './_shared';
+} from "../../../../src/generated/server/worldmonitor/market/v1/service_server";
+import {
+  getCachedJsonBatch,
+  runRedisPipeline,
+  setCachedJson,
+} from "../../../_shared/redis";
+import { sanitizeSymbol } from "./_shared";
 
 const ANALYSIS_HISTORY_LIMIT = 32;
 const ANALYSIS_HISTORY_TTL_SECONDS = 90 * 24 * 60 * 60;
@@ -13,14 +17,16 @@ const BACKTEST_STORE_TTL_SECONDS = 30 * 24 * 60 * 60;
 
 type AnalysisHistoryRecord = Record<string, AnalyzeStockResponse[]>;
 
-function compareAnalysisDesc<T extends { analysisAt: number; generatedAt: string }>(a: T, b: T): number {
-  const aTime = a.analysisAt || Date.parse(a.generatedAt || '') || 0;
-  const bTime = b.analysisAt || Date.parse(b.generatedAt || '') || 0;
+function compareAnalysisDesc<
+  T extends { analysisAt: number; generatedAt: string },
+>(a: T, b: T): number {
+  const aTime = a.analysisAt || Date.parse(a.generatedAt || "") || 0;
+  const bTime = b.analysisAt || Date.parse(b.generatedAt || "") || 0;
   return bTime - aTime;
 }
 
 function analysisHistoryIndexKey(symbol: string, includeNews: boolean): string {
-  return `market:stock-analysis-history:index:v2:${sanitizeSymbol(symbol)}:${includeNews ? 'news' : 'core'}`;
+  return `market:stock-analysis-history:index:v2:${sanitizeSymbol(symbol)}:${includeNews ? "news" : "core"}`;
 }
 
 function analysisItemKey(analysisId: string): string {
@@ -50,11 +56,14 @@ function normalizeAnalysisRecord(
   if (!snapshot.available || !snapshot.symbol) return null;
 
   const symbol = sanitizeSymbol(snapshot.symbol);
-  const analysisAt = snapshot.analysisAt || Date.parse(snapshot.generatedAt || '') || 0;
+  const analysisAt =
+    snapshot.analysisAt || Date.parse(snapshot.generatedAt || "") || 0;
   if (!analysisAt) return null;
 
-  const engineVersion = snapshot.engineVersion || 'v1';
-  const analysisId = snapshot.analysisId || `stock:${engineVersion}:${symbol}:${analysisAt}:${includeNews ? 'news' : 'core'}`;
+  const engineVersion = snapshot.engineVersion || "v1";
+  const analysisId =
+    snapshot.analysisId ||
+    `stock:${engineVersion}:${symbol}:${analysisAt}:${includeNews ? "news" : "core"}`;
 
   return {
     ...snapshot,
@@ -65,15 +74,19 @@ function normalizeAnalysisRecord(
   };
 }
 
-function normalizeLedgerRecord(snapshot: AnalyzeStockResponse): AnalyzeStockResponse | null {
+function normalizeLedgerRecord(
+  snapshot: AnalyzeStockResponse,
+): AnalyzeStockResponse | null {
   if (!snapshot.available || !snapshot.symbol) return null;
 
   const symbol = sanitizeSymbol(snapshot.symbol);
-  const analysisAt = snapshot.analysisAt || Date.parse(snapshot.generatedAt || '') || 0;
+  const analysisAt =
+    snapshot.analysisAt || Date.parse(snapshot.generatedAt || "") || 0;
   if (!analysisAt) return null;
 
-  const engineVersion = snapshot.engineVersion || 'v1';
-  const analysisId = snapshot.analysisId || `ledger:${engineVersion}:${symbol}:${analysisAt}`;
+  const engineVersion = snapshot.engineVersion || "v1";
+  const analysisId =
+    snapshot.analysisId || `ledger:${engineVersion}:${symbol}:${analysisAt}`;
 
   return {
     ...snapshot,
@@ -87,30 +100,38 @@ function normalizeLedgerRecord(snapshot: AnalyzeStockResponse): AnalyzeStockResp
 async function zrevrange(key: string, limit: number): Promise<string[]> {
   if (limit <= 0) return [];
   const data = await runRedisPipeline([
-    ['ZREVRANGE', key, 0, Math.max(0, limit - 1)],
+    ["ZREVRANGE", key, 0, Math.max(0, limit - 1)],
   ]);
   return Array.isArray(data[0]?.result)
     ? data[0]!.result!.map((item) => String(item))
     : [];
 }
 
-async function loadAnalysisRecords(ids: string[], itemKeyFor: (analysisId: string) => string): Promise<AnalyzeStockResponse[]> {
+async function loadAnalysisRecords(
+  ids: string[],
+  itemKeyFor: (analysisId: string) => string,
+): Promise<AnalyzeStockResponse[]> {
   if (ids.length === 0) return [];
   const itemKeys = ids.map(itemKeyFor);
   const cached = await getCachedJsonBatch(itemKeys);
 
   return ids
-    .map((_, index) => cached.get(itemKeys[index]!) as AnalyzeStockResponse | undefined)
+    .map(
+      (_, index) =>
+        cached.get(itemKeys[index]!) as AnalyzeStockResponse | undefined,
+    )
     .filter((item): item is AnalyzeStockResponse => !!item?.available)
     .sort(compareAnalysisDesc);
 }
 
-async function trimIndexTail(indexKey: string, ids: string[], keepLimit: number): Promise<void> {
+async function trimIndexTail(
+  indexKey: string,
+  ids: string[],
+  keepLimit: number,
+): Promise<void> {
   if (ids.length <= keepLimit) return;
   const overflow = ids.slice(keepLimit);
-  await runRedisPipeline([
-    ['ZREM', indexKey, ...overflow],
-  ]);
+  await runRedisPipeline([["ZREM", indexKey, ...overflow]]);
 }
 
 export async function storeStockAnalysisSnapshot(
@@ -124,9 +145,15 @@ export async function storeStockAnalysisSnapshot(
   const itemKey = analysisItemKey(record.analysisId);
 
   await runRedisPipeline([
-    ['SET', itemKey, JSON.stringify(record), 'EX', ANALYSIS_HISTORY_TTL_SECONDS],
-    ['ZADD', indexKey, record.analysisAt, record.analysisId],
-    ['EXPIRE', indexKey, ANALYSIS_HISTORY_TTL_SECONDS],
+    [
+      "SET",
+      itemKey,
+      JSON.stringify(record),
+      "EX",
+      ANALYSIS_HISTORY_TTL_SECONDS,
+    ],
+    ["ZADD", indexKey, record.analysisAt, record.analysisId],
+    ["EXPIRE", indexKey, ANALYSIS_HISTORY_TTL_SECONDS],
   ]);
 
   const ids = await zrevrange(indexKey, ANALYSIS_HISTORY_LIMIT + 4);
@@ -139,13 +166,21 @@ export async function getStoredStockAnalysisHistory(
   limitPerSymbol = ANALYSIS_HISTORY_LIMIT,
 ): Promise<AnalysisHistoryRecord> {
   const normalized = normalizeSymbolList(symbols);
-  const clampedLimit = Math.max(1, Math.min(ANALYSIS_HISTORY_LIMIT, limitPerSymbol));
+  const clampedLimit = Math.max(
+    1,
+    Math.min(ANALYSIS_HISTORY_LIMIT, limitPerSymbol),
+  );
   const out: AnalysisHistoryRecord = {};
 
-  await Promise.all(normalized.map(async (symbol) => {
-    const ids = await zrevrange(analysisHistoryIndexKey(symbol, includeNews), clampedLimit);
-    out[symbol] = await loadAnalysisRecords(ids, analysisItemKey);
-  }));
+  await Promise.all(
+    normalized.map(async (symbol) => {
+      const ids = await zrevrange(
+        analysisHistoryIndexKey(symbol, includeNews),
+        clampedLimit,
+      );
+      out[symbol] = await loadAnalysisRecords(ids, analysisItemKey);
+    }),
+  );
 
   return out;
 }
@@ -162,9 +197,15 @@ export async function storeHistoricalBacktestAnalysisRecords(
 
     const indexKey = backtestLedgerIndexKey(record.symbol);
     commands.push(
-      ['SET', backtestLedgerItemKey(record.analysisId), JSON.stringify(record), 'EX', BACKTEST_LEDGER_TTL_SECONDS],
-      ['ZADD', indexKey, record.analysisAt, record.analysisId],
-      ['EXPIRE', indexKey, BACKTEST_LEDGER_TTL_SECONDS],
+      [
+        "SET",
+        backtestLedgerItemKey(record.analysisId),
+        JSON.stringify(record),
+        "EX",
+        BACKTEST_LEDGER_TTL_SECONDS,
+      ],
+      ["ZADD", indexKey, record.analysisAt, record.analysisId],
+      ["EXPIRE", indexKey, BACKTEST_LEDGER_TTL_SECONDS],
     );
     touchedSymbols.add(record.symbol);
   }
@@ -175,10 +216,19 @@ export async function storeHistoricalBacktestAnalysisRecords(
     await runRedisPipeline(commands.slice(i, i + PIPELINE_CHUNK));
   }
 
-  await Promise.all([...touchedSymbols].map(async (symbol) => {
-    const ids = await zrevrange(backtestLedgerIndexKey(symbol), BACKTEST_LEDGER_LIMIT + 8);
-    await trimIndexTail(backtestLedgerIndexKey(symbol), ids, BACKTEST_LEDGER_LIMIT);
-  }));
+  await Promise.all(
+    [...touchedSymbols].map(async (symbol) => {
+      const ids = await zrevrange(
+        backtestLedgerIndexKey(symbol),
+        BACKTEST_LEDGER_LIMIT + 8,
+      );
+      await trimIndexTail(
+        backtestLedgerIndexKey(symbol),
+        ids,
+        BACKTEST_LEDGER_LIMIT,
+      );
+    }),
+  );
 }
 
 export async function getStoredHistoricalBacktestAnalyses(
@@ -187,7 +237,10 @@ export async function getStoredHistoricalBacktestAnalyses(
 ): Promise<AnalyzeStockResponse[]> {
   const normalized = sanitizeSymbol(symbol);
   if (!normalized) return [];
-  const ids = await zrevrange(backtestLedgerIndexKey(normalized), Math.max(1, limit));
+  const ids = await zrevrange(
+    backtestLedgerIndexKey(normalized),
+    Math.max(1, limit),
+  );
   return loadAnalysisRecords(ids, backtestLedgerItemKey);
 }
 
@@ -195,11 +248,18 @@ export async function storeStockBacktestSnapshot(
   snapshot: BacktestStockResponse,
 ): Promise<void> {
   if (!snapshot.available || !snapshot.symbol) return;
-  const key = backtestSnapshotKey(snapshot.symbol, snapshot.evalWindowDays || 10);
-  await setCachedJson(key, {
-    ...snapshot,
-    symbol: sanitizeSymbol(snapshot.symbol),
-  }, BACKTEST_STORE_TTL_SECONDS);
+  const key = backtestSnapshotKey(
+    snapshot.symbol,
+    snapshot.evalWindowDays || 10,
+  );
+  await setCachedJson(
+    key,
+    {
+      ...snapshot,
+      symbol: sanitizeSymbol(snapshot.symbol),
+    },
+    BACKTEST_STORE_TTL_SECONDS,
+  );
 }
 
 export async function getStoredStockBacktestSnapshots(
@@ -207,11 +267,20 @@ export async function getStoredStockBacktestSnapshots(
   evalWindowDays: number,
 ): Promise<BacktestStockResponse[]> {
   const normalized = normalizeSymbolList(symbols);
-  const keys = normalized.map((symbol) => backtestSnapshotKey(symbol, evalWindowDays));
+  const keys = normalized.map((symbol) =>
+    backtestSnapshotKey(symbol, evalWindowDays),
+  );
   const cached = await getCachedJsonBatch(keys);
 
   return normalized
-    .map((_, index) => cached.get(keys[index]!) as BacktestStockResponse | undefined)
+    .map(
+      (_, index) =>
+        cached.get(keys[index]!) as BacktestStockResponse | undefined,
+    )
     .filter((item): item is BacktestStockResponse => !!item?.available)
-    .sort((a, b) => (Date.parse(b.generatedAt || '') || 0) - (Date.parse(a.generatedAt || '') || 0));
+    .sort(
+      (a, b) =>
+        (Date.parse(b.generatedAt || "") || 0) -
+        (Date.parse(a.generatedAt || "") || 0),
+    );
 }

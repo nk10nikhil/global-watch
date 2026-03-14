@@ -3,18 +3,18 @@
  * Stores a short list of airports, airlines, and routes the user cares about.
  */
 
-const STORAGE_KEY = 'aviation:watchlist:v1';
+const STORAGE_KEY = "aviation:watchlist:v1";
 
 export interface AviationWatchlist {
-  airports: string[];   // IATA codes e.g. ['IST','LHR']
-  airlines: string[];   // IATA codes e.g. ['TK','LH']
-  routes: string[];     // "ORG-DST" e.g. ['IST-LHR']
+  airports: string[]; // IATA codes e.g. ['IST','LHR']
+  airlines: string[]; // IATA codes e.g. ['TK','LH']
+  routes: string[]; // "ORG-DST" e.g. ['IST-LHR']
 }
 
 const DEFAULT_WATCHLIST: AviationWatchlist = {
-  airports: ['IST', 'ESB', 'SAW', 'LHR', 'FRA', 'CDG', 'DXB', 'RUH'],
-  airlines: ['TK'],
-  routes: ['IST-LHR', 'IST-FRA'],
+  airports: ["IST", "ESB", "SAW", "LHR", "FRA", "CDG", "DXB", "RUH"],
+  airlines: ["TK"],
+  routes: ["IST-LHR", "IST-FRA"],
 };
 
 function load(): AviationWatchlist {
@@ -23,9 +23,15 @@ function load(): AviationWatchlist {
     if (!raw) return { ...DEFAULT_WATCHLIST };
     const parsed = JSON.parse(raw) as Partial<AviationWatchlist>;
     return {
-      airports: Array.isArray(parsed.airports) ? parsed.airports : DEFAULT_WATCHLIST.airports,
-      airlines: Array.isArray(parsed.airlines) ? parsed.airlines : DEFAULT_WATCHLIST.airlines,
-      routes: Array.isArray(parsed.routes) ? parsed.routes : DEFAULT_WATCHLIST.routes,
+      airports: Array.isArray(parsed.airports)
+        ? parsed.airports
+        : DEFAULT_WATCHLIST.airports,
+      airlines: Array.isArray(parsed.airlines)
+        ? parsed.airlines
+        : DEFAULT_WATCHLIST.airlines,
+      routes: Array.isArray(parsed.routes)
+        ? parsed.routes
+        : DEFAULT_WATCHLIST.routes,
     };
   } catch {
     return { ...DEFAULT_WATCHLIST };
@@ -35,7 +41,9 @@ function load(): AviationWatchlist {
 function save(wl: AviationWatchlist): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(wl));
-  } catch { /* storage quota */ }
+  } catch {
+    /* storage quota */
+  }
 }
 
 export const aviationWatchlist = {
@@ -59,7 +67,7 @@ export const aviationWatchlist = {
 
   removeAirport(iata: string): void {
     const wl = load();
-    wl.airports = wl.airports.filter(a => a !== iata.toUpperCase());
+    wl.airports = wl.airports.filter((a) => a !== iata.toUpperCase());
     save(wl);
   },
 
@@ -74,7 +82,7 @@ export const aviationWatchlist = {
 
   removeAirline(iata: string): void {
     const wl = load();
-    wl.airlines = wl.airlines.filter(a => a !== iata.toUpperCase());
+    wl.airlines = wl.airlines.filter((a) => a !== iata.toUpperCase());
     save(wl);
   },
 
@@ -89,7 +97,7 @@ export const aviationWatchlist = {
 
   removeRoute(route: string): void {
     const wl = load();
-    wl.routes = wl.routes.filter(r => r !== route);
+    wl.routes = wl.routes.filter((r) => r !== route);
     save(wl);
   },
 

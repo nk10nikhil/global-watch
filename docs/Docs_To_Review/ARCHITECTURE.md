@@ -87,16 +87,16 @@ graph TD
 
 ### Component Summary
 
-| Layer | Technology | Role |
-|---|---|---|
-| **SPA** | TypeScript, Vite 6, no framework | UI rendering via class-based components extending a `Panel` base class. 44 panels in the full variant. |
-| **Vercel Edge Functions** | Plain JS (60+ files in api/) | Proxy, normalise, and cache upstream API calls. Each file exports a default Vercel handler. |
-| **External APIs** | 30+ heterogeneous sources | RSS feeds, conflict databases (ACLED, UCDP), geospatial (GDELT, NASA FIRMS, OpenSky), markets (Finnhub, Yahoo Finance, CoinGecko), LLMs (Groq, OpenRouter), and more. |
-| **Upstash Redis** | Redis REST API | Server-side response cache with TTL-based expiry. Falls back to in-memory Map in sidecar mode. |
-| **Service Worker** | Workbox | Offline support, runtime caching strategies, background sync. |
-| **IndexedDB** | `worldmonitor_db` | Client-side storage for playback snapshots and temporal baseline data. |
-| **Tauri Shell** | Tauri 2 (Rust) + Node.js sidecar | Desktop packaging. Sidecar runs a local API server; Rust layer provides OS keychain, window management, and IPC. |
-| **ML Worker** | Web Worker + ONNX Runtime / Transformers.js | In-browser inference for embeddings, sentiment, summarisation, and NER. |
+| Layer                     | Technology                                  | Role                                                                                                                                                                  |
+| ------------------------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **SPA**                   | TypeScript, Vite 6, no framework            | UI rendering via class-based components extending a `Panel` base class. 44 panels in the full variant.                                                                |
+| **Vercel Edge Functions** | Plain JS (60+ files in api/)                | Proxy, normalise, and cache upstream API calls. Each file exports a default Vercel handler.                                                                           |
+| **External APIs**         | 30+ heterogeneous sources                   | RSS feeds, conflict databases (ACLED, UCDP), geospatial (GDELT, NASA FIRMS, OpenSky), markets (Finnhub, Yahoo Finance, CoinGecko), LLMs (Groq, OpenRouter), and more. |
+| **Upstash Redis**         | Redis REST API                              | Server-side response cache with TTL-based expiry. Falls back to in-memory Map in sidecar mode.                                                                        |
+| **Service Worker**        | Workbox                                     | Offline support, runtime caching strategies, background sync.                                                                                                         |
+| **IndexedDB**             | `worldmonitor_db`                           | Client-side storage for playback snapshots and temporal baseline data.                                                                                                |
+| **Tauri Shell**           | Tauri 2 (Rust) + Node.js sidecar            | Desktop packaging. Sidecar runs a local API server; Rust layer provides OS keychain, window management, and IPC.                                                      |
+| **ML Worker**             | Web Worker + ONNX Runtime / Transformers.js | In-browser inference for embeddings, sentiment, summarisation, and NER.                                                                                               |
 
 ---
 
@@ -104,10 +104,10 @@ graph TD
 
 World Monitor ships as three product variants from a single codebase. Each variant surfaces a different subset of panels, map layers, and data sources.
 
-| Variant | Domain | Focus |
-|---|---|---|
-| `full` | worldmonitor.app | Geopolitics, military, OSINT, conflicts, markets |
-| `tech` | tech.worldmonitor.app | AI/ML, startups, cybersecurity, developer tools |
+| Variant   | Domain                   | Focus                                             |
+| --------- | ------------------------ | ------------------------------------------------- |
+| `full`    | worldmonitor.app         | Geopolitics, military, OSINT, conflicts, markets  |
+| `tech`    | tech.worldmonitor.app    | AI/ML, startups, cybersecurity, developer tools   |
 | `finance` | finance.worldmonitor.app | Markets, trading, central banks, macro indicators |
 
 ### Variant Resolution
@@ -122,11 +122,12 @@ The exported constant `SITE_VARIANT` is computed once as an IIFE:
 
 ```typescript
 export const SITE_VARIANT: string = (() => {
-  if (typeof window !== 'undefined') {
-    const stored = localStorage.getItem('worldmonitor-variant');
-    if (stored === 'tech' || stored === 'full' || stored === 'finance') return stored;
+  if (typeof window !== "undefined") {
+    const stored = localStorage.getItem("worldmonitor-variant");
+    if (stored === "tech" || stored === "full" || stored === "finance")
+      return stored;
   }
-  return import.meta.env.VITE_VARIANT || 'full';
+  return import.meta.env.VITE_VARIANT || "full";
 })();
 ```
 
@@ -185,22 +186,23 @@ At build time, Vite's tree-shaking eliminates the unused variant configs. If `VI
 At runtime, src/config/panels.ts selects the active config via ternary expressions:
 
 ```typescript
-export const DEFAULT_PANELS = SITE_VARIANT === 'tech'
-  ? TECH_PANELS
-  : SITE_VARIANT === 'finance'
-    ? FINANCE_PANELS
-    : FULL_PANELS;
+export const DEFAULT_PANELS =
+  SITE_VARIANT === "tech"
+    ? TECH_PANELS
+    : SITE_VARIANT === "finance"
+      ? FINANCE_PANELS
+      : FULL_PANELS;
 ```
 
 The same pattern applies to `DEFAULT_MAP_LAYERS` and `MOBILE_DEFAULT_MAP_LAYERS`.
 
 ### Panel and Layer Counts
 
-| Variant | Panels | Desktop Map Layers | Mobile Map Layers |
-|---|---|---|---|
-| `full` | 44 | 35+ | Reduced subset |
-| `tech` | ~20 | Tech-focused layers (cloud regions, startup hubs, accelerators) | Minimal |
-| `finance` | ~18 | Finance-focused layers (stock exchanges, financial centres, central banks) | Minimal |
+| Variant   | Panels | Desktop Map Layers                                                         | Mobile Map Layers |
+| --------- | ------ | -------------------------------------------------------------------------- | ----------------- |
+| `full`    | 44     | 35+                                                                        | Reduced subset    |
+| `tech`    | ~20    | Tech-focused layers (cloud regions, startup hubs, accelerators)            | Minimal           |
+| `finance` | ~18    | Finance-focused layers (stock exchanges, financial centres, central banks) | Minimal           |
 
 The `MapLayers` interface contains 35+ boolean toggle keys including: `conflicts`, `bases`, `cables`, `pipelines`, `hotspots`, `ais`, `nuclear`, `irradiators`, `sanctions`, `weather`, `economic`, `waterways`, `outages`, `cyberThreats`, `datacenters`, `protests`, `flights`, `military`, `natural`, `spaceports`, `minerals`, `fires`, `ucdpEvents`, `displacement`, `climate`, `startupHubs`, `cloudRegions`, `accelerators`, `techHQs`, `techEvents`, `stockExchanges`, `financialCenters`, `centralBanks`, `commodityHubs`, and `gulfInvestments`.
 
@@ -276,13 +278,13 @@ The `extractEntitiesFromTitle()` function matches text against a pre-built entit
 
 The entity index (src/services/entity-index.ts) is a multi-index structure with five `Map` lookups:
 
-| Index | Type | Purpose |
-|---|---|---|
-| `byId` | `Map<string, EntityEntry>` | Canonical lookup by entity ID |
-| `byAlias` | `Map<string, string>` | Alias-to-ID resolution (case-insensitive) |
-| `byKeyword` | `Map<string, Set<string>>` | Keyword-to-entity-IDs for text matching |
-| `bySector` | `Map<string, Set<string>>` | Sector-based grouping |
-| `byType` | `Map<string, Set<string>>` | Entity type grouping (person, org, country, etc.) |
+| Index       | Type                       | Purpose                                           |
+| ----------- | -------------------------- | ------------------------------------------------- |
+| `byId`      | `Map<string, EntityEntry>` | Canonical lookup by entity ID                     |
+| `byAlias`   | `Map<string, string>`      | Alias-to-ID resolution (case-insensitive)         |
+| `byKeyword` | `Map<string, Set<string>>` | Keyword-to-entity-IDs for text matching           |
+| `bySector`  | `Map<string, Set<string>>` | Sector-based grouping                             |
+| `byType`    | `Map<string, Set<string>>` | Entity type grouping (person, org, country, etc.) |
 
 **Stage 5 — Display**
 
@@ -384,14 +386,14 @@ SignalSummary (final output)
 
 The `REGION_DEFINITIONS` constant maps six monitored regions to their constituent country codes:
 
-| Region | Name | Countries |
-|---|---|---|
-| `middle_east` | Middle East | IR, IL, SA, AE, IQ, SY, YE, JO, LB, KW, QA, OM, BH |
-| `east_asia` | East Asia | CN, TW, JP, KR, KP, HK, MN |
-| `south_asia` | South Asia | IN, PK, BD, AF, NP, LK, MM |
-| `europe_east` | Eastern Europe | UA, RU, BY, PL, RO, MD, HU, CZ, SK, BG |
-| `africa_north` | North Africa | EG, LY, DZ, TN, MA, SD, SS |
-| `africa_sahel` | Sahel Region | ML, NE, BF, TD, NG, CM, CF |
+| Region         | Name           | Countries                                          |
+| -------------- | -------------- | -------------------------------------------------- |
+| `middle_east`  | Middle East    | IR, IL, SA, AE, IQ, SY, YE, JO, LB, KW, QA, OM, BH |
+| `east_asia`    | East Asia      | CN, TW, JP, KR, KP, HK, MN                         |
+| `south_asia`   | South Asia     | IN, PK, BD, AF, NP, LK, MM                         |
+| `europe_east`  | Eastern Europe | UA, RU, BY, PL, RO, MD, HU, CZ, SK, BG             |
+| `africa_north` | North Africa   | EG, LY, DZ, TN, MA, SD, SS                         |
+| `africa_sahel` | Sahel Region   | ML, NE, BF, TD, NG, CM, CF                         |
 
 ### Convergence Scoring
 
@@ -534,7 +536,7 @@ graph TD
 
 ### Tier 1: Upstash Redis (Server-Side)
 
-The api/_upstash-cache.js module wraps all API fetch operations with Redis GET/SET. Every API endpoint calls `getCachedJson(key)` before hitting upstream. On cache miss, the upstream response is stored with `setCachedJson(key, value, ttlSeconds)`. The module lazily initialises the Redis client from `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` environment variables.
+The api/\_upstash-cache.js module wraps all API fetch operations with Redis GET/SET. Every API endpoint calls `getCachedJson(key)` before hitting upstream. On cache miss, the upstream response is stored with `setCachedJson(key, value, ttlSeconds)`. The module lazily initialises the Redis client from `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` environment variables.
 
 A `hashString()` utility produces compact cache keys from request parameters using a DJB2 hash.
 
@@ -562,10 +564,10 @@ The offline fallback page (public/offline.html) is served when the network is un
 
 The `worldmonitor_db` IndexedDB database contains two object stores:
 
-| Store | keyPath | Index | Purpose |
-|---|---|---|---|
-| `baselines` | `key` | — | Stores baseline values for temporal deviation tracking. The signal aggregator compares current values against baselines to detect anomalies. |
-| `snapshots` | `timestamp` | `by_time` | Stores periodic system state snapshots for the playback control feature, enabling users to replay historical states. |
+| Store       | keyPath     | Index     | Purpose                                                                                                                                      |
+| ----------- | ----------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `baselines` | `key`       | —         | Stores baseline values for temporal deviation tracking. The signal aggregator compares current values against baselines to detect anomalies. |
+| `snapshots` | `timestamp` | `by_time` | Stores periodic system state snapshots for the playback control feature, enabling users to replay historical states.                         |
 
 ### Tier 5: Persistent Cache
 
@@ -635,16 +637,16 @@ When desktop mode is detected, `getApiBaseUrl()` returns `http://127.0.0.1:46123
 
 The src-tauri/ directory contains:
 
-| File | Purpose |
-|---|---|
-| tauri.conf.json | Base Tauri configuration (window size, CSP, bundle settings) |
-| tauri.tech.conf.json | Tech variant overrides (app name, window title, icons) |
-| tauri.finance.conf.json | Finance variant overrides |
-| build.rs | Rust build script for Tauri codegen |
-| Cargo.toml | Rust dependencies |
-| sidecar/ | Node.js sidecar source (local API server) |
-| capabilities/ | Tauri capability definitions (permissions) |
-| icons/ | Application icons for each platform |
+| File                    | Purpose                                                      |
+| ----------------------- | ------------------------------------------------------------ |
+| tauri.conf.json         | Base Tauri configuration (window size, CSP, bundle settings) |
+| tauri.tech.conf.json    | Tech variant overrides (app name, window title, icons)       |
+| tauri.finance.conf.json | Finance variant overrides                                    |
+| build.rs                | Rust build script for Tauri codegen                          |
+| Cargo.toml              | Rust dependencies                                            |
+| sidecar/                | Node.js sidecar source (local API server)                    |
+| capabilities/           | Tauri capability definitions (permissions)                   |
+| icons/                  | Application icons for each platform                          |
 
 ### Tauri Bridge
 
@@ -746,7 +748,7 @@ interface MLCapabilities {
   hasSIMD: boolean;
   hasThreads: boolean;
   estimatedMemoryMB: number;
-  recommendedExecutionProvider: 'webgpu' | 'webgl' | 'wasm';
+  recommendedExecutionProvider: "webgpu" | "webgl" | "wasm";
   recommendedThreads: number;
 }
 ```
@@ -757,13 +759,13 @@ ML is only enabled on desktop-class devices (`!isMobileDevice()`) with at least 
 
 The src/config/ml-config.ts module defines five model configurations:
 
-| Model ID | HuggingFace Model | Size | Task | Required |
-|---|---|---|---|---|
-| `embeddings` | Xenova/all-MiniLM-L6-v2 | 23 MB | feature-extraction | Yes |
-| `sentiment` | Xenova/distilbert-base-uncased-finetuned-sst-2-english | 65 MB | text-classification | No |
-| `summarization` | Xenova/flan-t5-base | 250 MB | text2text-generation | No |
-| `summarization-beta` | Xenova/flan-t5-small | 60 MB | text2text-generation | No |
-| `ner` | Xenova/bert-base-NER | 65 MB | token-classification | No |
+| Model ID             | HuggingFace Model                                      | Size   | Task                 | Required |
+| -------------------- | ------------------------------------------------------ | ------ | -------------------- | -------- |
+| `embeddings`         | Xenova/all-MiniLM-L6-v2                                | 23 MB  | feature-extraction   | Yes      |
+| `sentiment`          | Xenova/distilbert-base-uncased-finetuned-sst-2-english | 65 MB  | text-classification  | No       |
+| `summarization`      | Xenova/flan-t5-base                                    | 250 MB | text2text-generation | No       |
+| `summarization-beta` | Xenova/flan-t5-small                                   | 60 MB  | text2text-generation | No       |
+| `ner`                | Xenova/bert-base-NER                                   | 65 MB  | token-classification | No       |
 
 Only the embeddings model is marked as `required` — it powers semantic clustering. Other models are loaded on-demand based on feature flags (`ML_FEATURE_FLAGS`) and available memory budget (`ML_THRESHOLDS.memoryBudgetMB`, default 200 MB).
 
@@ -771,12 +773,12 @@ Only the embeddings model is marked as `required` — it powers semantic cluster
 
 ```typescript
 const ML_THRESHOLDS = {
-  semanticClusterThreshold: 0.75,  // cosine similarity for merging clusters
-  minClustersForML: 5,             // minimum clusters before ML refinement
-  maxTextsPerBatch: 20,            // batch size for embedding requests
-  modelLoadTimeoutMs: 600_000,     // 10 min model download/compile timeout
-  inferenceTimeoutMs: 120_000,     // 2 min per inference call
-  memoryBudgetMB: 200,             // max memory for all loaded models
+  semanticClusterThreshold: 0.75, // cosine similarity for merging clusters
+  minClustersForML: 5, // minimum clusters before ML refinement
+  maxTextsPerBatch: 20, // batch size for embedding requests
+  modelLoadTimeoutMs: 600_000, // 10 min model download/compile timeout
+  inferenceTimeoutMs: 120_000, // 2 min per inference call
+  memoryBudgetMB: 200, // max memory for all loaded models
 };
 ```
 
@@ -794,13 +796,13 @@ The `MLWorkerManager` class (src/services/ml-worker.ts) manages the lifecycle of
 
 ### Worker Result Message Types
 
-| Message Type | Payload | Used By |
-|---|---|---|
-| `embed-result` | `embeddings: number[][]` | Semantic clustering |
-| `summarize-result` | `summaries: string[]` | AI Insights panel |
-| `sentiment-result` | `results: SentimentResult[]` | Threat classification augmentation |
-| `entities-result` | `entities: NEREntity[][]` | Entity extraction (ML-backed) |
-| `cluster-semantic-result` | `clusters: number[][]` | Cluster merging |
+| Message Type              | Payload                      | Used By                            |
+| ------------------------- | ---------------------------- | ---------------------------------- |
+| `embed-result`            | `embeddings: number[][]`     | Semantic clustering                |
+| `summarize-result`        | `summaries: string[]`        | AI Insights panel                  |
+| `sentiment-result`        | `results: SentimentResult[]` | Threat classification augmentation |
+| `entities-result`         | `entities: NEREntity[][]`    | Entity extraction (ML-backed)      |
+| `cluster-semantic-result` | `clusters: number[][]`       | Cluster merging                    |
 
 ### Fallback Chain
 
@@ -866,16 +868,16 @@ interface CircuitState {
   lastError?: string;
 }
 
-type BreakerDataMode = 'live' | 'cached' | 'unavailable';
+type BreakerDataMode = "live" | "cached" | "unavailable";
 ```
 
 **Constants:**
 
-| Constant | Default | Purpose |
-|---|---|---|
-| `DEFAULT_MAX_FAILURES` | 2 | Consecutive failures before opening the circuit |
-| `DEFAULT_COOLDOWN_MS` | 5 min (300,000 ms) | How long to wait before retrying |
-| `DEFAULT_CACHE_TTL_MS` | 10 min (600,000 ms) | How long cached data remains valid |
+| Constant               | Default             | Purpose                                         |
+| ---------------------- | ------------------- | ----------------------------------------------- |
+| `DEFAULT_MAX_FAILURES` | 2                   | Consecutive failures before opening the circuit |
+| `DEFAULT_COOLDOWN_MS`  | 5 min (300,000 ms)  | How long to wait before retrying                |
+| `DEFAULT_CACHE_TTL_MS` | 10 min (600,000 ms) | How long cached data remains valid              |
 
 ### Lifecycle
 
@@ -899,7 +901,7 @@ Each breaker tracks a `BreakerDataState` for UI display:
 
 ```typescript
 interface BreakerDataState {
-  mode: BreakerDataMode;  // 'live' | 'cached' | 'unavailable'
+  mode: BreakerDataMode; // 'live' | 'cached' | 'unavailable'
   timestamp: number | null;
   offline: boolean;
 }
@@ -915,13 +917,13 @@ The `isDesktopOfflineMode()` helper detects when the Tauri desktop app loses net
 
 A module-level `Map<string, CircuitBreaker<unknown>>` maintains all active breakers. Utility functions provide system-wide observability:
 
-| Function | Purpose |
-|---|---|
-| `createCircuitBreaker<T>(options)` | Create and register a new breaker |
-| `getCircuitBreakerStatus()` | Returns status of all breakers (for diagnostics) |
-| `isCircuitBreakerOnCooldown(name)` | Check if a specific breaker is in cooldown |
-| `getCircuitBreakerCooldownInfo(name)` | Get cooldown state and remaining seconds |
-| `removeCircuitBreaker(name)` | Deregister a breaker |
+| Function                              | Purpose                                          |
+| ------------------------------------- | ------------------------------------------------ |
+| `createCircuitBreaker<T>(options)`    | Create and register a new breaker                |
+| `getCircuitBreakerStatus()`           | Returns status of all breakers (for diagnostics) |
+| `isCircuitBreakerOnCooldown(name)`    | Check if a specific breaker is in cooldown       |
+| `getCircuitBreakerCooldownInfo(name)` | Get cooldown state and remaining seconds         |
+| `removeCircuitBreaker(name)`          | Deregister a breaker                             |
 
 ### Degradation Hierarchy
 

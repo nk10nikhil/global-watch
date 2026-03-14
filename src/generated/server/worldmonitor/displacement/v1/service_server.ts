@@ -118,7 +118,10 @@ export interface ServerContext {
 
 export interface ServerOptions {
   onError?: (error: unknown, req: Request) => Response | Promise<Response>;
-  validateRequest?: (methodName: string, body: unknown) => FieldViolation[] | undefined;
+  validateRequest?: (
+    methodName: string,
+    body: unknown,
+  ) => FieldViolation[] | undefined;
 }
 
 export interface RouteDescriptor {
@@ -128,8 +131,14 @@ export interface RouteDescriptor {
 }
 
 export interface DisplacementServiceHandler {
-  getDisplacementSummary(ctx: ServerContext, req: GetDisplacementSummaryRequest): Promise<GetDisplacementSummaryResponse>;
-  getPopulationExposure(ctx: ServerContext, req: GetPopulationExposureRequest): Promise<GetPopulationExposureResponse>;
+  getDisplacementSummary(
+    ctx: ServerContext,
+    req: GetDisplacementSummaryRequest,
+  ): Promise<GetDisplacementSummaryResponse>;
+  getPopulationExposure(
+    ctx: ServerContext,
+    req: GetPopulationExposureRequest,
+  ): Promise<GetPopulationExposureResponse>;
 }
 
 export function createDisplacementServiceRoutes(
@@ -151,7 +160,10 @@ export function createDisplacementServiceRoutes(
             flowLimit: Number(params.get("flow_limit") ?? "0"),
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getDisplacementSummary", body);
+            const bodyViolations = options.validateRequest(
+              "getDisplacementSummary",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -164,16 +176,22 @@ export function createDisplacementServiceRoutes(
           };
 
           const result = await handler.getDisplacementSummary(ctx, body);
-          return new Response(JSON.stringify(result as GetDisplacementSummaryResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetDisplacementSummaryResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -201,7 +219,10 @@ export function createDisplacementServiceRoutes(
             radius: Number(params.get("radius") ?? "0"),
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getPopulationExposure", body);
+            const bodyViolations = options.validateRequest(
+              "getPopulationExposure",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -214,16 +235,22 @@ export function createDisplacementServiceRoutes(
           };
 
           const result = await handler.getPopulationExposure(ctx, body);
-          return new Response(JSON.stringify(result as GetPopulationExposureResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetPopulationExposureResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -238,4 +265,3 @@ export function createDisplacementServiceRoutes(
     },
   ];
 }
-

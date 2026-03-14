@@ -1,8 +1,8 @@
-import { getRpcBaseUrl } from '@/services/rpc-client';
+import { getRpcBaseUrl } from "@/services/rpc-client";
 import {
   MarketServiceClient,
   type AnalyzeStockResponse,
-} from '@/generated/client/worldmonitor/market/v1/service_client';
+} from "@/generated/client/worldmonitor/market/v1/service_client";
 
 export type StockAnalysisSnapshot = AnalyzeStockResponse;
 export type StockAnalysisHistory = Record<string, StockAnalysisSnapshot[]>;
@@ -17,22 +17,30 @@ const MAX_SNAPSHOTS_PER_SYMBOL = 32;
 export const STOCK_ANALYSIS_FRESH_MS = 15 * 60 * 1000;
 
 async function getTargetSymbols(limit: number): Promise<string[]> {
-  const { getStockAnalysisTargets } = await import('./stock-analysis');
+  const { getStockAnalysisTargets } = await import("./stock-analysis");
   return getStockAnalysisTargets(limit).map((target) => target.symbol);
 }
 
-function compareSnapshots(a: StockAnalysisSnapshot, b: StockAnalysisSnapshot): number {
-  const aTime = Date.parse(a.generatedAt || '') || 0;
-  const bTime = Date.parse(b.generatedAt || '') || 0;
+function compareSnapshots(
+  a: StockAnalysisSnapshot,
+  b: StockAnalysisSnapshot,
+): number {
+  const aTime = Date.parse(a.generatedAt || "") || 0;
+  const bTime = Date.parse(b.generatedAt || "") || 0;
   return bTime - aTime;
 }
 
-function isSameSnapshot(a: StockAnalysisSnapshot, b: StockAnalysisSnapshot): boolean {
-  return a.symbol === b.symbol
-    && a.generatedAt === b.generatedAt
-    && a.signal === b.signal
-    && a.signalScore === b.signalScore
-    && a.currentPrice === b.currentPrice;
+function isSameSnapshot(
+  a: StockAnalysisSnapshot,
+  b: StockAnalysisSnapshot,
+): boolean {
+  return (
+    a.symbol === b.symbol &&
+    a.generatedAt === b.generatedAt &&
+    a.signal === b.signal &&
+    a.signalScore === b.signalScore &&
+    a.currentPrice === b.currentPrice
+  );
 }
 
 export function mergeStockAnalysisHistory(
@@ -56,7 +64,10 @@ export function mergeStockAnalysisHistory(
   return next;
 }
 
-export function getLatestStockAnalysisSnapshots(history: StockAnalysisHistory, limit = DEFAULT_LIMIT): StockAnalysisSnapshot[] {
+export function getLatestStockAnalysisSnapshots(
+  history: StockAnalysisHistory,
+  limit = DEFAULT_LIMIT,
+): StockAnalysisSnapshot[] {
   return Object.values(history)
     .map((items) => items[0])
     .filter((item): item is StockAnalysisSnapshot => !!item?.available)
@@ -73,8 +84,8 @@ export function hasFreshStockAnalysisHistory(
   const now = Date.now();
   return symbols.every((symbol) => {
     const latest = history[symbol]?.[0];
-    const ts = Date.parse(latest?.generatedAt || '');
-    return !!latest?.available && Number.isFinite(ts) && (now - ts) <= maxAgeMs;
+    const ts = Date.parse(latest?.generatedAt || "");
+    return !!latest?.available && Number.isFinite(ts) && now - ts <= maxAgeMs;
   });
 }
 
@@ -86,8 +97,8 @@ export function getMissingOrStaleStockAnalysisSymbols(
   const now = Date.now();
   return symbols.filter((symbol) => {
     const latest = history[symbol]?.[0];
-    const ts = Date.parse(latest?.generatedAt || '');
-    return !(latest?.available && Number.isFinite(ts) && (now - ts) <= maxAgeMs);
+    const ts = Date.parse(latest?.generatedAt || "");
+    return !(latest?.available && Number.isFinite(ts) && now - ts <= maxAgeMs);
   });
 }
 

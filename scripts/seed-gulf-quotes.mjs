@@ -1,12 +1,17 @@
 #!/usr/bin/env node
 
-import { loadEnvFile, loadSharedConfig, CHROME_UA, runSeed } from './_seed-utils.mjs';
+import {
+  loadEnvFile,
+  loadSharedConfig,
+  CHROME_UA,
+  runSeed,
+} from "./_seed-utils.mjs";
 
-const gulfConfig = loadSharedConfig('gulf.json');
+const gulfConfig = loadSharedConfig("gulf.json");
 
 loadEnvFile(import.meta.url);
 
-const CANONICAL_KEY = 'market:gulf-quotes:v1';
+const CANONICAL_KEY = "market:gulf-quotes:v1";
 const CACHE_TTL = 3600;
 const YAHOO_DELAY_MS = 200;
 
@@ -19,12 +24,14 @@ function sleep(ms) {
 async function fetchYahooWithRetry(url, label, maxAttempts = 4) {
   for (let i = 0; i < maxAttempts; i++) {
     const resp = await fetch(url, {
-      headers: { 'User-Agent': CHROME_UA },
+      headers: { "User-Agent": CHROME_UA },
       signal: AbortSignal.timeout(10_000),
     });
     if (resp.status === 429) {
       const wait = 5000 * (i + 1);
-      console.warn(`  [Yahoo] ${label} 429 — waiting ${wait / 1000}s (attempt ${i + 1}/${maxAttempts})`);
+      console.warn(
+        `  [Yahoo] ${label} 429 — waiting ${wait / 1000}s (attempt ${i + 1}/${maxAttempts})`,
+      );
       await sleep(wait);
       continue;
     }
@@ -44,7 +51,8 @@ function parseYahooChart(data, meta) {
   if (!chartMeta) return null;
 
   const price = chartMeta.regularMarketPrice;
-  const prevClose = chartMeta.chartPreviousClose || chartMeta.previousClose || price;
+  const prevClose =
+    chartMeta.chartPreviousClose || chartMeta.previousClose || price;
   const change = ((price - prevClose) / prevClose) * 100;
 
   const closes = result.indicators?.quote?.[0]?.close;
@@ -81,7 +89,9 @@ async function fetchGulfQuotes() {
       const parsed = parseYahooChart(chart, meta);
       if (parsed) {
         quotes.push(parsed);
-        console.log(`  ${meta.symbol}: $${parsed.price} (${parsed.change > 0 ? '+' : ''}${parsed.change}%)`);
+        console.log(
+          `  ${meta.symbol}: $${parsed.price} (${parsed.change > 0 ? "+" : ""}${parsed.change}%)`,
+        );
       } else {
         misses++;
       }
@@ -102,11 +112,11 @@ function validate(data) {
   return Array.isArray(data?.quotes) && data.quotes.length >= 1;
 }
 
-runSeed('market', 'gulf-quotes', CANONICAL_KEY, fetchGulfQuotes, {
+runSeed("market", "gulf-quotes", CANONICAL_KEY, fetchGulfQuotes, {
   validateFn: validate,
   ttlSeconds: CACHE_TTL,
-  sourceVersion: 'yahoo-chart',
+  sourceVersion: "yahoo-chart",
 }).catch((err) => {
-  console.error('FATAL:', err.message || err);
+  console.error("FATAL:", err.message || err);
   process.exit(1);
 });

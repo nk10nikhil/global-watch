@@ -1,17 +1,20 @@
-import { isDesktopRuntime, toApiUrl, toRuntimeUrl } from '../services/runtime';
-import { getPersistentCache, setPersistentCache } from '../services/persistent-cache';
+import { isDesktopRuntime, toApiUrl, toRuntimeUrl } from "../services/runtime";
+import {
+  getPersistentCache,
+  setPersistentCache,
+} from "../services/persistent-cache";
 
 const isDev = import.meta.env.DEV;
-const RESPONSE_CACHE_PREFIX = 'api-response:';
+const RESPONSE_CACHE_PREFIX = "api-response:";
 
 // RSS proxy: route directly to Railway relay via Cloudflare CDN when enabled.
 // Feature flag controls rollout; default off for safe staged deployment.
-const RSS_DIRECT_TO_RELAY = import.meta.env.VITE_RSS_DIRECT_TO_RELAY === 'true';
+const RSS_DIRECT_TO_RELAY = import.meta.env.VITE_RSS_DIRECT_TO_RELAY === "true";
 const RSS_PROXY_BASE = isDev
-  ? '' // Dev uses Vite's rssProxyPlugin
+  ? "" // Dev uses Vite's rssProxyPlugin
   : RSS_DIRECT_TO_RELAY
-    ? 'https://proxy.worldmonitor.app'
-    : '';
+    ? "https://proxy.worldmonitor.app"
+    : "";
 
 export function rssProxyUrl(feedUrl: string): string {
   if (isDesktopRuntime()) return proxyUrl(feedUrl);
@@ -45,14 +48,18 @@ export function proxyUrl(localPath: string): string {
 }
 
 function shouldPersistResponse(url: string): boolean {
-  return url.startsWith('/api/');
+  return url.startsWith("/api/");
 }
 
 function buildResponseCacheKey(url: string): string {
   return `${RESPONSE_CACHE_PREFIX}${url}`;
 }
 
-function toCachedPayload(url: string, response: Response, body: string): CachedResponsePayload {
+function toCachedPayload(
+  url: string,
+  response: Response,
+  body: string,
+): CachedResponsePayload {
   const headers: Record<string, string> = {};
   response.headers.forEach((value, key) => {
     headers[key] = value;
@@ -80,9 +87,12 @@ async function fetchAndPersist(url: string): Promise<Response> {
   if (response.ok && shouldPersistResponse(url)) {
     try {
       const body = await response.clone().text();
-      void setPersistentCache(buildResponseCacheKey(url), toCachedPayload(url, response, body));
+      void setPersistentCache(
+        buildResponseCacheKey(url),
+        toCachedPayload(url, response, body),
+      );
     } catch (error) {
-      console.warn('[proxy] Failed to persist API response cache', error);
+      console.warn("[proxy] Failed to persist API response cache", error);
     }
   }
   return response;
@@ -98,7 +108,10 @@ export async function fetchWithProxy(url: string): Promise<Response> {
 
   if (cached?.data) {
     void fetchAndPersist(url).catch((error) => {
-      console.warn('[proxy] Background refresh failed for cached API response', error);
+      console.warn(
+        "[proxy] Background refresh failed for cached API response",
+        error,
+      );
     });
     return toResponse(cached.data);
   }

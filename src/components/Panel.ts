@@ -1,10 +1,10 @@
-import { isDesktopRuntime } from '../services/runtime';
-import { invokeTauri } from '../services/tauri-bridge';
-import { t } from '../services/i18n';
-import { h, replaceChildren, safeHtml } from '../utils/dom-utils';
-import { trackPanelResized } from '@/services/analytics';
-import { getAiFlowSettings } from '@/services/ai-flow-settings';
-import { getSecretState } from '@/services/runtime-config';
+import { isDesktopRuntime } from "../services/runtime";
+import { invokeTauri } from "../services/tauri-bridge";
+import { t } from "../services/i18n";
+import { h, replaceChildren, safeHtml } from "../utils/dom-utils";
+import { trackPanelResized } from "@/services/analytics";
+import { getAiFlowSettings } from "@/services/ai-flow-settings";
+import { getSecretState } from "@/services/runtime-config";
 
 export interface PanelOptions {
   id: string;
@@ -13,11 +13,11 @@ export interface PanelOptions {
   className?: string;
   trackActivity?: boolean;
   infoTooltip?: string;
-  premium?: 'locked' | 'enhanced';
+  premium?: "locked" | "enhanced";
   closable?: boolean;
 }
 
-const PANEL_SPANS_KEY = 'worldmonitor-panel-spans';
+const PANEL_SPANS_KEY = "worldmonitor-panel-spans";
 
 function loadPanelSpans(): Record<string, number> {
   try {
@@ -34,7 +34,7 @@ function savePanelSpan(panelId: string, span: number): void {
   localStorage.setItem(PANEL_SPANS_KEY, JSON.stringify(spans));
 }
 
-const PANEL_COL_SPANS_KEY = 'worldmonitor-panel-col-spans';
+const PANEL_COL_SPANS_KEY = "worldmonitor-panel-col-spans";
 const ROW_RESIZE_STEP_PX = 80;
 const COL_RESIZE_STEP_PX = 80;
 const PANELS_GRID_MIN_TRACK_PX = 280;
@@ -66,37 +66,41 @@ function clearPanelColSpan(panelId: string): void {
 }
 
 function getDefaultColSpan(element: HTMLElement): number {
-  return element.classList.contains('panel-wide') ? 2 : 1;
+  return element.classList.contains("panel-wide") ? 2 : 1;
 }
 
 function getColSpan(element: HTMLElement): number {
-  if (element.classList.contains('col-span-3')) return 3;
-  if (element.classList.contains('col-span-2')) return 2;
-  if (element.classList.contains('col-span-1')) return 1;
+  if (element.classList.contains("col-span-3")) return 3;
+  if (element.classList.contains("col-span-2")) return 2;
+  if (element.classList.contains("col-span-1")) return 1;
   return getDefaultColSpan(element);
 }
 
 function getGridColumnCount(element: HTMLElement): number {
-  const grid = (element.closest('.panels-grid') || element.closest('.map-bottom-grid')) as HTMLElement | null;
+  const grid = (element.closest(".panels-grid") ||
+    element.closest(".map-bottom-grid")) as HTMLElement | null;
   if (!grid) return 3;
   const style = window.getComputedStyle(grid);
   const template = style.gridTemplateColumns;
-  if (!template || template === 'none') return 3;
+  if (!template || template === "none") return 3;
 
-  if (template.includes('repeat(')) {
+  if (template.includes("repeat(")) {
     const repeatCountMatch = template.match(/repeat\(\s*(\d+)\s*,/i);
     if (repeatCountMatch) {
-      const parsed = Number.parseInt(repeatCountMatch[1] ?? '0', 10);
+      const parsed = Number.parseInt(repeatCountMatch[1] ?? "0", 10);
       if (Number.isFinite(parsed) && parsed > 0) return parsed;
     }
 
     // For repeat(auto-fill/auto-fit, minmax(...)), infer count from rendered width.
     const autoRepeatMatch = template.match(/repeat\(\s*auto-(fill|fit)\s*,/i);
     if (autoRepeatMatch) {
-      const gap = Number.parseFloat(style.columnGap || '0') || 0;
+      const gap = Number.parseFloat(style.columnGap || "0") || 0;
       const width = grid.getBoundingClientRect().width;
       if (width > 0) {
-        return Math.max(1, Math.floor((width + gap) / (PANELS_GRID_MIN_TRACK_PX + gap)));
+        return Math.max(
+          1,
+          Math.floor((width + gap) / (PANELS_GRID_MIN_TRACK_PX + gap)),
+        );
       }
     }
   }
@@ -118,7 +122,7 @@ function persistPanelColSpan(panelId: string, element: HTMLElement): void {
   const naturalSpan = clampColSpan(getDefaultColSpan(element), maxSpan);
   const currentSpan = clampColSpan(getColSpan(element), maxSpan);
   if (currentSpan === naturalSpan) {
-    element.classList.remove('col-span-1', 'col-span-2', 'col-span-3');
+    element.classList.remove("col-span-1", "col-span-2", "col-span-3");
     clearPanelColSpan(panelId);
     return;
   }
@@ -126,15 +130,20 @@ function persistPanelColSpan(panelId: string, element: HTMLElement): void {
   savePanelColSpan(panelId, currentSpan);
 }
 
-function deltaToColSpan(startSpan: number, deltaX: number, maxSpan = 3): number {
-  const spanDelta = deltaX > 0
-    ? Math.floor(deltaX / COL_RESIZE_STEP_PX)
-    : Math.ceil(deltaX / COL_RESIZE_STEP_PX);
+function deltaToColSpan(
+  startSpan: number,
+  deltaX: number,
+  maxSpan = 3,
+): number {
+  const spanDelta =
+    deltaX > 0
+      ? Math.floor(deltaX / COL_RESIZE_STEP_PX)
+      : Math.ceil(deltaX / COL_RESIZE_STEP_PX);
   return clampColSpan(startSpan + spanDelta, maxSpan);
 }
 
 function clearColSpanClass(element: HTMLElement): void {
-  element.classList.remove('col-span-1', 'col-span-2', 'col-span-3');
+  element.classList.remove("col-span-1", "col-span-2", "col-span-3");
 }
 
 function setColSpanClass(element: HTMLElement, span: number): void {
@@ -143,23 +152,24 @@ function setColSpanClass(element: HTMLElement, span: number): void {
 }
 
 function getRowSpan(element: HTMLElement): number {
-  if (element.classList.contains('span-4')) return 4;
-  if (element.classList.contains('span-3')) return 3;
-  if (element.classList.contains('span-2')) return 2;
+  if (element.classList.contains("span-4")) return 4;
+  if (element.classList.contains("span-3")) return 3;
+  if (element.classList.contains("span-2")) return 2;
   return 1;
 }
 
 function deltaToRowSpan(startSpan: number, deltaY: number): number {
-  const spanDelta = deltaY > 0
-    ? Math.floor(deltaY / ROW_RESIZE_STEP_PX)
-    : Math.ceil(deltaY / ROW_RESIZE_STEP_PX);
+  const spanDelta =
+    deltaY > 0
+      ? Math.floor(deltaY / ROW_RESIZE_STEP_PX)
+      : Math.ceil(deltaY / ROW_RESIZE_STEP_PX);
   return Math.max(1, Math.min(4, startSpan + spanDelta));
 }
 
 function setSpanClass(element: HTMLElement, span: number): void {
-  element.classList.remove('span-1', 'span-2', 'span-3', 'span-4');
+  element.classList.remove("span-1", "span-2", "span-3", "span-4");
   element.classList.add(`span-${span}`);
-  element.classList.add('resized');
+  element.classList.add("resized");
 }
 
 export class Panel {
@@ -205,37 +215,44 @@ export class Panel {
 
   constructor(options: PanelOptions) {
     this.panelId = options.id;
-    this.element = document.createElement('div');
-    this.element.className = `panel ${options.className || ''}`;
+    this.element = document.createElement("div");
+    this.element.className = `panel ${options.className || ""}`;
     this.element.dataset.panel = options.id;
 
-    this.header = document.createElement('div');
-    this.header.className = 'panel-header';
+    this.header = document.createElement("div");
+    this.header.className = "panel-header";
 
-    const headerLeft = document.createElement('div');
-    headerLeft.className = 'panel-header-left';
+    const headerLeft = document.createElement("div");
+    headerLeft.className = "panel-header-left";
 
-    const title = document.createElement('span');
-    title.className = 'panel-title';
+    const title = document.createElement("span");
+    title.className = "panel-title";
     title.textContent = options.title;
     headerLeft.appendChild(title);
 
     if (options.infoTooltip) {
-      const infoBtn = h('button', { className: 'panel-info-btn', 'aria-label': t('components.panel.showMethodologyInfo') }, '?');
+      const infoBtn = h(
+        "button",
+        {
+          className: "panel-info-btn",
+          "aria-label": t("components.panel.showMethodologyInfo"),
+        },
+        "?",
+      );
 
-      const tooltip = h('div', { className: 'panel-info-tooltip' });
+      const tooltip = h("div", { className: "panel-info-tooltip" });
       tooltip.appendChild(safeHtml(options.infoTooltip));
 
-      infoBtn.addEventListener('click', (e) => {
+      infoBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        tooltip.classList.toggle('visible');
+        tooltip.classList.toggle("visible");
       });
 
-      this.tooltipCloseHandler = () => tooltip.classList.remove('visible');
-      document.addEventListener('click', this.tooltipCloseHandler);
+      this.tooltipCloseHandler = () => tooltip.classList.remove("visible");
+      document.addEventListener("click", this.tooltipCloseHandler);
 
-      const infoWrapper = document.createElement('div');
-      infoWrapper.className = 'panel-info-wrapper';
+      const infoWrapper = document.createElement("div");
+      infoWrapper.className = "panel-info-wrapper";
       infoWrapper.appendChild(infoBtn);
       infoWrapper.appendChild(tooltip);
       headerLeft.appendChild(infoWrapper);
@@ -243,28 +260,36 @@ export class Panel {
 
     // Add "new" badge element (hidden by default)
     if (options.trackActivity !== false) {
-      this.newBadgeEl = document.createElement('span');
-      this.newBadgeEl.className = 'panel-new-badge';
-      this.newBadgeEl.style.display = 'none';
+      this.newBadgeEl = document.createElement("span");
+      this.newBadgeEl.className = "panel-new-badge";
+      this.newBadgeEl.style.display = "none";
       headerLeft.appendChild(this.newBadgeEl);
     }
 
-    if (isDesktopRuntime() && options.premium === 'enhanced' && !getSecretState('WORLDMONITOR_API_KEY').present) {
-      const proBadge = h('span', { className: 'panel-pro-badge' }, t('premium.pro'));
+    if (
+      isDesktopRuntime() &&
+      options.premium === "enhanced" &&
+      !getSecretState("WORLDMONITOR_API_KEY").present
+    ) {
+      const proBadge = h(
+        "span",
+        { className: "panel-pro-badge" },
+        t("premium.pro"),
+      );
       headerLeft.appendChild(proBadge);
     }
 
     this.header.appendChild(headerLeft);
 
-    this.statusBadgeEl = document.createElement('span');
-    this.statusBadgeEl.className = 'panel-data-badge';
-    this.statusBadgeEl.style.display = 'none';
+    this.statusBadgeEl = document.createElement("span");
+    this.statusBadgeEl.className = "panel-data-badge";
+    this.statusBadgeEl.style.display = "none";
     this.header.appendChild(this.statusBadgeEl);
 
     if (options.showCount) {
-      this.countEl = document.createElement('span');
-      this.countEl.className = 'panel-count';
-      this.countEl.textContent = '0';
+      this.countEl = document.createElement("span");
+      this.countEl.className = "panel-count";
+      this.countEl.textContent = "0";
       this.header.appendChild(this.countEl);
     }
 
@@ -272,30 +297,30 @@ export class Panel {
       this.appendCloseButton();
     }
 
-    this.content = document.createElement('div');
-    this.content.className = 'panel-content';
+    this.content = document.createElement("div");
+    this.content.className = "panel-content";
     this.content.id = `${options.id}Content`;
 
     this.element.appendChild(this.header);
     this.element.appendChild(this.content);
 
-    this.content.addEventListener('click', (e) => {
-      const target = (e.target as HTMLElement).closest('[data-panel-retry]');
+    this.content.addEventListener("click", (e) => {
+      const target = (e.target as HTMLElement).closest("[data-panel-retry]");
       if (!target || this._fetching) return;
       this.retryCallback?.();
     });
 
     // Add resize handle
-    this.resizeHandle = document.createElement('div');
-    this.resizeHandle.className = 'panel-resize-handle';
-    this.resizeHandle.title = t('components.panel.dragToResize');
+    this.resizeHandle = document.createElement("div");
+    this.resizeHandle.className = "panel-resize-handle";
+    this.resizeHandle.title = t("components.panel.dragToResize");
     this.element.appendChild(this.resizeHandle);
     this.setupResizeHandlers();
 
     // Right-edge handle for width resizing
-    this.colResizeHandle = document.createElement('div');
-    this.colResizeHandle.className = 'panel-col-resize-handle';
-    this.colResizeHandle.title = t('components.panel.dragToResize');
+    this.colResizeHandle = document.createElement("div");
+    this.colResizeHandle.className = "panel-col-resize-handle";
+    this.colResizeHandle.title = t("components.panel.dragToResize");
     this.element.appendChild(this.colResizeHandle);
     this.setupColResizeHandlers();
 
@@ -316,7 +341,11 @@ export class Panel {
   private restoreSavedColSpan(): void {
     const savedColSpans = loadPanelColSpans();
     const savedColSpan = savedColSpans[this.panelId];
-    if (typeof savedColSpan === 'number' && Number.isInteger(savedColSpan) && savedColSpan >= 1) {
+    if (
+      typeof savedColSpan === "number" &&
+      Number.isInteger(savedColSpan) &&
+      savedColSpan >= 1
+    ) {
       const naturalSpan = getDefaultColSpan(this.element);
       if (savedColSpan === naturalSpan) {
         clearColSpanClass(this.element);
@@ -341,7 +370,9 @@ export class Panel {
     const tryReconcile = (remaining: number) => {
       if (!this.element.isConnected || !this.element.parentElement) {
         if (remaining <= 0) return;
-        this.colSpanReconcileRaf = requestAnimationFrame(() => tryReconcile(remaining - 1));
+        this.colSpanReconcileRaf = requestAnimationFrame(() =>
+          tryReconcile(remaining - 1),
+        );
         return;
       }
       this.colSpanReconcileRaf = null;
@@ -353,25 +384,27 @@ export class Panel {
 
   private addRowTouchDocumentListeners(): void {
     if (this.onTouchMove) {
-      document.addEventListener('touchmove', this.onTouchMove, { passive: false });
+      document.addEventListener("touchmove", this.onTouchMove, {
+        passive: false,
+      });
     }
     if (this.onTouchEnd) {
-      document.addEventListener('touchend', this.onTouchEnd);
+      document.addEventListener("touchend", this.onTouchEnd);
     }
     if (this.onTouchCancel) {
-      document.addEventListener('touchcancel', this.onTouchCancel);
+      document.addEventListener("touchcancel", this.onTouchCancel);
     }
   }
 
   private removeRowTouchDocumentListeners(): void {
     if (this.onTouchMove) {
-      document.removeEventListener('touchmove', this.onTouchMove);
+      document.removeEventListener("touchmove", this.onTouchMove);
     }
     if (this.onTouchEnd) {
-      document.removeEventListener('touchend', this.onTouchEnd);
+      document.removeEventListener("touchend", this.onTouchEnd);
     }
     if (this.onTouchCancel) {
-      document.removeEventListener('touchcancel', this.onTouchCancel);
+      document.removeEventListener("touchcancel", this.onTouchCancel);
     }
   }
 
@@ -387,18 +420,18 @@ export class Panel {
     this.onRowMouseUp = () => {
       if (!this.isResizing) return;
       this.isResizing = false;
-      this.element.classList.remove('resizing');
+      this.element.classList.remove("resizing");
       delete this.element.dataset.resizing;
-      document.body.classList.remove('panel-resize-active');
-      this.resizeHandle?.classList.remove('active');
+      document.body.classList.remove("panel-resize-active");
+      this.resizeHandle?.classList.remove("active");
       if (this.onRowMouseMove) {
-        document.removeEventListener('mousemove', this.onRowMouseMove);
+        document.removeEventListener("mousemove", this.onRowMouseMove);
       }
       if (this.onRowMouseUp) {
-        document.removeEventListener('mouseup', this.onRowMouseUp);
+        document.removeEventListener("mouseup", this.onRowMouseUp);
       }
       if (this.onRowWindowBlur) {
-        window.removeEventListener('blur', this.onRowWindowBlur);
+        window.removeEventListener("blur", this.onRowWindowBlur);
       }
 
       const currentSpan = getRowSpan(this.element);
@@ -414,44 +447,48 @@ export class Panel {
       this.isResizing = true;
       this.startY = e.clientY;
       this.startRowSpan = getRowSpan(this.element);
-      this.element.dataset.resizing = 'true';
-      this.element.classList.add('resizing');
-      document.body.classList.add('panel-resize-active');
-      this.resizeHandle?.classList.add('active');
+      this.element.dataset.resizing = "true";
+      this.element.classList.add("resizing");
+      document.body.classList.add("panel-resize-active");
+      this.resizeHandle?.classList.add("active");
       if (this.onRowMouseMove) {
-        document.addEventListener('mousemove', this.onRowMouseMove);
+        document.addEventListener("mousemove", this.onRowMouseMove);
       }
       if (this.onRowMouseUp) {
-        document.addEventListener('mouseup', this.onRowMouseUp);
+        document.addEventListener("mouseup", this.onRowMouseUp);
       }
       if (this.onRowWindowBlur) {
-        window.addEventListener('blur', this.onRowWindowBlur);
+        window.addEventListener("blur", this.onRowWindowBlur);
       }
     };
 
-    this.resizeHandle.addEventListener('mousedown', onMouseDown);
+    this.resizeHandle.addEventListener("mousedown", onMouseDown);
 
     // Double-click to reset
-    this.resizeHandle.addEventListener('dblclick', () => {
+    this.resizeHandle.addEventListener("dblclick", () => {
       this.resetHeight();
     });
 
     // Touch support
-    this.resizeHandle.addEventListener('touchstart', (e: TouchEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const touch = e.touches[0];
-      if (!touch) return;
-      this.isResizing = true;
-      this.startY = touch.clientY;
-      this.startRowSpan = getRowSpan(this.element);
-      this.element.classList.add('resizing');
-      this.element.dataset.resizing = 'true';
-      document.body.classList.add('panel-resize-active');
-      this.resizeHandle?.classList.add('active');
-      this.removeRowTouchDocumentListeners();
-      this.addRowTouchDocumentListeners();
-    }, { passive: false });
+    this.resizeHandle.addEventListener(
+      "touchstart",
+      (e: TouchEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const touch = e.touches[0];
+        if (!touch) return;
+        this.isResizing = true;
+        this.startY = touch.clientY;
+        this.startRowSpan = getRowSpan(this.element);
+        this.element.classList.add("resizing");
+        this.element.dataset.resizing = "true";
+        document.body.classList.add("panel-resize-active");
+        this.resizeHandle?.classList.add("active");
+        this.removeRowTouchDocumentListeners();
+        this.addRowTouchDocumentListeners();
+      },
+      { passive: false },
+    );
 
     // Use bound handlers so they can be removed in destroy()
     this.onTouchMove = (e: TouchEvent) => {
@@ -468,10 +505,10 @@ export class Panel {
         return;
       }
       this.isResizing = false;
-      this.element.classList.remove('resizing');
+      this.element.classList.remove("resizing");
       delete this.element.dataset.resizing;
-      document.body.classList.remove('panel-resize-active');
-      this.resizeHandle?.classList.remove('active');
+      document.body.classList.remove("panel-resize-active");
+      this.resizeHandle?.classList.remove("active");
       this.removeRowTouchDocumentListeners();
       const currentSpan = getRowSpan(this.element);
       savePanelSpan(this.panelId, currentSpan);
@@ -484,34 +521,36 @@ export class Panel {
         delete this.element.dataset.resizing;
       }
       if (!this.isResizing && !this.isColResizing) {
-        document.body?.classList.remove('panel-resize-active');
+        document.body?.classList.remove("panel-resize-active");
       }
     };
 
-    document.addEventListener('mouseup', this.onDocMouseUp);
+    document.addEventListener("mouseup", this.onDocMouseUp);
   }
 
   private addColTouchDocumentListeners(): void {
     if (this.onColTouchMove) {
-      document.addEventListener('touchmove', this.onColTouchMove, { passive: false });
+      document.addEventListener("touchmove", this.onColTouchMove, {
+        passive: false,
+      });
     }
     if (this.onColTouchEnd) {
-      document.addEventListener('touchend', this.onColTouchEnd);
+      document.addEventListener("touchend", this.onColTouchEnd);
     }
     if (this.onColTouchCancel) {
-      document.addEventListener('touchcancel', this.onColTouchCancel);
+      document.addEventListener("touchcancel", this.onColTouchCancel);
     }
   }
 
   private removeColTouchDocumentListeners(): void {
     if (this.onColTouchMove) {
-      document.removeEventListener('touchmove', this.onColTouchMove);
+      document.removeEventListener("touchmove", this.onColTouchMove);
     }
     if (this.onColTouchEnd) {
-      document.removeEventListener('touchend', this.onColTouchEnd);
+      document.removeEventListener("touchend", this.onColTouchEnd);
     }
     if (this.onColTouchCancel) {
-      document.removeEventListener('touchcancel', this.onColTouchCancel);
+      document.removeEventListener("touchcancel", this.onColTouchCancel);
     }
   }
 
@@ -522,26 +561,32 @@ export class Panel {
       if (!this.isColResizing) return;
       const deltaX = e.clientX - this.startX;
       const maxSpan = getMaxColSpan(this.element);
-      setColSpanClass(this.element, deltaToColSpan(this.startColSpan, deltaX, maxSpan));
+      setColSpanClass(
+        this.element,
+        deltaToColSpan(this.startColSpan, deltaX, maxSpan),
+      );
     };
 
     this.onColMouseUp = () => {
       if (!this.isColResizing) return;
       this.isColResizing = false;
-      this.element.classList.remove('col-resizing');
+      this.element.classList.remove("col-resizing");
       delete this.element.dataset.resizing;
-      document.body.classList.remove('panel-resize-active');
-      this.colResizeHandle?.classList.remove('active');
+      document.body.classList.remove("panel-resize-active");
+      this.colResizeHandle?.classList.remove("active");
       if (this.onColMouseMove) {
-        document.removeEventListener('mousemove', this.onColMouseMove);
+        document.removeEventListener("mousemove", this.onColMouseMove);
       }
       if (this.onColMouseUp) {
-        document.removeEventListener('mouseup', this.onColMouseUp);
+        document.removeEventListener("mouseup", this.onColMouseUp);
       }
       if (this.onColWindowBlur) {
-        window.removeEventListener('blur', this.onColWindowBlur);
+        window.removeEventListener("blur", this.onColWindowBlur);
       }
-      const finalSpan = clampColSpan(getColSpan(this.element), getMaxColSpan(this.element));
+      const finalSpan = clampColSpan(
+        getColSpan(this.element),
+        getMaxColSpan(this.element),
+      );
       if (finalSpan !== this.startColSpan) {
         persistPanelColSpan(this.panelId, this.element);
       }
@@ -554,43 +599,53 @@ export class Panel {
       e.stopPropagation();
       this.isColResizing = true;
       this.startX = e.clientX;
-      this.startColSpan = clampColSpan(getColSpan(this.element), getMaxColSpan(this.element));
-      this.element.dataset.resizing = 'true';
-      this.element.classList.add('col-resizing');
-      document.body.classList.add('panel-resize-active');
-      this.colResizeHandle?.classList.add('active');
+      this.startColSpan = clampColSpan(
+        getColSpan(this.element),
+        getMaxColSpan(this.element),
+      );
+      this.element.dataset.resizing = "true";
+      this.element.classList.add("col-resizing");
+      document.body.classList.add("panel-resize-active");
+      this.colResizeHandle?.classList.add("active");
       if (this.onColMouseMove) {
-        document.addEventListener('mousemove', this.onColMouseMove);
+        document.addEventListener("mousemove", this.onColMouseMove);
       }
       if (this.onColMouseUp) {
-        document.addEventListener('mouseup', this.onColMouseUp);
+        document.addEventListener("mouseup", this.onColMouseUp);
       }
       if (this.onColWindowBlur) {
-        window.addEventListener('blur', this.onColWindowBlur);
+        window.addEventListener("blur", this.onColWindowBlur);
       }
     };
 
-    this.colResizeHandle.addEventListener('mousedown', onMouseDown);
+    this.colResizeHandle.addEventListener("mousedown", onMouseDown);
 
     // Double-click resets width
-    this.colResizeHandle.addEventListener('dblclick', () => this.resetWidth());
+    this.colResizeHandle.addEventListener("dblclick", () => this.resetWidth());
 
     // Touch
-    this.colResizeHandle.addEventListener('touchstart', (e: TouchEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const touch = e.touches[0];
-      if (!touch) return;
-      this.isColResizing = true;
-      this.startX = touch.clientX;
-      this.startColSpan = clampColSpan(getColSpan(this.element), getMaxColSpan(this.element));
-      this.element.dataset.resizing = 'true';
-      this.element.classList.add('col-resizing');
-      document.body.classList.add('panel-resize-active');
-      this.colResizeHandle?.classList.add('active');
-      this.removeColTouchDocumentListeners();
-      this.addColTouchDocumentListeners();
-    }, { passive: false });
+    this.colResizeHandle.addEventListener(
+      "touchstart",
+      (e: TouchEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const touch = e.touches[0];
+        if (!touch) return;
+        this.isColResizing = true;
+        this.startX = touch.clientX;
+        this.startColSpan = clampColSpan(
+          getColSpan(this.element),
+          getMaxColSpan(this.element),
+        );
+        this.element.dataset.resizing = "true";
+        this.element.classList.add("col-resizing");
+        document.body.classList.add("panel-resize-active");
+        this.colResizeHandle?.classList.add("active");
+        this.removeColTouchDocumentListeners();
+        this.addColTouchDocumentListeners();
+      },
+      { passive: false },
+    );
 
     this.onColTouchMove = (e: TouchEvent) => {
       if (!this.isColResizing) return;
@@ -598,7 +653,10 @@ export class Panel {
       if (!touch) return;
       const deltaX = touch.clientX - this.startX;
       const maxSpan = getMaxColSpan(this.element);
-      setColSpanClass(this.element, deltaToColSpan(this.startColSpan, deltaX, maxSpan));
+      setColSpanClass(
+        this.element,
+        deltaToColSpan(this.startColSpan, deltaX, maxSpan),
+      );
     };
 
     this.onColTouchEnd = () => {
@@ -607,12 +665,15 @@ export class Panel {
         return;
       }
       this.isColResizing = false;
-      this.element.classList.remove('col-resizing');
+      this.element.classList.remove("col-resizing");
       delete this.element.dataset.resizing;
-      document.body.classList.remove('panel-resize-active');
-      this.colResizeHandle?.classList.remove('active');
+      document.body.classList.remove("panel-resize-active");
+      this.colResizeHandle?.classList.remove("active");
       this.removeColTouchDocumentListeners();
-      const finalSpan = clampColSpan(getColSpan(this.element), getMaxColSpan(this.element));
+      const finalSpan = clampColSpan(
+        getColSpan(this.element),
+        getMaxColSpan(this.element),
+      );
       if (finalSpan !== this.startColSpan) {
         persistPanelColSpan(this.panelId, this.element);
       }
@@ -620,45 +681,55 @@ export class Panel {
     this.onColTouchCancel = this.onColTouchEnd;
   }
 
-
-  protected setDataBadge(state: 'live' | 'cached' | 'unavailable', detail?: string): void {
+  protected setDataBadge(
+    state: "live" | "cached" | "unavailable",
+    detail?: string,
+  ): void {
     if (!this.statusBadgeEl) return;
     const labels = {
-      live: t('common.live'),
-      cached: t('common.cached'),
-      unavailable: t('common.unavailable'),
+      live: t("common.live"),
+      cached: t("common.cached"),
+      unavailable: t("common.unavailable"),
     } as const;
-    this.statusBadgeEl.textContent = detail ? `${labels[state]} · ${detail}` : labels[state];
+    this.statusBadgeEl.textContent = detail
+      ? `${labels[state]} · ${detail}`
+      : labels[state];
     this.statusBadgeEl.className = `panel-data-badge ${state}`;
-    this.statusBadgeEl.style.display = 'inline-flex';
+    this.statusBadgeEl.style.display = "inline-flex";
   }
 
   protected clearDataBadge(): void {
     if (!this.statusBadgeEl) return;
-    this.statusBadgeEl.style.display = 'none';
+    this.statusBadgeEl.style.display = "none";
   }
 
   protected insertLiveCountBadge(count: number): void {
-    const headerLeft = this.header.querySelector('.panel-header-left');
+    const headerLeft = this.header.querySelector(".panel-header-left");
     if (!headerLeft) return;
-    const badge = document.createElement('span');
-    badge.className = 'panel-live-count';
+    const badge = document.createElement("span");
+    badge.className = "panel-live-count";
     badge.textContent = `${count}`;
     headerLeft.appendChild(badge);
   }
 
   protected appendCloseButton(): void {
-    const closeBtn = h('button', {
-      className: 'icon-btn panel-close-btn',
-      'aria-label': t('components.panel.closePanel'),
-      title: t('components.panel.closePanel'),
-    }, '\u2715');
-    closeBtn.addEventListener('click', (e) => {
+    const closeBtn = h(
+      "button",
+      {
+        className: "icon-btn panel-close-btn",
+        "aria-label": t("components.panel.closePanel"),
+        title: t("components.panel.closePanel"),
+      },
+      "\u2715",
+    );
+    closeBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      this.element.dispatchEvent(new CustomEvent('wm:panel-close', {
-        bubbles: true,
-        detail: { panelId: this.panelId },
-      }));
+      this.element.dispatchEvent(
+        new CustomEvent("wm:panel-close", {
+          bubbles: true,
+          detail: { panelId: this.panelId },
+        }),
+      );
     });
     this.header.appendChild(closeBtn);
   }
@@ -669,14 +740,16 @@ export class Panel {
 
   public isNearViewport(marginPx = 400): boolean {
     if (!this.element.isConnected) return false;
-    if (typeof window === 'undefined') return true;
+    if (typeof window === "undefined") return true;
 
     const style = window.getComputedStyle(this.element);
-    if (style.display === 'none' || style.visibility === 'hidden') return false;
+    if (style.display === "none" || style.visibility === "hidden") return false;
 
     const rect = this.element.getBoundingClientRect();
-    const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
-    const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
+    const viewportHeight =
+      window.innerHeight || document.documentElement.clientHeight || 0;
+    const viewportWidth =
+      window.innerWidth || document.documentElement.clientWidth || 0;
 
     if (rect.width === 0 || rect.height === 0) return false;
 
@@ -688,42 +761,60 @@ export class Panel {
     );
   }
 
-  public showLoading(message = t('common.loading')): void {
+  public showLoading(message = t("common.loading")): void {
     if (this._locked) return;
     this.setErrorState(false);
     this.clearRetryCountdown();
-    replaceChildren(this.content,
-      h('div', { className: 'panel-loading' },
-        h('div', { className: 'panel-loading-radar' },
-          h('div', { className: 'panel-radar-sweep' }),
-          h('div', { className: 'panel-radar-dot' }),
+    replaceChildren(
+      this.content,
+      h(
+        "div",
+        { className: "panel-loading" },
+        h(
+          "div",
+          { className: "panel-loading-radar" },
+          h("div", { className: "panel-radar-sweep" }),
+          h("div", { className: "panel-radar-dot" }),
         ),
-        h('div', { className: 'panel-loading-text' }, message),
+        h("div", { className: "panel-loading-text" }, message),
       ),
     );
   }
 
-  public showError(message?: string, onRetry?: () => void, autoRetrySeconds?: number): void {
+  public showError(
+    message?: string,
+    onRetry?: () => void,
+    autoRetrySeconds?: number,
+  ): void {
     if (this._locked) return;
     this.clearRetryCountdown();
     this.setErrorState(true);
     if (onRetry !== undefined) this.retryCallback = onRetry;
 
-    const radarEl = h('div', { className: 'panel-loading-radar panel-error-radar' },
-      h('div', { className: 'panel-radar-sweep' }),
-      h('div', { className: 'panel-radar-dot error' }),
+    const radarEl = h(
+      "div",
+      { className: "panel-loading-radar panel-error-radar" },
+      h("div", { className: "panel-radar-sweep" }),
+      h("div", { className: "panel-radar-dot error" }),
     );
 
-    const msgEl = h('div', { className: 'panel-error-msg' }, message || t('common.failedToLoad'));
+    const msgEl = h(
+      "div",
+      { className: "panel-error-msg" },
+      message || t("common.failedToLoad"),
+    );
 
     const children: (HTMLElement | string)[] = [radarEl, msgEl];
 
     if (this.retryCallback) {
-      const backoffSeconds = autoRetrySeconds ?? Math.min(15 * Math.pow(2, this.retryAttempt), 180);
+      const backoffSeconds =
+        autoRetrySeconds ?? Math.min(15 * Math.pow(2, this.retryAttempt), 180);
       this.retryAttempt++;
       let remaining = Math.round(backoffSeconds);
-      const countdownEl = h('div', { className: 'panel-error-countdown' },
-        `${t('common.retrying')} (${remaining}s)`,
+      const countdownEl = h(
+        "div",
+        { className: "panel-error-countdown" },
+        `${t("common.retrying")} (${remaining}s)`,
       );
       children.push(countdownEl);
       this.retryCountdownTimer = setInterval(() => {
@@ -733,10 +824,13 @@ export class Panel {
           this.retryCallback?.();
           return;
         }
-        countdownEl.textContent = `${t('common.retrying')} (${remaining}s)`;
+        countdownEl.textContent = `${t("common.retrying")} (${remaining}s)`;
       }, 1000);
     }
-    replaceChildren(this.content, h('div', { className: 'panel-error-state' }, ...children));
+    replaceChildren(
+      this.content,
+      h("div", { className: "panel-error-state" }, ...children),
+    );
   }
 
   public resetRetryBackoff(): void {
@@ -747,37 +841,56 @@ export class Panel {
     this._locked = true;
     this.clearRetryCountdown();
 
-    for (let child = this.header.nextElementSibling; child && child !== this.content; child = child.nextElementSibling) {
-      (child as HTMLElement).style.display = 'none';
+    for (
+      let child = this.header.nextElementSibling;
+      child && child !== this.content;
+      child = child.nextElementSibling
+    ) {
+      (child as HTMLElement).style.display = "none";
     }
-    this.element.classList.add('panel-is-locked');
+    this.element.classList.add("panel-is-locked");
 
     const lockSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>`;
-    const iconEl = h('div', { className: 'panel-locked-icon' });
+    const iconEl = h("div", { className: "panel-locked-icon" });
     iconEl.innerHTML = lockSvg;
 
     const lockedChildren: (HTMLElement | string)[] = [
       iconEl,
-      h('div', { className: 'panel-locked-desc' }, t('premium.lockedDesc')),
+      h("div", { className: "panel-locked-desc" }, t("premium.lockedDesc")),
     ];
 
     if (features.length > 0) {
-      const featureList = h('ul', { className: 'panel-locked-features' });
+      const featureList = h("ul", { className: "panel-locked-features" });
       for (const feat of features) {
-        featureList.appendChild(h('li', {}, feat));
+        featureList.appendChild(h("li", {}, feat));
       }
       lockedChildren.push(featureList);
     }
 
-    const ctaBtn = h('button', { type: 'button', className: 'panel-locked-cta' }, t('premium.joinWaitlist'));
+    const ctaBtn = h(
+      "button",
+      { type: "button", className: "panel-locked-cta" },
+      t("premium.joinWaitlist"),
+    );
     if (isDesktopRuntime()) {
-      ctaBtn.addEventListener('click', () => void invokeTauri<void>('open_url', { url: 'https://worldmonitor.app/pro' }).catch(() => window.open('https://worldmonitor.app/pro', '_blank')));
+      ctaBtn.addEventListener(
+        "click",
+        () =>
+          void invokeTauri<void>("open_url", {
+            url: "https://worldmonitor.app/pro",
+          }).catch(() => window.open("https://worldmonitor.app/pro", "_blank")),
+      );
     } else {
-      ctaBtn.addEventListener('click', () => window.open('https://worldmonitor.app/pro', '_blank'));
+      ctaBtn.addEventListener("click", () =>
+        window.open("https://worldmonitor.app/pro", "_blank"),
+      );
     }
     lockedChildren.push(ctaBtn);
 
-    replaceChildren(this.content, h('div', { className: 'panel-locked-state' }, ...lockedChildren));
+    replaceChildren(
+      this.content,
+      h("div", { className: "panel-locked-state" }, ...lockedChildren),
+    );
   }
 
   public showRetrying(message?: string, countdownSeconds?: number): void {
@@ -785,33 +898,42 @@ export class Panel {
     this.clearRetryCountdown();
     this.setErrorState(true);
 
-    const radarEl = h('div', { className: 'panel-loading-radar panel-error-radar' },
-      h('div', { className: 'panel-radar-sweep' }),
-      h('div', { className: 'panel-radar-dot error' }),
+    const radarEl = h(
+      "div",
+      { className: "panel-loading-radar panel-error-radar" },
+      h("div", { className: "panel-radar-sweep" }),
+      h("div", { className: "panel-radar-dot error" }),
     );
 
-    const msgEl = h('div', { className: 'panel-error-msg' }, message || t('common.retrying'));
+    const msgEl = h(
+      "div",
+      { className: "panel-error-msg" },
+      message || t("common.retrying"),
+    );
     const children: (HTMLElement | string)[] = [radarEl, msgEl];
 
     if (countdownSeconds && countdownSeconds > 0) {
       let remaining = countdownSeconds;
-      const countdownEl = h('div', { className: 'panel-error-countdown' },
-        `${t('common.retrying')} (${remaining}s)`,
+      const countdownEl = h(
+        "div",
+        { className: "panel-error-countdown" },
+        `${t("common.retrying")} (${remaining}s)`,
       );
       children.push(countdownEl);
       this.retryCountdownTimer = setInterval(() => {
         remaining--;
         if (remaining <= 0) {
           this.clearRetryCountdown();
-          countdownEl.textContent = t('common.retrying');
+          countdownEl.textContent = t("common.retrying");
           return;
         }
-        countdownEl.textContent = `${t('common.retrying')} (${remaining}s)`;
+        countdownEl.textContent = `${t("common.retrying")} (${remaining}s)`;
       }, 1000);
     }
 
-    replaceChildren(this.content,
-      h('div', { className: 'panel-error-state' }, ...children),
+    replaceChildren(
+      this.content,
+      h("div", { className: "panel-error-state" }, ...children),
     );
   }
 
@@ -828,7 +950,8 @@ export class Panel {
 
   protected setFetching(v: boolean): void {
     this._fetching = v;
-    const btn = this.content.querySelector<HTMLButtonElement>('[data-panel-retry]');
+    const btn =
+      this.content.querySelector<HTMLButtonElement>("[data-panel-retry]");
     if (btn) btn.disabled = v;
   }
 
@@ -837,14 +960,21 @@ export class Panel {
   }
 
   public showConfigError(message: string): void {
-    const msgEl = h('div', { className: 'config-error-message' }, message);
+    const msgEl = h("div", { className: "config-error-message" }, message);
     if (isDesktopRuntime()) {
       msgEl.appendChild(
-        h('button', {
-          type: 'button',
-          className: 'config-error-settings-btn',
-          onClick: () => void invokeTauri<void>('open_settings_window_command').catch(() => { }),
-        }, t('components.panel.openSettings')),
+        h(
+          "button",
+          {
+            type: "button",
+            className: "config-error-settings-btn",
+            onClick: () =>
+              void invokeTauri<void>("open_settings_window_command").catch(
+                () => {},
+              ),
+          },
+          t("components.panel.openSettings"),
+        ),
       );
     }
     replaceChildren(this.content, msgEl);
@@ -852,22 +982,22 @@ export class Panel {
 
   public setCount(count: number): void {
     if (this.countEl) {
-      const prev = parseInt(this.countEl.textContent ?? '0', 10);
+      const prev = parseInt(this.countEl.textContent ?? "0", 10);
       this.countEl.textContent = count.toString();
       if (count > prev && getAiFlowSettings().badgeAnimation) {
-        this.countEl.classList.remove('bump');
+        this.countEl.classList.remove("bump");
         void this.countEl.offsetWidth;
-        this.countEl.classList.add('bump');
+        this.countEl.classList.add("bump");
       }
     }
   }
 
   public setErrorState(hasError: boolean, tooltip?: string): void {
-    this.header.classList.toggle('panel-header-error', hasError);
+    this.header.classList.toggle("panel-header-error", hasError);
     if (tooltip) {
       this.header.title = tooltip;
     } else {
-      this.header.removeAttribute('title');
+      this.header.removeAttribute("title");
     }
   }
 
@@ -905,11 +1035,11 @@ export class Panel {
   }
 
   public show(): void {
-    this.element.classList.remove('hidden');
+    this.element.classList.remove("hidden");
   }
 
   public hide(): void {
-    this.element.classList.add('hidden');
+    this.element.classList.add("hidden");
   }
 
   public toggle(visible: boolean): void {
@@ -926,20 +1056,21 @@ export class Panel {
     if (!this.newBadgeEl) return;
 
     if (count <= 0) {
-      this.newBadgeEl.style.display = 'none';
-      this.newBadgeEl.classList.remove('pulse');
-      this.element.classList.remove('has-new');
+      this.newBadgeEl.style.display = "none";
+      this.newBadgeEl.classList.remove("pulse");
+      this.element.classList.remove("has-new");
       return;
     }
 
-    this.newBadgeEl.textContent = count > 99 ? '99+' : `${count} ${t('common.new')}`;
-    this.newBadgeEl.style.display = 'inline-flex';
-    this.element.classList.add('has-new');
+    this.newBadgeEl.textContent =
+      count > 99 ? "99+" : `${count} ${t("common.new")}`;
+    this.newBadgeEl.style.display = "inline-flex";
+    this.element.classList.add("has-new");
 
     if (pulse) {
-      this.newBadgeEl.classList.add('pulse');
+      this.newBadgeEl.classList.add("pulse");
     } else {
-      this.newBadgeEl.classList.remove('pulse');
+      this.newBadgeEl.classList.remove("pulse");
     }
   }
 
@@ -961,7 +1092,13 @@ export class Panel {
    * Reset panel height to default
    */
   public resetHeight(): void {
-    this.element.classList.remove('resized', 'span-1', 'span-2', 'span-3', 'span-4');
+    this.element.classList.remove(
+      "resized",
+      "span-1",
+      "span-2",
+      "span-3",
+      "span-4",
+    );
     const spans = loadPanelSpans();
     delete spans[this.panelId];
     localStorage.setItem(PANEL_SPANS_KEY, JSON.stringify(spans));
@@ -977,7 +1114,7 @@ export class Panel {
   }
 
   protected isAbortError(error: unknown): boolean {
-    return error instanceof DOMException && error.name === 'AbortError';
+    return error instanceof DOMException && error.name === "AbortError";
   }
 
   public destroy(): void {
@@ -994,7 +1131,7 @@ export class Panel {
     this.pendingContentHtml = null;
 
     if (this.tooltipCloseHandler) {
-      document.removeEventListener('click', this.tooltipCloseHandler);
+      document.removeEventListener("click", this.tooltipCloseHandler);
       this.tooltipCloseHandler = null;
     }
     this.removeRowTouchDocumentListeners();
@@ -1008,31 +1145,31 @@ export class Panel {
       this.onTouchCancel = null;
     }
     if (this.onDocMouseUp) {
-      document.removeEventListener('mouseup', this.onDocMouseUp);
+      document.removeEventListener("mouseup", this.onDocMouseUp);
       this.onDocMouseUp = null;
     }
     if (this.onRowMouseMove) {
-      document.removeEventListener('mousemove', this.onRowMouseMove);
+      document.removeEventListener("mousemove", this.onRowMouseMove);
       this.onRowMouseMove = null;
     }
     if (this.onRowMouseUp) {
-      document.removeEventListener('mouseup', this.onRowMouseUp);
+      document.removeEventListener("mouseup", this.onRowMouseUp);
       this.onRowMouseUp = null;
     }
     if (this.onRowWindowBlur) {
-      window.removeEventListener('blur', this.onRowWindowBlur);
+      window.removeEventListener("blur", this.onRowWindowBlur);
       this.onRowWindowBlur = null;
     }
     if (this.onColMouseMove) {
-      document.removeEventListener('mousemove', this.onColMouseMove);
+      document.removeEventListener("mousemove", this.onColMouseMove);
       this.onColMouseMove = null;
     }
     if (this.onColMouseUp) {
-      document.removeEventListener('mouseup', this.onColMouseUp);
+      document.removeEventListener("mouseup", this.onColMouseUp);
       this.onColMouseUp = null;
     }
     if (this.onColWindowBlur) {
-      window.removeEventListener('blur', this.onColWindowBlur);
+      window.removeEventListener("blur", this.onColWindowBlur);
       this.onColWindowBlur = null;
     }
     this.removeColTouchDocumentListeners();
@@ -1045,8 +1182,8 @@ export class Panel {
     if (this.onColTouchCancel) {
       this.onColTouchCancel = null;
     }
-    this.element.classList.remove('resizing', 'col-resizing');
+    this.element.classList.remove("resizing", "col-resizing");
     delete this.element.dataset.resizing;
-    document.body.classList.remove('panel-resize-active');
+    document.body.classList.remove("panel-resize-active");
   }
 }

@@ -1,7 +1,7 @@
 export const SEVERITY_SCORE = {
-  'AIS_DISRUPTION_SEVERITY_LOW': 1,
-  'AIS_DISRUPTION_SEVERITY_ELEVATED': 2,
-  'AIS_DISRUPTION_SEVERITY_HIGH': 3,
+  AIS_DISRUPTION_SEVERITY_LOW: 1,
+  AIS_DISRUPTION_SEVERITY_ELEVATED: 2,
+  AIS_DISRUPTION_SEVERITY_HIGH: 3,
 };
 
 /**
@@ -17,9 +17,9 @@ export const SEVERITY_SCORE = {
 export const THREAT_LEVEL = {
   war_zone: 70,
   critical: 40,
-  high:     30,
+  high: 30,
   elevated: 15,
-  normal:    0,
+  normal: 0,
 };
 
 /**
@@ -50,14 +50,23 @@ export function aisComponent(maxCongestionSeverity) {
  *
  * Capped at 100.
  */
-export function computeDisruptionScore(threatLevel, warningCount, maxCongestionSeverity) {
-  return Math.min(100, threatLevel + warningComponent(warningCount) + aisComponent(maxCongestionSeverity));
+export function computeDisruptionScore(
+  threatLevel,
+  warningCount,
+  maxCongestionSeverity,
+) {
+  return Math.min(
+    100,
+    threatLevel +
+      warningComponent(warningCount) +
+      aisComponent(maxCongestionSeverity),
+  );
 }
 
 export function scoreToStatus(score) {
-  if (score < 20) return 'green';
-  if (score < 50) return 'yellow';
-  return 'red';
+  if (score < 20) return "green";
+  if (score < 50) return "yellow";
+  return "red";
 }
 
 export function computeHHI(shares) {
@@ -66,18 +75,21 @@ export function computeHHI(shares) {
 }
 
 export function riskRating(hhi) {
-  if (hhi >= 5000) return 'critical';
-  if (hhi >= 2500) return 'high';
-  if (hhi >= 1500) return 'moderate';
-  return 'low';
+  if (hhi >= 5000) return "critical";
+  if (hhi >= 2500) return "high";
+  if (hhi >= 1500) return "moderate";
+  return "low";
 }
 
 export function detectSpike(history) {
   if (!history || history.length < 3) return false;
-  const values = history.map(h => typeof h === 'number' ? h : h.value).filter(v => Number.isFinite(v));
+  const values = history
+    .map((h) => (typeof h === "number" ? h : h.value))
+    .filter((v) => Number.isFinite(v));
   if (values.length < 3) return false;
   const mean = values.reduce((a, b) => a + b, 0) / values.length;
-  const variance = values.reduce((sum, v) => sum + (v - mean) ** 2, 0) / values.length;
+  const variance =
+    values.reduce((sum, v) => sum + (v - mean) ** 2, 0) / values.length;
   const stdDev = Math.sqrt(variance);
   if (stdDev === 0) return false;
   const latest = values[values.length - 1];

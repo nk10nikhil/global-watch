@@ -101,8 +101,7 @@ export interface Stablecoin {
   image: string;
 }
 
-export interface ListEtfFlowsRequest {
-}
+export interface ListEtfFlowsRequest {}
 
 export interface ListEtfFlowsResponse {
   timestamp: string;
@@ -147,8 +146,7 @@ export interface GetCountryStockIndexResponse {
   fetchedAt: string;
 }
 
-export interface ListGulfQuotesRequest {
-}
+export interface ListGulfQuotesRequest {}
 
 export interface ListGulfQuotesResponse {
   quotes: GulfQuote[];
@@ -328,7 +326,10 @@ export interface ServerContext {
 
 export interface ServerOptions {
   onError?: (error: unknown, req: Request) => Response | Promise<Response>;
-  validateRequest?: (methodName: string, body: unknown) => FieldViolation[] | undefined;
+  validateRequest?: (
+    methodName: string,
+    body: unknown,
+  ) => FieldViolation[] | undefined;
 }
 
 export interface RouteDescriptor {
@@ -338,18 +339,54 @@ export interface RouteDescriptor {
 }
 
 export interface MarketServiceHandler {
-  listMarketQuotes(ctx: ServerContext, req: ListMarketQuotesRequest): Promise<ListMarketQuotesResponse>;
-  listCryptoQuotes(ctx: ServerContext, req: ListCryptoQuotesRequest): Promise<ListCryptoQuotesResponse>;
-  listCommodityQuotes(ctx: ServerContext, req: ListCommodityQuotesRequest): Promise<ListCommodityQuotesResponse>;
-  getSectorSummary(ctx: ServerContext, req: GetSectorSummaryRequest): Promise<GetSectorSummaryResponse>;
-  listStablecoinMarkets(ctx: ServerContext, req: ListStablecoinMarketsRequest): Promise<ListStablecoinMarketsResponse>;
-  listEtfFlows(ctx: ServerContext, req: ListEtfFlowsRequest): Promise<ListEtfFlowsResponse>;
-  getCountryStockIndex(ctx: ServerContext, req: GetCountryStockIndexRequest): Promise<GetCountryStockIndexResponse>;
-  listGulfQuotes(ctx: ServerContext, req: ListGulfQuotesRequest): Promise<ListGulfQuotesResponse>;
-  analyzeStock(ctx: ServerContext, req: AnalyzeStockRequest): Promise<AnalyzeStockResponse>;
-  getStockAnalysisHistory(ctx: ServerContext, req: GetStockAnalysisHistoryRequest): Promise<GetStockAnalysisHistoryResponse>;
-  backtestStock(ctx: ServerContext, req: BacktestStockRequest): Promise<BacktestStockResponse>;
-  listStoredStockBacktests(ctx: ServerContext, req: ListStoredStockBacktestsRequest): Promise<ListStoredStockBacktestsResponse>;
+  listMarketQuotes(
+    ctx: ServerContext,
+    req: ListMarketQuotesRequest,
+  ): Promise<ListMarketQuotesResponse>;
+  listCryptoQuotes(
+    ctx: ServerContext,
+    req: ListCryptoQuotesRequest,
+  ): Promise<ListCryptoQuotesResponse>;
+  listCommodityQuotes(
+    ctx: ServerContext,
+    req: ListCommodityQuotesRequest,
+  ): Promise<ListCommodityQuotesResponse>;
+  getSectorSummary(
+    ctx: ServerContext,
+    req: GetSectorSummaryRequest,
+  ): Promise<GetSectorSummaryResponse>;
+  listStablecoinMarkets(
+    ctx: ServerContext,
+    req: ListStablecoinMarketsRequest,
+  ): Promise<ListStablecoinMarketsResponse>;
+  listEtfFlows(
+    ctx: ServerContext,
+    req: ListEtfFlowsRequest,
+  ): Promise<ListEtfFlowsResponse>;
+  getCountryStockIndex(
+    ctx: ServerContext,
+    req: GetCountryStockIndexRequest,
+  ): Promise<GetCountryStockIndexResponse>;
+  listGulfQuotes(
+    ctx: ServerContext,
+    req: ListGulfQuotesRequest,
+  ): Promise<ListGulfQuotesResponse>;
+  analyzeStock(
+    ctx: ServerContext,
+    req: AnalyzeStockRequest,
+  ): Promise<AnalyzeStockResponse>;
+  getStockAnalysisHistory(
+    ctx: ServerContext,
+    req: GetStockAnalysisHistoryRequest,
+  ): Promise<GetStockAnalysisHistoryResponse>;
+  backtestStock(
+    ctx: ServerContext,
+    req: BacktestStockRequest,
+  ): Promise<BacktestStockResponse>;
+  listStoredStockBacktests(
+    ctx: ServerContext,
+    req: ListStoredStockBacktestsRequest,
+  ): Promise<ListStoredStockBacktestsResponse>;
 }
 
 export function createMarketServiceRoutes(
@@ -369,7 +406,10 @@ export function createMarketServiceRoutes(
             symbols: params.get("symbols") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("listMarketQuotes", body);
+            const bodyViolations = options.validateRequest(
+              "listMarketQuotes",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -382,16 +422,22 @@ export function createMarketServiceRoutes(
           };
 
           const result = await handler.listMarketQuotes(ctx, body);
-          return new Response(JSON.stringify(result as ListMarketQuotesResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as ListMarketQuotesResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -416,7 +462,10 @@ export function createMarketServiceRoutes(
             ids: params.get("ids") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("listCryptoQuotes", body);
+            const bodyViolations = options.validateRequest(
+              "listCryptoQuotes",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -429,16 +478,22 @@ export function createMarketServiceRoutes(
           };
 
           const result = await handler.listCryptoQuotes(ctx, body);
-          return new Response(JSON.stringify(result as ListCryptoQuotesResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as ListCryptoQuotesResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -463,7 +518,10 @@ export function createMarketServiceRoutes(
             symbols: params.get("symbols") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("listCommodityQuotes", body);
+            const bodyViolations = options.validateRequest(
+              "listCommodityQuotes",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -476,16 +534,22 @@ export function createMarketServiceRoutes(
           };
 
           const result = await handler.listCommodityQuotes(ctx, body);
-          return new Response(JSON.stringify(result as ListCommodityQuotesResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as ListCommodityQuotesResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -510,7 +574,10 @@ export function createMarketServiceRoutes(
             period: params.get("period") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getSectorSummary", body);
+            const bodyViolations = options.validateRequest(
+              "getSectorSummary",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -523,16 +590,22 @@ export function createMarketServiceRoutes(
           };
 
           const result = await handler.getSectorSummary(ctx, body);
-          return new Response(JSON.stringify(result as GetSectorSummaryResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetSectorSummaryResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -557,7 +630,10 @@ export function createMarketServiceRoutes(
             coins: params.get("coins") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("listStablecoinMarkets", body);
+            const bodyViolations = options.validateRequest(
+              "listStablecoinMarkets",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -570,16 +646,22 @@ export function createMarketServiceRoutes(
           };
 
           const result = await handler.listStablecoinMarkets(ctx, body);
-          return new Response(JSON.stringify(result as ListStablecoinMarketsResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as ListStablecoinMarketsResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -613,10 +695,13 @@ export function createMarketServiceRoutes(
           });
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -641,7 +726,10 @@ export function createMarketServiceRoutes(
             countryCode: params.get("country_code") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getCountryStockIndex", body);
+            const bodyViolations = options.validateRequest(
+              "getCountryStockIndex",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -654,16 +742,22 @@ export function createMarketServiceRoutes(
           };
 
           const result = await handler.getCountryStockIndex(ctx, body);
-          return new Response(JSON.stringify(result as GetCountryStockIndexResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetCountryStockIndexResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -691,16 +785,22 @@ export function createMarketServiceRoutes(
           };
 
           const result = await handler.listGulfQuotes(ctx, body);
-          return new Response(JSON.stringify(result as ListGulfQuotesResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as ListGulfQuotesResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -727,7 +827,10 @@ export function createMarketServiceRoutes(
             includeNews: params.get("include_news") === "true",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("analyzeStock", body);
+            const bodyViolations = options.validateRequest(
+              "analyzeStock",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -746,10 +849,13 @@ export function createMarketServiceRoutes(
           });
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -776,7 +882,10 @@ export function createMarketServiceRoutes(
             includeNews: params.get("include_news") === "true",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getStockAnalysisHistory", body);
+            const bodyViolations = options.validateRequest(
+              "getStockAnalysisHistory",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -789,16 +898,22 @@ export function createMarketServiceRoutes(
           };
 
           const result = await handler.getStockAnalysisHistory(ctx, body);
-          return new Response(JSON.stringify(result as GetStockAnalysisHistoryResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetStockAnalysisHistoryResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -825,7 +940,10 @@ export function createMarketServiceRoutes(
             evalWindowDays: Number(params.get("eval_window_days") ?? "0"),
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("backtestStock", body);
+            const bodyViolations = options.validateRequest(
+              "backtestStock",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -844,10 +962,13 @@ export function createMarketServiceRoutes(
           });
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -873,7 +994,10 @@ export function createMarketServiceRoutes(
             evalWindowDays: Number(params.get("eval_window_days") ?? "0"),
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("listStoredStockBacktests", body);
+            const bodyViolations = options.validateRequest(
+              "listStoredStockBacktests",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -886,16 +1010,22 @@ export function createMarketServiceRoutes(
           };
 
           const result = await handler.listStoredStockBacktests(ctx, body);
-          return new Response(JSON.stringify(result as ListStoredStockBacktestsResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as ListStoredStockBacktestsResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);

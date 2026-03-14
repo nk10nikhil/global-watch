@@ -94,8 +94,7 @@ export interface GetHumanitarianSummaryBatchResponse {
   requested: number;
 }
 
-export interface ListIranEventsRequest {
-}
+export interface ListIranEventsRequest {}
 
 export interface ListIranEventsResponse {
   events: IranEvent[];
@@ -114,7 +113,11 @@ export interface IranEvent {
   severity: string;
 }
 
-export type UcdpViolenceType = "UCDP_VIOLENCE_TYPE_UNSPECIFIED" | "UCDP_VIOLENCE_TYPE_STATE_BASED" | "UCDP_VIOLENCE_TYPE_NON_STATE" | "UCDP_VIOLENCE_TYPE_ONE_SIDED";
+export type UcdpViolenceType =
+  | "UCDP_VIOLENCE_TYPE_UNSPECIFIED"
+  | "UCDP_VIOLENCE_TYPE_STATE_BASED"
+  | "UCDP_VIOLENCE_TYPE_NON_STATE"
+  | "UCDP_VIOLENCE_TYPE_ONE_SIDED";
 
 export interface FieldViolation {
   field: string;
@@ -151,7 +154,10 @@ export interface ServerContext {
 
 export interface ServerOptions {
   onError?: (error: unknown, req: Request) => Response | Promise<Response>;
-  validateRequest?: (methodName: string, body: unknown) => FieldViolation[] | undefined;
+  validateRequest?: (
+    methodName: string,
+    body: unknown,
+  ) => FieldViolation[] | undefined;
 }
 
 export interface RouteDescriptor {
@@ -161,11 +167,26 @@ export interface RouteDescriptor {
 }
 
 export interface ConflictServiceHandler {
-  listAcledEvents(ctx: ServerContext, req: ListAcledEventsRequest): Promise<ListAcledEventsResponse>;
-  listUcdpEvents(ctx: ServerContext, req: ListUcdpEventsRequest): Promise<ListUcdpEventsResponse>;
-  getHumanitarianSummary(ctx: ServerContext, req: GetHumanitarianSummaryRequest): Promise<GetHumanitarianSummaryResponse>;
-  getHumanitarianSummaryBatch(ctx: ServerContext, req: GetHumanitarianSummaryBatchRequest): Promise<GetHumanitarianSummaryBatchResponse>;
-  listIranEvents(ctx: ServerContext, req: ListIranEventsRequest): Promise<ListIranEventsResponse>;
+  listAcledEvents(
+    ctx: ServerContext,
+    req: ListAcledEventsRequest,
+  ): Promise<ListAcledEventsResponse>;
+  listUcdpEvents(
+    ctx: ServerContext,
+    req: ListUcdpEventsRequest,
+  ): Promise<ListUcdpEventsResponse>;
+  getHumanitarianSummary(
+    ctx: ServerContext,
+    req: GetHumanitarianSummaryRequest,
+  ): Promise<GetHumanitarianSummaryResponse>;
+  getHumanitarianSummaryBatch(
+    ctx: ServerContext,
+    req: GetHumanitarianSummaryBatchRequest,
+  ): Promise<GetHumanitarianSummaryBatchResponse>;
+  listIranEvents(
+    ctx: ServerContext,
+    req: ListIranEventsRequest,
+  ): Promise<ListIranEventsResponse>;
 }
 
 export function createConflictServiceRoutes(
@@ -189,7 +210,10 @@ export function createConflictServiceRoutes(
             country: params.get("country") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("listAcledEvents", body);
+            const bodyViolations = options.validateRequest(
+              "listAcledEvents",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -202,16 +226,22 @@ export function createConflictServiceRoutes(
           };
 
           const result = await handler.listAcledEvents(ctx, body);
-          return new Response(JSON.stringify(result as ListAcledEventsResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as ListAcledEventsResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -240,7 +270,10 @@ export function createConflictServiceRoutes(
             country: params.get("country") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("listUcdpEvents", body);
+            const bodyViolations = options.validateRequest(
+              "listUcdpEvents",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -253,16 +286,22 @@ export function createConflictServiceRoutes(
           };
 
           const result = await handler.listUcdpEvents(ctx, body);
-          return new Response(JSON.stringify(result as ListUcdpEventsResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as ListUcdpEventsResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -287,7 +326,10 @@ export function createConflictServiceRoutes(
             countryCode: params.get("country_code") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getHumanitarianSummary", body);
+            const bodyViolations = options.validateRequest(
+              "getHumanitarianSummary",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -300,16 +342,22 @@ export function createConflictServiceRoutes(
           };
 
           const result = await handler.getHumanitarianSummary(ctx, body);
-          return new Response(JSON.stringify(result as GetHumanitarianSummaryResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetHumanitarianSummaryResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -328,12 +376,15 @@ export function createConflictServiceRoutes(
       handler: async (req: Request): Promise<Response> => {
         try {
           const pathParams: Record<string, string> = {};
-          const rawBody = await req.json() as { country_codes?: string[] };
+          const rawBody = (await req.json()) as { country_codes?: string[] };
           const body: GetHumanitarianSummaryBatchRequest = {
             countryCodes: rawBody.country_codes ?? [],
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("getHumanitarianSummaryBatch", body);
+            const bodyViolations = options.validateRequest(
+              "getHumanitarianSummaryBatch",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -346,16 +397,22 @@ export function createConflictServiceRoutes(
           };
 
           const result = await handler.getHumanitarianSummaryBatch(ctx, body);
-          return new Response(JSON.stringify(result as GetHumanitarianSummaryBatchResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as GetHumanitarianSummaryBatchResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -383,16 +440,22 @@ export function createConflictServiceRoutes(
           };
 
           const result = await handler.listIranEvents(ctx, body);
-          return new Response(JSON.stringify(result as ListIranEventsResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as ListIranEventsResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -407,4 +470,3 @@ export function createConflictServiceRoutes(
     },
   ];
 }
-

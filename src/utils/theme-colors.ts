@@ -1,5 +1,5 @@
 const colorCache = new Map<string, string>();
-let cacheTheme = '';
+let cacheTheme = "";
 
 /**
  * Read a CSS custom property value from the document root.
@@ -8,7 +8,7 @@ let cacheTheme = '';
  * @returns The computed color value string
  */
 export function getCSSColor(varName: string): string {
-  const currentTheme = document.documentElement.dataset.theme || 'dark';
+  const currentTheme = document.documentElement.dataset.theme || "dark";
   if (currentTheme !== cacheTheme) {
     colorCache.clear();
     cacheTheme = currentTheme;
@@ -16,7 +16,8 @@ export function getCSSColor(varName: string): string {
   const cached = colorCache.get(varName);
   if (cached) return cached;
   const value = getComputedStyle(document.documentElement)
-    .getPropertyValue(varName).trim();
+    .getPropertyValue(varName)
+    .trim();
   colorCache.set(varName, value);
   return value;
 }
@@ -27,5 +28,5 @@ export function getCSSColor(varName: string): string {
  */
 export function invalidateColorCache(): void {
   colorCache.clear();
-  cacheTheme = '';
+  cacheTheme = "";
 }

@@ -17,8 +17,8 @@ export interface SpeciesRecovery {
   scientificName: string;
   photoUrl: string;
   iucnCategory: string;
-  populationTrend: 'increasing' | 'stable';
-  recoveryStatus: 'recovered' | 'recovering' | 'stabilized';
+  populationTrend: "increasing" | "stable";
+  recoveryStatus: "recovered" | "recovering" | "stabilized";
   populationData: Array<{ year: number; value: number }>;
   summaryText: string;
   source: string;
@@ -36,6 +36,6 @@ export interface SpeciesRecovery {
  * Uses dynamic import for code-splitting (JSON only loaded for happy variant).
  */
 export async function fetchConservationWins(): Promise<SpeciesRecovery[]> {
-  const { default: data } = await import('@/data/conservation-wins.json');
+  const { default: data } = await import("@/data/conservation-wins.json");
   return data as SpeciesRecovery[];
 }

@@ -19,11 +19,11 @@ import type {
   CategoryBreakdown,
   CryptoGivingSummary,
   InstitutionalGiving,
-} from '../../../../src/generated/server/worldmonitor/giving/v1/service_server';
+} from "../../../../src/generated/server/worldmonitor/giving/v1/service_server";
 
-import { cachedFetchJson } from '../../../_shared/redis';
+import { cachedFetchJson } from "../../../_shared/redis";
 
-const REDIS_CACHE_KEY = 'giving:summary:v1';
+const REDIS_CACHE_KEY = "giving:summary:v1";
 const REDIS_CACHE_TTL = 3600; // 1 hour
 
 // ─── GoFundMe Estimate ───
@@ -39,12 +39,12 @@ const REDIS_CACHE_TTL = 3600; // 1 hour
 
 function getGoFundMeEstimate(): PlatformGiving {
   return {
-    platform: 'GoFundMe',
+    platform: "GoFundMe",
     dailyVolumeUsd: 9_000_000_000 / 365, // ~$24.7M/day from 2024 annual report
     activeCampaignsSampled: 0,
     newCampaigns24h: 0,
     donationVelocity: 0,
-    dataFreshness: 'annual',
+    dataFreshness: "annual",
     lastUpdated: new Date().toISOString(),
   };
 }
@@ -61,12 +61,12 @@ function getGoFundMeEstimate(): PlatformGiving {
 
 function getGlobalGivingEstimate(): PlatformGiving {
   return {
-    platform: 'GlobalGiving',
+    platform: "GlobalGiving",
     dailyVolumeUsd: 100_000_000 / 365, // ~$274K/day from annual reports
     activeCampaignsSampled: 0,
     newCampaigns24h: 0,
     donationVelocity: 0,
-    dataFreshness: 'annual',
+    dataFreshness: "annual",
     lastUpdated: new Date().toISOString(),
   };
 }
@@ -77,12 +77,12 @@ function getJustGivingEstimate(): PlatformGiving {
   // JustGiving reports ~$7B+ total raised. Public search API is limited.
   // Use published annual reports for macro signal.
   return {
-    platform: 'JustGiving',
+    platform: "JustGiving",
     dailyVolumeUsd: 7_000_000_000 / 365, // ~$19.2M/day from annual reports
     activeCampaignsSampled: 0,
     newCampaigns24h: 0,
     donationVelocity: 0,
-    dataFreshness: 'annual',
+    dataFreshness: "annual",
     lastUpdated: new Date().toISOString(),
   };
 }
@@ -97,7 +97,12 @@ function getCryptoGivingEstimate(): CryptoGivingSummary {
     dailyInflowUsd: 2_000_000_000 / 365, // ~$5.5M/day estimate
     trackedWallets: 150,
     transactions24h: 0, // would require on-chain indexer
-    topReceivers: ['Endaoment', 'The Giving Block', 'UNICEF Crypto Fund', 'Save the Children'],
+    topReceivers: [
+      "Endaoment",
+      "The Giving Block",
+      "UNICEF Crypto Fund",
+      "Save the Children",
+    ],
     pctOfTotal: 0.8, // ~0.8% of total charitable giving
   };
 }
@@ -112,7 +117,7 @@ function getInstitutionalBaseline(): InstitutionalGiving {
     cafWorldGivingIndex: 34, // 2024 CAF World Giving Index (global avg %)
     cafDataYear: 2024,
     candidGrantsTracked: 18_000_000, // Candid tracks ~18M grants
-    dataLag: 'Annual',
+    dataLag: "Annual",
   };
 }
 
@@ -121,26 +126,84 @@ function getInstitutionalBaseline(): InstitutionalGiving {
 function getDefaultCategories(): CategoryBreakdown[] {
   // Based on published GoFundMe / GlobalGiving category distributions
   return [
-    { category: 'Medical & Health', share: 0.33, change24h: 0, activeCampaigns: 0, trending: true },
-    { category: 'Disaster Relief', share: 0.15, change24h: 0, activeCampaigns: 0, trending: false },
-    { category: 'Education', share: 0.12, change24h: 0, activeCampaigns: 0, trending: false },
-    { category: 'Community', share: 0.10, change24h: 0, activeCampaigns: 0, trending: false },
-    { category: 'Memorials', share: 0.08, change24h: 0, activeCampaigns: 0, trending: false },
-    { category: 'Animals & Pets', share: 0.07, change24h: 0, activeCampaigns: 0, trending: false },
-    { category: 'Environment', share: 0.05, change24h: 0, activeCampaigns: 0, trending: false },
-    { category: 'Hunger & Food', share: 0.05, change24h: 0, activeCampaigns: 0, trending: false },
-    { category: 'Other', share: 0.05, change24h: 0, activeCampaigns: 0, trending: false },
+    {
+      category: "Medical & Health",
+      share: 0.33,
+      change24h: 0,
+      activeCampaigns: 0,
+      trending: true,
+    },
+    {
+      category: "Disaster Relief",
+      share: 0.15,
+      change24h: 0,
+      activeCampaigns: 0,
+      trending: false,
+    },
+    {
+      category: "Education",
+      share: 0.12,
+      change24h: 0,
+      activeCampaigns: 0,
+      trending: false,
+    },
+    {
+      category: "Community",
+      share: 0.1,
+      change24h: 0,
+      activeCampaigns: 0,
+      trending: false,
+    },
+    {
+      category: "Memorials",
+      share: 0.08,
+      change24h: 0,
+      activeCampaigns: 0,
+      trending: false,
+    },
+    {
+      category: "Animals & Pets",
+      share: 0.07,
+      change24h: 0,
+      activeCampaigns: 0,
+      trending: false,
+    },
+    {
+      category: "Environment",
+      share: 0.05,
+      change24h: 0,
+      activeCampaigns: 0,
+      trending: false,
+    },
+    {
+      category: "Hunger & Food",
+      share: 0.05,
+      change24h: 0,
+      activeCampaigns: 0,
+      trending: false,
+    },
+    {
+      category: "Other",
+      share: 0.05,
+      change24h: 0,
+      activeCampaigns: 0,
+      trending: false,
+    },
   ];
 }
 
 // ─── Composite Activity Index ───
 
-function computeActivityIndex(platforms: PlatformGiving[], crypto: CryptoGivingSummary): number {
+function computeActivityIndex(
+  platforms: PlatformGiving[],
+  crypto: CryptoGivingSummary,
+): number {
   // Composite index (0-100) weighted by data quality and signal strength
   // Higher when: more platforms reporting, higher velocity, more new campaigns
   let score = 50; // baseline
 
-  const totalDailyVolume = platforms.reduce((s, p) => s + p.dailyVolumeUsd, 0) + crypto.dailyInflowUsd;
+  const totalDailyVolume =
+    platforms.reduce((s, p) => s + p.dailyVolumeUsd, 0) + crypto.dailyInflowUsd;
   // Expected baseline ~$50M/day across tracked platforms
   const volumeRatio = totalDailyVolume / 50_000_000;
   score += Math.min(20, Math.max(-20, (volumeRatio - 1) * 20));
@@ -156,7 +219,7 @@ function computeActivityIndex(platforms: PlatformGiving[], crypto: CryptoGivingS
   if (totalNew > 50) score += 5;
 
   // Data coverage bonus
-  const reporting = platforms.filter(p => p.dailyVolumeUsd > 0).length;
+  const reporting = platforms.filter((p) => p.dailyVolumeUsd > 0).length;
   score += reporting * 2;
 
   return Math.max(0, Math.min(100, Math.round(score)));
@@ -164,9 +227,9 @@ function computeActivityIndex(platforms: PlatformGiving[], crypto: CryptoGivingS
 
 function computeTrend(index: number): string {
   // Without historical data, use index level as proxy
-  if (index >= 65) return 'rising';
-  if (index <= 35) return 'falling';
-  return 'stable';
+  if (index >= 65) return "rising";
+  if (index <= 35) return "falling";
+  return "stable";
 }
 
 // ─── Main Handler ───
@@ -176,33 +239,39 @@ export async function getGivingSummary(
   req: GetGivingSummaryRequest,
 ): Promise<GetGivingSummaryResponse> {
   try {
-    const result = await cachedFetchJson<GetGivingSummaryResponse>(REDIS_CACHE_KEY, REDIS_CACHE_TTL, async () => {
-      const cryptoEstimate = getCryptoGivingEstimate();
-      const gofundme = getGoFundMeEstimate();
-      const globalGiving = getGlobalGivingEstimate();
-      const justGiving = getJustGivingEstimate();
-      const institutional = getInstitutionalBaseline();
+    const result = await cachedFetchJson<GetGivingSummaryResponse>(
+      REDIS_CACHE_KEY,
+      REDIS_CACHE_TTL,
+      async () => {
+        const cryptoEstimate = getCryptoGivingEstimate();
+        const gofundme = getGoFundMeEstimate();
+        const globalGiving = getGlobalGivingEstimate();
+        const justGiving = getJustGivingEstimate();
+        const institutional = getInstitutionalBaseline();
 
-      const platforms = [gofundme, globalGiving, justGiving];
-      const categories = getDefaultCategories();
+        const platforms = [gofundme, globalGiving, justGiving];
+        const categories = getDefaultCategories();
 
-      const activityIndex = computeActivityIndex(platforms, cryptoEstimate);
-      const trend = computeTrend(activityIndex);
-      const estimatedDailyFlowUsd = platforms.reduce((s, p) => s + p.dailyVolumeUsd, 0) + cryptoEstimate.dailyInflowUsd;
+        const activityIndex = computeActivityIndex(platforms, cryptoEstimate);
+        const trend = computeTrend(activityIndex);
+        const estimatedDailyFlowUsd =
+          platforms.reduce((s, p) => s + p.dailyVolumeUsd, 0) +
+          cryptoEstimate.dailyInflowUsd;
 
-      const summary: GivingSummary = {
-        generatedAt: new Date().toISOString(),
-        activityIndex,
-        trend,
-        estimatedDailyFlowUsd,
-        platforms,
-        categories,
-        crypto: cryptoEstimate,
-        institutional,
-      };
+        const summary: GivingSummary = {
+          generatedAt: new Date().toISOString(),
+          activityIndex,
+          trend,
+          estimatedDailyFlowUsd,
+          platforms,
+          categories,
+          crypto: cryptoEstimate,
+          institutional,
+        };
 
-      return { summary };
-    });
+        return { summary };
+      },
+    );
 
     if (!result) return { summary: undefined as unknown as GivingSummary };
 
@@ -212,12 +281,14 @@ export async function getGivingSummary(
     return {
       summary: {
         ...summary,
-        platforms: req.platformLimit > 0 && summary.platforms
-          ? summary.platforms.slice(0, req.platformLimit)
-          : summary.platforms,
-        categories: req.categoryLimit > 0 && summary.categories
-          ? summary.categories.slice(0, req.categoryLimit)
-          : summary.categories,
+        platforms:
+          req.platformLimit > 0 && summary.platforms
+            ? summary.platforms.slice(0, req.platformLimit)
+            : summary.platforms,
+        categories:
+          req.categoryLimit > 0 && summary.categories
+            ? summary.categories.slice(0, req.categoryLimit)
+            : summary.categories,
       },
     };
   } catch {

@@ -42,13 +42,33 @@ export interface PaginationResponse {
   totalCount: number;
 }
 
-export type CriticalityLevel = "CRITICALITY_LEVEL_UNSPECIFIED" | "CRITICALITY_LEVEL_LOW" | "CRITICALITY_LEVEL_MEDIUM" | "CRITICALITY_LEVEL_HIGH" | "CRITICALITY_LEVEL_CRITICAL";
+export type CriticalityLevel =
+  | "CRITICALITY_LEVEL_UNSPECIFIED"
+  | "CRITICALITY_LEVEL_LOW"
+  | "CRITICALITY_LEVEL_MEDIUM"
+  | "CRITICALITY_LEVEL_HIGH"
+  | "CRITICALITY_LEVEL_CRITICAL";
 
-export type CyberThreatIndicatorType = "CYBER_THREAT_INDICATOR_TYPE_UNSPECIFIED" | "CYBER_THREAT_INDICATOR_TYPE_IP" | "CYBER_THREAT_INDICATOR_TYPE_DOMAIN" | "CYBER_THREAT_INDICATOR_TYPE_URL";
+export type CyberThreatIndicatorType =
+  | "CYBER_THREAT_INDICATOR_TYPE_UNSPECIFIED"
+  | "CYBER_THREAT_INDICATOR_TYPE_IP"
+  | "CYBER_THREAT_INDICATOR_TYPE_DOMAIN"
+  | "CYBER_THREAT_INDICATOR_TYPE_URL";
 
-export type CyberThreatSource = "CYBER_THREAT_SOURCE_UNSPECIFIED" | "CYBER_THREAT_SOURCE_FEODO" | "CYBER_THREAT_SOURCE_URLHAUS" | "CYBER_THREAT_SOURCE_C2INTEL" | "CYBER_THREAT_SOURCE_OTX" | "CYBER_THREAT_SOURCE_ABUSEIPDB";
+export type CyberThreatSource =
+  | "CYBER_THREAT_SOURCE_UNSPECIFIED"
+  | "CYBER_THREAT_SOURCE_FEODO"
+  | "CYBER_THREAT_SOURCE_URLHAUS"
+  | "CYBER_THREAT_SOURCE_C2INTEL"
+  | "CYBER_THREAT_SOURCE_OTX"
+  | "CYBER_THREAT_SOURCE_ABUSEIPDB";
 
-export type CyberThreatType = "CYBER_THREAT_TYPE_UNSPECIFIED" | "CYBER_THREAT_TYPE_C2_SERVER" | "CYBER_THREAT_TYPE_MALWARE_HOST" | "CYBER_THREAT_TYPE_PHISHING" | "CYBER_THREAT_TYPE_MALICIOUS_URL";
+export type CyberThreatType =
+  | "CYBER_THREAT_TYPE_UNSPECIFIED"
+  | "CYBER_THREAT_TYPE_C2_SERVER"
+  | "CYBER_THREAT_TYPE_MALWARE_HOST"
+  | "CYBER_THREAT_TYPE_PHISHING"
+  | "CYBER_THREAT_TYPE_MALICIOUS_URL";
 
 export interface FieldViolation {
   field: string;
@@ -85,7 +105,10 @@ export interface ServerContext {
 
 export interface ServerOptions {
   onError?: (error: unknown, req: Request) => Response | Promise<Response>;
-  validateRequest?: (methodName: string, body: unknown) => FieldViolation[] | undefined;
+  validateRequest?: (
+    methodName: string,
+    body: unknown,
+  ) => FieldViolation[] | undefined;
 }
 
 export interface RouteDescriptor {
@@ -95,7 +118,10 @@ export interface RouteDescriptor {
 }
 
 export interface CyberServiceHandler {
-  listCyberThreats(ctx: ServerContext, req: ListCyberThreatsRequest): Promise<ListCyberThreatsResponse>;
+  listCyberThreats(
+    ctx: ServerContext,
+    req: ListCyberThreatsRequest,
+  ): Promise<ListCyberThreatsResponse>;
 }
 
 export function createCyberServiceRoutes(
@@ -121,7 +147,10 @@ export function createCyberServiceRoutes(
             minSeverity: params.get("min_severity") ?? "",
           };
           if (options?.validateRequest) {
-            const bodyViolations = options.validateRequest("listCyberThreats", body);
+            const bodyViolations = options.validateRequest(
+              "listCyberThreats",
+              body,
+            );
             if (bodyViolations) {
               throw new ValidationError(bodyViolations);
             }
@@ -134,16 +163,22 @@ export function createCyberServiceRoutes(
           };
 
           const result = await handler.listCyberThreats(ctx, body);
-          return new Response(JSON.stringify(result as ListCyberThreatsResponse), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify(result as ListCyberThreatsResponse),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: unknown) {
           if (err instanceof ValidationError) {
-            return new Response(JSON.stringify({ violations: err.violations }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
+            return new Response(
+              JSON.stringify({ violations: err.violations }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
           }
           if (options?.onError) {
             return options.onError(err, req);
@@ -158,4 +193,3 @@ export function createCyberServiceRoutes(
     },
   ];
 }
-

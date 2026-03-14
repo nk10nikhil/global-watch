@@ -101,8 +101,7 @@ export interface Stablecoin {
   image: string;
 }
 
-export interface ListEtfFlowsRequest {
-}
+export interface ListEtfFlowsRequest {}
 
 export interface ListEtfFlowsResponse {
   timestamp: string;
@@ -147,8 +146,7 @@ export interface GetCountryStockIndexResponse {
   fetchedAt: string;
 }
 
-export interface ListGulfQuotesRequest {
-}
+export interface ListGulfQuotesRequest {}
 
 export interface ListGulfQuotesResponse {
   quotes: GulfQuote[];
@@ -341,11 +339,16 @@ export class MarketServiceClient {
     this.defaultHeaders = { ...options?.defaultHeaders };
   }
 
-  async listMarketQuotes(req: ListMarketQuotesRequest, options?: MarketServiceCallOptions): Promise<ListMarketQuotesResponse> {
+  async listMarketQuotes(
+    req: ListMarketQuotesRequest,
+    options?: MarketServiceCallOptions,
+  ): Promise<ListMarketQuotesResponse> {
     let path = "/api/market/v1/list-market-quotes";
     const params = new URLSearchParams();
-    if (req.symbols != null && req.symbols !== "") params.set("symbols", String(req.symbols));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.symbols != null && req.symbols !== "")
+      params.set("symbols", String(req.symbols));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -363,14 +366,18 @@ export class MarketServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as ListMarketQuotesResponse;
+    return (await resp.json()) as ListMarketQuotesResponse;
   }
 
-  async listCryptoQuotes(req: ListCryptoQuotesRequest, options?: MarketServiceCallOptions): Promise<ListCryptoQuotesResponse> {
+  async listCryptoQuotes(
+    req: ListCryptoQuotesRequest,
+    options?: MarketServiceCallOptions,
+  ): Promise<ListCryptoQuotesResponse> {
     let path = "/api/market/v1/list-crypto-quotes";
     const params = new URLSearchParams();
     if (req.ids != null && req.ids !== "") params.set("ids", String(req.ids));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -388,14 +395,19 @@ export class MarketServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as ListCryptoQuotesResponse;
+    return (await resp.json()) as ListCryptoQuotesResponse;
   }
 
-  async listCommodityQuotes(req: ListCommodityQuotesRequest, options?: MarketServiceCallOptions): Promise<ListCommodityQuotesResponse> {
+  async listCommodityQuotes(
+    req: ListCommodityQuotesRequest,
+    options?: MarketServiceCallOptions,
+  ): Promise<ListCommodityQuotesResponse> {
     let path = "/api/market/v1/list-commodity-quotes";
     const params = new URLSearchParams();
-    if (req.symbols != null && req.symbols !== "") params.set("symbols", String(req.symbols));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.symbols != null && req.symbols !== "")
+      params.set("symbols", String(req.symbols));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -413,14 +425,19 @@ export class MarketServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as ListCommodityQuotesResponse;
+    return (await resp.json()) as ListCommodityQuotesResponse;
   }
 
-  async getSectorSummary(req: GetSectorSummaryRequest, options?: MarketServiceCallOptions): Promise<GetSectorSummaryResponse> {
+  async getSectorSummary(
+    req: GetSectorSummaryRequest,
+    options?: MarketServiceCallOptions,
+  ): Promise<GetSectorSummaryResponse> {
     let path = "/api/market/v1/get-sector-summary";
     const params = new URLSearchParams();
-    if (req.period != null && req.period !== "") params.set("period", String(req.period));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.period != null && req.period !== "")
+      params.set("period", String(req.period));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -438,14 +455,19 @@ export class MarketServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as GetSectorSummaryResponse;
+    return (await resp.json()) as GetSectorSummaryResponse;
   }
 
-  async listStablecoinMarkets(req: ListStablecoinMarketsRequest, options?: MarketServiceCallOptions): Promise<ListStablecoinMarketsResponse> {
+  async listStablecoinMarkets(
+    req: ListStablecoinMarketsRequest,
+    options?: MarketServiceCallOptions,
+  ): Promise<ListStablecoinMarketsResponse> {
     let path = "/api/market/v1/list-stablecoin-markets";
     const params = new URLSearchParams();
-    if (req.coins != null && req.coins !== "") params.set("coins", String(req.coins));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.coins != null && req.coins !== "")
+      params.set("coins", String(req.coins));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -463,10 +485,13 @@ export class MarketServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as ListStablecoinMarketsResponse;
+    return (await resp.json()) as ListStablecoinMarketsResponse;
   }
 
-  async listEtfFlows(req: ListEtfFlowsRequest, options?: MarketServiceCallOptions): Promise<ListEtfFlowsResponse> {
+  async listEtfFlows(
+    req: ListEtfFlowsRequest,
+    options?: MarketServiceCallOptions,
+  ): Promise<ListEtfFlowsResponse> {
     let path = "/api/market/v1/list-etf-flows";
     const url = this.baseURL + path;
 
@@ -486,14 +511,19 @@ export class MarketServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as ListEtfFlowsResponse;
+    return (await resp.json()) as ListEtfFlowsResponse;
   }
 
-  async getCountryStockIndex(req: GetCountryStockIndexRequest, options?: MarketServiceCallOptions): Promise<GetCountryStockIndexResponse> {
+  async getCountryStockIndex(
+    req: GetCountryStockIndexRequest,
+    options?: MarketServiceCallOptions,
+  ): Promise<GetCountryStockIndexResponse> {
     let path = "/api/market/v1/get-country-stock-index";
     const params = new URLSearchParams();
-    if (req.countryCode != null && req.countryCode !== "") params.set("country_code", String(req.countryCode));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.countryCode != null && req.countryCode !== "")
+      params.set("country_code", String(req.countryCode));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -511,10 +541,13 @@ export class MarketServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as GetCountryStockIndexResponse;
+    return (await resp.json()) as GetCountryStockIndexResponse;
   }
 
-  async listGulfQuotes(req: ListGulfQuotesRequest, options?: MarketServiceCallOptions): Promise<ListGulfQuotesResponse> {
+  async listGulfQuotes(
+    req: ListGulfQuotesRequest,
+    options?: MarketServiceCallOptions,
+  ): Promise<ListGulfQuotesResponse> {
     let path = "/api/market/v1/list-gulf-quotes";
     const url = this.baseURL + path;
 
@@ -534,16 +567,22 @@ export class MarketServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as ListGulfQuotesResponse;
+    return (await resp.json()) as ListGulfQuotesResponse;
   }
 
-  async analyzeStock(req: AnalyzeStockRequest, options?: MarketServiceCallOptions): Promise<AnalyzeStockResponse> {
+  async analyzeStock(
+    req: AnalyzeStockRequest,
+    options?: MarketServiceCallOptions,
+  ): Promise<AnalyzeStockResponse> {
     let path = "/api/market/v1/analyze-stock";
     const params = new URLSearchParams();
-    if (req.symbol != null && req.symbol !== "") params.set("symbol", String(req.symbol));
-    if (req.name != null && req.name !== "") params.set("name", String(req.name));
+    if (req.symbol != null && req.symbol !== "")
+      params.set("symbol", String(req.symbol));
+    if (req.name != null && req.name !== "")
+      params.set("name", String(req.name));
     if (req.includeNews) params.set("include_news", String(req.includeNews));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -561,16 +600,22 @@ export class MarketServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as AnalyzeStockResponse;
+    return (await resp.json()) as AnalyzeStockResponse;
   }
 
-  async getStockAnalysisHistory(req: GetStockAnalysisHistoryRequest, options?: MarketServiceCallOptions): Promise<GetStockAnalysisHistoryResponse> {
+  async getStockAnalysisHistory(
+    req: GetStockAnalysisHistoryRequest,
+    options?: MarketServiceCallOptions,
+  ): Promise<GetStockAnalysisHistoryResponse> {
     let path = "/api/market/v1/get-stock-analysis-history";
     const params = new URLSearchParams();
-    if (req.symbols != null && req.symbols !== "") params.set("symbols", String(req.symbols));
-    if (req.limitPerSymbol != null && req.limitPerSymbol !== 0) params.set("limit_per_symbol", String(req.limitPerSymbol));
+    if (req.symbols != null && req.symbols !== "")
+      params.set("symbols", String(req.symbols));
+    if (req.limitPerSymbol != null && req.limitPerSymbol !== 0)
+      params.set("limit_per_symbol", String(req.limitPerSymbol));
     if (req.includeNews) params.set("include_news", String(req.includeNews));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -588,16 +633,23 @@ export class MarketServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as GetStockAnalysisHistoryResponse;
+    return (await resp.json()) as GetStockAnalysisHistoryResponse;
   }
 
-  async backtestStock(req: BacktestStockRequest, options?: MarketServiceCallOptions): Promise<BacktestStockResponse> {
+  async backtestStock(
+    req: BacktestStockRequest,
+    options?: MarketServiceCallOptions,
+  ): Promise<BacktestStockResponse> {
     let path = "/api/market/v1/backtest-stock";
     const params = new URLSearchParams();
-    if (req.symbol != null && req.symbol !== "") params.set("symbol", String(req.symbol));
-    if (req.name != null && req.name !== "") params.set("name", String(req.name));
-    if (req.evalWindowDays != null && req.evalWindowDays !== 0) params.set("eval_window_days", String(req.evalWindowDays));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.symbol != null && req.symbol !== "")
+      params.set("symbol", String(req.symbol));
+    if (req.name != null && req.name !== "")
+      params.set("name", String(req.name));
+    if (req.evalWindowDays != null && req.evalWindowDays !== 0)
+      params.set("eval_window_days", String(req.evalWindowDays));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -615,15 +667,21 @@ export class MarketServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as BacktestStockResponse;
+    return (await resp.json()) as BacktestStockResponse;
   }
 
-  async listStoredStockBacktests(req: ListStoredStockBacktestsRequest, options?: MarketServiceCallOptions): Promise<ListStoredStockBacktestsResponse> {
+  async listStoredStockBacktests(
+    req: ListStoredStockBacktestsRequest,
+    options?: MarketServiceCallOptions,
+  ): Promise<ListStoredStockBacktestsResponse> {
     let path = "/api/market/v1/list-stored-stock-backtests";
     const params = new URLSearchParams();
-    if (req.symbols != null && req.symbols !== "") params.set("symbols", String(req.symbols));
-    if (req.evalWindowDays != null && req.evalWindowDays !== 0) params.set("eval_window_days", String(req.evalWindowDays));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    if (req.symbols != null && req.symbols !== "")
+      params.set("symbols", String(req.symbols));
+    if (req.evalWindowDays != null && req.evalWindowDays !== 0)
+      params.set("eval_window_days", String(req.evalWindowDays));
+    const url =
+      this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -641,7 +699,7 @@ export class MarketServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as ListStoredStockBacktestsResponse;
+    return (await resp.json()) as ListStoredStockBacktestsResponse;
   }
 
   private async handleError(resp: Response): Promise<never> {
@@ -656,6 +714,10 @@ export class MarketServiceClient {
         if (e instanceof ValidationError) throw e;
       }
     }
-    throw new ApiError(resp.status, `Request failed with status ${resp.status}`, body);
+    throw new ApiError(
+      resp.status,
+      `Request failed with status ${resp.status}`,
+      body,
+    );
   }
 }

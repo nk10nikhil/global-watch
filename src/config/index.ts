@@ -4,7 +4,7 @@
 // VITE_VARIANT=full → worldmonitor.app (geopolitical)
 // VITE_VARIANT=finance → finance.worldmonitor.app (markets/trading)
 
-export { SITE_VARIANT } from './variant';
+export { SITE_VARIANT } from "./variant";
 
 // Shared base configuration (always included)
 export {
@@ -12,16 +12,16 @@ export {
   REFRESH_INTERVALS,
   MONITOR_COLORS,
   STORAGE_KEYS,
-} from './variants/base';
+} from "./variants/base";
 
 // Market data (shared)
-export { SECTORS, COMMODITIES, MARKET_SYMBOLS, CRYPTO_MAP } from './markets';
+export { SECTORS, COMMODITIES, MARKET_SYMBOLS, CRYPTO_MAP } from "./markets";
 
 // Geo data (shared base)
-export { UNDERSEA_CABLES, MAP_URLS } from './geo';
+export { UNDERSEA_CABLES, MAP_URLS } from "./geo";
 
 // AI Datacenters (shared)
-export { AI_DATA_CENTERS } from './ai-datacenters';
+export { AI_DATA_CENTERS } from "./ai-datacenters";
 
 // Feeds configuration (shared functions, variant-specific data)
 export {
@@ -34,7 +34,7 @@ export {
   ALERT_EXCLUSIONS,
   type SourceRiskProfile,
   type SourceType,
-} from './feeds';
+} from "./feeds";
 
 // Panel configuration - imported from panels.ts
 export {
@@ -42,7 +42,7 @@ export {
   DEFAULT_MAP_LAYERS,
   MOBILE_DEFAULT_MAP_LAYERS,
   LAYER_TO_SOURCE,
-} from './panels';
+} from "./panels";
 
 // ============================================
 // VARIANT-SPECIFIC EXPORTS
@@ -51,15 +51,11 @@ export {
 
 // Full variant (geopolitical) - only included in full builds
 // These are large data files that should be tree-shaken in tech builds
-export {
-  FEEDS,
-  INTEL_SOURCES,
-} from './feeds';
+export { FEEDS, INTEL_SOURCES } from "./feeds";
 
 export {
   INTEL_HOTSPOTS,
   CONFLICT_ZONES,
-
   MILITARY_BASES,
   NUCLEAR_FACILITIES,
   APT_GROUPS,
@@ -68,30 +64,30 @@ export {
   SANCTIONED_COUNTRIES,
   SPACEPORTS,
   CRITICAL_MINERALS,
-} from './geo';
+} from "./geo";
 
-export { GAMMA_IRRADIATORS } from './irradiators';
-export { PIPELINES, PIPELINE_COLORS } from './pipelines';
-export { PORTS } from './ports';
-export { MONITORED_AIRPORTS, FAA_AIRPORTS } from './airports';
+export { GAMMA_IRRADIATORS } from "./irradiators";
+export { PIPELINES, PIPELINE_COLORS } from "./pipelines";
+export { PORTS } from "./ports";
+export { MONITORED_AIRPORTS, FAA_AIRPORTS } from "./airports";
 export {
   ENTITY_REGISTRY,
   getEntityById,
   type EntityType,
   type EntityEntry,
-} from './entities';
+} from "./entities";
 
 // Tech variant - these are included in tech builds
-export { TECH_COMPANIES } from './tech-companies';
-export { AI_RESEARCH_LABS } from './ai-research-labs';
-export { STARTUP_ECOSYSTEMS } from './startup-ecosystems';
+export { TECH_COMPANIES } from "./tech-companies";
+export { AI_RESEARCH_LABS } from "./ai-research-labs";
+export { STARTUP_ECOSYSTEMS } from "./startup-ecosystems";
 export {
   AI_REGULATIONS,
   REGULATORY_ACTIONS,
   COUNTRY_REGULATION_PROFILES,
   getUpcomingDeadlines,
   getRecentActions,
-} from './ai-regulations';
+} from "./ai-regulations";
 export {
   STARTUP_HUBS,
   ACCELERATORS,
@@ -101,7 +97,7 @@ export {
   type Accelerator,
   type TechHQ,
   type CloudRegion,
-} from './tech-geo';
+} from "./tech-geo";
 
 // Finance variant - these are included in finance builds
 export {
@@ -113,22 +109,22 @@ export {
   type FinancialCenter,
   type CentralBank,
   type CommodityHub,
-} from './finance-geo';
+} from "./finance-geo";
 
 // Gulf FDI investment database
-export { GULF_INVESTMENTS } from './gulf-fdi';
+export { GULF_INVESTMENTS } from "./gulf-fdi";
 
 // Commodity variant - these are included in commodity builds
 export {
   COMMODITY_PRICES,
   COMMODITY_MARKET_SYMBOLS,
-} from './commodity-markets';
+} from "./commodity-markets";
 
 export {
   MINING_SITES,
   PROCESSING_PLANTS,
   COMMODITY_PORTS,
-} from './commodity-geo';
+} from "./commodity-geo";
 
 // COMMODITY_MINERS: 30+ mining company HQs — not yet rendered on map.
 // Uncomment when a miners layer is added to DeckGLMap.ts.

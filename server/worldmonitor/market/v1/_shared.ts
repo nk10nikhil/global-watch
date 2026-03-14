@@ -1,9 +1,9 @@
 /**
  * Shared helpers, types, and constants for the market service handler RPCs.
  */
-import { CHROME_UA, yahooGate } from '../../../_shared/constants';
-import cryptoConfig from '../../../../shared/crypto.json';
-import stablecoinConfig from '../../../../shared/stablecoins.json';
+import { CHROME_UA, yahooGate } from "../../../_shared/constants";
+import cryptoConfig from "../../../../shared/crypto.json";
+import stablecoinConfig from "../../../../shared/stablecoins.json";
 
 // ========================================================================
 // Relay helpers (Railway proxy for Yahoo when Vercel IPs are rate-limited)
@@ -12,16 +12,16 @@ import stablecoinConfig from '../../../../shared/stablecoins.json';
 function getRelayBaseUrl(): string | null {
   const relayUrl = process.env.WS_RELAY_URL;
   if (!relayUrl) return null;
-  return relayUrl
-    .replace(/^ws(s?):\/\//, 'http$1://')
-    .replace(/\/$/, '');
+  return relayUrl.replace(/^ws(s?):\/\//, "http$1://").replace(/\/$/, "");
 }
 
 function getRelayHeaders(): Record<string, string> {
-  const headers: Record<string, string> = { 'User-Agent': CHROME_UA };
+  const headers: Record<string, string> = { "User-Agent": CHROME_UA };
   const relaySecret = process.env.RELAY_SHARED_SECRET;
   if (relaySecret) {
-    const relayHeader = (process.env.RELAY_AUTH_HEADER || 'x-relay-key').toLowerCase();
+    const relayHeader = (
+      process.env.RELAY_AUTH_HEADER || "x-relay-key"
+    ).toLowerCase();
     headers[relayHeader] = relaySecret;
   }
   return headers;
@@ -34,7 +34,7 @@ function getRelayHeaders(): Record<string, string> {
 export const UPSTREAM_TIMEOUT_MS = 10_000;
 
 export function sanitizeSymbol(raw: string): string {
-  return raw.trim().replace(/\s+/g, '').slice(0, 32).toUpperCase();
+  return raw.trim().replace(/\s+/g, "").slice(0, 32).toUpperCase();
 }
 
 /**
@@ -45,14 +45,21 @@ export function sanitizeSymbol(raw: string): string {
  */
 export function parseStringArray(raw: unknown): string[] {
   if (Array.isArray(raw)) return raw.filter(Boolean);
-  if (typeof raw === 'string' && raw.length > 0) return raw.split(',').filter(Boolean);
+  if (typeof raw === "string" && raw.length > 0)
+    return raw.split(",").filter(Boolean);
   return [];
 }
 
 export async function fetchYahooQuotesBatch(
   symbols: string[],
-): Promise<{ results: Map<string, { price: number; change: number; sparkline: number[] }>; rateLimited: boolean }> {
-  const results = new Map<string, { price: number; change: number; sparkline: number[] }>();
+): Promise<{
+  results: Map<string, { price: number; change: number; sparkline: number[] }>;
+  rateLimited: boolean;
+}> {
+  const results = new Map<
+    string,
+    { price: number; change: number; sparkline: number[] }
+  >();
   let rateLimitHits = 0;
   let consecutiveFails = 0;
   for (let i = 0; i < symbols.length; i++) {
@@ -71,11 +78,19 @@ export async function fetchYahooQuotesBatch(
 
 // Yahoo-only symbols: indices and futures not on Finnhub free tier
 export const YAHOO_ONLY_SYMBOLS = new Set([
-  '^GSPC', '^DJI', '^IXIC', '^VIX',
-  'GC=F', 'CL=F', 'NG=F', 'SI=F', 'HG=F',
+  "^GSPC",
+  "^DJI",
+  "^IXIC",
+  "^VIX",
+  "GC=F",
+  "CL=F",
+  "NG=F",
+  "SI=F",
+  "HG=F",
 ]);
 
-export const CRYPTO_META: Record<string, { name: string; symbol: string }> = cryptoConfig.meta;
+export const CRYPTO_META: Record<string, { name: string; symbol: string }> =
+  cryptoConfig.meta;
 
 // ========================================================================
 // Types
@@ -121,7 +136,11 @@ export async function fetchFinnhubQuote(
   try {
     const url = `https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(symbol)}`;
     const resp = await fetch(url, {
-      headers: { Accept: 'application/json', 'User-Agent': CHROME_UA, 'X-Finnhub-Token': apiKey },
+      headers: {
+        Accept: "application/json",
+        "User-Agent": CHROME_UA,
+        "X-Finnhub-Token": apiKey,
+      },
       signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
     });
     if (!resp.ok) {
@@ -129,9 +148,20 @@ export async function fetchFinnhubQuote(
       return null;
     }
 
-    const data = await resp.json() as { c: number; d: number; dp: number; h: number; l: number; o: number; pc: number; t: number };
+    const data = (await resp.json()) as {
+      c: number;
+      d: number;
+      dp: number;
+      h: number;
+      l: number;
+      o: number;
+      pc: number;
+      t: number;
+    };
     if (data.c === 0 && data.h === 0 && data.l === 0) {
-      console.warn(`[Finnhub] ${symbol} returned zeros (market closed or invalid)`);
+      console.warn(
+        `[Finnhub] ${symbol} returned zeros (market closed or invalid)`,
+      );
       return null;
     }
 
@@ -174,7 +204,9 @@ export async function fetchFinnhubQuote(
 //   5. get-macro-signals.ts needs chart data (1y range) — use /stable/historical-price-eod/light
 // ========================================================================
 
-function parseYahooChartResponse(data: YahooChartResponse): { price: number; change: number; sparkline: number[] } | null {
+function parseYahooChartResponse(
+  data: YahooChartResponse,
+): { price: number; change: number; sparkline: number[] } | null {
   const result = data.chart?.result?.[0];
   const meta = result?.meta;
   if (!meta) return null;
@@ -197,7 +229,7 @@ export async function fetchYahooQuote(
     await yahooGate();
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}`;
     const resp = await fetch(url, {
-      headers: { 'User-Agent': CHROME_UA },
+      headers: { "User-Agent": CHROME_UA },
       signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
     });
     if (resp.ok) {
@@ -224,7 +256,9 @@ export async function fetchYahooQuote(
       signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
     });
     if (!resp.ok) {
-      console.warn(`[Yahoo] ${symbol} relay HTTP ${resp.status}: ${await resp.text().catch(() => '')}`);
+      console.warn(
+        `[Yahoo] ${symbol} relay HTTP ${resp.status}: ${await resp.text().catch(() => "")}`,
+      );
       return null;
     }
     const data: YahooChartResponse = await resp.json();
@@ -244,27 +278,29 @@ export async function fetchCoinGeckoMarkets(
 ): Promise<CoinGeckoMarketItem[]> {
   const apiKey = process.env.COINGECKO_API_KEY;
   const baseUrl = apiKey
-    ? 'https://pro-api.coingecko.com/api/v3'
-    : 'https://api.coingecko.com/api/v3';
-  const url = `${baseUrl}/coins/markets?vs_currency=usd&ids=${ids.join(',')}&order=market_cap_desc&sparkline=true&price_change_percentage=24h`;
+    ? "https://pro-api.coingecko.com/api/v3"
+    : "https://api.coingecko.com/api/v3";
+  const url = `${baseUrl}/coins/markets?vs_currency=usd&ids=${ids.join(",")}&order=market_cap_desc&sparkline=true&price_change_percentage=24h`;
   const headers: Record<string, string> = {
-    Accept: 'application/json',
-    'User-Agent': CHROME_UA,
+    Accept: "application/json",
+    "User-Agent": CHROME_UA,
   };
-  if (apiKey) headers['x-cg-pro-api-key'] = apiKey;
+  if (apiKey) headers["x-cg-pro-api-key"] = apiKey;
 
   const resp = await fetch(url, {
     headers,
     signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
   });
   if (!resp.ok) {
-    const body = await resp.text().catch(() => '');
+    const body = await resp.text().catch(() => "");
     throw new Error(`CoinGecko HTTP ${resp.status}: ${body.slice(0, 200)}`);
   }
 
   const data = await resp.json();
   if (!Array.isArray(data)) {
-    throw new Error(`CoinGecko returned non-array: ${JSON.stringify(data).slice(0, 200)}`);
+    throw new Error(
+      `CoinGecko returned non-array: ${JSON.stringify(data).slice(0, 200)}`,
+    );
   }
   return data;
 }
@@ -297,22 +333,30 @@ interface CoinPaprikaTicker {
 export async function fetchCoinPaprikaMarkets(
   geckoIds: string[],
 ): Promise<CoinGeckoMarketItem[]> {
-  const paprikaIds = geckoIds.map(id => COINPAPRIKA_ID_MAP[id]).filter(Boolean);
-  if (paprikaIds.length === 0) throw new Error('No CoinPaprika ID mapping for requested coins');
+  const paprikaIds = geckoIds
+    .map((id) => COINPAPRIKA_ID_MAP[id])
+    .filter(Boolean);
+  if (paprikaIds.length === 0)
+    throw new Error("No CoinPaprika ID mapping for requested coins");
 
-  const resp = await fetch('https://api.coinpaprika.com/v1/tickers?quotes=USD', {
-    headers: { Accept: 'application/json', 'User-Agent': CHROME_UA },
-    signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
-  });
+  const resp = await fetch(
+    "https://api.coinpaprika.com/v1/tickers?quotes=USD",
+    {
+      headers: { Accept: "application/json", "User-Agent": CHROME_UA },
+      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
+    },
+  );
   if (!resp.ok) throw new Error(`CoinPaprika HTTP ${resp.status}`);
 
   const allTickers: CoinPaprikaTicker[] = await resp.json();
   const paprikaSet = new Set(paprikaIds);
-  const matched = allTickers.filter(t => paprikaSet.has(t.id));
+  const matched = allTickers.filter((t) => paprikaSet.has(t.id));
 
-  const reverseMap = new Map(Object.entries(COINPAPRIKA_ID_MAP).map(([g, p]) => [p, g]));
+  const reverseMap = new Map(
+    Object.entries(COINPAPRIKA_ID_MAP).map(([g, p]) => [p, g]),
+  );
 
-  return matched.map(t => {
+  return matched.map((t) => {
     const q = t.quotes.USD;
     return {
       id: reverseMap.get(t.id) || t.id,
@@ -323,7 +367,7 @@ export async function fetchCoinPaprikaMarkets(
       total_volume: q.volume_24h,
       symbol: t.symbol.toLowerCase(),
       name: t.name,
-      image: '',
+      image: "",
       sparkline_in_7d: undefined,
     };
   });
@@ -339,7 +383,10 @@ export async function fetchCryptoMarkets(
   try {
     return await fetchCoinGeckoMarkets(ids);
   } catch (err) {
-    console.warn(`[CoinGecko] Failed, falling back to CoinPaprika:`, (err as Error).message);
+    console.warn(
+      `[CoinGecko] Failed, falling back to CoinPaprika:`,
+      (err as Error).message,
+    );
     return fetchCoinPaprikaMarkets(ids);
   }
 }

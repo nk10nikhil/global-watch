@@ -1,26 +1,31 @@
-import type { NewsItem } from '@/types';
-import type { OrefAlert } from '@/services/oref-alerts';
-import { getSourceTier } from '@/config/feeds';
+import type { NewsItem } from "@/types";
+import type { OrefAlert } from "@/services/oref-alerts";
+import { getSourceTier } from "@/config/feeds";
 
 export interface BreakingAlert {
   id: string;
   headline: string;
   source: string;
   link?: string;
-  threatLevel: 'critical' | 'high';
+  threatLevel: "critical" | "high";
   timestamp: Date;
-  origin: 'rss_alert' | 'keyword_spike' | 'hotspot_escalation' | 'military_surge' | 'oref_siren';
+  origin:
+    | "rss_alert"
+    | "keyword_spike"
+    | "hotspot_escalation"
+    | "military_surge"
+    | "oref_siren";
 }
 
 export interface AlertSettings {
   enabled: boolean;
   soundEnabled: boolean;
   desktopNotificationsEnabled: boolean;
-  sensitivity: 'critical-only' | 'critical-and-high';
+  sensitivity: "critical-only" | "critical-and-high";
 }
 
-const SETTINGS_KEY = 'wm-breaking-alerts-v1';
-const DEDUPE_KEY = 'wm-breaking-alerts-dedupe';
+const SETTINGS_KEY = "wm-breaking-alerts-v1";
+const DEDUPE_KEY = "wm-breaking-alerts-dedupe";
 const RECENCY_GATE_MS = 15 * 60 * 1000;
 const PER_EVENT_COOLDOWN_MS = 30 * 60 * 1000;
 const GLOBAL_COOLDOWN_MS = 60 * 1000;
@@ -32,12 +37,12 @@ const DEFAULT_SETTINGS: AlertSettings = {
   enabled: true,
   soundEnabled: true,
   desktopNotificationsEnabled: true,
-  sensitivity: 'critical-and-high',
+  sensitivity: "critical-and-high",
 };
 
 const dedupeMap = new Map<string, number>();
 let lastGlobalAlertMs = 0;
-let lastGlobalAlertLevel: 'critical' | 'high' | null = null;
+let lastGlobalAlertLevel: "critical" | "high" | null = null;
 let storageListener: ((e: StorageEvent) => void) | null = null;
 let cachedSettings: AlertSettings | null = null;
 let initTimestamp = 0;
@@ -52,19 +57,24 @@ function simpleHash(str: string): string {
 }
 
 function normalizeTitle(title: string): string {
-  return title.toLowerCase().replace(/[^\w\s]/g, '').trim().slice(0, 80);
+  return title
+    .toLowerCase()
+    .replace(/[^\w\s]/g, "")
+    .trim()
+    .slice(0, 80);
 }
 
 function extractHostname(url: string): string {
   try {
     return new URL(url).hostname;
   } catch {
-    return '';
+    return "";
   }
 }
 
 function makeAlertKey(headline: string, source: string, link?: string): string {
-  const parts = normalizeTitle(headline) + '|' + source + '|' + extractHostname(link ?? '');
+  const parts =
+    normalizeTitle(headline) + "|" + source + "|" + extractHostname(link ?? "");
   return simpleHash(parts);
 }
 
@@ -120,11 +130,11 @@ export function updateAlertSettings(partial: Partial<AlertSettings>): void {
 // ─── Gate checks ───────────────────────────────────────────────────────────
 
 function isRecent(pubDate: Date): boolean {
-  return pubDate.getTime() >= (Date.now() - RECENCY_GATE_MS);
+  return pubDate.getTime() >= Date.now() - RECENCY_GATE_MS;
 }
 
 function isInStartupGrace(): boolean {
-  return initTimestamp > 0 && (Date.now() - initTimestamp) < STARTUP_GRACE_MS;
+  return initTimestamp > 0 && Date.now() - initTimestamp < STARTUP_GRACE_MS;
 }
 
 function pruneDedupeMap(): void {
@@ -137,12 +147,13 @@ function pruneDedupeMap(): void {
 function isDuplicate(key: string): boolean {
   const lastFired = dedupeMap.get(key);
   if (lastFired === undefined) return false;
-  return (Date.now() - lastFired) < PER_EVENT_COOLDOWN_MS;
+  return Date.now() - lastFired < PER_EVENT_COOLDOWN_MS;
 }
 
-function isGlobalCooldown(candidateLevel: 'critical' | 'high'): boolean {
-  if ((Date.now() - lastGlobalAlertMs) >= GLOBAL_COOLDOWN_MS) return false;
-  if (candidateLevel === 'critical' && lastGlobalAlertLevel !== 'critical') return false;
+function isGlobalCooldown(candidateLevel: "critical" | "high"): boolean {
+  if (Date.now() - lastGlobalAlertMs >= GLOBAL_COOLDOWN_MS) return false;
+  if (candidateLevel === "critical" && lastGlobalAlertLevel !== "critical")
+    return false;
   return true;
 }
 
@@ -152,7 +163,9 @@ function dispatchAlert(alert: BreakingAlert): void {
   lastGlobalAlertMs = Date.now();
   lastGlobalAlertLevel = alert.threatLevel;
   saveDedupeMap();
-  document.dispatchEvent(new CustomEvent('wm:breaking-news', { detail: alert }));
+  document.dispatchEvent(
+    new CustomEvent("wm:breaking-news", { detail: alert }),
+  );
 }
 
 export function checkBatchForBreakingAlerts(items: NewsItem[]): void {
@@ -173,20 +186,23 @@ export function checkBatchForBreakingAlerts(items: NewsItem[]): void {
     if (!isRecent(item.pubDate)) continue;
 
     const level = item.threat.level;
-    if (level !== 'critical' && level !== 'high') continue;
-    if (settings.sensitivity === 'critical-only' && level !== 'critical') continue;
+    if (level !== "critical" && level !== "high") continue;
+    if (settings.sensitivity === "critical-only" && level !== "critical")
+      continue;
 
     // Tier 3+ sources (think tanks, specialty) need LLM confirmation to fire alerts.
     // Keyword-only "war" matches on analysis articles are too noisy.
     const tier = getSourceTier(item.source);
-    if (tier >= 3 && item.threat.source === 'keyword') continue;
+    if (tier >= 3 && item.threat.source === "keyword") continue;
 
     const key = makeAlertKey(item.title, item.source, item.link);
     if (isDuplicate(key)) continue;
 
-    const isBetter = !best
-      || (level === 'critical' && best.threatLevel !== 'critical')
-      || (level === best.threatLevel && item.pubDate.getTime() > best.timestamp.getTime());
+    const isBetter =
+      !best ||
+      (level === "critical" && best.threatLevel !== "critical") ||
+      (level === best.threatLevel &&
+        item.pubDate.getTime() > best.timestamp.getTime());
 
     if (isBetter) {
       best = {
@@ -194,9 +210,9 @@ export function checkBatchForBreakingAlerts(items: NewsItem[]): void {
         headline: item.title,
         source: item.source,
         link: item.link,
-        threatLevel: level as 'critical' | 'high',
+        threatLevel: level as "critical" | "high",
         timestamp: item.pubDate,
-        origin: 'rss_alert',
+        origin: "rss_alert",
       };
     }
   }
@@ -208,27 +224,29 @@ export function dispatchOrefBreakingAlert(alerts: OrefAlert[]): void {
   const settings = getAlertSettings();
   if (!settings.enabled || !alerts.length) return;
 
-  const title = alerts[0]?.title || 'Siren alert';
-  const allLocations = alerts.flatMap(a => a.data);
+  const title = alerts[0]?.title || "Siren alert";
+  const allLocations = alerts.flatMap((a) => a.data);
   const shown = allLocations.slice(0, 3);
   const overflow = allLocations.length - shown.length;
   const locationSuffix = shown.length
-    ? ' — ' + shown.join(', ') + (overflow > 0 ? ` +${overflow} areas` : '')
-    : '';
+    ? " — " + shown.join(", ") + (overflow > 0 ? ` +${overflow} areas` : "")
+    : "";
   const headline = title + locationSuffix;
 
-  const keyParts = alerts.map(a => a.id || `${a.cat}|${a.title}|${a.alertDate}`).sort();
-  const dedupeKey = 'oref:' + simpleHash(keyParts.join(','));
+  const keyParts = alerts
+    .map((a) => a.id || `${a.cat}|${a.title}|${a.alertDate}`)
+    .sort();
+  const dedupeKey = "oref:" + simpleHash(keyParts.join(","));
 
   if (isDuplicate(dedupeKey)) return;
 
   dispatchAlert({
     id: dedupeKey,
     headline,
-    source: 'OREF Pikud HaOref',
-    threatLevel: 'critical',
+    source: "OREF Pikud HaOref",
+    threatLevel: "critical",
     timestamp: new Date(),
-    origin: 'oref_siren',
+    origin: "oref_siren",
   });
 }
 
@@ -240,12 +258,12 @@ export function initBreakingNewsAlerts(): void {
       cachedSettings = null;
     }
   };
-  window.addEventListener('storage', storageListener);
+  window.addEventListener("storage", storageListener);
 }
 
 export function destroyBreakingNewsAlerts(): void {
   if (storageListener) {
-    window.removeEventListener('storage', storageListener);
+    window.removeEventListener("storage", storageListener);
     storageListener = null;
   }
   dedupeMap.clear();
