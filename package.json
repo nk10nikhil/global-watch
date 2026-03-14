@@ -1,8 +1,7 @@
 {
-  "name": "world-monitor",
+  "name": "global-watch",
   "private": true,
-  "version": "2.6.1",
-  "license": "AGPL-3.0-only",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "lint:md": "markdownlint-cli2 '**/*.md' '!**/node_modules/**' '!.agent/**' '!.agents/**' '!.claude/**' '!.factory/**' '!.windsurf/**' '!skills/**' '!docs/internal/**' '!docs/Docs_To_Review/**'",
