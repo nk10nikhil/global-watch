@@ -426,7 +426,7 @@ export class RuntimeConfigPanel extends Panel {
       this.content
         .querySelector<HTMLButtonElement>("[data-early-access]")
         ?.addEventListener("click", () => {
-          const url = "https://www.worldmonitor.app/pro";
+          const url = "https://globalwatch.vercel.app";
           if (isDesktopRuntime()) {
             void invokeTauri<void>("open_url", { url }).catch(() =>
               window.open(url, "_blank"),

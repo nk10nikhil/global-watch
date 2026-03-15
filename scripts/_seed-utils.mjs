@@ -33,7 +33,7 @@ export function loadEnvFile(metaUrl) {
   ];
   if (process.env.HOME) {
     candidates.push(
-      join(process.env.HOME, "Documents/GitHub/worldmonitor", ".env.local"),
+      join(process.env.HOME, "Documents/GitHub/GLOBALWATCH", ".env.local"),
     );
   }
   for (const envPath of candidates) {

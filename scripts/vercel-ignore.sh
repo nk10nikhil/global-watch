@@ -19,7 +19,6 @@ git diff --name-only "$VERCEL_GIT_PREVIOUS_SHA" HEAD -- \
   'shared/' \
   'public/' \
   'blog-site/' \
-  'pro-test/' \
   'proto/' \
   'package.json' \
   'package-lock.json' \

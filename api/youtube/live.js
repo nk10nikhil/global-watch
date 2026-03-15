@@ -40,7 +40,7 @@ export default async function handler(request) {
   if (relayBase) {
     try {
       const relayHeaders = getRelayHeaders({
-        "User-Agent": "WorldMonitor-Edge/1.0",
+        "User-Agent": "GlobalWatch-Edge/1.0",
       });
       const relayRes = await fetch(`${relayBase}/youtube-live?${qs}`, {
         headers: relayHeaders,

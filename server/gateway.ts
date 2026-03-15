@@ -20,7 +20,7 @@ import {
   hasEndpointRatePolicy,
 } from "./_shared/rate-limit";
 import { drainResponseHeaders } from "./_shared/response-headers";
-import type { ServerOptions } from "../src/generated/server/worldmonitor/seismology/v1/service_server";
+import type { ServerOptions } from "../src/generated/server/globalwatch/seismology/v1/service_server";
 
 export const serverOptions: ServerOptions = { onError: mapErrorToResponse };
 
@@ -140,13 +140,6 @@ const RPC_CACHE_TIER: Record<string, CacheTier> = {
   "/api/imagery/v1/search-imagery": "static",
 };
 
-const PREMIUM_RPC_PATHS = new Set([
-  "/api/market/v1/analyze-stock",
-  "/api/market/v1/get-stock-analysis-history",
-  "/api/market/v1/backtest-stock",
-  "/api/market/v1/list-stored-stock-backtests",
-]);
-
 /**
  * Creates a Vercel Edge handler for a single domain's routes.
  *
@@ -185,9 +178,7 @@ export function createDomainGateway(
     }
 
     // API key validation (origin-aware)
-    const keyCheck = validateApiKey(request, {
-      forceKey: PREMIUM_RPC_PATHS.has(pathname),
-    });
+    const keyCheck = validateApiKey(request);
     if (keyCheck.required && !keyCheck.valid) {
       return new Response(JSON.stringify({ error: keyCheck.error }), {
         status: 401,

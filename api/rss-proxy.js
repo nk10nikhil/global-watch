@@ -42,7 +42,7 @@ async function fetchViaRailway(feedUrl, timeoutMs) {
     {
       headers: getRelayHeaders({
         Accept: "application/rss+xml, application/xml, text/xml, */*",
-        "User-Agent": "WorldMonitor-RSS-Proxy/1.0",
+        "User-Agent": "GlobalWatch-RSS-Proxy/1.0",
       }),
     },
     timeoutMs,

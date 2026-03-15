@@ -59,7 +59,6 @@ import { BETA_MODE } from "@/config/beta";
 import { t } from "@/services/i18n";
 import { getCurrentTheme } from "@/utils";
 import { trackCriticalBannerAction } from "@/services/analytics";
-import { getSecretState } from "@/services/runtime-config";
 
 export interface PanelLayoutCallbacks {
   openCountryStory: (code: string, name: string) => void;
@@ -142,7 +141,7 @@ export class PanelLayoutManager implements AppModule {
                 ? 'target="_blank" rel="noopener"'
                 : "";
             return `
-            <a href="${vHref("full", "https://worldmonitor.app")}"
+            <a href="${vHref("full", "https://globalwatch.vercel.app")}"
                class="variant-option ${SITE_VARIANT === "full" ? "active" : ""}"
                data-variant="full"
                ${vTarget("full")}
@@ -151,7 +150,7 @@ export class PanelLayoutManager implements AppModule {
               <span class="variant-label">${t("header.world")}</span>
             </a>
             <span class="variant-divider"></span>
-            <a href="${vHref("tech", "https://tech.worldmonitor.app")}"
+            <a href="${vHref("tech", "https://globalwatchtech.vercel.app")}"
                class="variant-option ${SITE_VARIANT === "tech" ? "active" : ""}"
                data-variant="tech"
                ${vTarget("tech")}
@@ -160,7 +159,7 @@ export class PanelLayoutManager implements AppModule {
               <span class="variant-label">${t("header.tech")}</span>
             </a>
             <span class="variant-divider"></span>
-            <a href="${vHref("finance", "https://finance.worldmonitor.app")}"
+            <a href="${vHref("finance", "https://globalwatchfinance.vercel.app")}"
                class="variant-option ${SITE_VARIANT === "finance" ? "active" : ""}"
                data-variant="finance"
                ${vTarget("finance")}
@@ -169,7 +168,7 @@ export class PanelLayoutManager implements AppModule {
               <span class="variant-label">${t("header.finance")}</span>
             </a>
             <span class="variant-divider"></span>
-            <a href="${vHref("commodity", "https://commodity.worldmonitor.app")}"
+            <a href="${vHref("commodity", "https://globalwatchcommodity.vercel.app")}"
                class="variant-option ${SITE_VARIANT === "commodity" ? "active" : ""}"
                data-variant="commodity"
                ${vTarget("commodity")}
@@ -178,7 +177,7 @@ export class PanelLayoutManager implements AppModule {
               <span class="variant-label">${t("header.commodity")}</span>
             </a>
             <span class="variant-divider"></span>
-            <a href="${vHref("happy", "https://happy.worldmonitor.app")}"
+            <a href="${vHref("happy", "https://globalwatchhappy.vercel.app")}"
                class="variant-option ${SITE_VARIANT === "happy" ? "active" : ""}"
                data-variant="happy"
                ${vTarget("happy")}
@@ -187,12 +186,12 @@ export class PanelLayoutManager implements AppModule {
               <span class="variant-label">Good News</span>
             </a>`;
           })()}</div>
-          <span class="logo">MONITOR</span><span class="logo-mobile">World Monitor</span><span class="version">v${__APP_VERSION__}</span>${BETA_MODE ? '<span class="beta-badge">BETA</span>' : ""}
+          <span class="logo">MONITOR</span><span class="logo-mobile">Global Watch</span><span class="version">v${__APP_VERSION__}</span>${BETA_MODE ? '<span class="beta-badge">BETA</span>' : ""}
           <a href="https://x.com/eliehabib" target="_blank" rel="noopener" class="credit-link">
             <svg class="x-logo" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
             <span class="credit-text">@eliehabib</span>
           </a>
-          <a href="https://github.com/koala73/worldmonitor" target="_blank" rel="noopener" class="github-link" title="${t("header.viewOnGitHub")}">
+          <a href="https://github.com/nk10nikhil/globalwatch" target="_blank" rel="noopener" class="github-link" title="${t("header.viewOnGitHub")}">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
           </a>
           <button class="mobile-settings-btn" id="mobileSettingsBtn" title="${t("header.settings")}">
@@ -240,7 +239,7 @@ export class PanelLayoutManager implements AppModule {
       <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
       <nav class="mobile-menu" id="mobileMenu">
         <div class="mobile-menu-header">
-          <span class="mobile-menu-title">WORLD MONITOR</span>
+          <span class="mobile-menu-title">GLOBAL WATCH</span>
           <button class="mobile-menu-close" id="mobileMenuClose" aria-label="Close menu">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
@@ -344,20 +343,19 @@ export class PanelLayoutManager implements AppModule {
         <div class="site-footer-brand">
           <img src="/favico/favicon-32x32.png" alt="" width="28" height="28" class="site-footer-icon" />
           <div class="site-footer-brand-text">
-            <span class="site-footer-name">WORLD MONITOR</span>
+            <span class="site-footer-name">GLOBAL WATCH</span>
             <span class="site-footer-sub">by Someone.ceo</span>
           </div>
         </div>
         <nav>
-          <a href="${this.ctx.isDesktopApp ? "https://worldmonitor.app/pro" : "https://www.worldmonitor.app/pro"}" target="_blank" rel="noopener">Pro</a>
-          <a href="${this.ctx.isDesktopApp ? "https://worldmonitor.app/blog/" : "https://www.worldmonitor.app/blog/"}" target="_blank" rel="noopener">Blog</a>
-          <a href="${this.ctx.isDesktopApp ? "https://worldmonitor.app/docs" : "https://www.worldmonitor.app/docs"}" target="_blank" rel="noopener">Docs</a>
-          <a href="https://status.worldmonitor.app/" target="_blank" rel="noopener">Status</a>
-          <a href="https://github.com/koala73/worldmonitor" target="_blank" rel="noopener">GitHub</a>
-          <a href="https://github.com/koala73/worldmonitor/discussions" target="_blank" rel="noopener">Discussions</a>
-          <a href="https://x.com/worldmonitorai" target="_blank" rel="noopener">X</a>
+          <a href="${this.ctx.isDesktopApp ? "https://globalwatch.vercel.app/blog/" : "https://globalwatch.vercel.app/blog/"}" target="_blank" rel="noopener">Blog</a>
+          <a href="${this.ctx.isDesktopApp ? "https://globalwatch.vercel.app/docs" : "https://globalwatch.vercel.app/docs"}" target="_blank" rel="noopener">Docs</a>
+          <a href="https://globalwatch.vercel.app" target="_blank" rel="noopener">Status</a>
+          <a href="https://github.com/nk10nikhil/globalwatch" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://github.com/nk10nikhil/globalwatch/discussions" target="_blank" rel="noopener">Discussions</a>
+          <a href="https://x.com/globalwatch" target="_blank" rel="noopener">X</a>
         </nav>
-        <span class="site-footer-copy">&copy; ${new Date().getFullYear()} World Monitor</span>
+        <span class="site-footer-copy">&copy; ${new Date().getFullYear()} Global Watch</span>
       </footer>
     `;
 
@@ -554,28 +552,8 @@ export class PanelLayoutManager implements AppModule {
 
     this.createPanel("heatmap", () => new HeatmapPanel());
     this.createPanel("markets", () => new MarketPanel());
-    const stockAnalysisPanel = this.createPanel(
-      "stock-analysis",
-      () => new StockAnalysisPanel(),
-    );
-    if (stockAnalysisPanel && !getSecretState("WORLDMONITOR_API_KEY").present) {
-      stockAnalysisPanel.showLocked([
-        "AI stock briefs with technical + news synthesis",
-        "Trend scoring from MA, MACD, RSI, and volume structure",
-        "Actionable watchlist monitoring for your premium workspace",
-      ]);
-    }
-    const stockBacktestPanel = this.createPanel(
-      "stock-backtest",
-      () => new StockBacktestPanel(),
-    );
-    if (stockBacktestPanel && !getSecretState("WORLDMONITOR_API_KEY").present) {
-      stockBacktestPanel.showLocked([
-        "Historical replay of premium stock-analysis signals",
-        "Win-rate, accuracy, and simulated-return metrics",
-        "Recent evaluation samples for your tracked symbols",
-      ]);
-    }
+    this.createPanel("stock-analysis", () => new StockAnalysisPanel());
+    this.createPanel("stock-backtest", () => new StockBacktestPanel());
 
     const monitorPanel = this.createPanel(
       "monitors",
@@ -769,9 +747,6 @@ export class PanelLayoutManager implements AppModule {
       }),
     );
 
-    const _wmKeyPresent = getSecretState("WORLDMONITOR_API_KEY").present;
-    const _lockPanels = this.ctx.isDesktopApp && !_wmKeyPresent;
-
     this.lazyPanel(
       "daily-market-brief",
       () =>
@@ -779,13 +754,6 @@ export class PanelLayoutManager implements AppModule {
           (m) => new m.DailyMarketBriefPanel(),
         ),
       undefined,
-      !_wmKeyPresent
-        ? [
-            "Pre-market watchlist priorities",
-            "Action plan for the session",
-            "Risk watch tied to current finance headlines",
-          ]
-        : undefined,
     );
 
     this.lazyPanel(
@@ -795,9 +763,6 @@ export class PanelLayoutManager implements AppModule {
           (m) => new m.OrefSirensPanel(),
         ),
       undefined,
-      _lockPanels
-        ? [t("premium.features.orefSirens1"), t("premium.features.orefSirens2")]
-        : undefined,
     );
 
     this.lazyPanel(
@@ -807,12 +772,6 @@ export class PanelLayoutManager implements AppModule {
           (m) => new m.TelegramIntelPanel(),
         ),
       undefined,
-      _lockPanels
-        ? [
-            t("premium.features.telegramIntel1"),
-            t("premium.features.telegramIntel2"),
-          ]
-        : undefined,
     );
 
     if (this.shouldCreatePanel("gcc-investments")) {
@@ -1449,21 +1408,14 @@ export class PanelLayoutManager implements AppModule {
     key: string,
     loader: () => Promise<T>,
     setup?: (panel: T) => void,
-    lockedFeatures?: string[],
   ): void {
     if (!this.shouldCreatePanel(key)) return;
     loader()
       .then(async (panel) => {
         this.ctx.panels[key] =
           panel as unknown as import("@/components/Panel").Panel;
-        if (lockedFeatures) {
-          (panel as unknown as import("@/components/Panel").Panel).showLocked(
-            lockedFeatures,
-          );
-        } else {
-          await replayPendingCalls(key, panel);
-          if (setup) setup(panel);
-        }
+        await replayPendingCalls(key, panel);
+        if (setup) setup(panel);
         const el = panel.getElement();
         this.makeDraggable(el, key);
 

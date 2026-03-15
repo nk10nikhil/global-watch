@@ -14,7 +14,7 @@ interface ExportData {
 
 export function exportToJSON(
   data: ExportData,
-  filename = "worldmonitor-export",
+  filename = "GLOBALWATCH-export",
 ): void {
   const jsonStr = JSON.stringify(data, null, 2);
   downloadFile(jsonStr, `${filename}.json`, "application/json");
@@ -22,7 +22,7 @@ export function exportToJSON(
 
 export function exportToCSV(
   data: ExportData,
-  filename = "worldmonitor-export",
+  filename = "GLOBALWATCH-export",
 ): void {
   const lines: string[] = [];
 
@@ -231,7 +231,7 @@ export class ExportPanel {
   private export(format: ExportFormat): void {
     const data = this.getData();
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-    const filename = `worldmonitor-${timestamp}`;
+    const filename = `GLOBALWATCH-${timestamp}`;
 
     if (format === "json") {
       exportToJSON(data, filename);

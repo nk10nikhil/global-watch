@@ -1,10 +1,7 @@
 import type { MapLayers } from "@/types";
-import { isDesktopRuntime } from "@/services/runtime";
 
 export type MapRenderer = "flat" | "globe";
 export type MapVariant = "full" | "tech" | "finance" | "happy" | "commodity";
-
-const _desktop = isDesktopRuntime();
 
 export interface LayerDefinition {
   key: keyof MapLayers;
@@ -12,7 +9,6 @@ export interface LayerDefinition {
   i18nSuffix: string;
   fallbackLabel: string;
   renderers: MapRenderer[];
-  premium?: "locked" | "enhanced";
 }
 
 const def = (
@@ -21,25 +17,19 @@ const def = (
   i18nSuffix: string,
   fallbackLabel: string,
   renderers: MapRenderer[] = ["flat", "globe"],
-  premium?: "locked" | "enhanced",
 ): LayerDefinition => ({
   key,
   icon,
   i18nSuffix,
   fallbackLabel,
   renderers,
-  ...(premium && { premium }),
 });
 
 export const LAYER_REGISTRY: Record<keyof MapLayers, LayerDefinition> = {
-  iranAttacks: def(
-    "iranAttacks",
-    "&#127919;",
-    "iranAttacks",
-    "Iran Attacks",
-    ["flat", "globe"],
-    _desktop ? "locked" : undefined,
-  ),
+  iranAttacks: def("iranAttacks", "&#127919;", "iranAttacks", "Iran Attacks", [
+    "flat",
+    "globe",
+  ]),
   hotspots: def("hotspots", "&#127919;", "intelHotspots", "Intel Hotspots"),
   conflicts: def("conflicts", "&#9876;", "conflictZones", "Conflict Zones"),
 
@@ -109,21 +99,16 @@ export const LAYER_REGISTRY: Record<keyof MapLayers, LayerDefinition> = {
     "criticalMinerals",
     "Critical Minerals",
   ),
-  gpsJamming: def(
-    "gpsJamming",
-    "&#128225;",
-    "gpsJamming",
-    "GPS Jamming",
-    ["flat", "globe"],
-    _desktop ? "locked" : undefined,
-  ),
+  gpsJamming: def("gpsJamming", "&#128225;", "gpsJamming", "GPS Jamming", [
+    "flat",
+    "globe",
+  ]),
   ciiChoropleth: def(
     "ciiChoropleth",
     "&#127758;",
     "ciiChoropleth",
     "CII Instability",
     ["flat"],
-    _desktop ? "enhanced" : undefined,
   ),
   dayNight: def("dayNight", "&#127763;", "dayNight", "Day/Night", ["flat"]),
   sanctions: def("sanctions", "&#128683;", "sanctions", "Sanctions", []),

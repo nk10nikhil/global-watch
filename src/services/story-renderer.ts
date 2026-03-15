@@ -47,7 +47,7 @@ const THREAT_COLORS: Record<string, string> = {
   info: "#3b82f6",
 };
 
-const LOGO_URL = "/favico/worldmonitor-icon-1024.png";
+const LOGO_URL = "/favico/GLOBALWATCH-icon-1024.png";
 
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -91,7 +91,7 @@ export async function renderStoryToCanvas(
   ctx.fillStyle = "#666";
   ctx.font = "700 30px Inter, system-ui, sans-serif";
   ctx.letterSpacing = "6px";
-  ctx.fillText("WORLDMONITOR.APP", textX, y + 26);
+  ctx.fillText("globalwatch.vercel.app", textX, y + 26);
   ctx.letterSpacing = "0px";
   const dateStr = new Date().toLocaleDateString(getLocale(), {
     weekday: "short",
@@ -538,7 +538,7 @@ export async function renderStoryToCanvas(
   ctx.fillStyle = "#444";
   ctx.font = "600 24px Inter, system-ui, sans-serif";
   ctx.letterSpacing = "2px";
-  ctx.fillText("WORLDMONITOR.APP", footerTextX, H - 55);
+  ctx.fillText("globalwatch.vercel.app", footerTextX, H - 55);
   ctx.letterSpacing = "0px";
   ctx.font = "400 20px Inter, system-ui, sans-serif";
   ctx.fillText("Real-time global intelligence monitoring", footerTextX, H - 30);

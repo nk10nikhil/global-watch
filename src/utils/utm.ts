@@ -1,4 +1,4 @@
-const UTM_SOURCE = "worldmonitor";
+const UTM_SOURCE = "GLOBALWATCH";
 const UTM_MEDIUM = "referral";
 
 function isExternalUrl(url: string): boolean {

@@ -107,7 +107,7 @@ export async function initLiveChannelsWindow(
   }
 
   if (!containerEl) {
-    document.title = `${t("components.liveNews.manage") ?? "Channel management"} - World Monitor`;
+    document.title = `${t("components.liveNews.manage") ?? "Channel management"} - Global Watch`;
   }
 
   channels = loadChannelsFromStorage();

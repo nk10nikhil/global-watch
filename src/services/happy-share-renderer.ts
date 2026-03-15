@@ -204,7 +204,7 @@ export async function renderHappyShareCard(
 
   ctx.font = "400 22px Nunito, system-ui, sans-serif";
   ctx.fillStyle = "#A0AEC0";
-  ctx.fillText("happy.worldmonitor.app", PAD, brandY + 34);
+  ctx.fillText("globalwatchhappy.vercel.app", PAD, brandY + 34);
 
   return canvas;
 }

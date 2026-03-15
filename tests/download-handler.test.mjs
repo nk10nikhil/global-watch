@@ -2,7 +2,7 @@ import { strict as assert } from "node:assert";
 import test from "node:test";
 import handler from "../api/download.js";
 
-const RELEASES_PAGE = "https://github.com/koala73/worldmonitor/releases/latest";
+const RELEASES_PAGE = "https://github.com/nk10nikhil/globalwatch/releases/latest";
 
 function makeGitHubReleaseResponse(assets) {
   return new Response(JSON.stringify({ assets }), {
@@ -25,7 +25,7 @@ test("matches full variant for dotted World.Monitor AppImage asset names", async
   try {
     const response = await handler(
       new Request(
-        "https://worldmonitor.app/api/download?platform=linux-appimage&variant=full",
+        "https://myglobalwatch.vercel.app/api/download?platform=linux-appimage&variant=full",
       ),
     );
     assert.equal(response.status, 302);
@@ -57,7 +57,7 @@ test("matches tech variant for dashed Tech-Monitor AppImage asset names", async 
   try {
     const response = await handler(
       new Request(
-        "https://worldmonitor.app/api/download?platform=linux-appimage&variant=tech",
+        "https://myglobalwatch.vercel.app/api/download?platform=linux-appimage&variant=tech",
       ),
     );
     assert.equal(response.status, 302);
@@ -84,7 +84,7 @@ test("falls back to release page when requested variant has no matching asset", 
   try {
     const response = await handler(
       new Request(
-        "https://worldmonitor.app/api/download?platform=linux-appimage&variant=finance",
+        "https://myglobalwatch.vercel.app/api/download?platform=linux-appimage&variant=finance",
       ),
     );
     assert.equal(response.status, 302);

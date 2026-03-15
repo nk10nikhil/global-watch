@@ -229,7 +229,7 @@ function renderOverview(area: HTMLElement): void {
         ? "var(--settings-blue)"
         : "var(--settings-yellow)";
 
-  const wmState = getSecretState("WORLDMONITOR_API_KEY");
+  const wmState = getSecretState("GLOBALWATCH_API_KEY");
   const wmStatusText = wmState.present ? "Active" : "Not set";
   const wmStatusClass = wmState.present ? "ok" : "warn";
   const catCards = SETTINGS_CATEGORIES.map((cat) => {
@@ -285,7 +285,7 @@ function renderOverview(area: HTMLElement): void {
         <h2 class="wm-section-title">${t("modals.settingsWindow.worldMonitor.register.title")}</h2>
         <p class="wm-section-desc">${t("modals.settingsWindow.worldMonitor.register.description")}</p>
         <div class="wm-register-row">
-          <button type="button" class="wm-submit-btn" data-wm-open-pro>
+          <button type="button" class="wm-submit-btn" data-wm-open-site>
             ${t("modals.settingsWindow.worldMonitor.register.submitBtn")}
           </button>
         </div>
@@ -311,8 +311,8 @@ function initOverviewListeners(area: HTMLElement): void {
       }
     });
 
-  area.querySelector("[data-wm-open-pro]")?.addEventListener("click", () => {
-    const url = "https://worldmonitor.app/pro";
+  area.querySelector("[data-wm-open-site]")?.addEventListener("click", () => {
+    const url = "https://globalwatch.vercel.app";
     void invokeTauri<void>("open_url", { url }).catch(() =>
       window.open(url, "_blank"),
     );
@@ -1131,7 +1131,7 @@ async function initSettingsWindow(): Promise<void> {
         }
 
         if (hasWmKeyChange && wmKeyValue) {
-          await setSecretValue("WORLDMONITOR_API_KEY", wmKeyValue);
+          await setSecretValue("GLOBALWATCH_API_KEY", wmKeyValue);
         }
 
         if (hasPending) {

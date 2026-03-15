@@ -12,8 +12,8 @@ type CacheEnvelope<T> = {
   data: T;
 };
 
-const CACHE_PREFIX = "worldmonitor-persistent-cache:";
-const CACHE_DB_NAME = "worldmonitor_persistent_cache";
+const CACHE_PREFIX = "GLOBALWATCH-persistent-cache:";
+const CACHE_DB_NAME = "GLOBALWATCH_persistent_cache";
 const CACHE_DB_VERSION = 1;
 const CACHE_STORE = "entries";
 

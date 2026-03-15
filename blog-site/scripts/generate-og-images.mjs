@@ -147,7 +147,7 @@ for (const file of files) {
           h(
             "span",
             { fontSize: 14, color: "#666666" },
-            "worldmonitor.app/blog",
+            "globalwatch.vercel.app/blog",
           ),
           h("div", { display: "flex", alignItems: "center", gap: 8 }, [
             h(

@@ -4,7 +4,7 @@ import { getCollection } from "astro:content";
 export async function GET(context: { site: URL }) {
   const posts = await getCollection("blog");
   return rss({
-    title: "World Monitor Blog",
+    title: "Global Watch Blog",
     description:
       "Real-time global intelligence, OSINT, geopolitics, and markets.",
     site: context.site,
@@ -13,7 +13,7 @@ export async function GET(context: { site: URL }) {
     },
     customData: [
       "<language>en-us</language>",
-      `<atom:link href="https://www.worldmonitor.app/blog/rss.xml" rel="self" type="application/rss+xml" />`,
+      `<atom:link href="https://globalwatch.vercel.app/blog/rss.xml" rel="self" type="application/rss+xml" />`,
     ].join(""),
     items: posts
       .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
@@ -26,7 +26,7 @@ export async function GET(context: { site: URL }) {
         ...(post.data.heroImage
           ? {
               enclosure: {
-                url: `https://www.worldmonitor.app${post.data.heroImage}`,
+                url: `https://globalwatch.vercel.app${post.data.heroImage}`,
                 length: 0,
                 type: "image/jpeg",
               },

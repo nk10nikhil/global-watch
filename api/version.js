@@ -2,14 +2,14 @@
 export const config = { runtime: "edge" };
 
 const RELEASES_URL =
-  "https://api.github.com/repos/koala73/worldmonitor/releases/latest";
+  "https://api.github.com/repos/nk10nikhil/globalwatch/releases/latest";
 
 export default async function handler() {
   try {
     const res = await fetch(RELEASES_URL, {
       headers: {
         Accept: "application/vnd.github+json",
-        "User-Agent": "WorldMonitor-Version-Check",
+        "User-Agent": "GlobalWatch-Version-Check",
       },
     });
 

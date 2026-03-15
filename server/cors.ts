@@ -6,8 +6,11 @@
  */
 
 const PRODUCTION_PATTERNS: RegExp[] = [
-  /^https:\/\/(.*\.)?worldmonitor\.app$/,
-  /^https:\/\/worldmonitor-[a-z0-9-]+-elie-[a-z0-9]+\.vercel\.app$/,
+  /^https:\/\/(.*\.)?globalwatch\.vercel\.app$/,
+  /^https:\/\/(.*\.)?globalwatchtech\.vercel\.app$/,
+  /^https:\/\/(.*\.)?globalwatchfinance\.vercel\.app$/,
+  /^https:\/\/(.*\.)?globalwatchcommodity\.vercel\.app$/,
+  /^https:\/\/(.*\.)?globalwatchhappy\.vercel\.app$/,
   /^https?:\/\/tauri\.localhost(:\d+)?$/,
   /^https?:\/\/[a-z0-9-]+\.tauri\.localhost(:\d+)?$/i,
   /^tauri:\/\/localhost$/,
@@ -35,12 +38,12 @@ export function getCorsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get("origin") || "";
   const allowOrigin = isAllowedOrigin(origin)
     ? origin
-    : "https://worldmonitor.app";
+    : "https://globalwatch.vercel.app";
   return {
     "Access-Control-Allow-Origin": allowOrigin,
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers":
-      "Content-Type, Authorization, X-WorldMonitor-Key",
+      "Content-Type, Authorization, X-GlobalWatch-Key",
     "Access-Control-Max-Age": "86400",
     Vary: "Origin",
   };

@@ -25,7 +25,7 @@ export type RuntimeSecretKey =
   | "UCDP_ACCESS_TOKEN"
   | "OLLAMA_API_URL"
   | "OLLAMA_MODEL"
-  | "WORLDMONITOR_API_KEY"
+  | "GLOBALWATCH_API_KEY"
   | "WTO_API_KEY"
   | "AVIATIONSTACK_API"
   | "ICAO_API_KEY";
@@ -76,7 +76,7 @@ export interface RuntimeConfig {
   secrets: Partial<Record<RuntimeSecretKey, RuntimeSecretState>>;
 }
 
-const TOGGLES_STORAGE_KEY = "worldmonitor-runtime-feature-toggles";
+const TOGGLES_STORAGE_KEY = "GLOBALWATCH-runtime-feature-toggles";
 function getSidecarEnvUpdateUrl(): string {
   return `${getApiBaseUrl()}/api/local-env-update`;
 }
@@ -142,7 +142,7 @@ export const RUNTIME_FEATURES: RuntimeFeatureDefinition[] = [
     id: "stockNewsSearchTavily",
     name: "Tavily stock-news search",
     description:
-      "Primary targeted stock-news search provider for premium analysis enrichment.",
+      "Primary targeted stock-news search provider for analysis enrichment.",
     requiredSecrets: ["TAVILY_API_KEYS"],
     fallback: "Falls back to Brave, then SerpAPI, then Google News RSS.",
   },
@@ -150,7 +150,7 @@ export const RUNTIME_FEATURES: RuntimeFeatureDefinition[] = [
     id: "stockNewsSearchBrave",
     name: "Brave stock-news search",
     description:
-      "Fallback targeted stock-news provider for premium analysis enrichment.",
+      "Fallback targeted stock-news provider for analysis enrichment.",
     requiredSecrets: ["BRAVE_API_KEYS"],
     fallback: "Falls back to SerpAPI, then Google News RSS.",
   },
@@ -158,7 +158,7 @@ export const RUNTIME_FEATURES: RuntimeFeatureDefinition[] = [
     id: "stockNewsSearchSerpApi",
     name: "SerpAPI stock-news search",
     description:
-      "Additional targeted stock-news provider for premium analysis enrichment.",
+      "Additional targeted stock-news provider for analysis enrichment.",
     requiredSecrets: ["SERPAPI_API_KEYS"],
     fallback: "Falls back to Google News RSS.",
   },
@@ -373,7 +373,7 @@ export function validateSecret(
     }
   }
 
-  if (key === "WORLDMONITOR_API_KEY") {
+  if (key === "GLOBALWATCH_API_KEY") {
     if (trimmed.length < 16)
       return { valid: false, hint: "API key must be at least 16 characters" };
     return { valid: true };

@@ -3,7 +3,7 @@ import {
   UnrestServiceClient,
   type UnrestEvent,
   type ListUnrestEventsResponse,
-} from "@/generated/client/worldmonitor/unrest/v1/service_client";
+} from "@/generated/client/globalwatch/unrest/v1/service_client";
 import type {
   SocialUnrestEvent,
   ProtestSeverity,

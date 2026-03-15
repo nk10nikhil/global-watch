@@ -87,7 +87,7 @@ describe("country geometry overrides", () => {
       }
       if (
         url ===
-        "https://maps.worldmonitor.app/country-boundary-overrides.geojson"
+        "https://globalwatchmaps.vercel.app/country-boundary-overrides.geojson"
       ) {
         return new Promise((_resolve, reject) => {
           init?.signal?.addEventListener(
@@ -131,7 +131,7 @@ describe("country geometry overrides", () => {
       }
       if (
         url ===
-        "https://maps.worldmonitor.app/country-boundary-overrides.geojson"
+        "https://globalwatchmaps.vercel.app/country-boundary-overrides.geojson"
       ) {
         return Promise.resolve(jsonResponse(makeFeatureCollection(2)));
       }

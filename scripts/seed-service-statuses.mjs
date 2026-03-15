@@ -18,7 +18,7 @@ import {
 loadEnvFile(import.meta.url);
 
 const RPC_URL =
-  "https://worldmonitor.app/api/infrastructure/v1/list-service-statuses";
+  "https://myglobalwatch.vercel.app/api/infrastructure/v1/list-service-statuses";
 const CANONICAL_KEY = "infra:service-statuses:v1";
 
 async function warmPing() {
@@ -32,7 +32,7 @@ async function warmPing() {
     headers: {
       "Content-Type": "application/json",
       "User-Agent": CHROME_UA,
-      Origin: "https://worldmonitor.app",
+      Origin: "https://myglobalwatch.vercel.app",
     },
     body: "{}",
     signal: AbortSignal.timeout(60_000),

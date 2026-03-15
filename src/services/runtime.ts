@@ -1,7 +1,7 @@
 import { SITE_VARIANT } from "@/config/variant";
 
 const WS_API_URL = import.meta.env.VITE_WS_API_URL || "";
-const DEFAULT_WEB_API_URL = "https://api.worldmonitor.app";
+const DEFAULT_WEB_API_URL = "https://globalwatch.vercel.app";
 const KEYED_CLOUD_API_PATTERN =
   /^\/api\/(?:[^/]+\/v1\/|bootstrap(?:\?|$)|polymarket(?:\?|$)|ais-snapshot(?:\?|$))/;
 
@@ -109,11 +109,11 @@ export function getApiBaseUrl(): string {
   return `http://127.0.0.1:${getLocalApiPort()}`;
 }
 
-function isWorldMonitorWebHost(hostname: string): boolean {
+function isGlobalWatchWebHost(hostname: string): boolean {
   return (
-    hostname === "worldmonitor.app" ||
-    hostname === "www.worldmonitor.app" ||
-    hostname.endsWith(".worldmonitor.app")
+    hostname === "globalwatch.vercel.app" ||
+    hostname === "globalwatch.vercel.app" ||
+    hostname.endsWith(".globalwatch.vercel.app")
   );
 }
 
@@ -131,7 +131,7 @@ export function getConfiguredWebApiBaseUrl(): string {
   }
 
   const hostname = window.location?.hostname ?? "";
-  if (!isWorldMonitorWebHost(hostname)) {
+  if (!isGlobalWatchWebHost(hostname)) {
     return "";
   }
 
@@ -158,7 +158,7 @@ export function getRemoteApiBaseUrl(): string {
   if (fromHosts) return fromHosts;
 
   // Desktop builds may not set VITE_WS_API_URL; default to production.
-  if (isDesktopRuntime()) return "https://worldmonitor.app";
+  if (isDesktopRuntime()) return "https://globalwatch.vercel.app";
   return "";
 }
 
@@ -204,10 +204,10 @@ function extractHostnames(...urls: (string | undefined)[]): string[] {
 }
 
 const APP_HOSTS = new Set([
-  "worldmonitor.app",
-  "www.worldmonitor.app",
-  "tech.worldmonitor.app",
-  "api.worldmonitor.app",
+  "globalwatch.vercel.app",
+  "globalwatch.vercel.app",
+  "globalwatchtech.vercel.app",
+  "globalwatch.vercel.app",
   "localhost",
   "127.0.0.1",
   ...extractHostnames(WS_API_URL, import.meta.env.VITE_WS_RELAY_URL),
@@ -217,7 +217,7 @@ function isAppOriginUrl(urlStr: string): boolean {
   try {
     const u = new URL(urlStr);
     const host = u.hostname;
-    return APP_HOSTS.has(host) || host.endsWith(".worldmonitor.app");
+    return APP_HOSTS.has(host) || host.endsWith(".globalwatch.vercel.app");
   } catch {
     return false;
   }
@@ -648,7 +648,7 @@ export function installRuntimeFetchPatch(): void {
           secretsReady,
           new Promise<void>((r) => setTimeout(r, 2000)),
         ]);
-        const wmKeyState = getSecretState("WORLDMONITOR_API_KEY");
+        const wmKeyState = getSecretState("GLOBALWATCH_API_KEY");
         if (!wmKeyState.present || !wmKeyState.valid) {
           allowCloudFallback = false;
         }
@@ -668,9 +668,9 @@ export function installRuntimeFetchPatch(): void {
         const { getRuntimeConfigSnapshot } =
           await import("@/services/runtime-config");
         const wmKeyValue =
-          getRuntimeConfigSnapshot().secrets["WORLDMONITOR_API_KEY"]?.value;
+          getRuntimeConfigSnapshot().secrets["GLOBALWATCH_API_KEY"]?.value;
         if (wmKeyValue) {
-          cloudHeaders.set("X-WorldMonitor-Key", wmKeyValue);
+          cloudHeaders.set("X-GlobalWatch-Key", wmKeyValue);
         }
       }
       return nativeFetch(cloudUrl, { ...init, headers: cloudHeaders });
@@ -757,7 +757,7 @@ export function installRuntimeFetchPatch(): void {
 }
 
 const ALLOWED_REDIRECT_HOSTS =
-  /^https:\/\/([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)*worldmonitor\.app(:\d+)?$/;
+  /^https:\/\/([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)*GLOBALWATCH\.app(:\d+)?$/;
 
 function isAllowedRedirectTarget(url: string): boolean {
   try {

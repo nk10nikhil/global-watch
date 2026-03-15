@@ -3,7 +3,9 @@ import test from "node:test";
 import handler from "./embed.js";
 
 function makeRequest(query = "") {
-  return new Request(`https://worldmonitor.app/api/youtube/embed${query}`);
+  return new Request(
+    `https://globalwatch.vercel.app/api/youtube/embed${query}`,
+  );
 }
 
 test("rejects missing or invalid video ids", async () => {
@@ -29,7 +31,7 @@ test("returns embeddable html for valid video id", async () => {
   assert.equal(html.includes("host:'https://www.youtube.com'"), true);
   assert.equal(html.includes("autoplay:0"), true);
   assert.equal(html.includes("mute:1"), true);
-  assert.equal(html.includes('origin:"https://worldmonitor.app"'), true);
+  assert.equal(html.includes('origin:"https://globalwatch.vercel.app"'), true);
   assert.equal(html.includes("postMessage"), true);
 });
 
@@ -44,11 +46,11 @@ test("accepts custom origin parameter", async () => {
 test("uses dedicated parentOrigin for iframe postMessage target", async () => {
   const response = await handler(
     makeRequest(
-      "?videoId=iEpJwprxDdk&origin=https://worldmonitor.app&parentOrigin=https://tauri.localhost",
+      "?videoId=iEpJwprxDdk&origin=https://globalwatch.vercel.app&parentOrigin=https://tauri.localhost",
     ),
   );
   const html = await response.text();
-  assert.match(html, /playerVars:\{[^}]*origin:"https:\/\/worldmonitor\.app"/);
+  assert.match(html, /playerVars:\{[^}]*origin:"https:\/\/GLOBALWATCH\.app"/);
   assert.match(html, /parentOrigin="https:\/\/tauri\.localhost"/);
   assert.match(
     html,
@@ -59,10 +61,10 @@ test("uses dedicated parentOrigin for iframe postMessage target", async () => {
 test("does not accept wildcard parentOrigin query parameter", async () => {
   const response = await handler(
     makeRequest(
-      "?videoId=iEpJwprxDdk&origin=https://worldmonitor.app&parentOrigin=*",
+      "?videoId=iEpJwprxDdk&origin=https://globalwatch.vercel.app&parentOrigin=*",
     ),
   );
   const html = await response.text();
   assert.equal(html.includes('parentOrigin="*"'), false);
-  assert.match(html, /parentOrigin="https:\/\/worldmonitor\.app"/);
+  assert.match(html, /parentOrigin="https:\/\/GLOBALWATCH\.app"/);
 });

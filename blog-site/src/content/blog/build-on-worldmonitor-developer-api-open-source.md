@@ -1,20 +1,20 @@
 ---
-title: "Build on World Monitor: Open APIs, Proto-First Architecture, and the Developer Platform"
-description: "Build intelligence applications on World Monitor's typed API layer. 22 services, 92 proto files, 60+ edge functions, auto-generated TypeScript clients. AGPL-3.0 open source."
-metaTitle: "World Monitor Developer API: 22 Services, 92 Proto Files, Open Source Intelligence Platform"
+title: "Build on Global Watch: Open APIs, Proto-First Architecture, and the Developer Platform"
+description: "Build intelligence applications on Global Watch's typed API layer. 22 services, 92 proto files, 60+ edge functions, auto-generated TypeScript clients. AGPL-3.0 open source."
+metaTitle: "Global Watch Developer API: 22 Services, 92 Proto Files, Open Source Intelligence Platform"
 keywords: "open source intelligence API, OSINT API free, geopolitical data API, intelligence platform developer, proto-first API architecture"
 audience: "Developers, data engineers, startup builders, academic researchers, open-source contributors"
-heroImage: "/blog/images/blog/build-on-worldmonitor-developer-api-open-source.jpg"
+heroImage: "/blog/images/blog/build-on-GLOBALWATCH-developer-api-open-source.jpg"
 pubDate: "2026-03-09"
 ---
 
 Most intelligence platforms are walled gardens. You pay for access, you use their interface, and if you want to build something custom, you're out of luck. The data is locked behind a UI.
 
-World Monitor is designed differently. The entire intelligence platform, every data feed, every scoring algorithm, every aggregation pipeline, is built on a **typed API layer** that developers can use, extend, and build upon.
+Global Watch is designed differently. The entire intelligence platform, every data feed, every scoring algorithm, every aggregation pipeline, is built on a **typed API layer** that developers can use, extend, and build upon.
 
 ## Proto-First Architecture
 
-World Monitor uses **Protocol Buffers (protobuf)** as the single source of truth for all API contracts. The codebase contains:
+Global Watch uses **Protocol Buffers (protobuf)** as the single source of truth for all API contracts. The codebase contains:
 
 - **92 proto files** defining every data structure and service
 - **22 typed service domains** covering all intelligence verticals
@@ -37,11 +37,11 @@ Protocol Buffers enforce a contract between client and server that can't drift:
 - **Code generation:** TypeScript clients are generated, not handwritten. Zero chance of client/server mismatch.
 - **Documentation:** The proto file IS the documentation. Field names, types, and comments are the API spec.
 
-For developers building on World Monitor, this means you can trust the API contracts completely. If the proto says a field is `int64`, it's `int64`. If it says `repeated string`, it's an array of strings.
+For developers building on Global Watch, this means you can trust the API contracts completely. If the proto says a field is `int64`, it's `int64`. If it says `repeated string`, it's an array of strings.
 
 ## 22 Service Domains
 
-World Monitor's API is organized into domain-specific services:
+Global Watch's API is organized into domain-specific services:
 
 | Domain             | What It Covers                                        |
 | ------------------ | ----------------------------------------------------- |
@@ -83,16 +83,16 @@ The API layer runs on **Vercel Edge Functions**, providing:
 API endpoints follow the pattern:
 
 ```
-api.worldmonitor.app/api/{domain}/v1/{rpc}
+globalwatch.vercel.app/api/{domain}/v1/{rpc}
 ```
 
 For example:
 
-- `api.worldmonitor.app/api/market/v1/quotes` for stock quotes
-- `api.worldmonitor.app/api/conflict/v1/events` for conflict data
-- `api.worldmonitor.app/api/intelligence/v1/cii` for Country Instability Index scores
+- `globalwatch.vercel.app/api/market/v1/quotes` for stock quotes
+- `globalwatch.vercel.app/api/conflict/v1/events` for conflict data
+- `globalwatch.vercel.app/api/intelligence/v1/cii` for Country Instability Index scores
 
-## Building with World Monitor's API
+## Building with Global Watch's API
 
 ### Custom Dashboards
 
@@ -106,7 +106,7 @@ const cii = await intelligenceClient.getCII({ countries: ["US", "CN", "RU"] });
 
 ### Data Pipelines
 
-Feed World Monitor data into your own analytics:
+Feed Global Watch data into your own analytics:
 
 - Pull conflict events into a data warehouse for historical analysis
 - Stream market data alongside geopolitical scores for correlation studies
@@ -118,11 +118,11 @@ Academic researchers can use the API programmatically:
 
 - Study the relationship between news velocity and conflict escalation
 - Analyze prediction market accuracy against actual outcomes
-- Build custom scoring models using World Monitor's raw data feeds
+- Build custom scoring models using Global Watch's raw data feeds
 
 ### Mobile Apps
 
-Build a mobile app that consumes World Monitor's API for a custom mobile intelligence experience. The OpenAPI spec makes it accessible from any language (Swift, Kotlin, Python, Go).
+Build a mobile app that consumes Global Watch's API for a custom mobile intelligence experience. The OpenAPI spec makes it accessible from any language (Swift, Kotlin, Python, Go).
 
 ### Slack/Teams Bots
 
@@ -135,7 +135,7 @@ Build alerting bots that post to your team channel when:
 
 ## Self-Hosting
 
-World Monitor is AGPL-3.0. You can self-host the entire platform:
+Global Watch is AGPL-3.0. You can self-host the entire platform:
 
 **Frontend:** React + TypeScript + Vite. Standard `npm install && npm run build`.
 
@@ -166,7 +166,7 @@ The proto-first architecture makes contributing safe: the type system catches co
 
 ## The Developer Stack
 
-For reference, World Monitor is built with:
+For reference, Global Watch is built with:
 
 | Layer      | Technology                  |
 | ---------- | --------------------------- |
@@ -183,11 +183,11 @@ For reference, World Monitor is built with:
 | i18n       | i18next (21 locales)        |
 | Testing    | Vitest, Playwright          |
 
-## Why Build on World Monitor?
+## Why Build on Global Watch?
 
 The intelligence industry has a consolidation problem. A handful of vendors control the data, the algorithms, and the interfaces. Analysts are locked into ecosystems they can't customize, audit, or extend.
 
-World Monitor's open, typed, proto-first architecture is the alternative:
+Global Watch's open, typed, proto-first architecture is the alternative:
 
 - **Audit everything:** Every scoring algorithm, every data pipeline, every API contract is in the codebase
 - **Extend anything:** Add data sources, build custom panels, create new service domains
@@ -195,8 +195,8 @@ World Monitor's open, typed, proto-first architecture is the alternative:
 - **Deploy anywhere:** Edge functions, self-hosted, or desktop
 - **Own your intelligence:** No vendor lock-in, no API key revocation, no price hikes
 
-The intelligence platform of the future isn't a product. It's an ecosystem. World Monitor is building the foundation.
+The intelligence platform of the future isn't a product. It's an ecosystem. Global Watch is building the foundation.
 
 ---
 
-**Start building at [github.com/koala73/worldmonitor](https://github.com/koala73/worldmonitor). 22 services, 92 proto files, and a global intelligence dataset waiting for your application.**
+**Start building at [github.com/nk10nikhil/globalwatch](https://github.com/nk10nikhil/globalwatch). 22 services, 92 proto files, and a global intelligence dataset waiting for your application.**

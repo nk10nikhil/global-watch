@@ -1,9 +1,9 @@
 import type { PanelConfig, MapLayers } from "@/types";
 import type { DataSourceId } from "@/services/data-freshness";
 import { SITE_VARIANT } from "./variant";
-import { isDesktopRuntime } from "@/services/runtime";
 
-const _desktop = isDesktopRuntime();
+const _desktop =
+  typeof window !== "undefined" ? window.innerWidth >= 1024 : true;
 
 // ============================================
 // FULL VARIANT (Geopolitical)
@@ -24,20 +24,17 @@ const FULL_PANELS: Record<string, PanelConfig> = {
     name: "Country Instability",
     enabled: true,
     priority: 1,
-    ...(_desktop && { premium: "enhanced" as const }),
   },
   "strategic-risk": {
     name: "Strategic Risk Overview",
     enabled: true,
     priority: 1,
-    ...(_desktop && { premium: "enhanced" as const }),
   },
   intel: { name: "Intel Feed", enabled: true, priority: 1 },
   "gdelt-intel": {
     name: "Live Intelligence",
     enabled: true,
     priority: 1,
-    ...(_desktop && { premium: "enhanced" as const }),
   },
   cascade: { name: "Infrastructure Cascade", enabled: true, priority: 1 },
   "military-correlation": { name: "Force Posture", enabled: true, priority: 2 },
@@ -75,7 +72,6 @@ const FULL_PANELS: Record<string, PanelConfig> = {
     name: "Supply Chain",
     enabled: true,
     priority: 1,
-    ...(_desktop && { premium: "enhanced" as const }),
   },
   finance: { name: "Financial", enabled: true, priority: 1 },
   tech: { name: "Technology", enabled: true, priority: 2 },
@@ -107,13 +103,11 @@ const FULL_PANELS: Record<string, PanelConfig> = {
     name: "Israel Sirens",
     enabled: true,
     priority: 2,
-    ...(_desktop && { premium: "locked" as const }),
   },
   "telegram-intel": {
     name: "Telegram Intel",
     enabled: true,
     priority: 2,
-    ...(_desktop && { premium: "locked" as const }),
   },
   "airline-intel": { name: "Airline Intelligence", enabled: true, priority: 2 },
   "tech-readiness": {
@@ -416,22 +410,19 @@ const FINANCE_PANELS: Record<string, PanelConfig> = {
   insights: { name: "AI Market Insights", enabled: true, priority: 1 },
   markets: { name: "Live Markets", enabled: true, priority: 1 },
   "stock-analysis": {
-    name: "Premium Stock Analysis",
+    name: "Stock Analysis",
     enabled: true,
     priority: 1,
-    premium: "locked",
   },
   "stock-backtest": {
-    name: "Premium Backtesting",
+    name: "Stock Backtesting",
     enabled: true,
     priority: 1,
-    premium: "locked",
   },
   "daily-market-brief": {
     name: "Daily Market Brief",
     enabled: true,
     priority: 1,
-    premium: "locked",
   },
   "markets-news": { name: "Markets News", enabled: true, priority: 2 },
   forex: { name: "Forex & Currencies", enabled: true, priority: 1 },
@@ -1218,8 +1209,8 @@ export const MONITOR_COLORS = [
 ];
 
 export const STORAGE_KEYS = {
-  panels: "worldmonitor-panels",
-  monitors: "worldmonitor-monitors",
-  mapLayers: "worldmonitor-layers",
-  disabledFeeds: "worldmonitor-disabled-feeds",
+  panels: "GLOBALWATCH-panels",
+  monitors: "GLOBALWATCH-monitors",
+  mapLayers: "GLOBALWATCH-layers",
+  disabledFeeds: "GLOBALWATCH-disabled-feeds",
 } as const;

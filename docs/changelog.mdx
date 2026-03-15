@@ -1,10 +1,10 @@
 ---
 title: "Changelog"
-description: "All notable changes to World Monitor, organized by release."
+description: "All notable changes to Global Watch, organized by release."
 rss: true
 ---
 
-All notable changes to World Monitor are documented here. Subscribe via [RSS](/changelog/rss.xml) to stay updated.
+All notable changes to Global Watch are documented here. Subscribe via [RSS](/changelog/rss.xml) to stay updated.
 
 <Update label="v2.6.1 - March 11, 2026" description="v2.6.1" tags={["Blog", "Intelligence", "Satellite"]}>
 
@@ -17,7 +17,7 @@ All notable changes to World Monitor are documented here. Subscribe via [RSS](/c
 ### Added
 
 - Astro blog at /blog with 16 SEO posts and build integration (#1401, #1403)
-- Blog redesign to match /pro page design system (#1405)
+- Blog redesign to match legacy launch page design system (#1405)
 - Blog SEO, OG images, favicon fix, and site footer (#1409)
 - Country facts section and right-click context menu for intel panel (#1400)
 - Satellite imagery panel enabled in orbital surveillance layer (#1375)
@@ -52,16 +52,16 @@ All notable changes to World Monitor are documented here. Subscribe via [RSS](/c
 
 </Update>
 
-<Update label="v2.6.0 - March 09, 2026" description="v2.6.0" tags={["Satellite", "Finance", "Map", "Infrastructure", "Pro"]}>
+<Update label="v2.6.0 - March 09, 2026" description="v2.6.0" tags={["Satellite", "Finance", "Map", "Infrastructure", "Launch"]}>
 
 ### Highlights
 
 - **Orbital Surveillance** — real-time satellite tracking layer with TLE propagation (#1278)
-- **Premium Finance Suite** — stock analysis tools for Pro tier (#1268)
+- **Advanced Finance Suite** — stock analysis tools (#1268)
 - **Self-hosted Basemap** — migrated from CARTO to PMTiles on Cloudflare R2 (#1064)
 - **GPS Jamming v2** — migrated from gpsjam.org to Wingbits API with H3 hexagons (#1240)
 - **Military Flights Overhaul** — centralized via Redis seed + edge handler with OpenSky/Wingbits fallbacks (#1263, #1274, #1275, #1276)
-- **Pro Waitlist &amp; Landing Page** — referral system, Turnstile CAPTCHA, 21-language localization (#1140, #1187)
+- **Launch Landing Page** — referral system, Turnstile CAPTCHA, 21-language localization (#1140, #1187)
 - **Server-side AI Classification** — batch headline classification moves from client to server (#1195)
 - **Commodity Variant** — new app variant focused on commodities with relevant panels &amp; layers (#1040, #1100)
 - **Health Check System** — comprehensive health endpoint with auto seed-meta freshness tracking (#1091, #1127, #1128)
@@ -69,12 +69,12 @@ All notable changes to World Monitor are documented here. Subscribe via [RSS](/c
 ### Added
 
 - Orbital surveillance layer with real-time satellite tracking via satellite.js (#1278, #1281)
-- Premium finance stock analysis suite for Pro tier (#1268)
+- Advanced finance stock analysis suite (#1268)
 - GPS jamming migration to Wingbits API with H3 hex grid (#1240)
 - Commodity app variant with dedicated panels and map layers (#1040, #1100)
-- Pro waitlist landing page with referral system and Turnstile CAPTCHA (#1140)
-- Pro landing page localization — 21 languages (#1187)
-- Pro page repositioning toward markets, macro &amp; geopolitics (#1261)
+- Launch landing page with referral system and Turnstile CAPTCHA (#1140)
+- Launch landing page localization — 21 languages (#1187)
+- Launch page repositioning toward markets, macro &amp; geopolitics (#1261)
 - Referral invite banner when visiting via `?ref=` link (#1232)
 - Server-side batch AI classification for news headlines (#1195)
 - Self-hosted PMTiles basemap on Cloudflare R2, replacing CARTO (#1064)
@@ -125,8 +125,8 @@ All notable changes to World Monitor are documented here. Subscribe via [RSS](/c
 - **Map**: prevent ghost layers rendering without a toggle (#1264), DeckGL layer toggles getting stuck (#1248), auto-fallback to OpenFreeMap on basemap failure (#1109), CORS fallback for Carto basemap (#1142), use CORS-enabled R2 URL for PMTiles in Tauri (#1119), CII Instability layer disabled in 3D mode (#1292)
 - **Layout**: reconcile ultrawide zones when map is hidden (#1246), keep settings button visible on scaled desktop widths (#1249), exit fullscreen before switching variants (#1253), apply map-hidden layout class on initial load (#1087), preserve panel column position across refresh (#1170, #1108, #1112)
 - **Panels**: event delegation to survive setContent debounce (#1203), guard RPC response array access with optional chaining (#1174), clear stuck error headers and sanitize error messages (#1175), lazy panel race conditions + server feed gaps (#1113), Tech Readiness panel loading on full variant (#1208), Strategic Risk panel button listeners (#1214), World Clock green home row (#1202), Airline Intelligence CSS grid layouts (#1197)
-- **Pro/Turnstile**: explicit rendering to fix widget race condition (#1189), invisible widget support (#1215), CSP allow Turnstile (#1155), handle `already_registered` state (#1183), reset on enterprise form error (#1222), registration feedback and referral code gen (#1229, #1228), no-cache header for /pro (#1179), correct API endpoint path (#1177), www redirect loop fix (#1198, #1201)
-- **SEO**: comprehensive improvements for /pro and main pages (#1271)
+- **Launch/Turnstile**: explicit rendering to fix widget race condition (#1189), invisible widget support (#1215), CSP allow Turnstile (#1155), handle `already_registered` state (#1183), reset on enterprise form error (#1222), registration feedback and referral code gen (#1229, #1228), no-cache header for the launch page (#1179), correct API endpoint path (#1177), www redirect loop fix (#1198, #1201)
+- **SEO**: comprehensive improvements for launch and main pages (#1271)
 - **Railway**: remove custom railpack.json install step causing ENOENT builds (#1296, #1290, #1288)
 - **Aviation**: correct cancellation rate calculation and add 12 airports (#1209), unify NOTAM status logic (#1225)
 - **Sentry**: triage 26 issues, fix 3 bugs, add 29 noise filters (#1173, #1098)
@@ -202,7 +202,7 @@ All notable changes to World Monitor are documented here. Subscribe via [RSS](/c
 - **Runtime**: route all /api/\* calls through CDN edge instead of direct Vercel (#780)
 - **Desktop**: detect Linux node target from host arch (#742), harden Windows installer update path + map resize (#739), close update toast after clicking download (#738), only open valid http(s) links externally (#723)
 - **Webcams**: replace dead Tel Aviv live stream (#732), replace stale Jerusalem feed (#849)
-- Story header uses full domain WORLDMONITOR.APP (#799)
+- Story header uses full domain MYGLOBALWATCH.VERCEL.APP (#799)
 - Open variant nav links in same window instead of new tab (#721)
 - Suppress map renders during resize drag (#728)
 - Append deduction panel to DOM after async import resolves (#764)
@@ -309,7 +309,7 @@ All notable changes to World Monitor are documented here. Subscribe via [RSS](/c
 ### Added
 
 - **Edge caching**: Complete Cloudflare edge cache tier coverage with degraded-response policy (#484)
-- **Edge caching**: Cloudflare edge caching for proxy.worldmonitor.app (#478) and api.worldmonitor.app (#471)
+- **Edge caching**: Cloudflare edge caching for proxy.myglobalwatch.vercel.app (#478) and myglobalwatch.vercel.app (#471)
 - **Edge caching**: Tiered edge Cache-Control aligned to upstream TTLs (#474)
 - **API migration**: Convert 52 API endpoints from POST to GET for edge caching (#468)
 - **Gateway**: Configurable VITE_WS_API_URL + harden POST-to-GET shim (#480)
@@ -529,7 +529,7 @@ All notable changes to World Monitor are documented here. Subscribe via [RSS](/c
 
 ### Added
 
-- **Finance variant**: Added a dedicated market-first variant (`finance.worldmonitor.app`) with finance/trading-focused feeds, panels, and map defaults
+- **Finance variant**: Added a dedicated market-first variant (`globalwatchfinance.vercel.app`) with finance/trading-focused feeds, panels, and map defaults
 - **Finance desktop profile**: Added finance-specific desktop config and build profile for Tauri packaging
 
 ### Changed
@@ -620,7 +620,7 @@ All notable changes to World Monitor are documented here. Subscribe via [RSS](/c
 
 ### Security
 
-- **CORS hardening**: Tighten Vercel preview deployment regex to block origin spoofing (`worldmonitorEVIL.vercel.app`)
+- **CORS hardening**: Tighten Vercel preview deployment regex to block origin spoofing (`GLOBALWATCHEVIL.vercel.app`)
 - **Sidecar auth bypass**: Move `/api/local-env-update` behind `LOCAL_API_TOKEN` auth check
 - **Env key allowlist**: Restrict sidecar env mutations to 18 known secret keys (matching `SUPPORTED_SECRET_KEYS`)
 - **postMessage validation**: Add `origin` and `source` checks on incoming messages in LiveNewsPanel

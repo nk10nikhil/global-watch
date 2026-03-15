@@ -15,7 +15,7 @@ function fmtPct(value: number): string {
 
 export class StockBacktestPanel extends Panel {
   constructor() {
-    super({ id: "stock-backtest", title: "Premium Backtesting" });
+    super({ id: "stock-backtest", title: "Stock Backtesting" });
   }
 
   public renderBacktests(
@@ -33,7 +33,7 @@ export class StockBacktestPanel extends Panel {
     const html = `
       <div style="display:flex;flex-direction:column;gap:12px">
         <div style="font-size:12px;color:var(--text-dim);line-height:1.5">
-          Historical replay of the premium stock-analysis signal engine over recent daily bars.
+          Historical replay of the stock-analysis signal engine over recent daily bars.
         </div>
         ${items
           .map(

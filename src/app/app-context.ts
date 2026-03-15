@@ -13,7 +13,7 @@ import type {
   USNIFleetReport,
 } from "@/types";
 import type { AirportDelayAlert, PositionSample } from "@/services/aviation";
-import type { IranEvent } from "@/generated/client/worldmonitor/conflict/v1/service_client";
+import type { IranEvent } from "@/generated/client/globalwatch/conflict/v1/service_client";
 import type { SecurityAdvisory } from "@/services/security-advisories";
 import type {
   MapContainer,

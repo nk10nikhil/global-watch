@@ -1,7 +1,7 @@
 /**
  * GlobeMap - 3D interactive globe using globe.gl
  *
- * Matches World Monitor's MapContainer API so it can be used as a drop-in
+ * Matches Global Watch's MapContainer API so it can be used as a drop-in
  * replacement within MapContainer when the user enables globe mode.
  *
  * Architecture mirrors Sentinel (sentinel.axonia.us):
@@ -51,7 +51,6 @@ import {
   bindLayerSearch,
   type MapVariant,
 } from "@/config/map-layer-definitions";
-import { getSecretState } from "@/services/runtime-config";
 import {
   resolveTradeRouteSegments,
   type TradeRouteSegment,
@@ -104,7 +103,7 @@ import type { DisplacementFlow } from "@/services/displacement";
 import type { ClimateAnomaly } from "@/services/climate";
 import type { GpsJamHex } from "@/services/gps-interference";
 import type { SatellitePosition } from "@/services/satellites";
-import type { ImageryScene } from "@/generated/server/worldmonitor/imagery/v1/service_server";
+import type { ImageryScene } from "@/generated/server/globalwatch/imagery/v1/service_server";
 import { isAllowedPreviewUrl } from "@/utils/imagery-preview";
 
 const SAT_COUNTRY_COLORS: Record<string, string> = {
@@ -1995,12 +1994,10 @@ export class GlobeMap {
       (SITE_VARIANT || "full") as MapVariant,
       "globe",
     );
-    const _wmKey = getSecretState("WORLDMONITOR_API_KEY").present;
     const layers = layerDefs.map((def) => ({
       key: def.key,
       label: resolveLayerLabel(def, t),
       icon: def.icon,
-      premium: def.premium,
     }));
 
     const el = document.createElement("div");
@@ -2015,14 +2012,12 @@ export class GlobeMap {
       <input type="text" class="layer-search" placeholder="${t("components.deckgl.layerSearch")}" autocomplete="off" spellcheck="false" />
       <div class="toggle-list" style="max-height:32vh;overflow-y:auto;scrollbar-width:thin;">
         ${layers
-          .map(({ key, label, icon, premium }) => {
-            const isLocked = premium === "locked" && !_wmKey;
-            const isEnhanced = premium === "enhanced" && !_wmKey;
+          .map(({ key, label, icon }) => {
             return `
-          <label class="layer-toggle${isLocked ? " layer-toggle-locked" : ""}" data-layer="${key}">
-            <input type="checkbox" ${this.layers[key] ? "checked" : ""}${isLocked ? " disabled" : ""}>
+          <label class="layer-toggle" data-layer="${key}">
+            <input type="checkbox" ${this.layers[key] ? "checked" : ""}>
             <span class="toggle-icon">${icon}</span>
-            <span class="toggle-label">${label}${isLocked ? " \uD83D\uDD12" : ""}${isEnhanced ? ' <span class="layer-pro-badge">PRO</span>' : ""}</span>
+            <span class="toggle-label">${label}</span>
           </label>`;
           })
           .join("")}

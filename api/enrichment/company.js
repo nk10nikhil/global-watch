@@ -84,7 +84,7 @@ async function fetchSECData(companyName) {
       `https://efts.sec.gov/LATEST/search-index?q=${encodeURIComponent(companyName)}&dateRange=custom&startdt=${getDateMonthsAgo(6)}&enddt=${getTodayISO()}&forms=10-K,10-Q,8-K&from=0&size=5`,
       {
         headers: {
-          "User-Agent": "WorldMonitor research@worldmonitor.app",
+          "User-Agent": "GlobalWatch research@globalwatch.vercel.app",
           Accept: "application/json",
         },
         signal: AbortSignal.timeout(8000),

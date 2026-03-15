@@ -24,7 +24,7 @@ const readSrc = (relPath) => readFileSync(resolve(root, relPath), "utf-8");
 describe("cache TTL alignment with upstream refresh rates", () => {
   it("climate anomalies uses 3h TTL (ERA5 has 2-7 day lag)", () => {
     const src = readSrc(
-      "server/worldmonitor/climate/v1/list-climate-anomalies.ts",
+      "server/globalwatch/climate/v1/list-climate-anomalies.ts",
     );
     assert.match(
       src,
@@ -35,7 +35,7 @@ describe("cache TTL alignment with upstream refresh rates", () => {
 
   it("fire detections uses 1h TTL (FIRMS NRT updates every ~3h)", () => {
     const src = readSrc(
-      "server/worldmonitor/wildfire/v1/list-fire-detections.ts",
+      "server/globalwatch/wildfire/v1/list-fire-detections.ts",
     );
     assert.match(
       src,
@@ -115,7 +115,7 @@ describe("ACLED shared cache layer", () => {
 
 describe("ACLED consumers use shared cache layer", () => {
   it("conflict handler imports fetchAcledCached", () => {
-    const src = readSrc("server/worldmonitor/conflict/v1/list-acled-events.ts");
+    const src = readSrc("server/globalwatch/conflict/v1/list-acled-events.ts");
     assert.match(
       src,
       /fetchAcledCached/,
@@ -124,7 +124,7 @@ describe("ACLED consumers use shared cache layer", () => {
   });
 
   it("unrest handler imports fetchAcledCached", () => {
-    const src = readSrc("server/worldmonitor/unrest/v1/list-unrest-events.ts");
+    const src = readSrc("server/globalwatch/unrest/v1/list-unrest-events.ts");
     assert.match(
       src,
       /fetchAcledCached/,
@@ -134,7 +134,7 @@ describe("ACLED consumers use shared cache layer", () => {
 
   it("risk scores handler imports fetchAcledCached", () => {
     const src = readSrc(
-      "server/worldmonitor/intelligence/v1/get-risk-scores.ts",
+      "server/globalwatch/intelligence/v1/get-risk-scores.ts",
     );
     assert.match(
       src,
@@ -145,13 +145,13 @@ describe("ACLED consumers use shared cache layer", () => {
 
   it("no handler has its own ACLED_API_URL constant", () => {
     const conflict = readSrc(
-      "server/worldmonitor/conflict/v1/list-acled-events.ts",
+      "server/globalwatch/conflict/v1/list-acled-events.ts",
     );
     const unrest = readSrc(
-      "server/worldmonitor/unrest/v1/list-unrest-events.ts",
+      "server/globalwatch/unrest/v1/list-unrest-events.ts",
     );
     const riskScores = readSrc(
-      "server/worldmonitor/intelligence/v1/get-risk-scores.ts",
+      "server/globalwatch/intelligence/v1/get-risk-scores.ts",
     );
     for (const [name, src] of [
       ["conflict", conflict],

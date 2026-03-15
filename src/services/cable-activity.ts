@@ -4,7 +4,7 @@ import { UNDERSEA_CABLES } from "@/config";
 import {
   MaritimeServiceClient,
   type NavigationalWarning,
-} from "@/generated/client/worldmonitor/maritime/v1/service_client";
+} from "@/generated/client/globalwatch/maritime/v1/service_client";
 
 const maritimeClient = new MaritimeServiceClient(getRpcBaseUrl(), {
   fetch: (...args) => globalThis.fetch(...args),

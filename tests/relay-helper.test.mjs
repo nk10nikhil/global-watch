@@ -25,7 +25,7 @@ function makeRequest(url, opts = {}) {
   return new Request(url, {
     method: opts.method || "GET",
     headers: new Headers({
-      Origin: "https://worldmonitor.app",
+      Origin: "https://myglobalwatch.vercel.app",
       ...opts.headers,
     }),
   });
@@ -163,7 +163,7 @@ describe("createRelayHandler", () => {
   it("returns CORS headers on every response", async () => {
     mockFetchOk();
     const handler = createRelayHandler({ relayPath: "/test" });
-    const res = await handler(makeRequest("https://worldmonitor.app/api/test"));
+    const res = await handler(makeRequest("https://myglobalwatch.vercel.app/api/test"));
     assert.ok(res.headers.get("access-control-allow-origin"));
     assert.ok(res.headers.get("vary"));
   });
@@ -171,7 +171,7 @@ describe("createRelayHandler", () => {
   it("responds 204 to OPTIONS", async () => {
     const handler = createRelayHandler({ relayPath: "/test" });
     const res = await handler(
-      makeRequest("https://worldmonitor.app/api/test", { method: "OPTIONS" }),
+      makeRequest("https://myglobalwatch.vercel.app/api/test", { method: "OPTIONS" }),
     );
     assert.equal(res.status, 204);
   });
@@ -179,7 +179,7 @@ describe("createRelayHandler", () => {
   it("responds 403 to disallowed origin", async () => {
     const handler = createRelayHandler({ relayPath: "/test" });
     const res = await handler(
-      makeRequest("https://worldmonitor.app/api/test", {
+      makeRequest("https://myglobalwatch.vercel.app/api/test", {
         headers: { Origin: "https://evil.com" },
       }),
     );
@@ -191,22 +191,22 @@ describe("createRelayHandler", () => {
   it("responds 405 to non-GET", async () => {
     const handler = createRelayHandler({ relayPath: "/test" });
     const res = await handler(
-      makeRequest("https://worldmonitor.app/api/test", { method: "POST" }),
+      makeRequest("https://myglobalwatch.vercel.app/api/test", { method: "POST" }),
     );
     assert.equal(res.status, 405);
   });
 
   it("responds 401 when requireApiKey and no valid key", async () => {
-    process.env.WORLDMONITOR_VALID_KEYS = "real-key-123";
+    process.env.GLOBALWATCH_VALID_KEYS = "real-key-123";
     const handler = createRelayHandler({
       relayPath: "/test",
       requireApiKey: true,
     });
     const res = await handler(
-      makeRequest("https://worldmonitor.app/api/test", {
+      makeRequest("https://myglobalwatch.vercel.app/api/test", {
         headers: {
           Origin: "https://tauri.localhost",
-          "X-WorldMonitor-Key": "wrong-key",
+          "X-GlobalWatch-Key": "wrong-key",
         },
       }),
     );
@@ -216,17 +216,17 @@ describe("createRelayHandler", () => {
   });
 
   it("allows request when requireApiKey and key is valid", async () => {
-    process.env.WORLDMONITOR_VALID_KEYS = "real-key-123";
+    process.env.GLOBALWATCH_VALID_KEYS = "real-key-123";
     mockFetchOk();
     const handler = createRelayHandler({
       relayPath: "/test",
       requireApiKey: true,
     });
     const res = await handler(
-      makeRequest("https://worldmonitor.app/api/test", {
+      makeRequest("https://myglobalwatch.vercel.app/api/test", {
         headers: {
           Origin: "https://tauri.localhost",
-          "X-WorldMonitor-Key": "real-key-123",
+          "X-GlobalWatch-Key": "real-key-123",
         },
       }),
     );
@@ -236,7 +236,7 @@ describe("createRelayHandler", () => {
   it("responds 503 when WS_RELAY_URL not set", async () => {
     delete process.env.WS_RELAY_URL;
     const handler = createRelayHandler({ relayPath: "/test" });
-    const res = await handler(makeRequest("https://worldmonitor.app/api/test"));
+    const res = await handler(makeRequest("https://myglobalwatch.vercel.app/api/test"));
     assert.equal(res.status, 503);
     const body = await res.json();
     assert.equal(body.error, "WS_RELAY_URL is not configured");
@@ -245,7 +245,7 @@ describe("createRelayHandler", () => {
   it("proxies relay response with correct status and body", async () => {
     mockFetchOk('{"items":[1,2,3]}');
     const handler = createRelayHandler({ relayPath: "/data" });
-    const res = await handler(makeRequest("https://worldmonitor.app/api/data"));
+    const res = await handler(makeRequest("https://myglobalwatch.vercel.app/api/data"));
     assert.equal(res.status, 200);
     assert.equal(await res.text(), '{"items":[1,2,3]}');
   });
@@ -261,7 +261,7 @@ describe("createRelayHandler", () => {
     });
     const handler = createRelayHandler({ relayPath: "/test" });
     await handler(
-      makeRequest("https://worldmonitor.app/api/test?foo=bar&baz=1"),
+      makeRequest("https://myglobalwatch.vercel.app/api/test?foo=bar&baz=1"),
     );
     assert.ok(capturedUrl.includes("?foo=bar&baz=1"));
   });
@@ -279,7 +279,7 @@ describe("createRelayHandler", () => {
       relayPath: "/test",
       forwardSearch: false,
     });
-    await handler(makeRequest("https://worldmonitor.app/api/test?foo=bar"));
+    await handler(makeRequest("https://myglobalwatch.vercel.app/api/test?foo=bar"));
     assert.ok(!capturedUrl.includes("?foo=bar"));
   });
 
@@ -300,7 +300,7 @@ describe("createRelayHandler", () => {
       forwardSearch: false,
     });
     await handler(
-      makeRequest("https://worldmonitor.app/api/oref?endpoint=history"),
+      makeRequest("https://myglobalwatch.vercel.app/api/oref?endpoint=history"),
     );
     assert.ok(capturedUrl.endsWith("/oref/history"));
   });
@@ -313,7 +313,7 @@ describe("createRelayHandler", () => {
         "Cache-Control": ok ? "public, max-age=60" : "max-age=10",
       }),
     });
-    const res = await handler(makeRequest("https://worldmonitor.app/api/test"));
+    const res = await handler(makeRequest("https://myglobalwatch.vercel.app/api/test"));
     assert.equal(res.headers.get("cache-control"), "public, max-age=60");
   });
 
@@ -325,7 +325,7 @@ describe("createRelayHandler", () => {
         "Cache-Control": ok ? "public, max-age=60" : "max-age=10",
       }),
     });
-    const res = await handler(makeRequest("https://worldmonitor.app/api/test"));
+    const res = await handler(makeRequest("https://myglobalwatch.vercel.app/api/test"));
     assert.equal(res.status, 500);
     assert.equal(res.headers.get("cache-control"), "max-age=10");
   });
@@ -345,7 +345,7 @@ describe("createRelayHandler", () => {
         return xc ? { "X-Cache": xc } : {};
       },
     });
-    const res = await handler(makeRequest("https://worldmonitor.app/api/test"));
+    const res = await handler(makeRequest("https://myglobalwatch.vercel.app/api/test"));
     assert.equal(res.headers.get("x-cache"), "HIT");
   });
 
@@ -363,7 +363,7 @@ describe("createRelayHandler", () => {
         }),
     );
     const handler = createRelayHandler({ relayPath: "/test", timeout: 50 });
-    const res = await handler(makeRequest("https://worldmonitor.app/api/test"));
+    const res = await handler(makeRequest("https://myglobalwatch.vercel.app/api/test"));
     assert.equal(res.status, 504);
     const body = await res.json();
     assert.equal(body.error, "Relay timeout");
@@ -372,7 +372,7 @@ describe("createRelayHandler", () => {
   it("returns 502 on network error", async () => {
     mockFetchError("Connection refused");
     const handler = createRelayHandler({ relayPath: "/test" });
-    const res = await handler(makeRequest("https://worldmonitor.app/api/test"));
+    const res = await handler(makeRequest("https://myglobalwatch.vercel.app/api/test"));
     assert.equal(res.status, 502);
     const body = await res.json();
     assert.equal(body.error, "Relay request failed");
@@ -389,7 +389,7 @@ describe("createRelayHandler", () => {
           headers: { "Content-Type": "application/json", ...cors },
         }),
     });
-    const res = await handler(makeRequest("https://worldmonitor.app/api/test"));
+    const res = await handler(makeRequest("https://myglobalwatch.vercel.app/api/test"));
     assert.equal(res.status, 503);
     const body = await res.json();
     assert.equal(body.fallback, true);
@@ -405,7 +405,7 @@ describe("createRelayHandler", () => {
           headers: { "Content-Type": "application/json", ...cors },
         }),
     });
-    const res = await handler(makeRequest("https://worldmonitor.app/api/test"));
+    const res = await handler(makeRequest("https://myglobalwatch.vercel.app/api/test"));
     assert.equal(res.status, 503);
     const body = await res.json();
     assert.equal(body.fallback, true);
@@ -422,7 +422,7 @@ describe("createRelayHandler", () => {
           headers: { "Content-Type": "application/json", ...cors },
         }),
     });
-    const res = await handler(makeRequest("https://worldmonitor.app/api/test"));
+    const res = await handler(makeRequest("https://myglobalwatch.vercel.app/api/test"));
     assert.equal(res.status, 503);
     const body = await res.json();
     assert.equal(body.fallback, true);
@@ -431,7 +431,7 @@ describe("createRelayHandler", () => {
   it("passes through non-2xx when onlyOk is false", async () => {
     mockFetchStatus(502, '{"upstream":"error"}');
     const handler = createRelayHandler({ relayPath: "/test" });
-    const res = await handler(makeRequest("https://worldmonitor.app/api/test"));
+    const res = await handler(makeRequest("https://myglobalwatch.vercel.app/api/test"));
     assert.equal(res.status, 502);
     assert.equal(await res.text(), '{"upstream":"error"}');
   });

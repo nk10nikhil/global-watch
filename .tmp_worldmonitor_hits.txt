@@ -1,0 +1,946 @@
+README2.md:32:![Global Watch Dashboard](docs/images/worldmonitor-7-mar-2026.jpg)
+README2.md:318:cd worldmonitor
+README2.md:419:docker run -d --name worldmonitor -p 3000:80 ghcr.io/nk10nikhil/globalwatch:latest
+api/aviation/v1/[rpc].ts:4:import { createAviationServiceRoutes } from "../../../src/generated/server/worldmonitor/aviation/v1/service_server";
+api/aviation/v1/[rpc].ts:5:import { aviationHandler } from "../../../server/worldmonitor/aviation/v1/handler";
+api/climate/v1/[rpc].ts:4:import { createClimateServiceRoutes } from "../../../src/generated/server/worldmonitor/climate/v1/service_server";
+api/climate/v1/[rpc].ts:5:import { climateHandler } from "../../../server/worldmonitor/climate/v1/handler";
+api/conflict/v1/[rpc].ts:4:import { createConflictServiceRoutes } from "../../../src/generated/server/worldmonitor/conflict/v1/service_server";
+api/conflict/v1/[rpc].ts:5:import { conflictHandler } from "../../../server/worldmonitor/conflict/v1/handler";
+api/cyber/v1/[rpc].ts:4:import { createCyberServiceRoutes } from "../../../src/generated/server/worldmonitor/cyber/v1/service_server";
+api/cyber/v1/[rpc].ts:5:import { cyberHandler } from "../../../server/worldmonitor/cyber/v1/handler";
+api/displacement/v1/[rpc].ts:4:import { createDisplacementServiceRoutes } from "../../../src/generated/server/worldmonitor/displacement/v1/service_server";
+api/displacement/v1/[rpc].ts:5:import { displacementHandler } from "../../../server/worldmonitor/displacement/v1/handler";
+api/download.js:18:  full: ["worldmonitor"],
+api/download.js:19:  world: ["worldmonitor"],
+api/economic/v1/[rpc].ts:4:import { createEconomicServiceRoutes } from "../../../src/generated/server/worldmonitor/economic/v1/service_server";
+api/economic/v1/[rpc].ts:5:import { economicHandler } from "../../../server/worldmonitor/economic/v1/handler";
+api/giving/v1/[rpc].ts:4:import { createGivingServiceRoutes } from "../../../src/generated/server/worldmonitor/giving/v1/service_server";
+api/giving/v1/[rpc].ts:5:import { givingHandler } from "../../../server/worldmonitor/giving/v1/handler";
+api/imagery/v1/[rpc].ts:4:import { createImageryServiceRoutes } from "../../../src/generated/server/worldmonitor/imagery/v1/service_server";
+api/imagery/v1/[rpc].ts:5:import { imageryHandler } from "../../../server/worldmonitor/imagery/v1/handler";
+api/infrastructure/v1/[rpc].ts:4:import { createInfrastructureServiceRoutes } from "../../../src/generated/server/worldmonitor/infrastructure/v1/service_server";
+api/infrastructure/v1/[rpc].ts:5:import { infrastructureHandler } from "../../../server/worldmonitor/infrastructure/v1/handler";
+api/intelligence/v1/[rpc].ts:4:import { createIntelligenceServiceRoutes } from "../../../src/generated/server/worldmonitor/intelligence/v1/service_server";
+api/intelligence/v1/[rpc].ts:5:import { intelligenceHandler } from "../../../server/worldmonitor/intelligence/v1/handler";
+api/maritime/v1/[rpc].ts:4:import { createMaritimeServiceRoutes } from "../../../src/generated/server/worldmonitor/maritime/v1/service_server";
+api/maritime/v1/[rpc].ts:5:import { maritimeHandler } from "../../../server/worldmonitor/maritime/v1/handler";
+api/market/v1/[rpc].ts:4:import { createMarketServiceRoutes } from "../../../src/generated/server/worldmonitor/market/v1/service_server";
+api/market/v1/[rpc].ts:5:import { marketHandler } from "../../../server/worldmonitor/market/v1/handler";
+api/military/v1/[rpc].ts:4:import { createMilitaryServiceRoutes } from "../../../src/generated/server/worldmonitor/military/v1/service_server";
+api/military/v1/[rpc].ts:5:import { militaryHandler } from "../../../server/worldmonitor/military/v1/handler";
+api/natural/v1/[rpc].ts:4:import { createNaturalServiceRoutes } from "../../../src/generated/server/worldmonitor/natural/v1/service_server";
+api/natural/v1/[rpc].ts:5:import { naturalHandler } from "../../../server/worldmonitor/natural/v1/handler";
+api/news/v1/[rpc].ts:4:import { createNewsServiceRoutes } from "../../../src/generated/server/worldmonitor/news/v1/service_server";
+api/news/v1/[rpc].ts:5:import { newsHandler } from "../../../server/worldmonitor/news/v1/handler";
+api/positive-events/v1/[rpc].ts:4:import { createPositiveEventsServiceRoutes } from "../../../src/generated/server/worldmonitor/positive_events/v1/service_server";
+api/positive-events/v1/[rpc].ts:5:import { positiveEventsHandler } from "../../../server/worldmonitor/positive-events/v1/handler";
+api/prediction/v1/[rpc].ts:4:import { createPredictionServiceRoutes } from "../../../src/generated/server/worldmonitor/prediction/v1/service_server";
+api/prediction/v1/[rpc].ts:5:import { predictionHandler } from "../../../server/worldmonitor/prediction/v1/handler";
+api/research/v1/[rpc].ts:4:import { createResearchServiceRoutes } from "../../../src/generated/server/worldmonitor/research/v1/service_server";
+api/research/v1/[rpc].ts:5:import { researchHandler } from "../../../server/worldmonitor/research/v1/handler";
+api/seismology/v1/[rpc].ts:4:import { createSeismologyServiceRoutes } from "../../../src/generated/server/worldmonitor/seismology/v1/service_server";
+api/seismology/v1/[rpc].ts:5:import { seismologyHandler } from "../../../server/worldmonitor/seismology/v1/handler";
+api/supply-chain/v1/[rpc].ts:4:import { createSupplyChainServiceRoutes } from "../../../src/generated/server/worldmonitor/supply_chain/v1/service_server";
+api/supply-chain/v1/[rpc].ts:5:import { supplyChainHandler } from "../../../server/worldmonitor/supply-chain/v1/handler";
+api/trade/v1/[rpc].ts:4:import { createTradeServiceRoutes } from "../../../src/generated/server/worldmonitor/trade/v1/service_server";
+api/trade/v1/[rpc].ts:5:import { tradeHandler } from "../../../server/worldmonitor/trade/v1/handler";
+api/unrest/v1/[rpc].ts:4:import { createUnrestServiceRoutes } from "../../../src/generated/server/worldmonitor/unrest/v1/service_server";
+api/unrest/v1/[rpc].ts:5:import { unrestHandler } from "../../../server/worldmonitor/unrest/v1/handler";
+api/wildfire/v1/[rpc].ts:4:import { createWildfireServiceRoutes } from "../../../src/generated/server/worldmonitor/wildfire/v1/service_server";
+api/wildfire/v1/[rpc].ts:5:import { wildfireHandler } from "../../../server/worldmonitor/wildfire/v1/handler";
+api/youtube/embed.js:14:  /^https:\/\/(.*\.)?worldmonitor\.app$/,
+api/youtube/embed.js:15:  /^https:\/\/worldmonitor-[a-z0-9-]+-elie-habib-projects\.vercel\.app$/,
+api/youtube/embed.js:16:  /^https:\/\/worldmonitor-[a-z0-9-]+\.vercel\.app$/,
+api/youtube/embed.test.mjs:51:  assert.match(html, /playerVars:\{[^}]*origin:"https:\/\/worldmonitor\.app"/);
+api/youtube/embed.test.mjs:67:  assert.match(html, /parentOrigin="https:\/\/worldmonitor\.app"/);
+blog-site/src/content/blog/build-on-worldmonitor-developer-api-open-source.md:7:heroImage: "/blog/images/blog/build-on-worldmonitor-developer-api-open-source.jpg"
+blog-site/src/content/blog/what-is-worldmonitor-real-time-global-intelligence.md:7:heroImage: "/blog/images/blog/what-is-worldmonitor-real-time-global-intelligence.jpg"
+blog-site/src/content/blog/worldmonitor-in-21-languages-global-intelligence-for-everyone.md:7:heroImage: "/blog/images/blog/worldmonitor-in-21-languages-global-intelligence-for-everyone.jpg"
+blog-site/src/content/blog/worldmonitor-vs-traditional-intelligence-tools.md:7:heroImage: "/blog/images/blog/worldmonitor-vs-traditional-intelligence-tools.jpg"
+deploy/nginx/brotli-api-proxy.conf:19:  server_name api.worldmonitor.local;
+docs/Docs_To_Review/API_REFERENCE.md:138:| 1   | `worldmonitor\.app$`       | `https://myglobalwatch.vercel.app`   |
+docs/Docs_To_Review/API_REFERENCE.md:139:| 2   | `\.worldmonitor\.app$`     | `https://*.myglobalwatch.vercel.app` |
+docs/Docs_To_Review/ARCHITECTURE.md:97:| **IndexedDB**             | `worldmonitor_db`                           | Client-side storage for playback snapshots and temporal baseline data.                                                                                                |
+docs/Docs_To_Review/ARCHITECTURE.md:421:        UserPref["localStorage overrides<br/>(worldmonitor-layers)"]
+docs/Docs_To_Review/ARCHITECTURE.md:465:2. **User localStorage** — Stored under the key `worldmonitor-layers`. Users toggle layers in the map controls UI, and their preferences persist across sessions.
+docs/Docs_To_Review/ARCHITECTURE.md:510:        IDB["worldmonitor_db"]
+docs/Docs_To_Review/ARCHITECTURE.md:520:        LSFallback["localStorage fallback<br/>prefix: worldmonitor-persistent-cache:"]
+docs/Docs_To_Review/ARCHITECTURE.md:565:The `worldmonitor_db` IndexedDB database contains two object stores:
+docs/Docs_To_Review/ARCHITECTURE.md:584:On desktop, `getPersistentCache()` and `setPersistentCache()` attempt Tauri IPC invocations (`read_cache_entry` / `write_cache_entry`) first, which store data on the OS filesystem via the Rust backend. If the Tauri call fails (or in web mode), the module falls back to `localStorage` with the prefix `worldmonitor-persistent-cache:`.
+docs/Docs_To_Review/ARCHITECTURE.md:665:**2. Feature Toggles** — 14 `RuntimeFeatureId` values stored in localStorage under the key `worldmonitor-runtime-feature-toggles`:
+docs/Docs_To_Review/COMPONENTS.md:162:`localStorage['worldmonitor-panel-spans']` as a JSON map of `{ [id]: height }`.
+docs/Docs_To_Review/COMPONENTS.md:557:Recent selections stored in `localStorage['worldmonitor_recent_searches']`
+docs/Docs_To_Review/DATA_MODEL.md:1772:| `worldmonitor-panel-spans` | `PANEL_SPANS_KEY` | `Record<string, number>` — panel ID → grid span (1–4) |
+docs/Docs_To_Review/DATA_MODEL.md:1834:  panels: "worldmonitor-panels",
+docs/Docs_To_Review/DATA_MODEL.md:1835:  monitors: "worldmonitor-monitors",
+docs/Docs_To_Review/DATA_MODEL.md:1836:  mapLayers: "worldmonitor-layers",
+docs/Docs_To_Review/DATA_MODEL.md:1837:  disabledFeeds: "worldmonitor-disabled-feeds",
+docs/Docs_To_Review/DATA_MODEL.md:1959:Database: `worldmonitor_db`, version 1.
+docs/Docs_To_Review/DATA_MODEL.md:2028:- Key prefix: `worldmonitor-persistent-cache:`
+docs/Docs_To_Review/DOCUMENTATION.md:3309:cd worldmonitor
+docs/Docs_To_Review/DOCUMENTATION.md:3869:   git clone https://github.com/YOUR_USERNAME/worldmonitor.git
+docs/Docs_To_Review/DOCUMENTATION.md:3870:   cd worldmonitor
+docs/Docs_To_Review/PANELS.md:14:4. [Full Variant Panels](#4-full-variant-panels-worldmonitorio)
+docs/Docs_To_Review/PANELS.md:15:5. [Tech Variant Panels](#5-tech-variant-panels-techworldmonitorio)
+docs/Docs_To_Review/PANELS.md:16:6. [Finance Variant Panels](#6-finance-variant-panels-financeworldmonitorio)
+docs/Docs_To_Review/PANELS.md:38:| `full`    | worldmonitor.io         | Geopolitical intelligence, OSINT, defense | 37          |
+docs/Docs_To_Review/PANELS.md:39:| `tech`    | tech.worldmonitor.io    | Technology, AI/ML, startups, VC           | 34          |
+docs/Docs_To_Review/PANELS.md:40:| `finance` | finance.worldmonitor.io | Markets, trading, macro, commodities      | 29          |
+docs/Docs_To_Review/PANELS.md:130:  panels: "worldmonitor-panels", // Panel visibility toggles
+docs/Docs_To_Review/PANELS.md:131:  monitors: "worldmonitor-monitors", // Monitor keyword configs
+docs/Docs_To_Review/PANELS.md:132:  mapLayers: "worldmonitor-layers", // Map layer toggles
+docs/Docs_To_Review/PANELS.md:133:  disabledFeeds: "worldmonitor-disabled-feeds", // Per-source feed disabling
+docs/Docs_To_Review/PANELS.md:141:| `worldmonitor-panel-spans`      | Panel height/span sizes (1–4)                  | `Panel.ts` |
+docs/Docs_To_Review/PANELS.md:144:| `worldmonitor-panel-order-v1.9` | Migration flag for v1.9 panel layout           | `App.ts`   |
+docs/Docs_To_Review/PANELS.md:229:Span values are persisted per-panel in the `worldmonitor-panel-spans` localStorage key as a JSON object `{ [panelId]: spanNumber }`.
+docs/Docs_To_Review/PANELS.md:256:## 4. Full Variant Panels (worldmonitor.io)
+docs/Docs_To_Review/PANELS.md:304:## 5. Tech Variant Panels (tech.worldmonitor.io)
+docs/Docs_To_Review/PANELS.md:349:## 6. Finance Variant Panels (finance.worldmonitor.io)
+docs/Docs_To_Review/PANELS.md:622:| Panel visibility  | `worldmonitor-panels`               | `Record<string, PanelConfig>` JSON | `DEFAULT_PANELS`         |       ✅        |
+docs/Docs_To_Review/PANELS.md:624:| Panel sizes/spans | `worldmonitor-panel-spans`          | `Record<string, number>` JSON      | All span-1               |       ✅        |
+docs/Docs_To_Review/PANELS.md:625:| Map layer toggles | `worldmonitor-layers`               | `MapLayers` JSON                   | `DEFAULT_MAP_LAYERS`     |       ✅        |
+docs/Docs_To_Review/PANELS.md:626:| Monitor keywords  | `worldmonitor-monitors`             | `Monitor[]` JSON                   | `[]`                     |       ✅        |
+docs/Docs_To_Review/PANELS.md:627:| Disabled sources  | `worldmonitor-disabled-feeds`       | `string[]` JSON                    | `[]`                     |       ✅        |
+docs/Docs_To_Review/PANELS.md:647:This ensures users switching between variant domains (e.g. from worldmonitor.io to tech.worldmonitor.io) get a clean default experience for the new variant.
+docs/Docs_To_Review/PANELS.md:919:    App->>localStorage: saveToStorage('worldmonitor-panels', panelSettings)
+docs/Docs_To_Review/PANELS.md:928:    App->>localStorage: loadFromStorage('worldmonitor-panels')
+docs/Docs_To_Review/STATE_MANAGEMENT.md:206:const PANEL_SPANS_KEY = "worldmonitor-panel-spans";
+docs/Docs_To_Review/STATE_MANAGEMENT.md:240:Stored in `localStorage` under `worldmonitor-panels` as `Record<string, PanelConfig>`. Includes per-panel `enabled` state, `name`, and `priority`. Controlled by the variant config and user overrides.
+docs/Docs_To_Review/STATE_MANAGEMENT.md:248:  panels: "worldmonitor-panels",
+docs/Docs_To_Review/STATE_MANAGEMENT.md:249:  monitors: "worldmonitor-monitors",
+docs/Docs_To_Review/STATE_MANAGEMENT.md:250:  mapLayers: "worldmonitor-layers",
+docs/Docs_To_Review/STATE_MANAGEMENT.md:251:  disabledFeeds: "worldmonitor-disabled-feeds",
+docs/Docs_To_Review/STATE_MANAGEMENT.md:257:| `worldmonitor-panels`         | `Record<string, PanelConfig>` | Per-panel enabled/name/priority    |
+docs/Docs_To_Review/STATE_MANAGEMENT.md:258:| `worldmonitor-monitors`       | `Monitor[]`                   | Color/label configs for monitors   |
+docs/Docs_To_Review/STATE_MANAGEMENT.md:259:| `worldmonitor-layers`         | `MapLayers`                   | Enabled/disabled map layer toggles |
+docs/Docs_To_Review/STATE_MANAGEMENT.md:260:| `worldmonitor-disabled-feeds` | `string[]`                    | User-disabled news feed sources    |
+docs/Docs_To_Review/STATE_MANAGEMENT.md:346:- **Database name:** `worldmonitor_db`
+docs/Docs_To_Review/STATE_MANAGEMENT.md:414:  // Opens or creates worldmonitor_db v1
+docs/Docs_To_Review/STATE_MANAGEMENT.md:616:- **Toggles key:** `worldmonitor-runtime-feature-toggles` in `localStorage`
+docs/Docs_To_Review/STATE_MANAGEMENT.md:729:| `worldmonitor-panel-spans`             | Panel grid sizes               | `Record<string, number>` (JSON)            | `src/components/Panel.ts`          |
+docs/Docs_To_Review/STATE_MANAGEMENT.md:730:| `worldmonitor-panels`                  | Panel enabled/config state     | `Record<string, PanelConfig>` (JSON)       | `STORAGE_KEYS.panels`              |
+docs/Docs_To_Review/STATE_MANAGEMENT.md:731:| `worldmonitor-monitors`                | Monitor color/label configs    | `Monitor[]` (JSON)                         | `STORAGE_KEYS.monitors`            |
+docs/Docs_To_Review/STATE_MANAGEMENT.md:732:| `worldmonitor-layers`                  | Map layer toggles              | `MapLayers` (JSON)                         | `STORAGE_KEYS.mapLayers`           |
+docs/Docs_To_Review/STATE_MANAGEMENT.md:733:| `worldmonitor-disabled-feeds`          | User-disabled news sources     | `string[]` (JSON)                          | `STORAGE_KEYS.disabledFeeds`       |
+docs/Docs_To_Review/STATE_MANAGEMENT.md:734:| `worldmonitor-runtime-feature-toggles` | Desktop feature toggles        | `Record<RuntimeFeatureId, boolean>` (JSON) | `src/services/runtime-config.ts`   |
+docs/Docs_To_Review/STATE_MANAGEMENT.md:735:| `worldmonitor-persistent-cache:{key}`  | Persistent data cache entries  | `CacheEnvelope<T>` (JSON)                  | `src/services/persistent-cache.ts` |
+docs/Docs_To_Review/STATE_MANAGEMENT.md:737:| `worldmonitor-panel-order-v1.9`        | Panel order migration flag     | `'done'`                                   | `App.ts` (one-time migration)      |
+docs/Docs_To_Review/STATE_MANAGEMENT.md:738:| `worldmonitor-tech-insights-top-v1`    | Tech variant migration flag    | `'done'`                                   | `App.ts` (one-time migration)      |
+docs/Docs_To_Review/STATE_MANAGEMENT.md:762:        IDB["IndexedDB (worldmonitor_db)"]
+docs/Docs_To_Review/bugs.md:90:`PANEL_ORDER_MIGRATION_KEY` is `worldmonitor-panel-order-v1.9` but the `console.log` says `"Migrated panel order to v1.8 layout"`.
+docs/Docs_To_Review/todo_docs.md:254:- [ ] Nginx configuration (reference `deploy/nginx-worldmonitor.conf`)
+docs/Docs_To_Review/todo_docs.md:255:- [ ] SystemD service setup (reference `deploy/worldmonitor-api.service`)
+docs/Docs_To_Review/todo_docs.md:392:- [ ] Add entries for UI customizations on `feat/ui-customizations-worldmonitor` branch
+docs/adding-endpoints.mdx:46:Create `proto/worldmonitor/seismology/v1/get_earthquake_details.proto`:
+docs/adding-endpoints.mdx:50:package worldmonitor.seismology.v1;
+docs/adding-endpoints.mdx:53:import "worldmonitor/seismology/v1/earthquake.proto";
+docs/adding-endpoints.mdx:74:Edit `proto/worldmonitor/seismology/v1/service.proto`:
+docs/adding-endpoints.mdx:77:import "worldmonitor/seismology/v1/get_earthquake_details.proto";
+docs/adding-endpoints.mdx:99:Create `server/worldmonitor/seismology/v1/get-earthquake-details.ts`:
+docs/adding-endpoints.mdx:107:} from "../../../../src/generated/server/worldmonitor/seismology/v1/service_server";
+docs/adding-endpoints.mdx:140:Edit `server/worldmonitor/seismology/v1/handler.ts`:
+docs/adding-endpoints.mdx:143:import type { SeismologyServiceHandler } from "../../../../src/generated/server/worldmonitor/seismology/v1/service_server";
+docs/adding-endpoints.mdx:173:proto/worldmonitor/sanctions/v1/
+docs/adding-endpoints.mdx:178:Create `proto/worldmonitor/sanctions/v1/sanctions_entry.proto`:
+docs/adding-endpoints.mdx:182:package worldmonitor.sanctions.v1;
+docs/adding-endpoints.mdx:207:Create `proto/worldmonitor/sanctions/v1/list_sanctions.proto`:
+docs/adding-endpoints.mdx:211:package worldmonitor.sanctions.v1;
+docs/adding-endpoints.mdx:214:import "worldmonitor/core/v1/pagination.proto";
+docs/adding-endpoints.mdx:215:import "worldmonitor/sanctions/v1/sanctions_entry.proto";
+docs/adding-endpoints.mdx:224:  worldmonitor.core.v1.PaginationRequest pagination = 3;
+docs/adding-endpoints.mdx:232:  worldmonitor.core.v1.PaginationResponse pagination = 2;
+docs/adding-endpoints.mdx:238:Create `proto/worldmonitor/sanctions/v1/service.proto`:
+docs/adding-endpoints.mdx:242:package worldmonitor.sanctions.v1;
+docs/adding-endpoints.mdx:245:import "worldmonitor/sanctions/v1/list_sanctions.proto";
+docs/adding-endpoints.mdx:269:server/worldmonitor/sanctions/v1/
+docs/adding-endpoints.mdx:274:`server/worldmonitor/sanctions/v1/list-sanctions.ts`:
+docs/adding-endpoints.mdx:282:} from "../../../../src/generated/server/worldmonitor/sanctions/v1/service_server";
+docs/adding-endpoints.mdx:293:`server/worldmonitor/sanctions/v1/handler.ts`:
+docs/adding-endpoints.mdx:296:import type { SanctionsServiceHandler } from "../../../../src/generated/server/worldmonitor/sanctions/v1/service_server";
+docs/adding-endpoints.mdx:310:import { createSanctionsServiceRoutes } from "../src/generated/server/worldmonitor/sanctions/v1/service_server";
+docs/adding-endpoints.mdx:311:import { sanctionsHandler } from "./server/worldmonitor/sanctions/v1/handler";
+docs/adding-endpoints.mdx:332:} from "@/generated/client/worldmonitor/sanctions/v1/service_client";
+docs/adding-endpoints.mdx:423:| `GeoCoordinates`     | `worldmonitor/core/v1/geo.proto`        | Any lat/lon location (has built-in -90/90 and -180/180 bounds) |
+docs/adding-endpoints.mdx:424:| `BoundingBox`        | `worldmonitor/core/v1/geo.proto`        | Spatial filtering                                              |
+docs/adding-endpoints.mdx:425:| `TimeRange`          | `worldmonitor/core/v1/time.proto`       | Time-based filtering (has `INT64_ENCODING_NUMBER`)             |
+docs/adding-endpoints.mdx:426:| `PaginationRequest`  | `worldmonitor/core/v1/pagination.proto` | Request pagination (has page_size 1-100 constraint)            |
+docs/adding-endpoints.mdx:427:| `PaginationResponse` | `worldmonitor/core/v1/pagination.proto` | Response pagination metadata                                   |
+docs/architecture.mdx:393:**Per-panel circuit breakers** (data panels) — panels that fetch from API endpoints use IndexedDB-backed persistent caches (`worldmonitor_persistent_cache` store) with TTL envelopes. When a fetch succeeds, the result is stored with an expiration timestamp. On subsequent loads, the circuit breaker serves the cached result immediately and attempts a background refresh. If the background refresh fails, the stale cached data continues to display — panels never go blank due to transient API failures. Cache entries survive page reloads and browser restarts.
+docs/architecture.mdx:498:Transactions are sampled at 10% to balance observability with cost. Release tracking (`worldmonitor@{version}`) enables regression detection across deployments.
+docs/changelog.mdx:623:- **CORS hardening**: Tighten Vercel preview deployment regex to block origin spoofing (`worldmonitorEVIL.vercel.app`)
+docs/contributing.mdx:13:   git clone https://github.com/YOUR_USERNAME/worldmonitor.git
+docs/contributing.mdx:14:   cd worldmonitor
+docs/cors.mdx:24:| `worldmonitor-*-elie-*.vercel.app`          | Vercel preview deploys                              |
+docs/getting-started.mdx:81:cd worldmonitor
+docs/local-backend-audit.md:11:All JSON API endpoints now use sebuf-generated handlers served through a single catch-all gateway (`api/[[...path]].js`). Handler implementations live in `server/worldmonitor/{domain}/v1/`. The desktop sidecar runs the same handler code locally via an esbuild-compiled bundle.
+docs/local-backend-audit.md:27:| P1       | StrategicRiskPanel cached overlays                     | `src/services/cached-risk-scores.ts`                                                                         | intelligence                                 | `server/worldmonitor/intelligence/v1/`                                 | Requires user-provided API key | ✅ Explicit fallback: panel continues with local aggregate scoring when cache feed is unavailable.               |
+docs/local-backend-audit.md:28:| P1       | Map layers (conflicts, outages, AIS, military flights) | `src/services/conflict/`, `src/services/infrastructure/`, `src/services/maritime/`, `src/services/military/` | conflict, infrastructure, maritime, military | `server/worldmonitor/{domain}/v1/`                                     | Requires user-provided API key | ✅ Explicit fallback: unavailable feeds are disabled while map rendering remains active for local/static layers. |
+docs/local-backend-audit.md:29:| P2       | Summaries                                              | `src/services/news/`                                                                                         | news                                         | `server/worldmonitor/news/v1/`                                         | Requires user-provided API key | ✅ Explicit fallback chain: Groq → OpenRouter → browser model.                                                   |
+docs/local-backend-audit.md:30:| P2       | MarketPanel                                            | `src/services/market/`, `src/services/prediction/`                                                           | market, prediction                           | `server/worldmonitor/market/v1/`, `server/worldmonitor/prediction/v1/` | Fully local                    | ✅ Multi-provider and cache-aware fetch behavior maintained in sidecar mode.                                     |
+docs/local-backend-audit.md:31:| P3       | Flight enrichment                                      | `src/services/military/`                                                                                     | military                                     | `server/worldmonitor/military/v1/`                                     | Requires user-provided API key | ✅ Explicit fallback: heuristic-only classification mode.                                                        |
+docs/local-backend-audit.md:32:| P3       | OpenSky relay fallback path                            | `src/services/military/`                                                                                     | military                                     | `server/worldmonitor/military/v1/`                                     | Requires cloud fallback        | ✅ Relay fallback documented; no hard failure when relay is unavailable.                                         |
+docs/maps-and-geocoding.mdx:8:All large static map files are served from Cloudflare R2, **not** from Vercel. The R2 bucket `worldmonitor-maps` is fronted by a CF-proxied custom domain:
+docs/maps-and-geocoding.mdx:33:rclone copyto <local-path> r2:worldmonitor-maps/<filename>
+docs/maps-and-geocoding.mdx:116:   rclone copyto public/data/country-boundary-overrides.geojson r2:worldmonitor-maps/country-boundary-overrides.geojson
+docs/relay-parameters.mdx:16:- Server relay callers: `server/worldmonitor/*` handlers - Optional browser
+e2e/circuit-breaker-persistence.spec.ts:115:      const DB_NAME = "worldmonitor_persistent_cache";
+e2e/circuit-breaker-persistence.spec.ts:193:      const DB_NAME = "worldmonitor_persistent_cache";
+e2e/circuit-breaker-persistence.spec.ts:423:      const DB_NAME = "worldmonitor_persistent_cache";
+e2e/rag-vector-store.spec.ts:215:      indexedDB.deleteDatabase("worldmonitor_vector_store");
+proto/buf.gen.yaml:8:      value: github.com/worldmonitor/proto
+proto/worldmonitor/aviation/v1/airport_delay.proto:3:package worldmonitor.aviation.v1;
+proto/worldmonitor/aviation/v1/airport_delay.proto:7:import "worldmonitor/core/v1/geo.proto";
+proto/worldmonitor/aviation/v1/airport_delay.proto:28:  worldmonitor.core.v1.GeoCoordinates location = 7;
+proto/worldmonitor/aviation/v1/aviation_news_item.proto:3:package worldmonitor.aviation.v1;
+proto/worldmonitor/aviation/v1/carrier.proto:3:package worldmonitor.aviation.v1;
+proto/worldmonitor/aviation/v1/flight_instance.proto:3:package worldmonitor.aviation.v1;
+proto/worldmonitor/aviation/v1/flight_instance.proto:6:import "worldmonitor/aviation/v1/carrier.proto";
+proto/worldmonitor/aviation/v1/get_airport_ops_summary.proto:3:package worldmonitor.aviation.v1;
+proto/worldmonitor/aviation/v1/get_airport_ops_summary.proto:7:import "worldmonitor/aviation/v1/airport_delay.proto";
+proto/worldmonitor/aviation/v1/get_carrier_ops.proto:3:package worldmonitor.aviation.v1;
+proto/worldmonitor/aviation/v1/get_carrier_ops.proto:7:import "worldmonitor/aviation/v1/carrier.proto";
+proto/worldmonitor/aviation/v1/get_flight_status.proto:3:package worldmonitor.aviation.v1;
+proto/worldmonitor/aviation/v1/get_flight_status.proto:7:import "worldmonitor/aviation/v1/flight_instance.proto";
+proto/worldmonitor/aviation/v1/list_airport_delays.proto:3:package worldmonitor.aviation.v1;
+proto/worldmonitor/aviation/v1/list_airport_delays.proto:6:import "worldmonitor/core/v1/pagination.proto";
+proto/worldmonitor/aviation/v1/list_airport_delays.proto:7:import "worldmonitor/aviation/v1/airport_delay.proto";
+proto/worldmonitor/aviation/v1/list_airport_delays.proto:26:  worldmonitor.core.v1.PaginationResponse pagination = 2;
+proto/worldmonitor/aviation/v1/list_airport_flights.proto:3:package worldmonitor.aviation.v1;
+proto/worldmonitor/aviation/v1/list_airport_flights.proto:7:import "worldmonitor/aviation/v1/flight_instance.proto";
+proto/worldmonitor/aviation/v1/list_aviation_news.proto:3:package worldmonitor.aviation.v1;
+proto/worldmonitor/aviation/v1/list_aviation_news.proto:7:import "worldmonitor/aviation/v1/aviation_news_item.proto";
+proto/worldmonitor/aviation/v1/position_sample.proto:3:package worldmonitor.aviation.v1;
+proto/worldmonitor/aviation/v1/price_quote.proto:3:package worldmonitor.aviation.v1;
+proto/worldmonitor/aviation/v1/price_quote.proto:6:import "worldmonitor/aviation/v1/carrier.proto";
+proto/worldmonitor/aviation/v1/search_flight_prices.proto:3:package worldmonitor.aviation.v1;
+proto/worldmonitor/aviation/v1/search_flight_prices.proto:7:import "worldmonitor/aviation/v1/price_quote.proto";
+proto/worldmonitor/aviation/v1/service.proto:3:package worldmonitor.aviation.v1;
+proto/worldmonitor/aviation/v1/service.proto:6:import "worldmonitor/aviation/v1/list_airport_delays.proto";
+proto/worldmonitor/aviation/v1/service.proto:7:import "worldmonitor/aviation/v1/get_airport_ops_summary.proto";
+proto/worldmonitor/aviation/v1/service.proto:8:import "worldmonitor/aviation/v1/list_airport_flights.proto";
+proto/worldmonitor/aviation/v1/service.proto:9:import "worldmonitor/aviation/v1/get_carrier_ops.proto";
+proto/worldmonitor/aviation/v1/service.proto:10:import "worldmonitor/aviation/v1/get_flight_status.proto";
+proto/worldmonitor/aviation/v1/service.proto:11:import "worldmonitor/aviation/v1/track_aircraft.proto";
+proto/worldmonitor/aviation/v1/service.proto:12:import "worldmonitor/aviation/v1/search_flight_prices.proto";
+proto/worldmonitor/aviation/v1/service.proto:13:import "worldmonitor/aviation/v1/list_aviation_news.proto";
+proto/worldmonitor/aviation/v1/track_aircraft.proto:3:package worldmonitor.aviation.v1;
+proto/worldmonitor/aviation/v1/track_aircraft.proto:6:import "worldmonitor/aviation/v1/position_sample.proto";
+proto/worldmonitor/climate/v1/climate_anomaly.proto:3:package worldmonitor.climate.v1;
+proto/worldmonitor/climate/v1/climate_anomaly.proto:6:import "worldmonitor/core/v1/geo.proto";
+proto/worldmonitor/climate/v1/climate_anomaly.proto:17:  worldmonitor.core.v1.GeoCoordinates location = 2;
+proto/worldmonitor/climate/v1/list_climate_anomalies.proto:3:package worldmonitor.climate.v1;
+proto/worldmonitor/climate/v1/list_climate_anomalies.proto:6:import "worldmonitor/core/v1/pagination.proto";
+proto/worldmonitor/climate/v1/list_climate_anomalies.proto:7:import "worldmonitor/climate/v1/climate_anomaly.proto";
+proto/worldmonitor/climate/v1/list_climate_anomalies.proto:24:  worldmonitor.core.v1.PaginationResponse pagination = 2;
+proto/worldmonitor/climate/v1/service.proto:3:package worldmonitor.climate.v1;
+proto/worldmonitor/climate/v1/service.proto:6:import "worldmonitor/climate/v1/list_climate_anomalies.proto";
+proto/worldmonitor/conflict/v1/acled_event.proto:3:package worldmonitor.conflict.v1;
+proto/worldmonitor/conflict/v1/acled_event.proto:7:import "worldmonitor/core/v1/geo.proto";
+proto/worldmonitor/conflict/v1/acled_event.proto:21:  worldmonitor.core.v1.GeoCoordinates location = 4;
+proto/worldmonitor/conflict/v1/get_humanitarian_summary.proto:3:package worldmonitor.conflict.v1;
+proto/worldmonitor/conflict/v1/get_humanitarian_summary.proto:7:import "worldmonitor/conflict/v1/humanitarian_summary.proto";
+proto/worldmonitor/conflict/v1/get_humanitarian_summary_batch.proto:3:package worldmonitor.conflict.v1;
+proto/worldmonitor/conflict/v1/get_humanitarian_summary_batch.proto:7:import "worldmonitor/conflict/v1/humanitarian_summary.proto";
+proto/worldmonitor/conflict/v1/humanitarian_summary.proto:3:package worldmonitor.conflict.v1;
+proto/worldmonitor/conflict/v1/list_acled_events.proto:3:package worldmonitor.conflict.v1;
+proto/worldmonitor/conflict/v1/list_acled_events.proto:6:import "worldmonitor/core/v1/pagination.proto";
+proto/worldmonitor/conflict/v1/list_acled_events.proto:7:import "worldmonitor/conflict/v1/acled_event.proto";
+proto/worldmonitor/conflict/v1/list_acled_events.proto:28:  worldmonitor.core.v1.PaginationResponse pagination = 2;
+proto/worldmonitor/conflict/v1/list_iran_events.proto:3:package worldmonitor.conflict.v1;
+proto/worldmonitor/conflict/v1/list_ucdp_events.proto:3:package worldmonitor.conflict.v1;
+proto/worldmonitor/conflict/v1/list_ucdp_events.proto:6:import "worldmonitor/core/v1/pagination.proto";
+proto/worldmonitor/conflict/v1/list_ucdp_events.proto:7:import "worldmonitor/conflict/v1/ucdp_event.proto";
+proto/worldmonitor/conflict/v1/list_ucdp_events.proto:28:  worldmonitor.core.v1.PaginationResponse pagination = 2;
+proto/worldmonitor/conflict/v1/service.proto:3:package worldmonitor.conflict.v1;
+proto/worldmonitor/conflict/v1/service.proto:6:import "worldmonitor/conflict/v1/list_acled_events.proto";
+proto/worldmonitor/conflict/v1/service.proto:7:import "worldmonitor/conflict/v1/list_ucdp_events.proto";
+proto/worldmonitor/conflict/v1/service.proto:8:import "worldmonitor/conflict/v1/get_humanitarian_summary.proto";
+proto/worldmonitor/conflict/v1/service.proto:9:import "worldmonitor/conflict/v1/list_iran_events.proto";
+proto/worldmonitor/conflict/v1/service.proto:10:import "worldmonitor/conflict/v1/get_humanitarian_summary_batch.proto";
+proto/worldmonitor/conflict/v1/ucdp_event.proto:3:package worldmonitor.conflict.v1;
+proto/worldmonitor/conflict/v1/ucdp_event.proto:7:import "worldmonitor/core/v1/geo.proto";
+proto/worldmonitor/conflict/v1/ucdp_event.proto:21:  worldmonitor.core.v1.GeoCoordinates location = 4;
+proto/worldmonitor/core/v1/country.proto:3:package worldmonitor.core.v1;
+proto/worldmonitor/core/v1/general_error.proto:3:package worldmonitor.core.v1;
+proto/worldmonitor/core/v1/geo.proto:3:package worldmonitor.core.v1;
+proto/worldmonitor/core/v1/i18n.proto:3:package worldmonitor.core.v1;
+proto/worldmonitor/core/v1/identifiers.proto:6:package worldmonitor.core.v1;
+proto/worldmonitor/core/v1/pagination.proto:3:package worldmonitor.core.v1;
+proto/worldmonitor/core/v1/severity.proto:3:package worldmonitor.core.v1;
+proto/worldmonitor/core/v1/time.proto:3:package worldmonitor.core.v1;
+proto/worldmonitor/cyber/v1/cyber_threat.proto:3:package worldmonitor.cyber.v1;
+proto/worldmonitor/cyber/v1/cyber_threat.proto:7:import "worldmonitor/core/v1/geo.proto";
+proto/worldmonitor/cyber/v1/cyber_threat.proto:8:import "worldmonitor/core/v1/severity.proto";
+proto/worldmonitor/cyber/v1/cyber_threat.proto:27:  worldmonitor.core.v1.GeoCoordinates location = 6;
+proto/worldmonitor/cyber/v1/cyber_threat.proto:31:  worldmonitor.core.v1.CriticalityLevel severity = 8;
+proto/worldmonitor/cyber/v1/list_cyber_threats.proto:3:package worldmonitor.cyber.v1;
+proto/worldmonitor/cyber/v1/list_cyber_threats.proto:6:import "worldmonitor/core/v1/pagination.proto";
+proto/worldmonitor/cyber/v1/list_cyber_threats.proto:7:import "worldmonitor/core/v1/severity.proto";
+proto/worldmonitor/cyber/v1/list_cyber_threats.proto:8:import "worldmonitor/cyber/v1/cyber_threat.proto";
+proto/worldmonitor/cyber/v1/list_cyber_threats.proto:25:  worldmonitor.core.v1.CriticalityLevel min_severity = 7 [(sebuf.http.query) = { name: "min_severity" }];
+proto/worldmonitor/cyber/v1/list_cyber_threats.proto:33:  worldmonitor.core.v1.PaginationResponse pagination = 2;
+proto/worldmonitor/cyber/v1/service.proto:3:package worldmonitor.cyber.v1;
+proto/worldmonitor/cyber/v1/service.proto:6:import "worldmonitor/cyber/v1/list_cyber_threats.proto";
+proto/worldmonitor/displacement/v1/displacement.proto:3:package worldmonitor.displacement.v1;
+proto/worldmonitor/displacement/v1/displacement.proto:7:import "worldmonitor/core/v1/geo.proto";
+proto/worldmonitor/displacement/v1/displacement.proto:61:  worldmonitor.core.v1.GeoCoordinates location = 11;
+proto/worldmonitor/displacement/v1/displacement.proto:83:  worldmonitor.core.v1.GeoCoordinates origin_location = 6;
+proto/worldmonitor/displacement/v1/displacement.proto:85:  worldmonitor.core.v1.GeoCoordinates asylum_location = 7;
+proto/worldmonitor/displacement/v1/get_displacement_summary.proto:3:package worldmonitor.displacement.v1;
+proto/worldmonitor/displacement/v1/get_displacement_summary.proto:7:import "worldmonitor/displacement/v1/displacement.proto";
+proto/worldmonitor/displacement/v1/get_population_exposure.proto:3:package worldmonitor.displacement.v1;
+proto/worldmonitor/displacement/v1/service.proto:3:package worldmonitor.displacement.v1;
+proto/worldmonitor/displacement/v1/service.proto:6:import "worldmonitor/displacement/v1/get_displacement_summary.proto";
+proto/worldmonitor/displacement/v1/service.proto:7:import "worldmonitor/displacement/v1/get_population_exposure.proto";
+proto/worldmonitor/economic/v1/bis_data.proto:3:package worldmonitor.economic.v1;
+proto/worldmonitor/economic/v1/economic_data.proto:3:package worldmonitor.economic.v1;
+proto/worldmonitor/economic/v1/get_bis_credit.proto:3:package worldmonitor.economic.v1;
+proto/worldmonitor/economic/v1/get_bis_credit.proto:5:import "worldmonitor/economic/v1/bis_data.proto";
+proto/worldmonitor/economic/v1/get_bis_exchange_rates.proto:3:package worldmonitor.economic.v1;
+proto/worldmonitor/economic/v1/get_bis_exchange_rates.proto:5:import "worldmonitor/economic/v1/bis_data.proto";
+proto/worldmonitor/economic/v1/get_bis_policy_rates.proto:3:package worldmonitor.economic.v1;
+proto/worldmonitor/economic/v1/get_bis_policy_rates.proto:5:import "worldmonitor/economic/v1/bis_data.proto";
+proto/worldmonitor/economic/v1/get_energy_capacity.proto:3:package worldmonitor.economic.v1;
+proto/worldmonitor/economic/v1/get_energy_prices.proto:3:package worldmonitor.economic.v1;
+proto/worldmonitor/economic/v1/get_energy_prices.proto:6:import "worldmonitor/economic/v1/economic_data.proto";
+proto/worldmonitor/economic/v1/get_fred_series.proto:3:package worldmonitor.economic.v1;
+proto/worldmonitor/economic/v1/get_fred_series.proto:7:import "worldmonitor/economic/v1/economic_data.proto";
+proto/worldmonitor/economic/v1/get_fred_series_batch.proto:3:package worldmonitor.economic.v1;
+proto/worldmonitor/economic/v1/get_fred_series_batch.proto:7:import "worldmonitor/economic/v1/economic_data.proto";
+proto/worldmonitor/economic/v1/get_macro_signals.proto:3:package worldmonitor.economic.v1;
+proto/worldmonitor/economic/v1/list_world_bank_indicators.proto:3:package worldmonitor.economic.v1;
+proto/worldmonitor/economic/v1/list_world_bank_indicators.proto:7:import "worldmonitor/core/v1/pagination.proto";
+proto/worldmonitor/economic/v1/list_world_bank_indicators.proto:8:import "worldmonitor/economic/v1/economic_data.proto";
+proto/worldmonitor/economic/v1/list_world_bank_indicators.proto:33:  worldmonitor.core.v1.PaginationResponse pagination = 2;
+proto/worldmonitor/economic/v1/service.proto:3:package worldmonitor.economic.v1;
+proto/worldmonitor/economic/v1/service.proto:6:import "worldmonitor/economic/v1/get_fred_series.proto";
+proto/worldmonitor/economic/v1/service.proto:7:import "worldmonitor/economic/v1/list_world_bank_indicators.proto";
+proto/worldmonitor/economic/v1/service.proto:8:import "worldmonitor/economic/v1/get_energy_prices.proto";
+proto/worldmonitor/economic/v1/service.proto:9:import "worldmonitor/economic/v1/get_macro_signals.proto";
+proto/worldmonitor/economic/v1/service.proto:10:import "worldmonitor/economic/v1/get_energy_capacity.proto";
+proto/worldmonitor/economic/v1/service.proto:11:import "worldmonitor/economic/v1/get_bis_policy_rates.proto";
+proto/worldmonitor/economic/v1/service.proto:12:import "worldmonitor/economic/v1/get_bis_exchange_rates.proto";
+proto/worldmonitor/economic/v1/service.proto:13:import "worldmonitor/economic/v1/get_bis_credit.proto";
+proto/worldmonitor/economic/v1/service.proto:14:import "worldmonitor/economic/v1/get_fred_series_batch.proto";
+proto/worldmonitor/giving/v1/get_giving_summary.proto:3:package worldmonitor.giving.v1;
+proto/worldmonitor/giving/v1/get_giving_summary.proto:6:import "worldmonitor/giving/v1/giving.proto";
+proto/worldmonitor/giving/v1/giving.proto:3:package worldmonitor.giving.v1;
+proto/worldmonitor/giving/v1/service.proto:3:package worldmonitor.giving.v1;
+proto/worldmonitor/giving/v1/service.proto:6:import "worldmonitor/giving/v1/get_giving_summary.proto";
+proto/worldmonitor/imagery/v1/search_imagery.proto:3:package worldmonitor.imagery.v1;
+proto/worldmonitor/imagery/v1/service.proto:3:package worldmonitor.imagery.v1;
+proto/worldmonitor/imagery/v1/service.proto:6:import "worldmonitor/imagery/v1/search_imagery.proto";
+proto/worldmonitor/infrastructure/v1/get_cable_health.proto:3:package worldmonitor.infrastructure.v1;
+proto/worldmonitor/infrastructure/v1/get_temporal_baseline.proto:3:package worldmonitor.infrastructure.v1;
+proto/worldmonitor/infrastructure/v1/infrastructure.proto:3:package worldmonitor.infrastructure.v1;
+proto/worldmonitor/infrastructure/v1/infrastructure.proto:7:import "worldmonitor/core/v1/geo.proto";
+proto/worldmonitor/infrastructure/v1/infrastructure.proto:29:  worldmonitor.core.v1.GeoCoordinates location = 8;
+proto/worldmonitor/infrastructure/v1/list_internet_outages.proto:3:package worldmonitor.infrastructure.v1;
+proto/worldmonitor/infrastructure/v1/list_internet_outages.proto:6:import "worldmonitor/core/v1/pagination.proto";
+proto/worldmonitor/infrastructure/v1/list_internet_outages.proto:7:import "worldmonitor/infrastructure/v1/infrastructure.proto";
+proto/worldmonitor/infrastructure/v1/list_internet_outages.proto:28:  worldmonitor.core.v1.PaginationResponse pagination = 2;
+proto/worldmonitor/infrastructure/v1/list_service_statuses.proto:3:package worldmonitor.infrastructure.v1;
+proto/worldmonitor/infrastructure/v1/list_service_statuses.proto:6:import "worldmonitor/infrastructure/v1/infrastructure.proto";
+proto/worldmonitor/infrastructure/v1/list_temporal_anomalies.proto:3:package worldmonitor.infrastructure.v1;
+proto/worldmonitor/infrastructure/v1/record_baseline_snapshot.proto:3:package worldmonitor.infrastructure.v1;
+proto/worldmonitor/infrastructure/v1/service.proto:3:package worldmonitor.infrastructure.v1;
+proto/worldmonitor/infrastructure/v1/service.proto:6:import "worldmonitor/infrastructure/v1/list_internet_outages.proto";
+proto/worldmonitor/infrastructure/v1/service.proto:7:import "worldmonitor/infrastructure/v1/list_service_statuses.proto";
+proto/worldmonitor/infrastructure/v1/service.proto:8:import "worldmonitor/infrastructure/v1/get_temporal_baseline.proto";
+proto/worldmonitor/infrastructure/v1/service.proto:9:import "worldmonitor/infrastructure/v1/get_cable_health.proto";
+proto/worldmonitor/infrastructure/v1/service.proto:10:import "worldmonitor/infrastructure/v1/record_baseline_snapshot.proto";
+proto/worldmonitor/infrastructure/v1/service.proto:11:import "worldmonitor/infrastructure/v1/list_temporal_anomalies.proto";
+proto/worldmonitor/intelligence/v1/classify_event.proto:3:package worldmonitor.intelligence.v1;
+proto/worldmonitor/intelligence/v1/classify_event.proto:7:import "worldmonitor/intelligence/v1/intelligence.proto";
+proto/worldmonitor/intelligence/v1/deduct_situation.proto:3:package worldmonitor.intelligence.v1;
+proto/worldmonitor/intelligence/v1/get_country_facts.proto:3:package worldmonitor.intelligence.v1;
+proto/worldmonitor/intelligence/v1/get_country_intel_brief.proto:3:package worldmonitor.intelligence.v1;
+proto/worldmonitor/intelligence/v1/get_pizzint_status.proto:3:package worldmonitor.intelligence.v1;
+proto/worldmonitor/intelligence/v1/get_pizzint_status.proto:6:import "worldmonitor/intelligence/v1/intelligence.proto";
+proto/worldmonitor/intelligence/v1/get_risk_scores.proto:3:package worldmonitor.intelligence.v1;
+proto/worldmonitor/intelligence/v1/get_risk_scores.proto:6:import "worldmonitor/intelligence/v1/intelligence.proto";
+proto/worldmonitor/intelligence/v1/intelligence.proto:3:package worldmonitor.intelligence.v1;
+proto/worldmonitor/intelligence/v1/intelligence.proto:7:import "worldmonitor/core/v1/severity.proto";
+proto/worldmonitor/intelligence/v1/intelligence.proto:29:  worldmonitor.core.v1.TrendDirection trend = 5;
+proto/worldmonitor/intelligence/v1/intelligence.proto:65:  worldmonitor.core.v1.SeverityLevel level = 2;
+proto/worldmonitor/intelligence/v1/intelligence.proto:74:  worldmonitor.core.v1.TrendDirection trend = 5;
+proto/worldmonitor/intelligence/v1/intelligence.proto:146:  worldmonitor.core.v1.TrendDirection trend = 5;
+proto/worldmonitor/intelligence/v1/intelligence.proto:160:  worldmonitor.core.v1.SeverityLevel severity = 3;
+proto/worldmonitor/intelligence/v1/search_gdelt_documents.proto:3:package worldmonitor.intelligence.v1;
+proto/worldmonitor/intelligence/v1/service.proto:3:package worldmonitor.intelligence.v1;
+proto/worldmonitor/intelligence/v1/service.proto:6:import "worldmonitor/intelligence/v1/get_risk_scores.proto";
+proto/worldmonitor/intelligence/v1/service.proto:7:import "worldmonitor/intelligence/v1/get_pizzint_status.proto";
+proto/worldmonitor/intelligence/v1/service.proto:8:import "worldmonitor/intelligence/v1/classify_event.proto";
+proto/worldmonitor/intelligence/v1/service.proto:9:import "worldmonitor/intelligence/v1/get_country_intel_brief.proto";
+proto/worldmonitor/intelligence/v1/service.proto:10:import "worldmonitor/intelligence/v1/search_gdelt_documents.proto";
+proto/worldmonitor/intelligence/v1/service.proto:11:import "worldmonitor/intelligence/v1/deduct_situation.proto";
+proto/worldmonitor/intelligence/v1/service.proto:12:import "worldmonitor/intelligence/v1/get_country_facts.proto";
+proto/worldmonitor/maritime/v1/get_vessel_snapshot.proto:3:package worldmonitor.maritime.v1;
+proto/worldmonitor/maritime/v1/get_vessel_snapshot.proto:6:import "worldmonitor/maritime/v1/vessel_snapshot.proto";
+proto/worldmonitor/maritime/v1/list_navigational_warnings.proto:3:package worldmonitor.maritime.v1;
+proto/worldmonitor/maritime/v1/list_navigational_warnings.proto:6:import "worldmonitor/core/v1/pagination.proto";
+proto/worldmonitor/maritime/v1/list_navigational_warnings.proto:7:import "worldmonitor/maritime/v1/vessel_snapshot.proto";
+proto/worldmonitor/maritime/v1/list_navigational_warnings.proto:24:  worldmonitor.core.v1.PaginationResponse pagination = 2;
+proto/worldmonitor/maritime/v1/service.proto:3:package worldmonitor.maritime.v1;
+proto/worldmonitor/maritime/v1/service.proto:6:import "worldmonitor/maritime/v1/get_vessel_snapshot.proto";
+proto/worldmonitor/maritime/v1/service.proto:7:import "worldmonitor/maritime/v1/list_navigational_warnings.proto";
+proto/worldmonitor/maritime/v1/vessel_snapshot.proto:3:package worldmonitor.maritime.v1;
+proto/worldmonitor/maritime/v1/vessel_snapshot.proto:7:import "worldmonitor/core/v1/geo.proto";
+proto/worldmonitor/maritime/v1/vessel_snapshot.proto:29:  worldmonitor.core.v1.GeoCoordinates location = 3;
+proto/worldmonitor/maritime/v1/vessel_snapshot.proto:55:  worldmonitor.core.v1.GeoCoordinates location = 4;
+proto/worldmonitor/maritime/v1/vessel_snapshot.proto:83:  worldmonitor.core.v1.GeoCoordinates location = 5;
+proto/worldmonitor/market/v1/analyze_stock.proto:3:package worldmonitor.market.v1;
+proto/worldmonitor/market/v1/backtest_stock.proto:3:package worldmonitor.market.v1;
+proto/worldmonitor/market/v1/get_country_stock_index.proto:3:package worldmonitor.market.v1;
+proto/worldmonitor/market/v1/get_sector_summary.proto:3:package worldmonitor.market.v1;
+proto/worldmonitor/market/v1/get_sector_summary.proto:6:import "worldmonitor/market/v1/market_quote.proto";
+proto/worldmonitor/market/v1/get_stock_analysis_history.proto:3:package worldmonitor.market.v1;
+proto/worldmonitor/market/v1/get_stock_analysis_history.proto:7:import "worldmonitor/market/v1/analyze_stock.proto";
+proto/worldmonitor/market/v1/list_commodity_quotes.proto:3:package worldmonitor.market.v1;
+proto/worldmonitor/market/v1/list_commodity_quotes.proto:6:import "worldmonitor/market/v1/market_quote.proto";
+proto/worldmonitor/market/v1/list_crypto_quotes.proto:3:package worldmonitor.market.v1;
+proto/worldmonitor/market/v1/list_crypto_quotes.proto:6:import "worldmonitor/market/v1/market_quote.proto";
+proto/worldmonitor/market/v1/list_etf_flows.proto:3:package worldmonitor.market.v1;
+proto/worldmonitor/market/v1/list_gulf_quotes.proto:3:package worldmonitor.market.v1;
+proto/worldmonitor/market/v1/list_market_quotes.proto:3:package worldmonitor.market.v1;
+proto/worldmonitor/market/v1/list_market_quotes.proto:6:import "worldmonitor/market/v1/market_quote.proto";
+proto/worldmonitor/market/v1/list_stablecoin_markets.proto:3:package worldmonitor.market.v1;
+proto/worldmonitor/market/v1/list_stored_stock_backtests.proto:3:package worldmonitor.market.v1;
+proto/worldmonitor/market/v1/list_stored_stock_backtests.proto:7:import "worldmonitor/market/v1/backtest_stock.proto";
+proto/worldmonitor/market/v1/market_quote.proto:3:package worldmonitor.market.v1;
+proto/worldmonitor/market/v1/service.proto:3:package worldmonitor.market.v1;
+proto/worldmonitor/market/v1/service.proto:6:import "worldmonitor/market/v1/list_market_quotes.proto";
+proto/worldmonitor/market/v1/service.proto:7:import "worldmonitor/market/v1/list_crypto_quotes.proto";
+proto/worldmonitor/market/v1/service.proto:8:import "worldmonitor/market/v1/list_commodity_quotes.proto";
+proto/worldmonitor/market/v1/service.proto:9:import "worldmonitor/market/v1/get_sector_summary.proto";
+proto/worldmonitor/market/v1/service.proto:10:import "worldmonitor/market/v1/list_stablecoin_markets.proto";
+proto/worldmonitor/market/v1/service.proto:11:import "worldmonitor/market/v1/list_etf_flows.proto";
+proto/worldmonitor/market/v1/service.proto:12:import "worldmonitor/market/v1/get_country_stock_index.proto";
+proto/worldmonitor/market/v1/service.proto:13:import "worldmonitor/market/v1/list_gulf_quotes.proto";
+proto/worldmonitor/market/v1/service.proto:14:import "worldmonitor/market/v1/analyze_stock.proto";
+proto/worldmonitor/market/v1/service.proto:15:import "worldmonitor/market/v1/backtest_stock.proto";
+proto/worldmonitor/market/v1/service.proto:16:import "worldmonitor/market/v1/get_stock_analysis_history.proto";
+proto/worldmonitor/market/v1/service.proto:17:import "worldmonitor/market/v1/list_stored_stock_backtests.proto";
+proto/worldmonitor/military/v1/get_aircraft_details.proto:3:package worldmonitor.military.v1;
+proto/worldmonitor/military/v1/get_aircraft_details_batch.proto:3:package worldmonitor.military.v1;
+proto/worldmonitor/military/v1/get_aircraft_details_batch.proto:7:import "worldmonitor/military/v1/get_aircraft_details.proto";
+proto/worldmonitor/military/v1/get_theater_posture.proto:3:package worldmonitor.military.v1;
+proto/worldmonitor/military/v1/get_theater_posture.proto:6:import "worldmonitor/military/v1/military_vessel.proto";
+proto/worldmonitor/military/v1/get_usni_fleet_report.proto:3:package worldmonitor.military.v1;
+proto/worldmonitor/military/v1/get_usni_fleet_report.proto:6:import "worldmonitor/military/v1/usni_fleet.proto";
+proto/worldmonitor/military/v1/get_wingbits_status.proto:3:package worldmonitor.military.v1;
+proto/worldmonitor/military/v1/list_military_bases.proto:3:package worldmonitor.military.v1;
+proto/worldmonitor/military/v1/list_military_flights.proto:3:package worldmonitor.military.v1;
+proto/worldmonitor/military/v1/list_military_flights.proto:6:import "worldmonitor/core/v1/pagination.proto";
+proto/worldmonitor/military/v1/list_military_flights.proto:7:import "worldmonitor/military/v1/military_flight.proto";
+proto/worldmonitor/military/v1/list_military_flights.proto:36:  worldmonitor.core.v1.PaginationResponse pagination = 3;
+proto/worldmonitor/military/v1/military_flight.proto:3:package worldmonitor.military.v1;
+proto/worldmonitor/military/v1/military_flight.proto:7:import "worldmonitor/core/v1/geo.proto";
+proto/worldmonitor/military/v1/military_flight.proto:31:  worldmonitor.core.v1.GeoCoordinates location = 9;
+proto/worldmonitor/military/v1/military_flight.proto:87:  worldmonitor.core.v1.GeoCoordinates location = 3;
+proto/worldmonitor/military/v1/military_vessel.proto:3:package worldmonitor.military.v1;
+proto/worldmonitor/military/v1/military_vessel.proto:7:import "worldmonitor/core/v1/geo.proto";
+proto/worldmonitor/military/v1/military_vessel.proto:8:import "worldmonitor/military/v1/military_flight.proto";
+proto/worldmonitor/military/v1/military_vessel.proto:32:  worldmonitor.core.v1.GeoCoordinates location = 9;
+proto/worldmonitor/military/v1/military_vessel.proto:66:  worldmonitor.core.v1.GeoCoordinates location = 3;
+proto/worldmonitor/military/v1/service.proto:3:package worldmonitor.military.v1;
+proto/worldmonitor/military/v1/service.proto:6:import "worldmonitor/military/v1/list_military_flights.proto";
+proto/worldmonitor/military/v1/service.proto:7:import "worldmonitor/military/v1/get_theater_posture.proto";
+proto/worldmonitor/military/v1/service.proto:8:import "worldmonitor/military/v1/get_aircraft_details.proto";
+proto/worldmonitor/military/v1/service.proto:9:import "worldmonitor/military/v1/get_aircraft_details_batch.proto";
+proto/worldmonitor/military/v1/service.proto:10:import "worldmonitor/military/v1/get_wingbits_status.proto";
+proto/worldmonitor/military/v1/service.proto:11:import "worldmonitor/military/v1/get_usni_fleet_report.proto";
+proto/worldmonitor/military/v1/service.proto:12:import "worldmonitor/military/v1/list_military_bases.proto";
+proto/worldmonitor/military/v1/usni_fleet.proto:3:package worldmonitor.military.v1;
+proto/worldmonitor/natural/v1/list_natural_events.proto:3:package worldmonitor.natural.v1;
+proto/worldmonitor/natural/v1/service.proto:3:package worldmonitor.natural.v1;
+proto/worldmonitor/natural/v1/service.proto:6:import "worldmonitor/natural/v1/list_natural_events.proto";
+proto/worldmonitor/news/v1/get_summarize_article_cache.proto:3:package worldmonitor.news.v1;
+proto/worldmonitor/news/v1/list_feed_digest.proto:3:package worldmonitor.news.v1;
+proto/worldmonitor/news/v1/list_feed_digest.proto:6:import "worldmonitor/news/v1/news_item.proto";
+proto/worldmonitor/news/v1/news_item.proto:3:package worldmonitor.news.v1;
+proto/worldmonitor/news/v1/news_item.proto:7:import "worldmonitor/core/v1/geo.proto";
+proto/worldmonitor/news/v1/news_item.proto:30:  worldmonitor.core.v1.GeoCoordinates location = 7;
+proto/worldmonitor/news/v1/service.proto:3:package worldmonitor.news.v1;
+proto/worldmonitor/news/v1/service.proto:6:import "worldmonitor/news/v1/summarize_article.proto";
+proto/worldmonitor/news/v1/service.proto:7:import "worldmonitor/news/v1/get_summarize_article_cache.proto";
+proto/worldmonitor/news/v1/service.proto:8:import "worldmonitor/news/v1/list_feed_digest.proto";
+proto/worldmonitor/news/v1/summarize_article.proto:3:package worldmonitor.news.v1;
+proto/worldmonitor/positive_events/v1/list_positive_geo_events.proto:3:package worldmonitor.positive_events.v1;
+proto/worldmonitor/positive_events/v1/service.proto:3:package worldmonitor.positive_events.v1;
+proto/worldmonitor/positive_events/v1/service.proto:6:import "worldmonitor/positive_events/v1/list_positive_geo_events.proto";
+proto/worldmonitor/prediction/v1/list_prediction_markets.proto:3:package worldmonitor.prediction.v1;
+proto/worldmonitor/prediction/v1/list_prediction_markets.proto:6:import "worldmonitor/core/v1/pagination.proto";
+proto/worldmonitor/prediction/v1/list_prediction_markets.proto:7:import "worldmonitor/prediction/v1/prediction_market.proto";
+proto/worldmonitor/prediction/v1/list_prediction_markets.proto:26:  worldmonitor.core.v1.PaginationResponse pagination = 2;
+proto/worldmonitor/prediction/v1/prediction_market.proto:3:package worldmonitor.prediction.v1;
+proto/worldmonitor/prediction/v1/service.proto:3:package worldmonitor.prediction.v1;
+proto/worldmonitor/prediction/v1/service.proto:6:import "worldmonitor/prediction/v1/list_prediction_markets.proto";
+proto/worldmonitor/research/v1/list_arxiv_papers.proto:3:package worldmonitor.research.v1;
+proto/worldmonitor/research/v1/list_arxiv_papers.proto:6:import "worldmonitor/core/v1/pagination.proto";
+proto/worldmonitor/research/v1/list_arxiv_papers.proto:7:import "worldmonitor/research/v1/research_item.proto";
+proto/worldmonitor/research/v1/list_arxiv_papers.proto:26:  worldmonitor.core.v1.PaginationResponse pagination = 2;
+proto/worldmonitor/research/v1/list_hackernews_items.proto:3:package worldmonitor.research.v1;
+proto/worldmonitor/research/v1/list_hackernews_items.proto:6:import "worldmonitor/core/v1/pagination.proto";
+proto/worldmonitor/research/v1/list_hackernews_items.proto:7:import "worldmonitor/research/v1/research_item.proto";
+proto/worldmonitor/research/v1/list_hackernews_items.proto:24:  worldmonitor.core.v1.PaginationResponse pagination = 2;
+proto/worldmonitor/research/v1/list_tech_events.proto:3:package worldmonitor.research.v1;
+proto/worldmonitor/research/v1/list_trending_repos.proto:3:package worldmonitor.research.v1;
+proto/worldmonitor/research/v1/list_trending_repos.proto:6:import "worldmonitor/core/v1/pagination.proto";
+proto/worldmonitor/research/v1/list_trending_repos.proto:7:import "worldmonitor/research/v1/research_item.proto";
+proto/worldmonitor/research/v1/list_trending_repos.proto:26:  worldmonitor.core.v1.PaginationResponse pagination = 2;
+proto/worldmonitor/research/v1/research_item.proto:3:package worldmonitor.research.v1;
+proto/worldmonitor/research/v1/service.proto:3:package worldmonitor.research.v1;
+proto/worldmonitor/research/v1/service.proto:6:import "worldmonitor/research/v1/list_arxiv_papers.proto";
+proto/worldmonitor/research/v1/service.proto:7:import "worldmonitor/research/v1/list_trending_repos.proto";
+proto/worldmonitor/research/v1/service.proto:8:import "worldmonitor/research/v1/list_hackernews_items.proto";
+proto/worldmonitor/research/v1/service.proto:9:import "worldmonitor/research/v1/list_tech_events.proto";
+proto/worldmonitor/seismology/v1/earthquake.proto:3:package worldmonitor.seismology.v1;
+proto/worldmonitor/seismology/v1/earthquake.proto:7:import "worldmonitor/core/v1/geo.proto";
+proto/worldmonitor/seismology/v1/earthquake.proto:24:  worldmonitor.core.v1.GeoCoordinates location = 5;
+proto/worldmonitor/seismology/v1/list_earthquakes.proto:3:package worldmonitor.seismology.v1;
+proto/worldmonitor/seismology/v1/list_earthquakes.proto:6:import "worldmonitor/core/v1/pagination.proto";
+proto/worldmonitor/seismology/v1/list_earthquakes.proto:7:import "worldmonitor/seismology/v1/earthquake.proto";
+proto/worldmonitor/seismology/v1/list_earthquakes.proto:28:  worldmonitor.core.v1.PaginationResponse pagination = 2;
+proto/worldmonitor/seismology/v1/service.proto:3:package worldmonitor.seismology.v1;
+proto/worldmonitor/seismology/v1/service.proto:6:import "worldmonitor/seismology/v1/list_earthquakes.proto";
+proto/worldmonitor/supply_chain/v1/get_chokepoint_status.proto:3:package worldmonitor.supply_chain.v1;
+proto/worldmonitor/supply_chain/v1/get_chokepoint_status.proto:5:import "worldmonitor/supply_chain/v1/supply_chain_data.proto";
+proto/worldmonitor/supply_chain/v1/get_critical_minerals.proto:3:package worldmonitor.supply_chain.v1;
+proto/worldmonitor/supply_chain/v1/get_critical_minerals.proto:5:import "worldmonitor/supply_chain/v1/supply_chain_data.proto";
+proto/worldmonitor/supply_chain/v1/get_shipping_rates.proto:3:package worldmonitor.supply_chain.v1;
+proto/worldmonitor/supply_chain/v1/get_shipping_rates.proto:5:import "worldmonitor/supply_chain/v1/supply_chain_data.proto";
+proto/worldmonitor/supply_chain/v1/service.proto:3:package worldmonitor.supply_chain.v1;
+proto/worldmonitor/supply_chain/v1/service.proto:6:import "worldmonitor/supply_chain/v1/get_shipping_rates.proto";
+proto/worldmonitor/supply_chain/v1/service.proto:7:import "worldmonitor/supply_chain/v1/get_chokepoint_status.proto";
+proto/worldmonitor/supply_chain/v1/service.proto:8:import "worldmonitor/supply_chain/v1/get_critical_minerals.proto";
+proto/worldmonitor/supply_chain/v1/supply_chain_data.proto:3:package worldmonitor.supply_chain.v1;
+proto/worldmonitor/trade/v1/get_tariff_trends.proto:3:package worldmonitor.trade.v1;
+proto/worldmonitor/trade/v1/get_tariff_trends.proto:6:import "worldmonitor/trade/v1/trade_data.proto";
+proto/worldmonitor/trade/v1/get_trade_barriers.proto:3:package worldmonitor.trade.v1;
+proto/worldmonitor/trade/v1/get_trade_barriers.proto:6:import "worldmonitor/trade/v1/trade_data.proto";
+proto/worldmonitor/trade/v1/get_trade_flows.proto:3:package worldmonitor.trade.v1;
+proto/worldmonitor/trade/v1/get_trade_flows.proto:6:import "worldmonitor/trade/v1/trade_data.proto";
+proto/worldmonitor/trade/v1/get_trade_restrictions.proto:3:package worldmonitor.trade.v1;
+proto/worldmonitor/trade/v1/get_trade_restrictions.proto:6:import "worldmonitor/trade/v1/trade_data.proto";
+proto/worldmonitor/trade/v1/service.proto:3:package worldmonitor.trade.v1;
+proto/worldmonitor/trade/v1/service.proto:6:import "worldmonitor/trade/v1/get_trade_restrictions.proto";
+proto/worldmonitor/trade/v1/service.proto:7:import "worldmonitor/trade/v1/get_tariff_trends.proto";
+proto/worldmonitor/trade/v1/service.proto:8:import "worldmonitor/trade/v1/get_trade_flows.proto";
+proto/worldmonitor/trade/v1/service.proto:9:import "worldmonitor/trade/v1/get_trade_barriers.proto";
+proto/worldmonitor/trade/v1/trade_data.proto:3:package worldmonitor.trade.v1;
+proto/worldmonitor/unrest/v1/list_unrest_events.proto:3:package worldmonitor.unrest.v1;
+proto/worldmonitor/unrest/v1/list_unrest_events.proto:6:import "worldmonitor/core/v1/pagination.proto";
+proto/worldmonitor/unrest/v1/list_unrest_events.proto:7:import "worldmonitor/core/v1/severity.proto";
+proto/worldmonitor/unrest/v1/list_unrest_events.proto:8:import "worldmonitor/unrest/v1/unrest_event.proto";
+proto/worldmonitor/unrest/v1/list_unrest_events.proto:23:  worldmonitor.core.v1.SeverityLevel min_severity = 6 [(sebuf.http.query) = { name: "min_severity" }];
+proto/worldmonitor/unrest/v1/list_unrest_events.proto:41:  worldmonitor.core.v1.PaginationResponse pagination = 3;
+proto/worldmonitor/unrest/v1/service.proto:3:package worldmonitor.unrest.v1;
+proto/worldmonitor/unrest/v1/service.proto:6:import "worldmonitor/unrest/v1/list_unrest_events.proto";
+proto/worldmonitor/unrest/v1/unrest_event.proto:3:package worldmonitor.unrest.v1;
+proto/worldmonitor/unrest/v1/unrest_event.proto:7:import "worldmonitor/core/v1/geo.proto";
+proto/worldmonitor/unrest/v1/unrest_event.proto:8:import "worldmonitor/core/v1/severity.proto";
+proto/worldmonitor/unrest/v1/unrest_event.proto:31:  worldmonitor.core.v1.GeoCoordinates location = 8;
+proto/worldmonitor/unrest/v1/unrest_event.proto:35:  worldmonitor.core.v1.SeverityLevel severity = 10;
+proto/worldmonitor/unrest/v1/unrest_event.proto:63:  worldmonitor.core.v1.SeverityLevel severity = 6;
+proto/worldmonitor/wildfire/v1/fire_detection.proto:3:package worldmonitor.wildfire.v1;
+proto/worldmonitor/wildfire/v1/fire_detection.proto:7:import "worldmonitor/core/v1/geo.proto";
+proto/worldmonitor/wildfire/v1/fire_detection.proto:18:  worldmonitor.core.v1.GeoCoordinates location = 2;
+proto/worldmonitor/wildfire/v1/list_fire_detections.proto:3:package worldmonitor.wildfire.v1;
+proto/worldmonitor/wildfire/v1/list_fire_detections.proto:6:import "worldmonitor/core/v1/pagination.proto";
+proto/worldmonitor/wildfire/v1/list_fire_detections.proto:7:import "worldmonitor/wildfire/v1/fire_detection.proto";
+proto/worldmonitor/wildfire/v1/list_fire_detections.proto:34:  worldmonitor.core.v1.PaginationResponse pagination = 2;
+proto/worldmonitor/wildfire/v1/service.proto:3:package worldmonitor.wildfire.v1;
+proto/worldmonitor/wildfire/v1/service.proto:6:import "worldmonitor/wildfire/v1/list_fire_detections.proto";
+scripts/_seed-utils.mjs:36:      join(process.env.HOME, "Documents/GitHub/worldmonitor", ".env.local"),
+scripts/fetch-pakistan-boundary-override.mjs:5: *   rclone copy public/data/country-boundary-overrides.geojson r2:worldmonitor-maps/
+scripts/package-lock.json:2:  "name": "worldmonitor-railway-relay",
+scripts/package-lock.json:8:      "name": "worldmonitor-railway-relay",
+scripts/package.json:2:  "name": "worldmonitor-railway-relay",
+scripts/seed-insights.mjs:68:// Provider config — mirrors server/worldmonitor/news/v1/_shared.ts getProviderCredentials()
+scripts/seed-military-bases.mjs:11:  "https://api.cloudflare.com/client/v4/accounts/{acct}/r2/buckets/worldmonitor-data/objects/seed-data/military-bases-final.json";
+scripts/seed-ucdp-events.mjs:28:      "/Users/eliehabib/Documents/GitHub/worldmonitor",
+server/gateway.ts:23:import type { ServerOptions } from "../src/generated/server/worldmonitor/seismology/v1/service_server";
+server/worldmonitor/aviation/v1/_providers/demo_prices.ts:10:} from "../../../../../src/generated/server/worldmonitor/aviation/v1/service_server";
+server/worldmonitor/aviation/v1/_providers/travelpayouts_data.ts:16:} from "../../../../../src/generated/server/worldmonitor/aviation/v1/service_server";
+server/worldmonitor/aviation/v1/_shared.ts:8:} from "../../../../src/generated/server/worldmonitor/aviation/v1/service_server";
+server/worldmonitor/aviation/v1/get-airport-ops-summary.ts:7:} from "../../../../src/generated/server/worldmonitor/aviation/v1/service_server";
+server/worldmonitor/aviation/v1/get-carrier-ops.ts:6:} from "../../../../src/generated/server/worldmonitor/aviation/v1/service_server";
+server/worldmonitor/aviation/v1/get-carrier-ops.ts:33:          import("../../../../src/generated/server/worldmonitor/aviation/v1/service_server").FlightInstance;
+server/worldmonitor/aviation/v1/get-carrier-ops.ts:63:            carrier: import("../../../../src/generated/server/worldmonitor/aviation/v1/service_server").Carrier;
+server/worldmonitor/aviation/v1/get-flight-status.ts:6:} from "../../../../src/generated/server/worldmonitor/aviation/v1/service_server";
+server/worldmonitor/aviation/v1/handler.ts:1:import type { AviationServiceHandler } from "../../../../src/generated/server/worldmonitor/aviation/v1/service_server";
+server/worldmonitor/aviation/v1/list-airport-delays.ts:6:} from "../../../../src/generated/server/worldmonitor/aviation/v1/service_server";
+server/worldmonitor/aviation/v1/list-airport-flights.ts:9:} from "../../../../src/generated/server/worldmonitor/aviation/v1/service_server";
+server/worldmonitor/aviation/v1/list-aviation-news.ts:6:} from "../../../../src/generated/server/worldmonitor/aviation/v1/service_server";
+server/worldmonitor/aviation/v1/search-flight-prices.ts:5:} from "../../../../src/generated/server/worldmonitor/aviation/v1/service_server";
+server/worldmonitor/aviation/v1/track-aircraft.ts:6:} from "../../../../src/generated/server/worldmonitor/aviation/v1/service_server";
+server/worldmonitor/climate/v1/handler.ts:1:import type { ClimateServiceHandler } from "../../../../src/generated/server/worldmonitor/climate/v1/service_server";
+server/worldmonitor/climate/v1/list-climate-anomalies.ts:18:} from "../../../../src/generated/server/worldmonitor/climate/v1/service_server";
+server/worldmonitor/conflict/v1/get-humanitarian-summary-batch.ts:6:} from "../../../../src/generated/server/worldmonitor/conflict/v1/service_server";
+server/worldmonitor/conflict/v1/get-humanitarian-summary-batch.ts:36:    const appId = btoa("worldmonitor:monitor@myglobalwatch.vercel.app");
+server/worldmonitor/conflict/v1/get-humanitarian-summary.ts:14:} from "../../../../src/generated/server/worldmonitor/conflict/v1/service_server";
+server/worldmonitor/conflict/v1/get-humanitarian-summary.ts:39:    const appId = btoa("worldmonitor:monitor@myglobalwatch.vercel.app");
+server/worldmonitor/conflict/v1/handler.ts:18:import type { ConflictServiceHandler } from "../../../../src/generated/server/worldmonitor/conflict/v1/service_server";
+server/worldmonitor/conflict/v1/list-acled-events.ts:14:} from "../../../../src/generated/server/worldmonitor/conflict/v1/service_server";
+server/worldmonitor/conflict/v1/list-iran-events.ts:5:} from "../../../../src/generated/server/worldmonitor/conflict/v1/service_server";
+server/worldmonitor/conflict/v1/list-ucdp-events.ts:7:} from "../../../../src/generated/server/worldmonitor/conflict/v1/service_server";
+server/worldmonitor/cyber/v1/_shared.ts:22:} from "../../../../src/generated/server/worldmonitor/cyber/v1/service_server";
+server/worldmonitor/cyber/v1/handler.ts:1:import type { CyberServiceHandler } from "../../../../src/generated/server/worldmonitor/cyber/v1/service_server";
+server/worldmonitor/cyber/v1/list-cyber-threats.ts:5:} from "../../../../src/generated/server/worldmonitor/cyber/v1/service_server";
+server/worldmonitor/displacement/v1/get-displacement-summary.ts:13:} from "../../../../src/generated/server/worldmonitor/displacement/v1/service_server";
+server/worldmonitor/displacement/v1/get-population-exposure.ts:12:} from "../../../../src/generated/server/worldmonitor/displacement/v1/service_server";
+server/worldmonitor/displacement/v1/handler.ts:1:import type { DisplacementServiceHandler } from "../../../../src/generated/server/worldmonitor/displacement/v1/service_server";
+server/worldmonitor/economic/v1/get-bis-credit.ts:11:} from "../../../../src/generated/server/worldmonitor/economic/v1/service_server";
+server/worldmonitor/economic/v1/get-bis-exchange-rates.ts:11:} from "../../../../src/generated/server/worldmonitor/economic/v1/service_server";
+server/worldmonitor/economic/v1/get-bis-policy-rates.ts:11:} from "../../../../src/generated/server/worldmonitor/economic/v1/service_server";
+server/worldmonitor/economic/v1/get-energy-capacity.ts:11:} from "../../../../src/generated/server/worldmonitor/economic/v1/service_server";
+server/worldmonitor/economic/v1/get-energy-prices.ts:10:} from "../../../../src/generated/server/worldmonitor/economic/v1/service_server";
+server/worldmonitor/economic/v1/get-fred-series-batch.ts:7:} from "../../../../src/generated/server/worldmonitor/economic/v1/service_server";
+server/worldmonitor/economic/v1/get-fred-series.ts:11:} from "../../../../src/generated/server/worldmonitor/economic/v1/service_server";
+server/worldmonitor/economic/v1/get-macro-signals.ts:13:} from "../../../../src/generated/server/worldmonitor/economic/v1/service_server";
+server/worldmonitor/economic/v1/handler.ts:1:import type { EconomicServiceHandler } from "../../../../src/generated/server/worldmonitor/economic/v1/service_server";
+server/worldmonitor/economic/v1/list-world-bank-indicators.ts:11:} from "../../../../src/generated/server/worldmonitor/economic/v1/service_server";
+server/worldmonitor/giving/v1/get-giving-summary.ts:22:} from "../../../../src/generated/server/worldmonitor/giving/v1/service_server";
+server/worldmonitor/giving/v1/handler.ts:1:import type { GivingServiceHandler } from "../../../../src/generated/server/worldmonitor/giving/v1/service_server";
+server/worldmonitor/imagery/v1/handler.ts:1:import type { ImageryServiceHandler } from "../../../../src/generated/server/worldmonitor/imagery/v1/service_server";
+server/worldmonitor/imagery/v1/search-imagery.ts:6:} from "../../../../src/generated/server/worldmonitor/imagery/v1/service_server";
+server/worldmonitor/infrastructure/v1/get-cable-health.ts:8:} from "../../../../src/generated/server/worldmonitor/infrastructure/v1/service_server";
+server/worldmonitor/infrastructure/v1/get-temporal-baseline.ts:5:} from "../../../../src/generated/server/worldmonitor/infrastructure/v1/service_server";
+server/worldmonitor/infrastructure/v1/handler.ts:1:import type { InfrastructureServiceHandler } from "../../../../src/generated/server/worldmonitor/infrastructure/v1/service_server";
+server/worldmonitor/infrastructure/v1/list-internet-outages.ts:7:} from "../../../../src/generated/server/worldmonitor/infrastructure/v1/service_server";
+server/worldmonitor/infrastructure/v1/list-service-statuses.ts:7:} from "../../../../src/generated/server/worldmonitor/infrastructure/v1/service_server";
+server/worldmonitor/infrastructure/v1/list-temporal-anomalies.ts:6:} from "../../../../src/generated/server/worldmonitor/infrastructure/v1/service_server";
+server/worldmonitor/infrastructure/v1/record-baseline-snapshot.ts:5:} from "../../../../src/generated/server/worldmonitor/infrastructure/v1/service_server";
+server/worldmonitor/intelligence/v1/classify-event.ts:6:} from "../../../../src/generated/server/worldmonitor/intelligence/v1/service_server";
+server/worldmonitor/intelligence/v1/deduct-situation.ts:5:} from "../../../../src/generated/server/worldmonitor/intelligence/v1/service_server";
+server/worldmonitor/intelligence/v1/get-country-facts.ts:5:} from "../../../../src/generated/server/worldmonitor/intelligence/v1/service_server";
+server/worldmonitor/intelligence/v1/get-country-intel-brief.ts:5:} from "../../../../src/generated/server/worldmonitor/intelligence/v1/service_server";
+server/worldmonitor/intelligence/v1/get-pizzint-status.ts:10:} from "../../../../src/generated/server/worldmonitor/intelligence/v1/service_server";
+server/worldmonitor/intelligence/v1/get-risk-scores.ts:9:} from "../../../../src/generated/server/worldmonitor/intelligence/v1/service_server";
+server/worldmonitor/intelligence/v1/handler.ts:1:import type { IntelligenceServiceHandler } from "../../../../src/generated/server/worldmonitor/intelligence/v1/service_server";
+server/worldmonitor/intelligence/v1/search-gdelt-documents.ts:6:} from "../../../../src/generated/server/worldmonitor/intelligence/v1/service_server";
+server/worldmonitor/maritime/v1/get-vessel-snapshot.ts:10:} from "../../../../src/generated/server/worldmonitor/maritime/v1/service_server";
+server/worldmonitor/maritime/v1/handler.ts:1:import type { MaritimeServiceHandler } from "../../../../src/generated/server/worldmonitor/maritime/v1/service_server";
+server/worldmonitor/maritime/v1/list-navigational-warnings.ts:6:} from "../../../../src/generated/server/worldmonitor/maritime/v1/service_server";
+server/worldmonitor/market/v1/analyze-stock.ts:6:} from "../../../../src/generated/server/worldmonitor/market/v1/service_server";
+server/worldmonitor/market/v1/backtest-stock.ts:6:} from "../../../../src/generated/server/worldmonitor/market/v1/service_server";
+server/worldmonitor/market/v1/get-country-stock-index.ts:10:} from "../../../../src/generated/server/worldmonitor/market/v1/service_server";
+server/worldmonitor/market/v1/get-sector-summary.ts:10:} from "../../../../src/generated/server/worldmonitor/market/v1/service_server";
+server/worldmonitor/market/v1/get-stock-analysis-history.ts:5:} from "../../../../src/generated/server/worldmonitor/market/v1/service_server";
+server/worldmonitor/market/v1/handler.ts:15:import type { MarketServiceHandler } from "../../../../src/generated/server/worldmonitor/market/v1/service_server";
+server/worldmonitor/market/v1/list-commodity-quotes.ts:11:} from "../../../../src/generated/server/worldmonitor/market/v1/service_server";
+server/worldmonitor/market/v1/list-crypto-quotes.ts:11:} from "../../../../src/generated/server/worldmonitor/market/v1/service_server";
+server/worldmonitor/market/v1/list-etf-flows.ts:11:} from "../../../../src/generated/server/worldmonitor/market/v1/service_server";
+server/worldmonitor/market/v1/list-gulf-quotes.ts:13:} from "../../../../src/generated/server/worldmonitor/market/v1/service_server";
+server/worldmonitor/market/v1/list-market-quotes.ts:10:} from "../../../../src/generated/server/worldmonitor/market/v1/service_server";
+server/worldmonitor/market/v1/list-stablecoin-markets.ts:11:} from "../../../../src/generated/server/worldmonitor/market/v1/service_server";
+server/worldmonitor/market/v1/list-stored-stock-backtests.ts:5:} from "../../../../src/generated/server/worldmonitor/market/v1/service_server";
+server/worldmonitor/market/v1/stock-news-search.ts:3:import type { StockAnalysisHeadline } from "../../../../src/generated/server/worldmonitor/market/v1/service_server";
+server/worldmonitor/military/v1/_shared.ts:1:import type { AircraftDetails } from "../../../../src/generated/server/worldmonitor/military/v1/service_server";
+server/worldmonitor/military/v1/get-aircraft-details-batch.ts:6:} from "../../../../src/generated/server/worldmonitor/military/v1/service_server";
+server/worldmonitor/military/v1/get-aircraft-details.ts:6:} from "../../../../src/generated/server/worldmonitor/military/v1/service_server";
+server/worldmonitor/military/v1/get-theater-posture.ts:6:} from "../../../../src/generated/server/worldmonitor/military/v1/service_server";
+server/worldmonitor/military/v1/get-usni-fleet-report.ts:9:} from "../../../../src/generated/server/worldmonitor/military/v1/service_server";
+server/worldmonitor/military/v1/get-wingbits-status.ts:5:} from "../../../../src/generated/server/worldmonitor/military/v1/service_server";
+server/worldmonitor/military/v1/handler.ts:1:import type { MilitaryServiceHandler } from "../../../../src/generated/server/worldmonitor/military/v1/service_server";
+server/worldmonitor/military/v1/list-military-bases.ts:7:} from "../../../../src/generated/server/worldmonitor/military/v1/service_server";
+server/worldmonitor/military/v1/list-military-flights.ts:6:} from "../../../../src/generated/server/worldmonitor/military/v1/service_server";
+server/worldmonitor/natural/v1/handler.ts:1:import type { NaturalServiceHandler } from "../../../../src/generated/server/worldmonitor/natural/v1/service_server";
+server/worldmonitor/natural/v1/list-natural-events.ts:7:} from "../../../../src/generated/server/worldmonitor/natural/v1/service_server";
+server/worldmonitor/news/v1/get-summarize-article-cache.ts:5:} from "../../../../src/generated/server/worldmonitor/news/v1/service_server";
+server/worldmonitor/news/v1/handler.ts:1:import type { NewsServiceHandler } from "../../../../src/generated/server/worldmonitor/news/v1/service_server";
+server/worldmonitor/news/v1/list-feed-digest.ts:8:} from "../../../../src/generated/server/worldmonitor/news/v1/service_server";
+server/worldmonitor/news/v1/summarize-article.ts:5:} from "../../../../src/generated/server/worldmonitor/news/v1/service_server";
+server/worldmonitor/positive-events/v1/handler.ts:1:import type { PositiveEventsServiceHandler } from "../../../../src/generated/server/worldmonitor/positive_events/v1/service_server";
+server/worldmonitor/positive-events/v1/list-positive-geo-events.ts:6:} from "../../../../src/generated/server/worldmonitor/positive_events/v1/service_server";
+server/worldmonitor/prediction/v1/handler.ts:1:import type { PredictionServiceHandler } from "../../../../src/generated/server/worldmonitor/prediction/v1/service_server";
+server/worldmonitor/prediction/v1/list-prediction-markets.ts:17:} from "../../../../src/generated/server/worldmonitor/prediction/v1/service_server";
+server/worldmonitor/research/v1/handler.ts:11:import type { ResearchServiceHandler } from "../../../../src/generated/server/worldmonitor/research/v1/service_server";
+server/worldmonitor/research/v1/list-arxiv-papers.ts:19:} from "../../../../src/generated/server/worldmonitor/research/v1/service_server";
+server/worldmonitor/research/v1/list-hackernews-items.ts:13:} from "../../../../src/generated/server/worldmonitor/research/v1/service_server";
+server/worldmonitor/research/v1/list-tech-events.ts:20:} from "../../../../src/generated/server/worldmonitor/research/v1/service_server";
+server/worldmonitor/research/v1/list-trending-repos.ts:13:} from "../../../../src/generated/server/worldmonitor/research/v1/service_server";
+server/worldmonitor/seismology/v1/handler.ts:1:import type { SeismologyServiceHandler } from "../../../../src/generated/server/worldmonitor/seismology/v1/service_server";
+server/worldmonitor/seismology/v1/list-earthquakes.ts:13:} from "../../../../src/generated/server/worldmonitor/seismology/v1/service_server";
+server/worldmonitor/supply-chain/v1/get-chokepoint-status.ts:6:} from "../../../../src/generated/server/worldmonitor/supply_chain/v1/service_server";
+server/worldmonitor/supply-chain/v1/get-chokepoint-status.ts:13:} from "../../../../src/generated/server/worldmonitor/maritime/v1/service_server";
+server/worldmonitor/supply-chain/v1/get-critical-minerals.ts:7:} from "../../../../src/generated/server/worldmonitor/supply_chain/v1/service_server";
+server/worldmonitor/supply-chain/v1/get-shipping-rates.ts:7:} from "../../../../src/generated/server/worldmonitor/supply_chain/v1/service_server";
+server/worldmonitor/supply-chain/v1/handler.ts:1:import type { SupplyChainServiceHandler } from "../../../../src/generated/server/worldmonitor/supply_chain/v1/service_server";
+server/worldmonitor/trade/v1/get-tariff-trends.ts:13:} from "../../../../src/generated/server/worldmonitor/trade/v1/service_server";
+server/worldmonitor/trade/v1/get-trade-barriers.ts:15:} from "../../../../src/generated/server/worldmonitor/trade/v1/service_server";
+server/worldmonitor/trade/v1/get-trade-flows.ts:13:} from "../../../../src/generated/server/worldmonitor/trade/v1/service_server";
+server/worldmonitor/trade/v1/get-trade-restrictions.ts:15:} from "../../../../src/generated/server/worldmonitor/trade/v1/service_server";
+server/worldmonitor/trade/v1/handler.ts:1:import type { TradeServiceHandler } from "../../../../src/generated/server/worldmonitor/trade/v1/service_server";
+server/worldmonitor/unrest/v1/_shared.ts:5:} from "../../../../src/generated/server/worldmonitor/unrest/v1/service_server";
+server/worldmonitor/unrest/v1/handler.ts:1:import type { UnrestServiceHandler } from "../../../../src/generated/server/worldmonitor/unrest/v1/service_server";
+server/worldmonitor/unrest/v1/list-unrest-events.ts:13:} from "../../../../src/generated/server/worldmonitor/unrest/v1/service_server";
+server/worldmonitor/wildfire/v1/handler.ts:1:import type { WildfireServiceHandler } from "../../../../src/generated/server/worldmonitor/wildfire/v1/service_server";
+server/worldmonitor/wildfire/v1/list-fire-detections.ts:15:} from "../../../../src/generated/server/worldmonitor/wildfire/v1/service_server";
+src-tauri/tauri.conf.json:6:  "identifier": "app.worldmonitor.desktop",
+src-tauri/tauri.finance.conf.json:5:  "identifier": "app.worldmonitor.finance.desktop",
+src-tauri/tauri.tech.conf.json:5:  "identifier": "app.worldmonitor.tech.desktop",
+src/App.ts:229:    const PANEL_SPANS_KEY = "worldmonitor-panel-spans";
+src/App.ts:287:      const PANEL_ORDER_MIGRATION_KEY = "worldmonitor-panel-order-v1.9";
+src/App.ts:317:        const TECH_INSIGHTS_MIGRATION_KEY = "worldmonitor-tech-insights-top-v1";
+src/App.ts:342:    const PANEL_PRUNE_KEY = "worldmonitor-panel-prune-v1";
+src/App.ts:374:    const LAYOUT_RESET_MIGRATION_KEY = "worldmonitor-layout-reset-v2.5";
+src/App.ts:418:      const baseKey = "worldmonitor-sources-reduction-v3";
+src/App.ts:432:      const localeKey = `worldmonitor-locale-boost-${userLang}`;
+src/app/app-context.ts:16:import type { IranEvent } from "@/generated/client/worldmonitor/conflict/v1/service_client";
+src/app/country-intel.ts:39:import { MarketServiceClient } from "@/generated/client/worldmonitor/market/v1/service_client";
+src/app/country-intel.ts:40:import { IntelligenceServiceClient } from "@/generated/client/worldmonitor/intelligence/v1/service_client";
+src/app/data-loader.ts:184:import type { ListFeedDigestResponse } from "@/generated/client/worldmonitor/news/v1/service_client";
+src/app/data-loader.ts:188:} from "@/generated/client/worldmonitor/market/v1/service_client";
+src/app/data-loader.ts:190:import { ResearchServiceClient } from "@/generated/client/worldmonitor/research/v1/service_client";
+src/app/data-loader.ts:245:} from "@/generated/client/worldmonitor/news/v1/service_client";
+src/app/data-loader.ts:2141:      | import("@/generated/client/worldmonitor/conflict/v1/service_client").ListUcdpEventsResponse
+src/app/event-handlers.ts:1003:        localStorage.removeItem("worldmonitor-panel-col-spans");
+src/components/DeckGLMap.ts:67:import type { ImageryScene } from "@/generated/server/worldmonitor/imagery/v1/service_server";
+src/components/DeductionPanel.ts:3:import { IntelligenceServiceClient } from "@/generated/client/worldmonitor/intelligence/v1/service_client";
+src/components/ETFFlowsPanel.ts:5:import { MarketServiceClient } from "@/generated/client/worldmonitor/market/v1/service_client";
+src/components/ETFFlowsPanel.ts:6:import type { ListEtfFlowsResponse } from "@/generated/client/worldmonitor/market/v1/service_client";
+src/components/GlobeMap.ts:107:import type { ImageryScene } from "@/generated/server/worldmonitor/imagery/v1/service_server";
+src/components/GulfEconomiesPanel.ts:7:import { MarketServiceClient } from "@/generated/client/worldmonitor/market/v1/service_client";
+src/components/GulfEconomiesPanel.ts:11:} from "@/generated/client/worldmonitor/market/v1/service_client";
+src/components/IntelligenceGapBadge.ts:23:const STORAGE_KEY = "worldmonitor-intel-findings";
+src/components/MacroSignalsPanel.ts:5:import { EconomicServiceClient } from "@/generated/client/worldmonitor/economic/v1/service_client";
+src/components/MacroSignalsPanel.ts:6:import type { GetMacroSignalsResponse } from "@/generated/client/worldmonitor/economic/v1/service_client";
+src/components/MapContainer.ts:48:import type { ImageryScene } from "@/generated/server/worldmonitor/imagery/v1/service_server";
+src/components/Panel.ts:20:const PANEL_SPANS_KEY = "worldmonitor-panel-spans";
+src/components/Panel.ts:37:const PANEL_COL_SPANS_KEY = "worldmonitor-panel-col-spans";
+src/components/SearchModal.ts:96:const RECENT_SEARCHES_KEY = "worldmonitor_recent_searches";
+src/components/StablecoinPanel.ts:5:import { MarketServiceClient } from "@/generated/client/worldmonitor/market/v1/service_client";
+src/components/StablecoinPanel.ts:6:import type { ListStablecoinMarketsResponse } from "@/generated/client/worldmonitor/market/v1/service_client";
+src/components/StoryModal.ts:143:  a.download = `worldmonitor-${currentData?.countryCode.toLowerCase() || "story"}-${Date.now()}.png`;
+src/components/StoryModal.ts:156:    `${data.countryCode.toLowerCase()}-worldmonitor.png`,
+src/components/TechEventsPanel.ts:7:import { ResearchServiceClient } from "@/generated/client/worldmonitor/research/v1/service_client";
+src/components/TechEventsPanel.ts:11:} from "@/generated/client/worldmonitor/research/v1/service_client";
+src/components/WorldClockPanel.ts:307:const STORAGE_KEY = "worldmonitor-world-clock-cities";
+src/config/beta.ts:3:  localStorage.getItem("worldmonitor-beta-mode") === "true";
+src/config/panels.ts:1209:  panels: "worldmonitor-panels",
+src/config/panels.ts:1210:  monitors: "worldmonitor-monitors",
+src/config/panels.ts:1211:  mapLayers: "worldmonitor-layers",
+src/config/panels.ts:1212:  disabledFeeds: "worldmonitor-disabled-feeds",
+src/config/variants/base.ts:37:  panels: "worldmonitor-panels",
+src/config/variants/base.ts:38:  monitors: "worldmonitor-monitors",
+src/config/variants/base.ts:39:  mapLayers: "worldmonitor-layers",
+src/config/variants/base.ts:40:  disabledFeeds: "worldmonitor-disabled-feeds",
+src/config/variants/base.ts:41:  liveChannels: "worldmonitor-live-channels",
+src/config/variants/base.ts:42:  mapMode: "worldmonitor-map-mode", // 'flat' | 'globe'
+src/generated/client/worldmonitor/aviation/v1/service_client.ts:3:// source: worldmonitor/aviation/v1/service.proto
+src/generated/client/worldmonitor/climate/v1/service_client.ts:3:// source: worldmonitor/climate/v1/service.proto
+src/generated/client/worldmonitor/conflict/v1/service_client.ts:3:// source: worldmonitor/conflict/v1/service.proto
+src/generated/client/worldmonitor/cyber/v1/service_client.ts:3:// source: worldmonitor/cyber/v1/service.proto
+src/generated/client/worldmonitor/displacement/v1/service_client.ts:3:// source: worldmonitor/displacement/v1/service.proto
+src/generated/client/worldmonitor/economic/v1/service_client.ts:3:// source: worldmonitor/economic/v1/service.proto
+src/generated/client/worldmonitor/giving/v1/service_client.ts:3:// source: worldmonitor/giving/v1/service.proto
+src/generated/client/worldmonitor/infrastructure/v1/service_client.ts:3:// source: worldmonitor/infrastructure/v1/service.proto
+src/generated/client/worldmonitor/intelligence/v1/service_client.ts:3:// source: worldmonitor/intelligence/v1/service.proto
+src/generated/client/worldmonitor/maritime/v1/service_client.ts:3:// source: worldmonitor/maritime/v1/service.proto
+src/generated/client/worldmonitor/market/v1/service_client.ts:3:// source: worldmonitor/market/v1/service.proto
+src/generated/client/worldmonitor/military/v1/service_client.ts:3:// source: worldmonitor/military/v1/service.proto
+src/generated/client/worldmonitor/natural/v1/service_client.ts:2:// source: worldmonitor/natural/v1/service.proto
+src/generated/client/worldmonitor/news/v1/service_client.ts:3:// source: worldmonitor/news/v1/service.proto
+src/generated/client/worldmonitor/positive_events/v1/service_client.ts:3:// source: worldmonitor/positive_events/v1/service.proto
+src/generated/client/worldmonitor/prediction/v1/service_client.ts:3:// source: worldmonitor/prediction/v1/service.proto
+src/generated/client/worldmonitor/research/v1/service_client.ts:3:// source: worldmonitor/research/v1/service.proto
+src/generated/client/worldmonitor/seismology/v1/service_client.ts:3:// source: worldmonitor/seismology/v1/service.proto
+src/generated/client/worldmonitor/supply_chain/v1/service_client.ts:3:// source: worldmonitor/supply_chain/v1/service.proto
+src/generated/client/worldmonitor/trade/v1/service_client.ts:3:// source: worldmonitor/trade/v1/service.proto
+src/generated/client/worldmonitor/unrest/v1/service_client.ts:3:// source: worldmonitor/unrest/v1/service.proto
+src/generated/client/worldmonitor/wildfire/v1/service_client.ts:3:// source: worldmonitor/wildfire/v1/service.proto
+src/generated/server/worldmonitor/aviation/v1/service_server.ts:3:// source: worldmonitor/aviation/v1/service.proto
+src/generated/server/worldmonitor/climate/v1/service_server.ts:3:// source: worldmonitor/climate/v1/service.proto
+src/generated/server/worldmonitor/conflict/v1/service_server.ts:3:// source: worldmonitor/conflict/v1/service.proto
+src/generated/server/worldmonitor/cyber/v1/service_server.ts:3:// source: worldmonitor/cyber/v1/service.proto
+src/generated/server/worldmonitor/displacement/v1/service_server.ts:3:// source: worldmonitor/displacement/v1/service.proto
+src/generated/server/worldmonitor/economic/v1/service_server.ts:3:// source: worldmonitor/economic/v1/service.proto
+src/generated/server/worldmonitor/giving/v1/service_server.ts:3:// source: worldmonitor/giving/v1/service.proto
+src/generated/server/worldmonitor/imagery/v1/service_server.ts:3:// source: worldmonitor/imagery/v1/service.proto
+src/generated/server/worldmonitor/infrastructure/v1/service_server.ts:3:// source: worldmonitor/infrastructure/v1/service.proto
+src/generated/server/worldmonitor/intelligence/v1/service_server.ts:3:// source: worldmonitor/intelligence/v1/service.proto
+src/generated/server/worldmonitor/maritime/v1/service_server.ts:3:// source: worldmonitor/maritime/v1/service.proto
+src/generated/server/worldmonitor/market/v1/service_server.ts:3:// source: worldmonitor/market/v1/service.proto
+src/generated/server/worldmonitor/military/v1/service_server.ts:3:// source: worldmonitor/military/v1/service.proto
+src/generated/server/worldmonitor/natural/v1/service_server.ts:2:// source: worldmonitor/natural/v1/service.proto
+src/generated/server/worldmonitor/news/v1/service_server.ts:3:// source: worldmonitor/news/v1/service.proto
+src/generated/server/worldmonitor/positive_events/v1/service_server.ts:3:// source: worldmonitor/positive_events/v1/service.proto
+src/generated/server/worldmonitor/prediction/v1/service_server.ts:3:// source: worldmonitor/prediction/v1/service.proto
+src/generated/server/worldmonitor/research/v1/service_server.ts:3:// source: worldmonitor/research/v1/service.proto
+src/generated/server/worldmonitor/seismology/v1/service_server.ts:3:// source: worldmonitor/seismology/v1/service.proto
+src/generated/server/worldmonitor/supply_chain/v1/service_server.ts:3:// source: worldmonitor/supply_chain/v1/service.proto
+src/generated/server/worldmonitor/trade/v1/service_server.ts:3:// source: worldmonitor/trade/v1/service.proto
+src/generated/server/worldmonitor/unrest/v1/service_server.ts:3:// source: worldmonitor/unrest/v1/service.proto
+src/generated/server/worldmonitor/wildfire/v1/service_server.ts:3:// source: worldmonitor/wildfire/v1/service.proto
+src/main.ts:14:  release: `worldmonitor@${__APP_VERSION__}`,
+src/main.ts:513:    const on = localStorage.getItem("worldmonitor-beta-mode") === "true";
+src/main.ts:518:    if (v) localStorage.setItem("worldmonitor-beta-mode", "true");
+src/main.ts:519:    else localStorage.removeItem("worldmonitor-beta-mode");
+src/services/aviation/index.ts:12:} from "@/generated/client/worldmonitor/aviation/v1/service_client";
+src/services/cable-activity.ts:7:} from "@/generated/client/worldmonitor/maritime/v1/service_client";
+src/services/cable-health.ts:6:} from "@/generated/client/worldmonitor/infrastructure/v1/service_client";
+src/services/cached-risk-scores.ts:9:} from "@/generated/client/worldmonitor/intelligence/v1/service_client";
+src/services/cached-theater-posture.ts:7:} from "@/generated/client/worldmonitor/military/v1/service_client";
+src/services/climate/index.ts:8:} from "@/generated/client/worldmonitor/climate/v1/service_client";
+src/services/conflict/index.ts:14:} from "@/generated/client/worldmonitor/conflict/v1/service_client";
+src/services/correlation-engine/engine.ts:10:import { IntelligenceServiceClient } from "@/generated/client/worldmonitor/intelligence/v1/service_client";
+src/services/cyber/index.ts:6:} from "@/generated/client/worldmonitor/cyber/v1/service_client";
+src/services/desktop-readiness.ts:90:      "server/worldmonitor/conflict/v1/handler.ts",
+src/services/desktop-readiness.ts:91:      "server/worldmonitor/infrastructure/v1/handler.ts",
+src/services/desktop-readiness.ts:92:      "server/worldmonitor/cyber/v1/handler.ts",
+src/services/desktop-readiness.ts:93:      "server/worldmonitor/maritime/v1/handler.ts",
+src/services/desktop-readiness.ts:94:      "server/worldmonitor/military/v1/handler.ts",
+src/services/desktop-readiness.ts:106:    apiHandlers: ["server/worldmonitor/news/v1/handler.ts"],
+src/services/desktop-readiness.ts:124:    apiHandlers: ["server/worldmonitor/market/v1/handler.ts"],
+src/services/desktop-readiness.ts:139:    apiHandlers: ["server/worldmonitor/military/v1/handler.ts"],
+src/services/desktop-readiness.ts:150:    apiHandlers: ["server/worldmonitor/military/v1/handler.ts"],
+src/services/displacement/index.ts:7:} from "@/generated/client/worldmonitor/displacement/v1/service_client";
+src/services/earthquakes.ts:6:} from "@/generated/client/worldmonitor/seismology/v1/service_client";
+src/services/economic/index.ts:27:} from "@/generated/client/worldmonitor/economic/v1/service_client";
+src/services/eonet.ts:7:} from "@/generated/client/worldmonitor/natural/v1/service_client";
+src/services/gdelt-intel.ts:8:} from "@/generated/client/worldmonitor/intelligence/v1/service_client";
+src/services/giving/index.ts:9:} from "@/generated/client/worldmonitor/giving/v1/service_client";
+src/services/imagery.ts:2:import type { ImageryScene } from "@/generated/server/worldmonitor/imagery/v1/service_server";
+src/services/infrastructure/index.ts:16:} from "@/generated/client/worldmonitor/infrastructure/v1/service_client";
+src/services/maritime/index.ts:7:} from "@/generated/client/worldmonitor/maritime/v1/service_client";
+src/services/market/index.ts:15:} from "@/generated/client/worldmonitor/market/v1/service_client";
+src/services/military-bases.ts:7:} from "@/generated/client/worldmonitor/military/v1/service_client";
+src/services/persistent-cache.ts:15:const CACHE_PREFIX = "worldmonitor-persistent-cache:";
+src/services/persistent-cache.ts:16:const CACHE_DB_NAME = "worldmonitor_persistent_cache";
+src/services/pizzint.ts:16:} from "@/generated/client/worldmonitor/intelligence/v1/service_client";
+src/services/population-exposure.ts:4:import { DisplacementServiceClient } from "@/generated/client/worldmonitor/displacement/v1/service_client";
+src/services/population-exposure.ts:5:import type { GetPopulationExposureResponse } from "@/generated/client/worldmonitor/displacement/v1/service_client";
+src/services/positive-events-geo.ts:9:import { PositiveEventsServiceClient } from "@/generated/client/worldmonitor/positive_events/v1/service_client";
+src/services/prediction/index.ts:4:} from "@/generated/client/worldmonitor/prediction/v1/service_client";
+src/services/research/index.ts:7:} from "@/generated/client/worldmonitor/research/v1/service_client";
+src/services/runtime-config.ts:79:const TOGGLES_STORAGE_KEY = "worldmonitor-runtime-feature-toggles";
+src/services/runtime.ts:760:  /^https:\/\/([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)*worldmonitor\.app(:\d+)?$/;
+src/services/stock-analysis-history.ts:5:} from "@/generated/client/worldmonitor/market/v1/service_client";
+src/services/stock-analysis.ts:6:} from "@/generated/client/worldmonitor/market/v1/service_client";
+src/services/stock-backtest.ts:5:} from "@/generated/client/worldmonitor/market/v1/service_client";
+src/services/storage.ts:1:const DB_NAME = "worldmonitor_db";
+src/services/story-renderer.ts:50:const LOGO_URL = "/favico/worldmonitor-icon-1024.png";
+src/services/summarization.ts:20:} from "@/generated/client/worldmonitor/news/v1/service_client";
+src/services/supply-chain/index.ts:12:} from "@/generated/client/worldmonitor/supply_chain/v1/service_client";
+src/services/temporal-baseline.ts:4:} from "@/generated/client/worldmonitor/infrastructure/v1/service_client";
+src/services/threat-classifier.ts:513:} from "@/generated/client/worldmonitor/intelligence/v1/service_client";
+src/services/trade/index.ts:17:} from "@/generated/client/worldmonitor/trade/v1/service_client";
+src/services/trending-keywords.ts:79:const CONFIG_KEY = "worldmonitor-trending-config-v1";
+src/services/unrest/index.ts:6:} from "@/generated/client/worldmonitor/unrest/v1/service_client";
+src/services/usni-fleet.ts:17:} from "@/generated/client/worldmonitor/military/v1/service_client";
+src/services/wildfires/index.ts:7:} from "@/generated/client/worldmonitor/wildfire/v1/service_client";
+src/services/wingbits.ts:16:} from "@/generated/client/worldmonitor/military/v1/service_client";
+src/utils/export.ts:17:  filename = "worldmonitor-export",
+src/utils/export.ts:25:  filename = "worldmonitor-export",
+src/utils/export.ts:234:    const filename = `worldmonitor-${timestamp}`;
+src/utils/settings-persistence.ts:17:  "worldmonitor-panels",
+src/utils/settings-persistence.ts:18:  "worldmonitor-monitors",
+src/utils/settings-persistence.ts:19:  "worldmonitor-layers",
+src/utils/settings-persistence.ts:20:  "worldmonitor-disabled-feeds",
+src/utils/settings-persistence.ts:21:  "worldmonitor-live-channels",
+src/utils/settings-persistence.ts:22:  "worldmonitor-map-mode",
+src/utils/settings-persistence.ts:25:  "worldmonitor-panel-spans",
+src/utils/settings-persistence.ts:26:  "worldmonitor-panel-order",
+src/utils/settings-persistence.ts:27:  "worldmonitor-runtime-feature-toggles",
+src/utils/settings-persistence.ts:67:  a.download = `worldmonitor-settings-${ts}.json`;
+src/utils/utm.ts:1:const UTM_SOURCE = "worldmonitor";
+src/workers/vector-db.ts:3:const DB_NAME = "worldmonitor_vector_store";
+tests/bootstrap.test.mjs:113:    const handlerDirs = join(root, "server", "worldmonitor");
+tests/cii-scoring.test.mts:4:import { computeCIIScores } from "../server/worldmonitor/intelligence/v1/get-risk-scores.ts";
+tests/edge-functions.test.mjs:110:          "(proto definition → buf generate → handler in server/worldmonitor/{domain}/v1/ → wired in handler.ts). " +
+tests/military-classification.test.mjs:14:  join(root, "server/worldmonitor/military/v1/_shared.ts"),
+tests/redis-caching.test.mjs:559:      "server/worldmonitor/military/v1/get-theater-posture.ts",
+tests/redis-caching.test.mjs:563:          "server/worldmonitor/military/v1/_shared.ts",
+tests/redis-caching.test.mjs:816:      "server/worldmonitor/intelligence/v1/get-country-intel-brief.ts",
+tests/redis-caching.test.mjs:820:          "server/worldmonitor/intelligence/v1/_shared.ts",
+tests/redis-caching.test.mjs:1020:      "server/worldmonitor/military/v1/list-military-flights.ts",
+tests/redis-caching.test.mjs:1024:          "server/worldmonitor/military/v1/_shared.ts",
+tests/route-cache-tier.test.mjs:11:  const generatedDir = join(root, "src", "generated", "server", "worldmonitor");
+tests/server-handlers.test.mjs:18:import { deduplicateHeadlines } from "../server/worldmonitor/news/v1/dedup.mjs";
+tests/server-handlers.test.mjs:32:    "server/worldmonitor/conflict/v1/get-humanitarian-summary.ts",
+tests/server-handlers.test.mjs:117:    "proto/worldmonitor/conflict/v1/humanitarian_summary.proto",
+tests/server-handlers.test.mjs:144:  const src = readSrc("server/worldmonitor/news/v1/_shared.ts");
+tests/server-handlers.test.mjs:219:  const sharedSrc = readSrc("server/worldmonitor/news/v1/_shared.ts");
+tests/server-handlers.test.mjs:258:  const src = readSrc("server/worldmonitor/maritime/v1/get-vessel-snapshot.ts");
+tests/stock-analysis-history.test.mts:9:import { analyzeStock } from "../server/worldmonitor/market/v1/analyze-stock.ts";
+tests/stock-analysis-history.test.mts:10:import { getStockAnalysisHistory } from "../server/worldmonitor/market/v1/get-stock-analysis-history.ts";
+tests/stock-analysis-history.test.mts:11:import { MarketServiceClient } from "../src/generated/client/worldmonitor/market/v1/service_client.ts";
+tests/stock-analysis.test.mts:4:import { analyzeStock } from "../server/worldmonitor/market/v1/analyze-stock.ts";
+tests/stock-analysis.test.mts:5:import { MarketServiceClient } from "../src/generated/client/worldmonitor/market/v1/service_client.ts";
+tests/stock-backtest.test.mts:4:import { backtestStock } from "../server/worldmonitor/market/v1/backtest-stock.ts";
+tests/stock-backtest.test.mts:5:import { listStoredStockBacktests } from "../server/worldmonitor/market/v1/list-stored-stock-backtests.ts";
+tests/stock-backtest.test.mts:6:import { MarketServiceClient } from "../src/generated/client/worldmonitor/market/v1/service_client.ts";
+tests/stock-news-search.test.mts:8:} from "../server/worldmonitor/market/v1/stock-news-search.ts";
+tests/summarize-reasoning.test.mjs:28:  const src = readSrc("server/worldmonitor/news/v1/summarize-article.ts");
+tests/summarize-reasoning.test.mjs:52:  const src = readSrc("server/worldmonitor/news/v1/summarize-article.ts");
+tests/summarize-reasoning.test.mjs:161:  const src = readSrc("server/worldmonitor/news/v1/summarize-article.ts");
+tests/supply-chain-handlers.test.mjs:14:} from "../server/worldmonitor/supply-chain/v1/_scoring.mjs";
+tests/supply-chain-handlers.test.mjs:19:} from "../server/worldmonitor/supply-chain/v1/get-chokepoint-status.ts";
+tests/supply-chain-v2.test.mjs:32:    "proto/worldmonitor/supply_chain/v1/supply_chain_data.proto",
+tests/supply-chain-v2.test.mjs:63:    "src/generated/client/worldmonitor/supply_chain/v1/service_client.ts",
+tests/supply-chain-v2.test.mjs:66:    "src/generated/server/worldmonitor/supply_chain/v1/service_server.ts",
+tests/supply-chain-v2.test.mjs:127:    "server/worldmonitor/supply-chain/v1/get-chokepoint-status.ts",
+tests/supply-chain-v2.test.mjs:130:    "server/worldmonitor/supply-chain/v1/get-critical-minerals.ts",
+tests/supply-chain-v2.test.mjs:177:    "server/worldmonitor/supply-chain/v1/get-chokepoint-status.ts",
+tests/supply-chain-v2.test.mjs:241:    "server/worldmonitor/supply-chain/v1/get-critical-minerals.ts",
+tests/supply-chain-v2.test.mjs:244:    "server/worldmonitor/supply-chain/v1/_minerals-data.ts",
+tests/supply-chain-v2.test.mjs:295:    "server/worldmonitor/supply-chain/v1/get-shipping-rates.ts",
+tests/supply-chain-v2.test.mjs:456:    "server/worldmonitor/supply-chain/v1/_minerals-data.ts",
+tests/supply-chain-v2.test.mjs:541:} from "../server/worldmonitor/supply-chain/v1/_scoring.mjs";
+tests/supply-chain-v2.test.mjs:665:} from "../server/worldmonitor/supply-chain/v1/get-chokepoint-status.ts";
+tests/ttl-acled-ais-guards.test.mjs:27:      "server/worldmonitor/climate/v1/list-climate-anomalies.ts",
+tests/ttl-acled-ais-guards.test.mjs:38:      "server/worldmonitor/wildfire/v1/list-fire-detections.ts",
+tests/ttl-acled-ais-guards.test.mjs:118:    const src = readSrc("server/worldmonitor/conflict/v1/list-acled-events.ts");
+tests/ttl-acled-ais-guards.test.mjs:127:    const src = readSrc("server/worldmonitor/unrest/v1/list-unrest-events.ts");
+tests/ttl-acled-ais-guards.test.mjs:137:      "server/worldmonitor/intelligence/v1/get-risk-scores.ts",
+tests/ttl-acled-ais-guards.test.mjs:148:      "server/worldmonitor/conflict/v1/list-acled-events.ts",
+tests/ttl-acled-ais-guards.test.mjs:151:      "server/worldmonitor/unrest/v1/list-unrest-events.ts",
+tests/ttl-acled-ais-guards.test.mjs:154:      "server/worldmonitor/intelligence/v1/get-risk-scores.ts",
+vite.config.ts:124:          /"url": "https:\/\/worldmonitor\.app\/"/,
+vite.config.ts:327:      import("./src/generated/server/worldmonitor/seismology/v1/service_server"),
+vite.config.ts:328:      import("./server/worldmonitor/seismology/v1/handler"),
+vite.config.ts:329:      import("./src/generated/server/worldmonitor/wildfire/v1/service_server"),
+vite.config.ts:330:      import("./server/worldmonitor/wildfire/v1/handler"),
+vite.config.ts:331:      import("./src/generated/server/worldmonitor/climate/v1/service_server"),
+vite.config.ts:332:      import("./server/worldmonitor/climate/v1/handler"),
+vite.config.ts:333:      import("./src/generated/server/worldmonitor/prediction/v1/service_server"),
+vite.config.ts:334:      import("./server/worldmonitor/prediction/v1/handler"),
+vite.config.ts:335:      import("./src/generated/server/worldmonitor/displacement/v1/service_server"),
+vite.config.ts:336:      import("./server/worldmonitor/displacement/v1/handler"),
+vite.config.ts:337:      import("./src/generated/server/worldmonitor/aviation/v1/service_server"),
+vite.config.ts:338:      import("./server/worldmonitor/aviation/v1/handler"),
+vite.config.ts:339:      import("./src/generated/server/worldmonitor/research/v1/service_server"),
+vite.config.ts:340:      import("./server/worldmonitor/research/v1/handler"),
+vite.config.ts:341:      import("./src/generated/server/worldmonitor/unrest/v1/service_server"),
+vite.config.ts:342:      import("./server/worldmonitor/unrest/v1/handler"),
+vite.config.ts:343:      import("./src/generated/server/worldmonitor/conflict/v1/service_server"),
+vite.config.ts:344:      import("./server/worldmonitor/conflict/v1/handler"),
+vite.config.ts:345:      import("./src/generated/server/worldmonitor/maritime/v1/service_server"),
+vite.config.ts:346:      import("./server/worldmonitor/maritime/v1/handler"),
+vite.config.ts:347:      import("./src/generated/server/worldmonitor/cyber/v1/service_server"),
+vite.config.ts:348:      import("./server/worldmonitor/cyber/v1/handler"),
+vite.config.ts:349:      import("./src/generated/server/worldmonitor/economic/v1/service_server"),
+vite.config.ts:350:      import("./server/worldmonitor/economic/v1/handler"),
+vite.config.ts:351:      import("./src/generated/server/worldmonitor/infrastructure/v1/service_server"),
+vite.config.ts:352:      import("./server/worldmonitor/infrastructure/v1/handler"),
+vite.config.ts:353:      import("./src/generated/server/worldmonitor/market/v1/service_server"),
+vite.config.ts:354:      import("./server/worldmonitor/market/v1/handler"),
+vite.config.ts:355:      import("./src/generated/server/worldmonitor/news/v1/service_server"),
+vite.config.ts:356:      import("./server/worldmonitor/news/v1/handler"),
+vite.config.ts:357:      import("./src/generated/server/worldmonitor/intelligence/v1/service_server"),
+vite.config.ts:358:      import("./server/worldmonitor/intelligence/v1/handler"),
+vite.config.ts:359:      import("./src/generated/server/worldmonitor/military/v1/service_server"),
+vite.config.ts:360:      import("./server/worldmonitor/military/v1/handler"),
+vite.config.ts:361:      import("./src/generated/server/worldmonitor/positive_events/v1/service_server"),
+vite.config.ts:362:      import("./server/worldmonitor/positive-events/v1/handler"),
+vite.config.ts:363:      import("./src/generated/server/worldmonitor/giving/v1/service_server"),
+vite.config.ts:364:      import("./server/worldmonitor/giving/v1/handler"),
+vite.config.ts:365:      import("./src/generated/server/worldmonitor/trade/v1/service_server"),
+vite.config.ts:366:      import("./server/worldmonitor/trade/v1/handler"),
+vite.config.ts:367:      import("./src/generated/server/worldmonitor/supply_chain/v1/service_server"),
+vite.config.ts:368:      import("./server/worldmonitor/supply-chain/v1/handler"),
+vite.config.ts:369:      import("./src/generated/server/worldmonitor/natural/v1/service_server"),
+vite.config.ts:370:      import("./server/worldmonitor/natural/v1/handler"),

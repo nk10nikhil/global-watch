@@ -1,9 +1,8 @@
 {
   "ignoreCommand": "bash scripts/vercel-ignore.sh",
   "rewrites": [
-    { "source": "/pro", "destination": "/pro/index.html" },
     {
-      "source": "/((?!api|assets|blog|docs|favico|map-styles|data|textures|pro|sw\\.js|manifest\\.webmanifest|offline\\.html|robots\\.txt|sitemap\\.xml|llms\\.txt|llms-full\\.txt|\\.well-known).*)",
+      "source": "/((?!api|assets|blog|docs|favico|map-styles|data|textures|sw\\.js|manifest\\.webmanifest|offline\\.html|robots\\.txt|sitemap\\.xml|llms\\.txt|llms-full\\.txt|\\.well-known).*)",
       "destination": "/index.html"
     }
   ],
@@ -18,7 +17,7 @@
         },
         {
           "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, Authorization, X-WorldMonitor-Key"
+          "value": "Content-Type, Authorization, X-GlobalWatch-Key"
         }
       ]
     },
@@ -48,15 +47,6 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=31536000, immutable"
-        }
-      ]
-    },
-    {
-      "source": "/pro/:path*",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-cache, no-store, must-revalidate"
         }
       ]
     }

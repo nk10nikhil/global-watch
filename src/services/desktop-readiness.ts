@@ -87,11 +87,11 @@ export const DESKTOP_PARITY_FEATURES: DesktopParityFeature[] = [
       "/api/military/v1/list-military-flights",
     ],
     apiHandlers: [
-      "server/worldmonitor/conflict/v1/handler.ts",
-      "server/worldmonitor/infrastructure/v1/handler.ts",
-      "server/worldmonitor/cyber/v1/handler.ts",
-      "server/worldmonitor/maritime/v1/handler.ts",
-      "server/worldmonitor/military/v1/handler.ts",
+      "server/globalwatch/conflict/v1/handler.ts",
+      "server/globalwatch/infrastructure/v1/handler.ts",
+      "server/globalwatch/cyber/v1/handler.ts",
+      "server/globalwatch/maritime/v1/handler.ts",
+      "server/globalwatch/military/v1/handler.ts",
     ],
     locality: "api-key",
     fallback:
@@ -103,7 +103,7 @@ export const DESKTOP_PARITY_FEATURES: DesktopParityFeature[] = [
     panel: "Summaries",
     serviceFiles: ["src/services/summarization.ts"],
     apiRoutes: ["/api/news/v1/summarize-article"],
-    apiHandlers: ["server/worldmonitor/news/v1/handler.ts"],
+    apiHandlers: ["server/globalwatch/news/v1/handler.ts"],
     locality: "api-key",
     fallback:
       "Browser summarizer executes when hosted LLM providers are unavailable.",
@@ -121,7 +121,7 @@ export const DESKTOP_PARITY_FEATURES: DesktopParityFeature[] = [
       "/api/market/v1/list-stablecoin-markets",
       "/api/market/v1/list-etf-flows",
     ],
-    apiHandlers: ["server/worldmonitor/market/v1/handler.ts"],
+    apiHandlers: ["server/globalwatch/market/v1/handler.ts"],
     locality: "fully-local",
     fallback:
       "Multi-source market fetchers degrade to remaining providers and cached values.",
@@ -136,7 +136,7 @@ export const DESKTOP_PARITY_FEATURES: DesktopParityFeature[] = [
       "/api/military/v1/get-aircraft-details-batch",
       "/api/military/v1/get-wingbits-status",
     ],
-    apiHandlers: ["server/worldmonitor/military/v1/handler.ts"],
+    apiHandlers: ["server/globalwatch/military/v1/handler.ts"],
     locality: "api-key",
     fallback:
       "Flight tracks continue with heuristic classification when Wingbits credentials are unavailable.",
@@ -147,7 +147,7 @@ export const DESKTOP_PARITY_FEATURES: DesktopParityFeature[] = [
     panel: "Map layers (military flights relay)",
     serviceFiles: ["src/services/military-flights.ts"],
     apiRoutes: ["/api/military/v1/list-military-flights"],
-    apiHandlers: ["server/worldmonitor/military/v1/handler.ts"],
+    apiHandlers: ["server/globalwatch/military/v1/handler.ts"],
     locality: "cloud-fallback",
     fallback:
       "If relay is unreachable, service falls back to Vercel proxy path and then no-data mode.",

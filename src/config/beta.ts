@@ -1,3 +1,3 @@
 export const BETA_MODE =
   typeof window !== "undefined" &&
-  localStorage.getItem("worldmonitor-beta-mode") === "true";
+  localStorage.getItem("GLOBALWATCH-beta-mode") === "true";

@@ -29,7 +29,7 @@ const readSrc = (relPath) => readFileSync(resolve(root, relPath), "utf-8");
 
 describe("ChokepointInfo proto has ais_disruptions field", () => {
   const proto = readSrc(
-    "proto/worldmonitor/supply_chain/v1/supply_chain_data.proto",
+    "proto/globalwatch/supply_chain/v1/supply_chain_data.proto",
   );
 
   it("declares ais_disruptions as int32 at field 11", () => {
@@ -60,10 +60,10 @@ describe("ChokepointInfo proto has ais_disruptions field", () => {
 
 describe("Generated types include aisDisruptions", () => {
   const clientSrc = readSrc(
-    "src/generated/client/worldmonitor/supply_chain/v1/service_client.ts",
+    "src/generated/client/globalwatch/supply_chain/v1/service_client.ts",
   );
   const serverSrc = readSrc(
-    "src/generated/server/worldmonitor/supply_chain/v1/service_server.ts",
+    "src/generated/server/globalwatch/supply_chain/v1/service_server.ts",
   );
 
   it("client ChokepointInfo has aisDisruptions: number", () => {
@@ -124,10 +124,10 @@ describe("Cache keys bumped to v2", () => {
   const bootstrapSrc = readSrc("api/bootstrap.js");
   const cacheKeysSrc = readSrc("server/_shared/cache-keys.ts");
   const chokepointSrc = readSrc(
-    "server/worldmonitor/supply-chain/v1/get-chokepoint-status.ts",
+    "server/globalwatch/supply-chain/v1/get-chokepoint-status.ts",
   );
   const mineralsSrc = readSrc(
-    "server/worldmonitor/supply-chain/v1/get-critical-minerals.ts",
+    "server/globalwatch/supply-chain/v1/get-critical-minerals.ts",
   );
 
   it("bootstrap.js chokepoints key is v2", () => {
@@ -174,7 +174,7 @@ describe("Cache keys bumped to v2", () => {
 
 describe("Chokepoint handler v2 changes", () => {
   const src = readSrc(
-    "server/worldmonitor/supply-chain/v1/get-chokepoint-status.ts",
+    "server/globalwatch/supply-chain/v1/get-chokepoint-status.ts",
   );
 
   it("uses 5-minute Redis TTL", () => {
@@ -238,10 +238,10 @@ describe("Chokepoint handler v2 changes", () => {
 
 describe("Minerals handler v2 changes", () => {
   const handlerSrc = readSrc(
-    "server/worldmonitor/supply-chain/v1/get-critical-minerals.ts",
+    "server/globalwatch/supply-chain/v1/get-critical-minerals.ts",
   );
   const dataSrc = readSrc(
-    "server/worldmonitor/supply-chain/v1/_minerals-data.ts",
+    "server/globalwatch/supply-chain/v1/_minerals-data.ts",
   );
 
   it("slices to top 3 producers (not 5)", () => {
@@ -292,7 +292,7 @@ describe("Minerals handler v2 changes", () => {
 
 describe("Shipping handler v2 changes", () => {
   const src = readSrc(
-    "server/worldmonitor/supply-chain/v1/get-shipping-rates.ts",
+    "server/globalwatch/supply-chain/v1/get-shipping-rates.ts",
   );
 
   it('uses full name "Deep Sea Freight Producer Price Index"', () => {
@@ -453,7 +453,7 @@ describe("Locale tab labels updated", () => {
 describe("Minerals data structural integrity", () => {
   // Direct import of the .mjs-compatible scoring, then validate against data file
   const dataSrc = readSrc(
-    "server/worldmonitor/supply-chain/v1/_minerals-data.ts",
+    "server/globalwatch/supply-chain/v1/_minerals-data.ts",
   );
 
   it("every entry has required fields", () => {
@@ -538,7 +538,7 @@ import {
   THREAT_LEVEL,
   warningComponent,
   aisComponent,
-} from "../server/worldmonitor/supply-chain/v1/_scoring.mjs";
+} from "../server/globalwatch/supply-chain/v1/_scoring.mjs";
 
 describe("Scoring integration with v2 minerals (top-3 slicing)", () => {
   it("HHI with 3 producers sums correctly", () => {
@@ -662,7 +662,7 @@ describe("Composite disruption score", () => {
 import {
   CHOKEPOINTS,
   THREAT_CONFIG_LAST_REVIEWED,
-} from "../server/worldmonitor/supply-chain/v1/get-chokepoint-status.ts";
+} from "../server/globalwatch/supply-chain/v1/get-chokepoint-status.ts";
 
 const cpById = Object.fromEntries(CHOKEPOINTS.map((cp) => [cp.id, cp]));
 

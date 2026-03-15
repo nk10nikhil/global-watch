@@ -212,7 +212,7 @@ test.describe("RAG vector store (worker-side)", () => {
       ]);
       const countBefore = await mlWorker.vectorStoreCount();
 
-      indexedDB.deleteDatabase("worldmonitor_vector_store");
+      indexedDB.deleteDatabase("GLOBALWATCH_vector_store");
 
       try {
         await mlWorker.vectorStoreIngest([

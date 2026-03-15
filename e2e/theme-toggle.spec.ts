@@ -13,9 +13,9 @@ test.describe("theme toggle (happy variant)", () => {
     // (addInitScript runs on every navigation, so we use a flag)
     await page.addInitScript(() => {
       if (!sessionStorage.getItem("__test_init_done")) {
-        localStorage.removeItem("worldmonitor-theme");
-        localStorage.removeItem("worldmonitor-variant");
-        localStorage.setItem("worldmonitor-variant", "happy");
+        localStorage.removeItem("globalwatch-theme");
+        localStorage.removeItem("globalwatch-variant");
+        localStorage.setItem("globalwatch-variant", "happy");
         sessionStorage.setItem("__test_init_done", "1");
       }
     });
@@ -118,7 +118,7 @@ test.describe("theme toggle (happy variant)", () => {
 
     // Verify localStorage has 'dark'
     const stored = await page.evaluate(() =>
-      localStorage.getItem("worldmonitor-theme"),
+      localStorage.getItem("globalwatch-theme"),
     );
     expect(stored).toBe("dark");
 
@@ -187,8 +187,8 @@ test.describe("theme toggle (happy variant)", () => {
   test("no FOUC: data-theme is set before main CSS loads", async ({ page }) => {
     // Set dark preference before navigation
     await page.addInitScript(() => {
-      localStorage.setItem("worldmonitor-theme", "dark");
-      localStorage.setItem("worldmonitor-variant", "happy");
+      localStorage.setItem("globalwatch-theme", "dark");
+      localStorage.setItem("globalwatch-variant", "happy");
     });
 
     await page.goto("/");

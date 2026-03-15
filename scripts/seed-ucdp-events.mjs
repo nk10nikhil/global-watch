@@ -25,7 +25,7 @@ function loadEnvFile() {
   let envPath = join(__dirname, "..", ".env.local");
   if (!existsSync(envPath)) {
     envPath = join(
-      "/Users/eliehabib/Documents/GitHub/worldmonitor",
+      "/Users/eliehabib/Documents/GitHub/GLOBALWATCH",
       ".env.local",
     );
   }

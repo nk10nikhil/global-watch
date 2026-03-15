@@ -58,7 +58,7 @@ describe("parseMapUrlState expanded param", () => {
 });
 
 describe("buildMapUrl expanded param", () => {
-  const base = "https://worldmonitor.app/";
+  const base = "https://myglobalwatch.vercel.app/";
   const baseState = {
     view: "global" as const,
     zoom: 2,
@@ -97,7 +97,7 @@ describe("buildMapUrl expanded param", () => {
 });
 
 describe("expanded param round-trip", () => {
-  const base = "https://worldmonitor.app/";
+  const base = "https://myglobalwatch.vercel.app/";
   const baseState = {
     view: "global" as const,
     zoom: 2,

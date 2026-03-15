@@ -53,8 +53,8 @@ test.describe("desktop runtime routing guardrails", () => {
           hasTauriGlobals: false,
           userAgent: "Mozilla/5.0",
           locationProtocol: "https:",
-          locationHost: "worldmonitor.app",
-          locationOrigin: "https://worldmonitor.app",
+          locationHost: "myglobalwatch.vercel.app",
+          locationOrigin: "https://myglobalwatch.vercel.app",
         }),
       };
     });
@@ -99,14 +99,14 @@ test.describe("desktop runtime routing guardrails", () => {
         if (url.includes("127.0.0.1:46123/api/fred-data")) {
           return responseJson({ error: "missing local api key" }, 500);
         }
-        if (url.includes("worldmonitor.app/api/fred-data")) {
+        if (url.includes("myglobalwatch.vercel.app/api/fred-data")) {
           return responseJson({ observations: [{ value: "321.5" }] }, 200);
         }
 
         if (url.includes("127.0.0.1:46123/api/stablecoin-markets")) {
           throw new Error("ECONNREFUSED");
         }
-        if (url.includes("worldmonitor.app/api/stablecoin-markets")) {
+        if (url.includes("myglobalwatch.vercel.app/api/stablecoin-markets")) {
           return responseJson({ stablecoins: [{ symbol: "USDT" }] }, 200);
         }
 
@@ -121,7 +121,7 @@ test.describe("desktop runtime routing guardrails", () => {
 
       // Set a valid WM API key so cloud fallback is allowed
       await runtimeConfig.setSecretValue(
-        "WORLDMONITOR_API_KEY" as import("/src/services/runtime-config.ts").RuntimeSecretKey,
+        "GLOBALWATCH_API_KEY" as import("/src/services/runtime-config.ts").RuntimeSecretKey,
         "wm_test_key_1234567890abcdef",
       );
 
@@ -156,7 +156,7 @@ test.describe("desktop runtime routing guardrails", () => {
           globalWindow.__TAURI__ = previousTauri;
         }
         await runtimeConfig.setSecretValue(
-          "WORLDMONITOR_API_KEY" as import("/src/services/runtime-config.ts").RuntimeSecretKey,
+          "GLOBALWATCH_API_KEY" as import("/src/services/runtime-config.ts").RuntimeSecretKey,
           "",
         );
       }
@@ -172,7 +172,7 @@ test.describe("desktop runtime routing guardrails", () => {
     ).toBe(true);
     expect(
       result.calls.some((url) =>
-        url.includes("worldmonitor.app/api/fred-data"),
+        url.includes("myglobalwatch.vercel.app/api/fred-data"),
       ),
     ).toBe(true);
     expect(
@@ -182,7 +182,7 @@ test.describe("desktop runtime routing guardrails", () => {
     ).toBe(true);
     expect(
       result.calls.some((url) =>
-        url.includes("worldmonitor.app/api/stablecoin-markets"),
+        url.includes("myglobalwatch.vercel.app/api/stablecoin-markets"),
       ),
     ).toBe(true);
   });
@@ -220,10 +220,10 @@ test.describe("desktop runtime routing guardrails", () => {
           throw new Error("ECONNREFUSED");
         }
 
-        if (url.includes("worldmonitor.app/api/local-env-update")) {
+        if (url.includes("myglobalwatch.vercel.app/api/local-env-update")) {
           return responseJson({ leaked: true }, 200);
         }
-        if (url.includes("worldmonitor.app/api/local-validate-secret")) {
+        if (url.includes("myglobalwatch.vercel.app/api/local-validate-secret")) {
           return responseJson({ leaked: true }, 200);
         }
 
@@ -294,12 +294,12 @@ test.describe("desktop runtime routing guardrails", () => {
     ).toBe(true);
     expect(
       result.calls.some((url) =>
-        url.includes("worldmonitor.app/api/local-env-update"),
+        url.includes("myglobalwatch.vercel.app/api/local-env-update"),
       ),
     ).toBe(false);
     expect(
       result.calls.some((url) =>
-        url.includes("worldmonitor.app/api/local-validate-secret"),
+        url.includes("myglobalwatch.vercel.app/api/local-validate-secret"),
       ),
     ).toBe(false);
   });
@@ -396,7 +396,7 @@ test.describe("desktop runtime routing guardrails", () => {
       };
       const previousTauri = globalWindow.__TAURI__;
       const releaseUrl =
-        "https://github.com/koala73/worldmonitor/releases/latest";
+        "https://github.com/nk10nikhil/globalwatch/releases/latest";
 
       const updaterProto = DesktopUpdater.prototype as unknown as {
         resolveUpdateDownloadUrl: (releaseUrl: string) => Promise<string>;
@@ -454,13 +454,13 @@ test.describe("desktop runtime routing guardrails", () => {
     });
 
     expect(result.macArm).toBe(
-      "https://worldmonitor.app/api/download?platform=macos-arm64&variant=full",
+      "https://myglobalwatch.vercel.app/api/download?platform=macos-arm64&variant=full",
     );
     expect(result.windowsX64).toBe(
-      "https://worldmonitor.app/api/download?platform=windows-exe&variant=full",
+      "https://myglobalwatch.vercel.app/api/download?platform=windows-exe&variant=full",
     );
     expect(result.linuxFallback).toBe(
-      "https://github.com/koala73/worldmonitor/releases/latest",
+      "https://github.com/nk10nikhil/globalwatch/releases/latest",
     );
   });
 
@@ -879,7 +879,7 @@ test.describe("desktop runtime routing guardrails", () => {
     expect(result.hasIso3Field).toBe(false);
   });
 
-  test("cloud fallback blocked without WorldMonitor API key", async ({
+  test("cloud fallback blocked without GlobalWatch API key", async ({
     page,
   }) => {
     await page.goto("/tests/runtime-harness.html");
@@ -909,7 +909,7 @@ test.describe("desktop runtime routing guardrails", () => {
         if (url.includes("127.0.0.1:46123/api/fred-data")) {
           throw new Error("ECONNREFUSED");
         }
-        if (url.includes("worldmonitor.app/api/fred-data")) {
+        if (url.includes("myglobalwatch.vercel.app/api/fred-data")) {
           return responseJson({ observations: [{ value: "999" }] }, 200);
         }
         return responseJson({ ok: true }, 200);
@@ -931,7 +931,7 @@ test.describe("desktop runtime routing guardrails", () => {
           fetchError = err instanceof Error ? err.message : String(err);
         }
 
-        const cloudCalls = calls.filter((u) => u.includes("worldmonitor.app"));
+        const cloudCalls = calls.filter((u) => u.includes("myglobalwatch.vercel.app"));
 
         return {
           fetchError,
@@ -954,7 +954,7 @@ test.describe("desktop runtime routing guardrails", () => {
     expect(result.localCalls).toBeGreaterThan(0);
   });
 
-  test("cloud fallback allowed with valid WorldMonitor API key", async ({
+  test("cloud fallback allowed with valid GlobalWatch API key", async ({
     page,
   }) => {
     await page.goto("/tests/runtime-harness.html");
@@ -983,16 +983,16 @@ test.describe("desktop runtime routing guardrails", () => {
 
         calls.push(url);
 
-        if (url.includes("worldmonitor.app") && init?.headers) {
+        if (url.includes("myglobalwatch.vercel.app") && init?.headers) {
           const h = new Headers(init.headers);
-          const wmKey = h.get("X-WorldMonitor-Key");
-          if (wmKey) capturedHeaders["X-WorldMonitor-Key"] = wmKey;
+          const wmKey = h.get("X-GlobalWatch-Key");
+          if (wmKey) capturedHeaders["X-GlobalWatch-Key"] = wmKey;
         }
 
         if (url.includes("127.0.0.1:46123/api/market/v1/test")) {
           throw new Error("ECONNREFUSED");
         }
-        if (url.includes("worldmonitor.app/api/market/v1/test")) {
+        if (url.includes("myglobalwatch.vercel.app/api/market/v1/test")) {
           return responseJson({ quotes: [] }, 200);
         }
         return responseJson({ ok: true }, 200);
@@ -1006,7 +1006,7 @@ test.describe("desktop runtime routing guardrails", () => {
 
       const testKey = "wm_test_key_1234567890abcdef";
       await runtimeConfig.setSecretValue(
-        "WORLDMONITOR_API_KEY" as import("/src/services/runtime-config.ts").RuntimeSecretKey,
+        "GLOBALWATCH_API_KEY" as import("/src/services/runtime-config.ts").RuntimeSecretKey,
         testKey,
       );
 
@@ -1019,9 +1019,9 @@ test.describe("desktop runtime routing guardrails", () => {
         return {
           status: response.status,
           hasQuotes: Array.isArray(body.quotes),
-          cloudCalls: calls.filter((u) => u.includes("worldmonitor.app"))
+          cloudCalls: calls.filter((u) => u.includes("myglobalwatch.vercel.app"))
             .length,
-          wmKeyHeader: capturedHeaders["X-WorldMonitor-Key"] || null,
+          wmKeyHeader: capturedHeaders["X-GlobalWatch-Key"] || null,
         };
       } finally {
         window.fetch = originalFetch;
@@ -1032,7 +1032,7 @@ test.describe("desktop runtime routing guardrails", () => {
           globalWindow.__TAURI__ = previousTauri;
         }
         await runtimeConfig.setSecretValue(
-          "WORLDMONITOR_API_KEY" as import("/src/services/runtime-config.ts").RuntimeSecretKey,
+          "GLOBALWATCH_API_KEY" as import("/src/services/runtime-config.ts").RuntimeSecretKey,
           "",
         );
       }

@@ -1,8 +1,8 @@
-# World Monitor — API Reference
+# Global Watch — API Reference
 
-> Comprehensive reference for all Vercel Edge Function endpoints powering the World Monitor intelligence dashboard.
+> Comprehensive reference for all Vercel Edge Function endpoints powering the Global Watch intelligence dashboard.
 
-**Base URL**: All endpoints are relative to `/api/` (e.g., `https://worldmonitor.app/api/earthquakes`).
+**Base URL**: All endpoints are relative to `/api/` (e.g., `https://myglobalwatch.vercel.app/api/earthquakes`).
 
 ---
 
@@ -94,7 +94,7 @@
 
 ## Overview
 
-World Monitor exposes **60+ serverless endpoints** deployed as **Vercel Edge Functions** (unless noted otherwise). Every endpoint:
+Global Watch exposes **60+ serverless endpoints** deployed as **Vercel Edge Functions** (unless noted otherwise). Every endpoint:
 
 1. Applies **CORS middleware** — only whitelisted origins may call the API.
 2. Optionally applies **IP-based rate limiting** via a sliding-window algorithm.
@@ -135,8 +135,8 @@ Eight regex patterns control access:
 
 | #   | Pattern                    | Matches                      |
 | --- | -------------------------- | ---------------------------- |
-| 1   | `worldmonitor\.app$`       | `https://worldmonitor.app`   |
-| 2   | `\.worldmonitor\.app$`     | `https://*.worldmonitor.app` |
+| 1   | `GLOBALWATCH\.app$`       | `https://myglobalwatch.vercel.app`   |
+| 2   | `\.GLOBALWATCH\.app$`     | `https://*.myglobalwatch.vercel.app` |
 | 3   | `\.vercel\.app$`           | Vercel preview deploys       |
 | 4   | `localhost(:\d+)?$`        | `http://localhost:*`         |
 | 5   | `127\.0\.0\.1(:\d+)?$`     | IPv4 loopback                |
@@ -2286,7 +2286,7 @@ Content-Type: application/json
 
 ## Caching Architecture
 
-World Monitor uses a **multi-tier caching strategy** to minimize upstream API calls, reduce latency, and stay within third-party rate limits.
+Global Watch uses a **multi-tier caching strategy** to minimize upstream API calls, reduce latency, and stay within third-party rate limits.
 
 ### Tier Overview
 

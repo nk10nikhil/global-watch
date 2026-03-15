@@ -1,39 +1,39 @@
-# World Monitor
+# Global Watch
 
 **Real-time global intelligence dashboard** — AI-powered news aggregation, geopolitical monitoring, and infrastructure tracking in a unified situational awareness interface.
 
-[![GitHub stars](https://img.shields.io/github/stars/koala73/worldmonitor?style=social)](https://github.com/koala73/worldmonitor/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/koala73/worldmonitor?style=social)](https://github.com/koala73/worldmonitor/network/members)
+[![GitHub stars](https://img.shields.io/github/stars/nk10nikhil/globalwatch?style=social)](https://github.com/nk10nikhil/globalwatch/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/nk10nikhil/globalwatch?style=social)](https://github.com/nk10nikhil/globalwatch/network/members)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Last commit](https://img.shields.io/github/last-commit/koala73/worldmonitor)](https://github.com/koala73/worldmonitor/commits/main)
-[![Latest release](https://img.shields.io/github/v/release/koala73/worldmonitor?style=flat)](https://github.com/koala73/worldmonitor/releases/latest)
+[![Last commit](https://img.shields.io/github/last-commit/nk10nikhil/globalwatch)](https://github.com/nk10nikhil/globalwatch/commits/main)
+[![Latest release](https://img.shields.io/github/v/release/nk10nikhil/globalwatch?style=flat)](https://github.com/nk10nikhil/globalwatch/releases/latest)
 
 <p align="center">
-  <a href="https://worldmonitor.app"><img src="https://img.shields.io/badge/Web_App-worldmonitor.app-blue?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Web App"></a>&nbsp;
-  <a href="https://tech.worldmonitor.app"><img src="https://img.shields.io/badge/Tech_Variant-tech.worldmonitor.app-0891b2?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Tech Variant"></a>&nbsp;
-  <a href="https://finance.worldmonitor.app"><img src="https://img.shields.io/badge/Finance_Variant-finance.worldmonitor.app-059669?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Finance Variant"></a>&nbsp;
-  <a href="https://commodity.worldmonitor.app"><img src="https://img.shields.io/badge/Commodity_Variant-commodity.worldmonitor.app-b45309?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Commodity Variant"></a>&nbsp;
-  <a href="https://happy.worldmonitor.app"><img src="https://img.shields.io/badge/Happy_Variant-happy.worldmonitor.app-f59e0b?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Happy Variant"></a>
+  <a href="https://myglobalwatch.vercel.app"><img src="https://img.shields.io/badge/Web_App-myglobalwatch.vercel.app-blue?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Web App"></a>&nbsp;
+  <a href="https://globalwatchtech.vercel.app"><img src="https://img.shields.io/badge/Tech_Variant-globalwatchtech.vercel.app-0891b2?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Tech Variant"></a>&nbsp;
+  <a href="https://globalwatchfinance.vercel.app"><img src="https://img.shields.io/badge/Finance_Variant-globalwatchfinance.vercel.app-059669?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Finance Variant"></a>&nbsp;
+  <a href="https://globalwatchcommodity.vercel.app"><img src="https://img.shields.io/badge/Commodity_Variant-globalwatchcommodity.vercel.app-b45309?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Commodity Variant"></a>&nbsp;
+  <a href="https://globalwatchhappy.vercel.app"><img src="https://img.shields.io/badge/Happy_Variant-globalwatchhappy.vercel.app-f59e0b?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Happy Variant"></a>
 </p>
 
 <p align="center">
-  <a href="https://worldmonitor.app/api/download?platform=windows-exe"><img src="https://img.shields.io/badge/Download-Windows_(.exe)-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Download Windows"></a>&nbsp;
-  <a href="https://worldmonitor.app/api/download?platform=macos-arm64"><img src="https://img.shields.io/badge/Download-macOS_Apple_Silicon-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Download macOS ARM"></a>&nbsp;
-  <a href="https://worldmonitor.app/api/download?platform=macos-x64"><img src="https://img.shields.io/badge/Download-macOS_Intel-555555?style=for-the-badge&logo=apple&logoColor=white" alt="Download macOS Intel"></a>&nbsp;
-  <a href="https://worldmonitor.app/api/download?platform=linux-appimage"><img src="https://img.shields.io/badge/Download-Linux_(.AppImage)-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Download Linux"></a>
+  <a href="https://myglobalwatch.vercel.app/api/download?platform=windows-exe"><img src="https://img.shields.io/badge/Download-Windows_(.exe)-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Download Windows"></a>&nbsp;
+  <a href="https://myglobalwatch.vercel.app/api/download?platform=macos-arm64"><img src="https://img.shields.io/badge/Download-macOS_Apple_Silicon-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Download macOS ARM"></a>&nbsp;
+  <a href="https://myglobalwatch.vercel.app/api/download?platform=macos-x64"><img src="https://img.shields.io/badge/Download-macOS_Intel-555555?style=for-the-badge&logo=apple&logoColor=white" alt="Download macOS Intel"></a>&nbsp;
+  <a href="https://myglobalwatch.vercel.app/api/download?platform=linux-appimage"><img src="https://img.shields.io/badge/Download-Linux_(.AppImage)-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Download Linux"></a>
 </p>
 
 <p align="center">
   <a href="./docs/DOCUMENTATION.md"><strong>Full Documentation</strong></a> &nbsp;·&nbsp;
-  <a href="https://github.com/koala73/worldmonitor/releases/latest"><strong>All Releases</strong></a>
+  <a href="https://github.com/nk10nikhil/globalwatch/releases/latest"><strong>All Releases</strong></a>
 </p>
 
-![World Monitor Dashboard](docs/images/worldmonitor-7-mar-2026.jpg)
+![Global Watch Dashboard](docs/images/GLOBALWATCH-7-mar-2026.jpg)
 
 ---
 
-## Why World Monitor?
+## Why Global Watch?
 
 | Problem                            | Solution                                                                                                                                                                                |
 | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -56,11 +56,11 @@
 
 | Variant               | URL                                                              | Focus                                                 |
 | --------------------- | ---------------------------------------------------------------- | ----------------------------------------------------- |
-| **World Monitor**     | [worldmonitor.app](https://worldmonitor.app)                     | Geopolitics, military, conflicts, infrastructure      |
-| **Tech Monitor**      | [tech.worldmonitor.app](https://tech.worldmonitor.app)           | Startups, AI/ML, cloud, cybersecurity                 |
-| **Finance Monitor**   | [finance.worldmonitor.app](https://finance.worldmonitor.app)     | Global markets, trading, central banks, Gulf FDI      |
-| **Commodity Monitor** | [commodity.worldmonitor.app](https://commodity.worldmonitor.app) | Mining, metals, energy commodities, critical minerals |
-| **Happy Monitor**     | [happy.worldmonitor.app](https://happy.worldmonitor.app)         | Good news, positive trends, uplifting stories         |
+| **Global Watch**     | [myglobalwatch.vercel.app](https://myglobalwatch.vercel.app)                     | Geopolitics, military, conflicts, infrastructure      |
+| **Tech Monitor**      | [globalwatchtech.vercel.app](https://globalwatchtech.vercel.app)           | Startups, AI/ML, cloud, cybersecurity                 |
+| **Finance Monitor**   | [globalwatchfinance.vercel.app](https://globalwatchfinance.vercel.app)     | Global markets, trading, central banks, Gulf FDI      |
+| **Commodity Monitor** | [globalwatchcommodity.vercel.app](https://globalwatchcommodity.vercel.app) | Mining, metals, energy commodities, critical minerals |
+| **Happy Monitor**     | [globalwatchhappy.vercel.app](https://globalwatchhappy.vercel.app)         | Good news, positive trends, uplifting stories         |
 
 All five variants run from a single codebase — switch between them with one click via the header bar.
 
@@ -150,7 +150,7 @@ All five variants run from a single codebase — switch between them with one cl
 - **Stablecoin & BTC ETF** — peg health monitoring and spot ETF flow tracking. [Details →](./docs/FINANCE_DATA.md)
 - **Oil & Energy** — WTI/Brent prices, production, inventory via EIA. [Details →](./docs/FINANCE_DATA.md#oil--energy-analytics)
 - **BIS & WTO** — central bank rates, trade policy intelligence. [Details →](./docs/FINANCE_DATA.md)
-- **Premium Stock Analysis** — analysis engine with stored history, backtesting, and daily market brief. [Details →](./docs/PREMIUM_FINANCE.md)
+- **advanced stock analysis** — analysis engine with stored history, backtesting, and daily market brief. [Details →](./docs/PREMIUM_FINANCE.md)
 
 ### Desktop & Mobile
 
@@ -227,14 +227,14 @@ All five variants run from a single codebase — switch between them with one cl
 
 A single codebase produces five specialized dashboards, each with distinct feeds, panels, map layers, and branding:
 
-| Aspect                | World Monitor                                                                  | Tech Monitor                                              | Finance Monitor                                              | Commodity Monitor                                                                                           | Happy Monitor                                                         |
+| Aspect                | Global Watch                                                                  | Tech Monitor                                              | Finance Monitor                                              | Commodity Monitor                                                                                           | Happy Monitor                                                         |
 | --------------------- | ------------------------------------------------------------------------------ | --------------------------------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| **Domain**            | worldmonitor.app                                                               | tech.worldmonitor.app                                     | finance.worldmonitor.app                                     | commodity.worldmonitor.app                                                                                  | happy.worldmonitor.app                                                |
+| **Domain**            | myglobalwatch.vercel.app                                                               | globalwatchtech.vercel.app                                     | globalwatchfinance.vercel.app                                     | globalwatchcommodity.vercel.app                                                                                  | globalwatchhappy.vercel.app                                                |
 | **Focus**             | Geopolitics, military, conflicts                                               | AI/ML, startups, cybersecurity                            | Markets, trading, central banks                              | Mining, metals, energy commodities, critical minerals                                                       | Good news, conservation, human progress                               |
 | **RSS Feeds**         | 15 categories, 200+ feeds (politics, MENA, Africa, think tanks)                | 21 categories, 152 feeds (AI, VC blogs, startups, GitHub) | 14 categories, 55 feeds (forex, bonds, commodities, IPOs)    | 10 categories, 50+ feeds (gold/silver, energy, mining, critical minerals, base metals)                      | 5 categories, 21 positive-news sources (GNN, Positive.News, Upworthy) |
 | **Panels**            | 45 (strategic posture, CII, cascade, trade policy, airline intel, predictions) | 28 (AI labs, unicorns, accelerators, tech readiness)      | 27 (forex, bonds, derivatives, trade policy, gulf economies) | 16 (live prices, sector heatmap, gold/silver, energy, mining, critical minerals, base metals, supply chain) | 10 (good news, breakthroughs, conservation, renewables, giving)       |
 | **Unique Map Layers** | Military bases, nuclear facilities, hotspots                                   | Tech HQs, cloud regions, startup hubs                     | Stock exchanges, central banks, Gulf investments             | Mine sites, processing plants, commodity ports, commodity hubs, pipelines, trade routes                     | Positive events, kindness, species recovery, renewables               |
-| **Desktop App**       | World Monitor.app / .exe / .AppImage                                           | Tech Monitor.app / .exe / .AppImage                       | Finance Monitor.app / .exe / .AppImage                       | (web-only)                                                                                                  | (web-only)                                                            |
+| **Desktop App**       | Global Watch.app / .exe / .AppImage                                           | Tech Monitor.app / .exe / .AppImage                       | Finance Monitor.app / .exe / .AppImage                       | (web-only)                                                                                                  | (web-only)                                                            |
 
 Single-deployment consolidation — all five variants serve from one Vercel deployment, determined by hostname. Build-time `VITE_VARIANT` tree-shakes unused data. Runtime variant selector in the header bar.
 
@@ -242,31 +242,31 @@ Single-deployment consolidation — all five variants serve from one Vercel depl
 
 ## Programmatic API Access
 
-Every data endpoint is accessible programmatically via `api.worldmonitor.app`. The API uses the same edge functions that power the dashboard, with the same caching and rate limiting:
+Every data endpoint is accessible programmatically via `myglobalwatch.vercel.app`. The API uses the same edge functions that power the dashboard, with the same caching and rate limiting:
 
 ```bash
 # Fetch market quotes
-curl -s 'https://api.worldmonitor.app/api/market/v1/list-market-quotes?symbols=AAPL,MSFT,GOOGL'
+curl -s 'https://myglobalwatch.vercel.app/api/market/v1/list-market-quotes?symbols=AAPL,MSFT,GOOGL'
 
 # Get airport delays
-curl -s 'https://api.worldmonitor.app/api/aviation/v1/list-airport-delays'
+curl -s 'https://myglobalwatch.vercel.app/api/aviation/v1/list-airport-delays'
 
 # Fetch climate anomalies
-curl -s 'https://api.worldmonitor.app/api/climate/v1/list-climate-anomalies'
+curl -s 'https://myglobalwatch.vercel.app/api/climate/v1/list-climate-anomalies'
 
 # Get earthquake data
-curl -s 'https://api.worldmonitor.app/api/seismology/v1/list-earthquakes'
+curl -s 'https://myglobalwatch.vercel.app/api/seismology/v1/list-earthquakes'
 
 # Company enrichment (GitHub, SEC filings, HN mentions)
-curl -s 'https://api.worldmonitor.app/api/enrichment/company?domain=stripe.com'
+curl -s 'https://myglobalwatch.vercel.app/api/enrichment/company?domain=stripe.com'
 
 # Company signal discovery (funding, hiring, exec changes)
-curl -s 'https://api.worldmonitor.app/api/enrichment/signals?company=Stripe&domain=stripe.com'
+curl -s 'https://myglobalwatch.vercel.app/api/enrichment/signals?company=Stripe&domain=stripe.com'
 ```
 
 All 22 service domains are available as REST endpoints following the pattern `POST /api/{domain}/v1/{rpc-name}`. GET requests with query parameters are supported for read-only RPCs. Responses include `X-Cache` headers (`HIT`, `REDIS-HIT`, `MISS`) for cache debugging and `Cache-Control` headers for CDN integration.
 
-> **Note**: Use `api.worldmonitor.app`, not `worldmonitor.app` — the main domain requires browser origin headers and returns 403 for programmatic access.
+> **Note**: Use `myglobalwatch.vercel.app`, not `myglobalwatch.vercel.app` — the main domain requires browser origin headers and returns 403 for programmatic access.
 
 ---
 
@@ -274,7 +274,7 @@ All 22 service domains are available as REST endpoints following the pattern `PO
 
 | Layer                          | Mechanism                                                                                                                                                                                                                                          |
 | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **CORS origin allowlist**      | Only `worldmonitor.app`, `tech.worldmonitor.app`, `finance.worldmonitor.app`, and `localhost:*` can call API endpoints. All others receive 403. Implemented in `api/_cors.js`.                                                                     |
+| **CORS origin allowlist**      | Only `myglobalwatch.vercel.app`, `globalwatchtech.vercel.app`, `globalwatchfinance.vercel.app`, and `localhost:*` can call API endpoints. All others receive 403. Implemented in `api/_cors.js`.                                                                     |
 | **RSS domain allowlist**       | The RSS proxy only fetches from explicitly listed domains (~90+). Requests for unlisted domains are rejected with 403.                                                                                                                             |
 | **Railway domain allowlist**   | The Railway relay has a separate, smaller domain allowlist for feeds that need the alternate origin.                                                                                                                                               |
 | **API key isolation**          | All API keys live server-side in Vercel environment variables. The browser never sees Groq, OpenRouter, ACLED, Finnhub, or other credentials.                                                                                                      |
@@ -314,8 +314,8 @@ The test suite includes **30 test files** with **554 individual test cases** acr
 
 ```bash
 # Clone and run
-git clone https://github.com/koala73/worldmonitor.git
-cd worldmonitor
+git clone https://github.com/nk10nikhil/globalwatch.git
+cd GLOBALWATCH
 npm install
 vercel dev       # Runs frontend + all 60+ API edge functions
 ```
@@ -352,7 +352,7 @@ See [`.env.example`](./.env.example) for the complete list with registration lin
 
 ## Self-Hosting
 
-World Monitor relies on **60+ Vercel Edge Functions** in the `api/` directory for RSS proxying, data caching, and API key isolation. Running `npm run dev` alone starts only the Vite frontend — the edge functions won't execute, and most panels (news feeds, markets, AI summaries) will be empty.
+Global Watch relies on **60+ Vercel Edge Functions** in the `api/` directory for RSS proxying, data caching, and API key isolation. Running `npm run dev` alone starts only the Vite frontend — the edge functions won't execute, and most panels (news feeds, markets, AI summaries) will be empty.
 
 ### Option 1: Deploy to Vercel (Recommended)
 
@@ -395,13 +395,13 @@ This runs the frontend without the API layer. Panels that require server-side pr
 | **Linux x86_64**       | Full support            | Works with `vercel dev` for local development. Desktop .AppImage available for x86_64. WebKitGTK rendering uses DMA-BUF with fallback to SHM for GPU compatibility. Font stack includes DejaVu Sans Mono and Liberation Mono for consistent rendering across distros |
 | **macOS**              | Works with `vercel dev` | Full local development                                                                                                                                                                                                                                               |
 | **Raspberry Pi / ARM** | Partial                 | `vercel dev` edge runtime emulation may not work on ARM. Use Option 1 (deploy to Vercel) or Option 3 (static frontend) instead                                                                                                                                       |
-| **Docker**             | Official image          | See [Docker image](#docker-image-official) ([#1260](https://github.com/koala73/worldmonitor/issues/1260))                                                                                                                                                            |
+| **Docker**             | Official image          | See [Docker image](#docker-image-official) ([#1260](https://github.com/nk10nikhil/globalwatch/issues/1260))                                                                                                                                                            |
 
 ### Docker image (official)
 
-An official Docker image is published to GitHub Container Registry on each [release](https://github.com/koala73/worldmonitor/releases) ([#1260](https://github.com/koala73/worldmonitor/issues/1260)):
+An official Docker image is published to GitHub Container Registry on each [release](https://github.com/nk10nikhil/globalwatch/releases) ([#1260](https://github.com/nk10nikhil/globalwatch/issues/1260)):
 
-- **Image**: `ghcr.io/koala73/worldmonitor`
+- **Image**: `ghcr.io/nk10nikhil/globalwatch`
 - **Architectures**: `linux/amd64`, `linux/arm64`
 - **Tags**: `latest`, `vX.Y.Z` (e.g. `v2.6.0`), and `X.Y` (e.g. `2.6`)
 
@@ -410,13 +410,13 @@ The image is **frontend-only**: it serves the Vite-built static app with nginx a
 **Build (from repo root):**
 
 ```bash
-docker build -f docker/Dockerfile -t ghcr.io/koala73/worldmonitor:latest .
+docker build -f docker/Dockerfile -t ghcr.io/nk10nikhil/globalwatch:latest .
 ```
 
-**Run (default API: `https://api.worldmonitor.app`):**
+**Run (default API: `https://myglobalwatch.vercel.app`):**
 
 ```bash
-docker run -d --name worldmonitor -p 3000:80 ghcr.io/koala73/worldmonitor:latest
+docker run -d --name GLOBALWATCH -p 3000:80 ghcr.io/nk10nikhil/globalwatch:latest
 ```
 
 Then open [http://localhost:3000](http://localhost:3000).
@@ -425,14 +425,14 @@ Then open [http://localhost:3000](http://localhost:3000).
 
 | Variable       | Default                        | Description                                     |
 | -------------- | ------------------------------ | ----------------------------------------------- |
-| `API_UPSTREAM` | `https://api.worldmonitor.app` | Backend URL for `/api/*` proxy (set at runtime) |
+| `API_UPSTREAM` | `https://myglobalwatch.vercel.app` | Backend URL for `/api/*` proxy (set at runtime) |
 
 The proxy forwards the upstream host (`Host: <API_UPSTREAM host>`) so the default API receives the correct Host. If your backend expects a different Host, configure it accordingly.
 
 Example with a custom API backend:
 
 ```bash
-docker run -d -p 3000:80 -e API_UPSTREAM=http://my-api:3001 ghcr.io/koala73/worldmonitor:latest
+docker run -d -p 3000:80 -e API_UPSTREAM=http://my-api:3001 ghcr.io/nk10nikhil/globalwatch:latest
 ```
 
 Build-time options (optional, for custom builds): pass `VITE_VARIANT` and `VITE_WS_API_URL` via `--build-arg`. Other `VITE_*` vars the app uses (e.g. `VITE_PMTILES_URL`, `VITE_WS_RELAY_URL`) can be added the same way; see `.env.example` for the full list.
@@ -488,11 +488,11 @@ Contributions welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed gui
 
 ```bash
 # Development
-npm run dev          # Full variant (worldmonitor.app)
-npm run dev:tech     # Tech variant (tech.worldmonitor.app)
-npm run dev:finance    # Finance variant (finance.worldmonitor.app)
-npm run dev:commodity  # Commodity variant (commodity.worldmonitor.app)
-npm run dev:happy      # Happy variant (happy.worldmonitor.app)
+npm run dev          # Full variant (myglobalwatch.vercel.app)
+npm run dev:tech     # Tech variant (globalwatchtech.vercel.app)
+npm run dev:finance    # Finance variant (globalwatchfinance.vercel.app)
+npm run dev:commodity  # Commodity variant (globalwatchcommodity.vercel.app)
+npm run dev:happy      # Happy variant (globalwatchhappy.vercel.app)
 
 # Production builds
 npm run build:full       # Build full variant
@@ -505,10 +505,10 @@ npm run build:happy      # Build happy variant
 npm run typecheck    # TypeScript type checking (tsc --noEmit)
 
 # Desktop packaging
-npm run desktop:package:macos:full      # .app + .dmg (World Monitor)
+npm run desktop:package:macos:full      # .app + .dmg (Global Watch)
 npm run desktop:package:macos:tech      # .app + .dmg (Tech Monitor)
 npm run desktop:package:macos:finance   # .app + .dmg (Finance Monitor)
-npm run desktop:package:windows:full    # .exe + .msi (World Monitor)
+npm run desktop:package:windows:full    # .exe + .msi (Global Watch)
 npm run desktop:package:windows:tech    # .exe + .msi (Tech Monitor)
 npm run desktop:package:windows:finance # .exe + .msi (Finance Monitor)
 
@@ -541,7 +541,7 @@ See [full roadmap](./docs/DOCUMENTATION.md#roadmap).
 
 ## Support the Project
 
-If you find World Monitor useful:
+If you find Global Watch useful:
 
 - **Star this repo** to help others discover it
 - **Share** with colleagues interested in OSINT
@@ -561,7 +561,7 @@ This project is dual-licensed:
 
 **You are free to (non-commercial):**
 
-- **Use** — run World Monitor for personal, educational, or research purposes
+- **Use** — run Global Watch for personal, educational, or research purposes
 - **Study** — read, audit, and learn from the source code
 - **Modify** — adapt, extend, and build upon the code for non-commercial use
 - **Distribute** — share copies with anyone under AGPL-3.0
@@ -576,11 +576,11 @@ This project is dual-licensed:
 
 **Commercial use is prohibited without a commercial license.** This includes:
 
-- Rebranding, white-labeling, or renaming World Monitor and deploying it as your own product
-- Running World Monitor (or a fork) as a paid service or behind a paywall
-- Embedding World Monitor code, components, or data pipelines into a commercial product
-- Using World Monitor internally at a for-profit company for revenue or competitive advantage
-- Selling data collected or processed through World Monitor
+- Rebranding, white-labeling, or renaming Global Watch and deploying it as your own product
+- Running Global Watch (or a fork) as a paid service or behind a paywall
+- Embedding Global Watch code, components, or data pipelines into a commercial product
+- Using Global Watch internally at a for-profit company for revenue or competitive advantage
+- Selling data collected or processed through Global Watch
 
 **In plain terms:**
 
@@ -594,7 +594,7 @@ This project is dual-licensed:
 | Running as a SaaS / paid web service      | No       | Requires commercial license                          |
 | Bundling into a proprietary product       | No       | Requires commercial license                          |
 
-For commercial licensing, contact the maintainer at the [GitHub repository](https://github.com/koala73/worldmonitor).
+For commercial licensing, contact the maintainer at the [GitHub repository](https://github.com/nk10nikhil/globalwatch).
 
 **No warranty** — the software is provided "as is" without warranty of any kind.
 
@@ -610,8 +610,8 @@ Copyright (C) 2024-2026 Elie Habib. All rights reserved.
 
 ## Contributors
 
-<a href="https://github.com/koala73/worldmonitor/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=koala73/worldmonitor" />
+<a href="https://github.com/nk10nikhil/globalwatch/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=nk10nikhil/globalwatch" />
 </a>
 
 ---
@@ -627,17 +627,17 @@ If you discover a vulnerability, please see our [Security Policy](./SECURITY.md)
 ---
 
 <p align="center">
-  <a href="https://worldmonitor.app">worldmonitor.app</a> &nbsp;·&nbsp;
-  <a href="https://tech.worldmonitor.app">tech.worldmonitor.app</a> &nbsp;·&nbsp;
-  <a href="https://finance.worldmonitor.app">finance.worldmonitor.app</a> &nbsp;·&nbsp;
-  <a href="https://commodity.worldmonitor.app">commodity.worldmonitor.app</a>
+  <a href="https://myglobalwatch.vercel.app">myglobalwatch.vercel.app</a> &nbsp;·&nbsp;
+  <a href="https://globalwatchtech.vercel.app">globalwatchtech.vercel.app</a> &nbsp;·&nbsp;
+  <a href="https://globalwatchfinance.vercel.app">globalwatchfinance.vercel.app</a> &nbsp;·&nbsp;
+  <a href="https://globalwatchcommodity.vercel.app">globalwatchcommodity.vercel.app</a>
 </p>
 
 ## Star History
 
-<a href="https://api.star-history.com/svg?repos=koala73/worldmonitor&type=Date">
+<a href="https://api.star-history.com/svg?repos=nk10nikhil/globalwatch&type=Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=koala73/worldmonitor&type=Date&type=Date&theme=dark" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=koala73/worldmonitor&type=Date&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=nk10nikhil/globalwatch&type=Date&type=Date&theme=dark" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=nk10nikhil/globalwatch&type=Date&type=Date" />
  </picture>
 </a>

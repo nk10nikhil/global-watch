@@ -13,7 +13,7 @@ const RSS_DIRECT_TO_RELAY = import.meta.env.VITE_RSS_DIRECT_TO_RELAY === "true";
 const RSS_PROXY_BASE = isDev
   ? "" // Dev uses Vite's rssProxyPlugin
   : RSS_DIRECT_TO_RELAY
-    ? "https://proxy.worldmonitor.app"
+    ? "https://proxy.globalwatch.vercel.app"
     : "";
 
 export function rssProxyUrl(feedUrl: string): string {

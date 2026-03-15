@@ -42,15 +42,15 @@ async function verifyTurnstile(token, ip) {
 }
 
 async function sendConfirmationEmail(email, referralCode) {
-  const referralLink = `https://worldmonitor.app/pro?ref=${referralCode}`;
+  const referralLink = `https://globalwatch.vercel.app?ref=${referralCode}`;
   const shareText = encodeURIComponent(
-    "I just joined the World Monitor Pro waitlist \u2014 real-time global intelligence powered by AI. Join me:",
+    "I just subscribed to Global Watch updates \u2014 real-time global intelligence powered by AI. Join me:",
   );
   const shareUrl = encodeURIComponent(referralLink);
   const twitterShare = `https://x.com/intent/tweet?text=${shareText}&url=${shareUrl}`;
   const linkedinShare = `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`;
   const whatsappShare = `https://wa.me/?text=${shareText}%20${shareUrl}`;
-  const telegramShare = `https://t.me/share/url?url=${shareUrl}&text=${encodeURIComponent("Join the World Monitor Pro waitlist:")}`;
+  const telegramShare = `https://t.me/share/url?url=${shareUrl}&text=${encodeURIComponent("Join Global Watch updates:")}`;
 
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) {
@@ -65,9 +65,9 @@ async function sendConfirmationEmail(email, referralCode) {
         Authorization: `Bearer ${resendKey}`,
       },
       body: JSON.stringify({
-        from: "World Monitor <noreply@worldmonitor.app>",
+        from: "Global Watch <noreply@globalwatch.vercel.app>",
         to: [email],
-        subject: "You\u2019re on the World Monitor Pro waitlist",
+        subject: "You\u2019re subscribed to Global Watch updates",
         html: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a; color: #e0e0e0;">
             <div style="background: #4ade80; height: 4px;"></div>
@@ -78,14 +78,14 @@ async function sendConfirmationEmail(email, referralCode) {
                     <span style="font-size: 20px; color: #4ade80;">&#9678;</span>
                   </td>
                   <td style="padding-left: 12px;">
-                    <div style="font-size: 16px; font-weight: 800; color: #fff; letter-spacing: -0.5px;">WORLD MONITOR</div>
+                    <div style="font-size: 16px; font-weight: 800; color: #fff; letter-spacing: -0.5px;">GLOBAL WATCH</div>
                     <div style="font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 2px;">by Someone.ceo</div>
                   </td>
                 </tr>
               </table>
               <div style="background: #111; border: 1px solid #1a1a1a; border-left: 3px solid #4ade80; padding: 20px 24px; margin-bottom: 28px;">
-                <p style="font-size: 18px; font-weight: 600; color: #fff; margin: 0 0 8px;">You\u2019re on the Pro waitlist.</p>
-                <p style="font-size: 14px; color: #999; margin: 0; line-height: 1.5;">We\u2019ll notify you the moment Pro launches. Here\u2019s what you\u2019ll get:</p>
+                <p style="font-size: 18px; font-weight: 600; color: #fff; margin: 0 0 8px;">You\u2019re on the Global Watch updates list.</p>
+                <p style="font-size: 14px; color: #999; margin: 0; line-height: 1.5;">We\u2019ll notify you when major features and releases ship. Here\u2019s what you get:</p>
               </div>
               <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 28px;">
                 <tr>
@@ -140,12 +140,12 @@ async function sendConfirmationEmail(email, referralCode) {
               <div style="text-align: center; margin-bottom: 24px;">
                 <div style="display: inline-block; background: #111; border: 1px solid #4ade80; padding: 12px 28px;">
                   <div style="font-size: 18px; font-weight: 800; color: #fff;">You're in!</div>
-                  <div style="font-size: 11px; color: #4ade80; text-transform: uppercase; letter-spacing: 2px; margin-top: 4px;">Waitlist confirmed</div>
+                  <div style="font-size: 11px; color: #4ade80; text-transform: uppercase; letter-spacing: 2px; margin-top: 4px;">Subscription confirmed</div>
                 </div>
               </div>
               <div style="background: #111; border: 1px solid #1a1a1a; border-left: 3px solid #4ade80; padding: 20px 24px; margin-bottom: 24px;">
-                <p style="font-size: 16px; font-weight: 700; color: #fff; margin: 0 0 8px;">Move up the line \u2014 invite friends</p>
-                <p style="font-size: 13px; color: #888; margin: 0 0 16px; line-height: 1.5;">Each friend who joins through your link bumps you closer to the front. Top referrers get early access.</p>
+                <p style="font-size: 16px; font-weight: 700; color: #fff; margin: 0 0 8px;">Share with friends</p>
+                <p style="font-size: 13px; color: #888; margin: 0 0 16px; line-height: 1.5;">Invite others to follow Global Watch updates and open-source releases.</p>
                 <div style="background: #0a0a0a; border: 1px solid #222; padding: 12px 16px; margin-bottom: 16px; word-break: break-all;">
                   <a href="${referralLink}" style="color: #4ade80; text-decoration: none; font-size: 13px; font-family: monospace;">${referralLink}</a>
                 </div>
@@ -167,19 +167,19 @@ async function sendConfirmationEmail(email, referralCode) {
                 </table>
               </div>
               <div style="text-align: center; margin-bottom: 36px;">
-                <a href="https://worldmonitor.app" style="display: inline-block; background: #4ade80; color: #0a0a0a; padding: 14px 36px; text-decoration: none; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; border-radius: 2px;">Explore the Free Dashboard</a>
-                <p style="font-size: 12px; color: #555; margin-top: 12px;">The free dashboard stays free forever. Pro adds intelligence on top.</p>
+                <a href="https://globalwatch.vercel.app" style="display: inline-block; background: #4ade80; color: #0a0a0a; padding: 14px 36px; text-decoration: none; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; border-radius: 2px;">Explore the Free Dashboard</a>
+                <p style="font-size: 12px; color: #555; margin-top: 12px;">Global Watch is free and open source.</p>
               </div>
             </div>
             <div style="border-top: 1px solid #1a1a1a; padding: 24px 32px; text-align: center;">
               <div style="margin-bottom: 16px;">
-                <a href="https://x.com/eliehabib" style="color: #666; text-decoration: none; font-size: 12px; margin: 0 12px;">X / Twitter</a>
-                <a href="https://github.com/koala73/worldmonitor" style="color: #666; text-decoration: none; font-size: 12px; margin: 0 12px;">GitHub</a>
-                <a href="https://worldmonitor.app/pro" style="color: #666; text-decoration: none; font-size: 12px; margin: 0 12px;">Pro Waitlist</a>
+                <a href="https://x.com/globalwatch" style="color: #666; text-decoration: none; font-size: 12px; margin: 0 12px;">X / Twitter</a>
+                <a href="https://github.com/nk10nikhil/globalwatch" style="color: #666; text-decoration: none; font-size: 12px; margin: 0 12px;">GitHub</a>
+                <a href="https://globalwatch.vercel.app" style="color: #666; text-decoration: none; font-size: 12px; margin: 0 12px;">Dashboard</a>
               </div>
               <p style="font-size: 11px; color: #444; margin: 0; line-height: 1.6;">
-                World Monitor \u2014 Real-time intelligence for a connected world.<br />
-                <a href="https://worldmonitor.app" style="color: #4ade80; text-decoration: none;">worldmonitor.app</a>
+                Global Watch \u2014 Real-time intelligence for a connected world.<br />
+                <a href="https://globalwatch.vercel.app" style="color: #4ade80; text-decoration: none;">globalwatch.vercel.app</a>
               </p>
             </div>
           </div>`,

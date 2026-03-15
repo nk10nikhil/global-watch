@@ -140,7 +140,7 @@ function downloadStory(): void {
   if (!currentDataUrl) return;
   const a = document.createElement("a");
   a.href = currentDataUrl;
-  a.download = `worldmonitor-${currentData?.countryCode.toLowerCase() || "story"}-${Date.now()}.png`;
+  a.download = `GLOBALWATCH-${currentData?.countryCode.toLowerCase() || "story"}-${Date.now()}.png`;
   a.click();
   flashButton(".story-save", t("modals.story.saved"), t("modals.story.save"));
 }
@@ -153,7 +153,7 @@ async function shareWhatsApp(data: StoryData): Promise<void> {
 
   const file = new File(
     [currentBlob],
-    `${data.countryCode.toLowerCase()}-worldmonitor.png`,
+    `${data.countryCode.toLowerCase()}-GLOBALWATCH.png`,
     { type: "image/png" },
   );
   const urls = getShareUrls(data);

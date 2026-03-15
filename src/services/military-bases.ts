@@ -4,7 +4,7 @@ import {
   type ListMilitaryBasesResponse,
   type MilitaryBaseEntry,
   type MilitaryBaseCluster,
-} from "@/generated/client/worldmonitor/military/v1/service_client";
+} from "@/generated/client/globalwatch/military/v1/service_client";
 import type {
   MilitaryBase,
   MilitaryBaseType,

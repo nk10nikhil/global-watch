@@ -17,7 +17,7 @@ import { getCurrentLanguage } from "./i18n";
 import {
   NewsServiceClient,
   type SummarizeArticleResponse,
-} from "@/generated/client/worldmonitor/news/v1/service_client";
+} from "@/generated/client/globalwatch/news/v1/service_client";
 import { createCircuitBreaker } from "@/utils";
 import { buildSummaryCacheKey } from "@/utils/summary-cache-key";
 

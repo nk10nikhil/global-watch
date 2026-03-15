@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "World Monitor",
+    "title": "Global Watch",
     "description": "Global Situation with AI Insights"
   },
   "countryBrief": {
@@ -498,12 +498,12 @@
       "title": "Desktop Configuration",
       "alertTitle": {
         "configured": "Desktop settings configured",
-        "needsKeys": "Configure API keys to unlock features",
+        "needsKeys": "Configure API keys to enable more features",
         "some": "Some features need API keys"
       },
       "openSettings": "Open Settings",
-      "reserveEarlyAccess": "Reserve Your Early Access",
-      "skipSetup": "Skip the setup — a single World Monitor license unlocks everything. Join the waitlist for early access.",
+      "reserveEarlyAccess": "Open Dashboard",
+      "skipSetup": "Skip setup for now and continue using the free dashboard.",
       "summary": {
         "desktop": "Desktop mode",
         "web": "Web mode (read-only, server-managed credentials)",
@@ -548,25 +548,25 @@
       "sidecarUnreachable": "Sidecar not reachable.",
       "logCleared": "Log cleared.",
       "worldMonitor": {
-        "tabLabel": "World Monitor",
+        "tabLabel": "Global Watch",
         "heroTitle": "One key. Everything included.",
-        "heroDescription": "A single World Monitor license replaces every API key and LLM provider you'd otherwise configure yourself. AI summaries, real-time intelligence, market data, conflict tracking, fire detection, satellite imagery — all powered, all managed, zero setup.",
+        "heroDescription": "A single Global Watch license replaces every API key and LLM provider you'd otherwise configure yourself. AI summaries, real-time intelligence, market data, conflict tracking, fire detection, satellite imagery — all powered, all managed, zero setup.",
         "apiKey": {
-          "title": "License Key",
+          "title": "API Key",
           "placeholder": "wm_xxxxxxxxxxxxxxxxxxxxxxxx",
-          "description": "Paste your license to unlock every data source and AI feature instantly.",
-          "statusValid": "LICENSED",
-          "statusMissing": "NO LICENSE"
+          "description": "Paste your API key to enable additional data sources and AI features.",
+          "statusValid": "CONNECTED",
+          "statusMissing": "NOT SET"
         },
         "dividerOr": "OR",
         "register": {
-          "title": "Reserve Your Spot",
-          "description": "We're preparing to launch World Monitor licenses. Sign up now and be first in line — early members get priority access and founding-member pricing.",
+          "title": "Get Product Updates",
+          "description": "Sign up to receive product updates and release announcements.",
           "emailPlaceholder": "your@email.com",
-          "submitBtn": "Join Waitlist",
+          "submitBtn": "Subscribe",
           "submitting": "Submitting...",
-          "success": "You're on the list! We'll notify you first.",
-          "alreadyRegistered": "You're already on the waitlist.",
+          "success": "You're subscribed. We'll keep you updated.",
+          "alreadyRegistered": "You're already subscribed.",
           "error": "Registration failed. Please try again.",
           "invalidEmail": "Please enter a valid email address."
         },
@@ -2423,9 +2423,9 @@
     "fontSystem": "System Default"
   },
   "premium": {
-    "pro": "PRO",
-    "lockedDesc": "Requires a World Monitor license key",
-    "joinWaitlist": "Join Waitlist",
+    "pro": "FEATURE",
+    "lockedDesc": "Unavailable in the current runtime mode",
+    "joinWaitlist": "Learn More",
     "features": {
       "orefSirens1": "Real-time Israel missile & rocket alerts",
       "orefSirens2": "Siren zone mapping with threat classification",

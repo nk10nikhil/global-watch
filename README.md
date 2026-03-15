@@ -29,7 +29,7 @@
 - **AI & Intelligence** — LLM-synthesized summaries, AI deduction, RAG-powered Headline Memory, threat classification, and country brief pages.
 - **Live News & Video** — 435+ RSS feeds, 30+ live video streams, 22 live webcams, and custom keyword monitors.
 - **Scoring & Detection** — Country Instability Index, hotspot escalation, strategic risk score, signal aggregation, and cross-stream correlation.
-- **Finance & Markets** — Macro signal analysis, Gulf FDI, stablecoin & BTC ETF monitoring, oil & energy analytics, BIS & WTO data, and premium stock analysis.
+- **Finance & Markets** — Macro signal analysis, Gulf FDI, stablecoin & BTC ETF monitoring, oil & energy analytics, BIS & WTO data, and advanced stock analysis.
 - **Desktop & Mobile** — Native desktop app (Tauri), installable PWA, mobile-optimized map, and responsive layout.
 - **Platform Features** — 21 languages, command palette, proto-first API contracts, dark/light theme, and story sharing.
 
@@ -101,4 +101,4 @@ npm run dev    # Vite dev server on http://localhost:5173
 
 ## Credits
 
-Based on the open-source [World Monitor](https://github.com/koala73/worldmonitor) project by Elie Habib.
+Based on the open-source [Global Watch](https://github.com/nk10nikhil/globalwatch) project by Elie Habib.

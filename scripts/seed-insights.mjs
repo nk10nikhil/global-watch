@@ -65,7 +65,7 @@ async function readExistingInsights() {
   return data.result ? JSON.parse(data.result) : null;
 }
 
-// Provider config — mirrors server/worldmonitor/news/v1/_shared.ts getProviderCredentials()
+// Provider config — mirrors server/globalwatch/news/v1/_shared.ts getProviderCredentials()
 const LLM_PROVIDERS = [
   {
     name: "groq",
@@ -87,8 +87,8 @@ const LLM_PROVIDERS = [
     headers: (key) => ({
       Authorization: `Bearer ${key}`,
       "Content-Type": "application/json",
-      "HTTP-Referer": "https://worldmonitor.app",
-      "X-Title": "World Monitor",
+      "HTTP-Referer": "https://myglobalwatch.vercel.app",
+      "X-Title": "Global Watch",
       "User-Agent": CHROME_UA,
     }),
     timeout: 20_000,
@@ -251,7 +251,7 @@ function categorizeStory(title) {
 }
 
 async function warmDigestCache() {
-  const apiBase = process.env.API_BASE_URL || "https://api.worldmonitor.app";
+  const apiBase = process.env.API_BASE_URL || "https://myglobalwatch.vercel.app";
   try {
     const resp = await fetch(
       `${apiBase}/api/news/v1/list-feed-digest?variant=full&lang=en`,

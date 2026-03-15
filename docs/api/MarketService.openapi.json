@@ -766,7 +766,7 @@
   "paths": {
     "/api/market/v1/analyze-stock": {
       "get": {
-        "description": "AnalyzeStock retrieves a premium stock analysis report with technicals, news, and AI synthesis.",
+        "description": "AnalyzeStock retrieves a advanced stock analysis report with technicals, news, and AI synthesis.",
         "operationId": "AnalyzeStock",
         "parameters": [
           {
@@ -822,7 +822,7 @@
     },
     "/api/market/v1/backtest-stock": {
       "get": {
-        "description": "BacktestStock replays premium stock-analysis signals over recent price history.",
+        "description": "BacktestStock replays advanced stock-analysis signals over recent price history.",
         "operationId": "BacktestStock",
         "parameters": [
           {
@@ -968,7 +968,7 @@
     },
     "/api/market/v1/get-stock-analysis-history": {
       "get": {
-        "description": "GetStockAnalysisHistory retrieves shared premium stock analysis history from the backend store.",
+        "description": "GetStockAnalysisHistory retrieves shared advanced stock analysis history from the backend store.",
         "operationId": "GetStockAnalysisHistory",
         "parameters": [
           {
@@ -1276,7 +1276,7 @@
     },
     "/api/market/v1/list-stored-stock-backtests": {
       "get": {
-        "description": "ListStoredStockBacktests retrieves stored premium backtest snapshots from the backend store.",
+        "description": "ListStoredStockBacktests retrieves stored backtest snapshots from the backend store.",
         "operationId": "ListStoredStockBacktests",
         "parameters": [
           {

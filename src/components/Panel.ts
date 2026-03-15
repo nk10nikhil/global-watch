@@ -4,7 +4,6 @@ import { t } from "../services/i18n";
 import { h, replaceChildren, safeHtml } from "../utils/dom-utils";
 import { trackPanelResized } from "@/services/analytics";
 import { getAiFlowSettings } from "@/services/ai-flow-settings";
-import { getSecretState } from "@/services/runtime-config";
 
 export interface PanelOptions {
   id: string;
@@ -13,11 +12,10 @@ export interface PanelOptions {
   className?: string;
   trackActivity?: boolean;
   infoTooltip?: string;
-  premium?: "locked" | "enhanced";
   closable?: boolean;
 }
 
-const PANEL_SPANS_KEY = "worldmonitor-panel-spans";
+const PANEL_SPANS_KEY = "GLOBALWATCH-panel-spans";
 
 function loadPanelSpans(): Record<string, number> {
   try {
@@ -34,7 +32,7 @@ function savePanelSpan(panelId: string, span: number): void {
   localStorage.setItem(PANEL_SPANS_KEY, JSON.stringify(spans));
 }
 
-const PANEL_COL_SPANS_KEY = "worldmonitor-panel-col-spans";
+const PANEL_COL_SPANS_KEY = "GLOBALWATCH-panel-col-spans";
 const ROW_RESIZE_STEP_PX = 80;
 const COL_RESIZE_STEP_PX = 80;
 const PANELS_GRID_MIN_TRACK_PX = 280;
@@ -264,19 +262,6 @@ export class Panel {
       this.newBadgeEl.className = "panel-new-badge";
       this.newBadgeEl.style.display = "none";
       headerLeft.appendChild(this.newBadgeEl);
-    }
-
-    if (
-      isDesktopRuntime() &&
-      options.premium === "enhanced" &&
-      !getSecretState("WORLDMONITOR_API_KEY").present
-    ) {
-      const proBadge = h(
-        "span",
-        { className: "panel-pro-badge" },
-        t("premium.pro"),
-      );
-      headerLeft.appendChild(proBadge);
     }
 
     this.header.appendChild(headerLeft);
@@ -856,7 +841,11 @@ export class Panel {
 
     const lockedChildren: (HTMLElement | string)[] = [
       iconEl,
-      h("div", { className: "panel-locked-desc" }, t("premium.lockedDesc")),
+      h(
+        "div",
+        { className: "panel-locked-desc" },
+        "Unavailable in the current runtime mode",
+      ),
     ];
 
     if (features.length > 0) {
@@ -870,19 +859,21 @@ export class Panel {
     const ctaBtn = h(
       "button",
       { type: "button", className: "panel-locked-cta" },
-      t("premium.joinWaitlist"),
+      "Open Site",
     );
     if (isDesktopRuntime()) {
       ctaBtn.addEventListener(
         "click",
         () =>
           void invokeTauri<void>("open_url", {
-            url: "https://worldmonitor.app/pro",
-          }).catch(() => window.open("https://worldmonitor.app/pro", "_blank")),
+            url: "https://globalwatch.vercel.app",
+          }).catch(() =>
+            window.open("https://globalwatch.vercel.app", "_blank"),
+          ),
       );
     } else {
       ctaBtn.addEventListener("click", () =>
-        window.open("https://worldmonitor.app/pro", "_blank"),
+        window.open("https://globalwatch.vercel.app", "_blank"),
       );
     }
     lockedChildren.push(ctaBtn);

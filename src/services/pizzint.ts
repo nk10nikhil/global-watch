@@ -13,7 +13,7 @@ import {
   type PizzintStatus as ProtoPizzintStatus,
   type PizzintLocation as ProtoLocation,
   type GdeltTensionPair as ProtoTensionPair,
-} from "@/generated/client/worldmonitor/intelligence/v1/service_client";
+} from "@/generated/client/globalwatch/intelligence/v1/service_client";
 
 // ---- Sebuf client ----
 

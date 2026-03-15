@@ -4711,7 +4711,7 @@ function classifyFetchLlm(titles, apiKey, apiUrl, model) {
 let classifyInFlight = false;
 
 async function seedClassifyForVariant(variant, apiKey, apiUrl, model) {
-  const digestUrl = `https://api.worldmonitor.app/api/news/v1/list-feed-digest?variant=${variant}&lang=en`;
+  const digestUrl = `https://myglobalwatch.vercel.app/api/news/v1/list-feed-digest?variant=${variant}&lang=en`;
   let digest;
   try {
     const resp = await new Promise((resolve, reject) => {
@@ -4911,7 +4911,7 @@ async function startClassifySeedLoop() {
 // ─────────────────────────────────────────────────────────────
 const SERVICE_STATUSES_SEED_INTERVAL_MS = 15 * 60 * 1000; // 15 min (TTL/2)
 const SERVICE_STATUSES_RPC_URL =
-  "https://api.worldmonitor.app/api/infrastructure/v1/list-service-statuses";
+  "https://myglobalwatch.vercel.app/api/infrastructure/v1/list-service-statuses";
 
 async function seedServiceStatuses() {
   try {
@@ -4920,7 +4920,7 @@ async function seedServiceStatuses() {
       headers: {
         "Content-Type": "application/json",
         "User-Agent": CHROME_UA,
-        Origin: "https://worldmonitor.app",
+        Origin: "https://myglobalwatch.vercel.app",
       },
       body: "{}",
       signal: AbortSignal.timeout(60_000),
@@ -5406,14 +5406,14 @@ function startTheaterPostureSeedLoop() {
 // ─────────────────────────────────────────────────────────────
 const CII_WARM_PING_INTERVAL_MS = 8 * 60 * 1000; // 8 min (live cache TTL is 10 min)
 const CII_RPC_URL =
-  "https://api.worldmonitor.app/api/intelligence/v1/get-risk-scores";
+  "https://myglobalwatch.vercel.app/api/intelligence/v1/get-risk-scores";
 
 async function seedCiiWarmPing() {
   try {
     const resp = await fetch(CII_RPC_URL, {
       headers: {
         "User-Agent": CHROME_UA,
-        Origin: "https://worldmonitor.app",
+        Origin: "https://myglobalwatch.vercel.app",
       },
       signal: AbortSignal.timeout(60_000),
     });
@@ -6030,7 +6030,7 @@ function wbFetchJson(url) {
       url,
       {
         headers: {
-          "User-Agent": "WorldMonitor-Seed/1.0",
+          "User-Agent": "GLOBALWATCH-Seed/1.0",
           Accept: "application/json",
         },
         timeout: 30000,
@@ -7635,7 +7635,7 @@ function _attemptOpenSkyTokenFetch(clientId, clientSecret) {
   const reqHeaders = {
     "Content-Type": "application/x-www-form-urlencoded",
     "Content-Length": Buffer.byteLength(postData),
-    "User-Agent": "WorldMonitor/1.0",
+    "User-Agent": "globalwatch/1.0",
   };
 
   if (OPENSKY_PROXY_ENABLED) {
@@ -7791,7 +7791,7 @@ function _openskyRawFetch(url, token) {
   const parsed = new URL(url);
   const reqHeaders = {
     Accept: "application/json",
-    "User-Agent": "WorldMonitor/1.0",
+    "User-Agent": "globalwatch/1.0",
     Authorization: `Bearer ${token}`,
   };
 
@@ -8389,7 +8389,7 @@ function handleWorldBankRequest(req, res) {
       headers: {
         Accept: "application/json",
         "User-Agent":
-          "Mozilla/5.0 (compatible; WorldMonitor/1.0; +https://worldmonitor.app)",
+          "Mozilla/5.0 (compatible; globalwatch/1.0; +https://myglobalwatch.vercel.app)",
       },
       timeout: 15000,
     },
@@ -9491,9 +9491,9 @@ function handleNotamProxyRequest(req, res) {
 
 // CORS origin allowlist — only our domains can use this relay
 const ALLOWED_ORIGINS = [
-  "https://worldmonitor.app",
-  "https://tech.worldmonitor.app",
-  "https://finance.worldmonitor.app",
+  "https://myglobalwatch.vercel.app",
+  "https://globalwatchtech.vercel.app",
+  "https://globalwatchfinance.vercel.app",
   "http://localhost:5173", // Vite dev
   "http://localhost:5174", // Vite dev alt port
   "http://localhost:4173", // Vite preview
@@ -9504,10 +9504,10 @@ const ALLOWED_ORIGINS = [
 function getCorsOrigin(req) {
   const origin = req.headers.origin || "";
   if (ALLOWED_ORIGINS.includes(origin)) return origin;
-  // Wildcard: any *.worldmonitor.app subdomain (for variant subdomains)
+  // Wildcard: any *.myglobalwatch.vercel.app subdomain (for variant subdomains)
   try {
     const url = new URL(origin);
-    if (url.hostname.endsWith(".worldmonitor.app") && url.protocol === "https:")
+    if (url.hostname.endsWith(".myglobalwatch.vercel.app") && url.protocol === "https:")
       return origin;
   } catch {
     /* invalid origin — fall through */

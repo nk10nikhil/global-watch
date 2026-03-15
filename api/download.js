@@ -2,8 +2,8 @@
 export const config = { runtime: "edge" };
 
 const RELEASES_URL =
-  "https://api.github.com/repos/koala73/worldmonitor/releases/latest";
-const RELEASES_PAGE = "https://github.com/koala73/worldmonitor/releases/latest";
+  "https://api.github.com/repos/nk10nikhil/globalwatch/releases/latest";
+const RELEASES_PAGE = "https://github.com/nk10nikhil/globalwatch/releases/latest";
 
 const PLATFORM_PATTERNS = {
   "windows-exe": (name) => name.endsWith("_x64-setup.exe"),
@@ -15,8 +15,8 @@ const PLATFORM_PATTERNS = {
 };
 
 const VARIANT_IDENTIFIERS = {
-  full: ["worldmonitor"],
-  world: ["worldmonitor"],
+  full: ["GLOBALWATCH"],
+  world: ["GLOBALWATCH"],
   tech: ["techmonitor"],
   finance: ["financemonitor"],
 };
@@ -56,7 +56,7 @@ export default async function handler(req) {
     const res = await fetch(RELEASES_URL, {
       headers: {
         Accept: "application/vnd.github+json",
-        "User-Agent": "WorldMonitor-Download-Redirect",
+        "User-Agent": "GlobalWatch-Download-Redirect",
       },
     });
 
